@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "167391621913",
+    "firebase_url": "https://gograb-87d87-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "gograb-87d87",
+    "storage_bucket": "gograb-87d87.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:167391621913:android:b999436b1e559fdf4bcb88",
+        "android_client_info": {
+          "package_name": "com.gograbx.user"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBwxLH6jYwh2yYISCW7YMo5gjF43vxI_jU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

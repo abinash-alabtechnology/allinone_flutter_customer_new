@@ -1,0 +1,34 @@
+<!-- Stylized brain with lightning bolts — clean, minimal, fully editable -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="256" height="256" fill="none">
+    <!-- Colors (edit these) -->
+    <defs>
+        <style>
+            .stroke { stroke: #111; }
+            .fill { fill: #111; }
+        </style>
+    </defs>
+
+    <!-- Brain outline -->
+    <path class="stroke" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"
+        d="M44 28c-10 0-18 8-18 18v6c-8 3-14 10-14 19 0 11 10 20 22 20h20m32-63c10 0 18 8 18 18v6c8 3 14 10 14 19 0 11-10 20-22 20H84M64 30c-9 0-16 7-16 16v36c0 9 7 16 16 16s16-7 16-16V46c0-9-7-16-16-16z"/>
+
+    <!-- Left hemisphere folds -->
+    <path class="stroke" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+        d="M48 44c-6 0-10 4-10 9 0 4 3 7 7 8m-6 10c-3 2-5 5-5 9 0 6 6 11 12 11"/>
+    <path class="stroke" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+        d="M54 40c-4 1-7 4-7 8 0 4 3 7 7 8m-2 12c-2 2-3 5-3 8 0 6 5 11 11 11"/>
+
+    <!-- Right hemisphere folds -->
+    <path class="stroke" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+        d="M80 44c6 0 10 4 10 9 0 4-3 7-7 8m6 10c3 2 5 5 5 9 0 6-6 11-12 11"/>
+    <path class="stroke" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+        d="M74 40c4 1 7 4 7 8 0 4-3 7-7 8m2 12c2 2 3 5 3 8 0 6-5 11-11 11"/>
+
+    <!-- Lightning bolts -->
+    <path class="fill"
+        d="M58 12l-6 14h6l-2 10 12-16h-7l3-8h-6z"/>
+    <path class="fill"
+        d="M88 10l-5 12h5l-2 9 10-14h-6l3-7h-5z"/>
+    <path class="fill"
+        d="M36 16l-5 11h5l-2 8 9-12h-6l3-7h-4z"/>
+</svg>

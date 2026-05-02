@@ -1,0 +1,4 @@
+extensions:
+  - shared_preferences: true
+  - drift: true
+  - provider: true
