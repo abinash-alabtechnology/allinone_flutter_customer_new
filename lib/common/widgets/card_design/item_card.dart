@@ -672,8 +672,9 @@ class MostSellItemCard extends StatelessWidget {
                                                         .module!
                                                         .unit! &&
                                                     item.unitType != null)
-                                                ? Container(
-                                                    decoration: BoxDecoration(
+                                                ? Flexible(
+                                                    child: Container(
+                                                      decoration: BoxDecoration(
                                                       borderRadius:
                                                           BorderRadius.circular(
                                                             6.r,
@@ -693,9 +694,12 @@ class MostSellItemCard extends StatelessWidget {
                                                           fontSize: Dimensions
                                                               .fontSizeExtraSmall,
                                                         ),
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow.ellipsis,
                                                       ),
                                                     ),
-                                                  )
+                                                  ),
+                                                )
                                                 : const SizedBox(),
                                             if (!isFood) SizedBox(width: 10.w),
                                             Container(

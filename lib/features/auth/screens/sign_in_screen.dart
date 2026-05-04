@@ -72,6 +72,7 @@ class SignInScreenState extends State<SignInScreen> {
       child: kIsWeb?
       Scaffold(
         backgroundColor: ResponsiveHelper.isDesktop(context) ? Colors.transparent : Theme.of(context).cardColor,
+        extendBodyBehindAppBar: true,
         appBar: (ResponsiveHelper.isDesktop(context) ? null : !widget.exitFromApp ? AppBar(leading: IconButton(
             onPressed: () {
               if(widget.fromNotification || widget.fromResetPassword) {
@@ -82,47 +83,63 @@ class SignInScreenState extends State<SignInScreen> {
                 Get.back(result: false);
               }
             },
-            icon: Icon(Icons.arrow_back_ios_rounded, color: Theme.of(context).textTheme.bodyLarge!.color),
+            icon: Icon(Icons.arrow_back_ios_rounded, color: Colors.white),
           ),
-          elevation: 0, backgroundColor: Theme.of(context).cardColor, actions: const [SizedBox()],
+          elevation: 0, backgroundColor: Colors.transparent, actions: const [SizedBox()],
         ) : null),
         endDrawer: const MenuDrawer(),endDrawerEnableOpenDragGesture: false,
 
-        body: SafeArea(
-          child: Align(
-            alignment: Alignment.center,
-            child: Container(
-              width: context.width > 700 ? 500 : context.width,
-              padding: context.width > 700 ? const EdgeInsets.all(50) : const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraLarge),
-              margin: context.width > 700 ? const EdgeInsets.all(50) : EdgeInsets.zero,
-              decoration: context.width > 700 ? BoxDecoration(
-                color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                boxShadow: ResponsiveHelper.isDesktop(context) ? null : const [BoxShadow(color: Colors.black12, blurRadius: 5, spreadRadius: 1)],
-              ) : null,
-              child: SingleChildScrollView(
-                child: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+        body: Stack(
+          children: [
+            if (!ResponsiveHelper.isDesktop(context))
+              SizedBox(
+                height: context.height,
+                width: context.width,
+                child: Image.asset('assets/image/logimimge.png', fit: BoxFit.cover),
+              ),
+            SafeArea(
+              child: Align(
+                alignment: ResponsiveHelper.isDesktop(context) ? Alignment.center : Alignment.bottomCenter,
+                child: Container(
+                  width: context.width > 700 ? 500 : context.width,
+                  padding: context.width > 700 ? const EdgeInsets.all(50) : const EdgeInsets.all(Dimensions.paddingSizeExtraLarge),
+                  margin: context.width > 700 ? const EdgeInsets.all(50) : EdgeInsets.zero,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor.withValues(alpha: ResponsiveHelper.isDesktop(context) ? 1.0 : 0.95),
+                    borderRadius: ResponsiveHelper.isDesktop(context) 
+                        ? BorderRadius.circular(Dimensions.radiusLarge)
+                        : const BorderRadius.vertical(top: Radius.circular(30)),
+                    boxShadow: ResponsiveHelper.isDesktop(context) ? null : const [BoxShadow(color: Colors.black12, blurRadius: 5, spreadRadius: 1, offset: Offset(0, -2))],
+                  ),
+                  child: SingleChildScrollView(
+                    child: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
 
-                  ResponsiveHelper.isDesktop(context) ? Align(
-                    alignment: Alignment.topRight,
-                    child: IconButton(
-                      onPressed: () => Get.back(),
-                      icon: const Icon(Icons.clear),
-                    ),
-                  ) : const SizedBox(),
+                      ResponsiveHelper.isDesktop(context) ? Align(
+                        alignment: Alignment.topRight,
+                        child: IconButton(
+                          onPressed: () => Get.back(),
+                          icon: const Icon(Icons.clear),
+                        ),
+                      ) : const SizedBox(),
 
-                  Image.asset(Images.logotransparent, width: 125),
-                  const SizedBox(height: Dimensions.paddingSizeExtremeLarge),
+                      if (ResponsiveHelper.isDesktop(context)) ...[
+                        Image.asset('assets/image/logimimge.png', width: 200),
+                        const SizedBox(height: Dimensions.paddingSizeExtremeLarge),
+                      ],
 
-                  SignInView(exitFromApp: widget.exitFromApp, backFromThis: widget.backFromThis, fromResetPassword: widget.fromResetPassword, isOtpViewEnable: (v){},),
+                      SignInView(exitFromApp: widget.exitFromApp, backFromThis: widget.backFromThis, fromResetPassword: widget.fromResetPassword, isOtpViewEnable: (v){},),
 
-                ]),
+                    ]),
+                  ),
+                ),
               ),
             ),
-          ),
+          ],
         ),
       ):
       Scaffold(
-        backgroundColor: ResponsiveHelper.isDesktop(context) ? Colors.transparent : Theme.of(context).primaryColor,
+        backgroundColor: ResponsiveHelper.isDesktop(context) ? Colors.transparent : Theme.of(context).cardColor,
+        extendBodyBehindAppBar: true,
         appBar: (ResponsiveHelper.isDesktop(context) ? null : !widget.exitFromApp ? AppBar(
           leading: IconButton(
             onPressed: () {
@@ -134,33 +151,44 @@ class SignInScreenState extends State<SignInScreen> {
                 Get.back(result: false);
               }
             },
-            icon: Icon(Icons.arrow_back_ios_rounded, color: Theme.of(context).cardColor),
+            icon: Icon(Icons.arrow_back_ios_rounded, color: Colors.white),
           ),
-          elevation: 0, backgroundColor:kIsWeb? Theme.of(context).cardColor:Theme.of(context).primaryColor, actions: const [SizedBox()],
+          elevation: 0, backgroundColor: Colors.transparent, actions: const [SizedBox()],
         ) : null),
         endDrawer: const MenuDrawer(),endDrawerEnableOpenDragGesture: false,
 
-        body: SafeArea(
-          child: Align(
-            alignment: Alignment.center,
-            child: Container(
-              height: Get.height,
-              width: context.width > 700 ? 500 : context.width,
-              padding: context.width > 700 ? const EdgeInsets.all(50) : const EdgeInsets.symmetric(horizontal: 10),
-              margin: context.width > 700 ? const EdgeInsets.all(50) : EdgeInsets.zero,
-              decoration: context.width > 700 ? BoxDecoration(
-                color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                boxShadow: ResponsiveHelper.isDesktop(context) ? null : const [BoxShadow(color: Colors.black12, blurRadius: 5, spreadRadius: 1)],
-              ) : null,
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                Expanded(child: Image.asset(Images.logotransparent,color: Colors.white, width: 125)),
-                const Spacer(),
-                SignInView(exitFromApp: widget.exitFromApp, backFromThis: widget.backFromThis, fromResetPassword: widget.fromResetPassword, isOtpViewEnable: (v){},),
-                const Spacer(),
-              ]),
+        body: Stack(
+          children: [
+            SizedBox(
+              height: context.height,
+              width: context.width,
+              child: Image.asset('assets/image/logimimge.png', fit: BoxFit.cover),
+            ),
+            SafeArea(
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  width: context.width > 700 ? 500 : context.width,
+                  padding: context.width > 700 ? const EdgeInsets.all(50) : EdgeInsets.zero,
+                  margin: context.width > 700 ? const EdgeInsets.all(50) : EdgeInsets.zero,
+                  child: SingleChildScrollView(
+                    child: Container(
+                      padding: const EdgeInsets.all(Dimensions.paddingSizeExtraLarge),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).cardColor.withValues(alpha: 0.95),
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+                        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5, spreadRadius: 1, offset: Offset(0, -2))],
+                      ),
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center, children: [
+                    SignInView(exitFromApp: widget.exitFromApp, backFromThis: widget.backFromThis, fromResetPassword: widget.fromResetPassword, isOtpViewEnable: (v){},),
+                  ]),
+                ),
+              ),
             ),
           ),
+            ),
+          ],
         ),
       ),
     );

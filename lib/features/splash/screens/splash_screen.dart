@@ -67,9 +67,9 @@ class SplashScreenState extends State<SplashScreen> {
       if(token != null && token.isNotEmpty){
         updateOnlineStatus(1, token).then((success) {;
         if (success) {
-          debugPrint("Online status updated successfully.");
+          // debugPrint("Online status updated successfully.");
         } else {
-          debugPrint("Failed to update online status.");
+          // debugPrint("Failed to update online status.");
         }
         });
 

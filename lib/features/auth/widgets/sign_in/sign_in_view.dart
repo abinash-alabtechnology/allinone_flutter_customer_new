@@ -89,14 +89,7 @@ class _SignInViewState extends State<SignInView> {
     CentralizeLoginType centralizeLogin = CentralizeLoginHelper.getPreferredLoginMethod(centralizeLoginSetup, authController.isOtpViewEnable).type;
     switch (centralizeLogin) {
       case CentralizeLoginType.otp:
-        return kIsWeb?OtpLoginWidget(
-          phoneController: _phoneController, phoneFocus: _phoneFocus,
-          countryDialCode: _countryDialCode,
-          onCountryChanged: (CountryCode countryCode) => _countryDialCode = countryCode.dialCode,
-          onClickLoginButton: () {
-            _otpLogin(Get.find<AuthController>(), _countryDialCode!, CentralizeLoginType.otp);
-          },
-        ):OtpLoginWidgetApp(
+        return OtpLoginWidget(
           phoneController: _phoneController, phoneFocus: _phoneFocus,
           countryDialCode: _countryDialCode,
           onCountryChanged: (CountryCode countryCode) => _countryDialCode = countryCode.dialCode,

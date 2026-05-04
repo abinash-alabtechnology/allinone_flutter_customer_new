@@ -107,6 +107,9 @@ import '../../widgets/views/new_on_mart_view.dart';
 import '../../widgets/views/special_offer_view.dart';
 import '../../widgets/views/top_offers_near_me.dart';
 import '../../widgets/views/visit_again_view.dart';
+import '../../widgets/views/promo_code_banner_view.dart';
+import '../../widgets/views/item_that_you_love_view.dart';
+import '../../widgets/views/promotional_banner_view.dart';
 import '../home_screen.dart';
 
 class GroceryHomeScreen extends StatefulWidget {
@@ -730,7 +733,7 @@ class _GroceryHomeScreenState extends State<GroceryHomeScreen> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Gap(10),
+                      // const Gap(10),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: Row(
@@ -791,76 +794,68 @@ class _GroceryHomeScreenState extends State<GroceryHomeScreen> {
                       Skeletonizer(
                         enabled: list == null,
                         child: SizedBox(
-                          height: 435.h,
+                          height: 130.h,
                           width: double.maxFinite,
-                          child: GridView.builder(
+                          child: ListView.builder(
                             padding: EdgeInsets.symmetric(horizontal: 10.w),
                             scrollDirection: Axis.horizontal,
                             shrinkWrap: true,
                             physics: const BouncingScrollPhysics(),
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 3,
-                                  mainAxisExtent: 110.w,
-                                  mainAxisSpacing: 10.w,
-                                  crossAxisSpacing: 10.h,
-                                ),
                             itemCount: list?.length ?? 12,
                             itemBuilder: (_, index) {
                               final category = list != null
                                   ? list[index]
                                   : null;
                               final isLoading = category == null;
-                              return InkWell(
-                                onTap: isLoading
-                                    ? null
-                                    : () => Get.toNamed(
-                                        RouteHelper.getCategoryItemRoute(
-                                          category.id,
-                                          category.name!,
-                                        ),
-                                      ),
-                                child: SizedBox(
-                                  height: 145.h,
-                                  width: 110.w,
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        width: 110.w,
-                                        height: 115.h,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                            Dimensions.radiusLarge.r,
+                              return Padding(
+                                padding: EdgeInsets.only(right: 10.w),
+                                child: InkWell(
+                                  onTap: isLoading
+                                      ? null
+                                      : () => Get.toNamed(
+                                          RouteHelper.getCategoryItemRoute(
+                                            category.id,
+                                            category.name!,
                                           ),
-                                          border: Border.all(
-                                            color: Colors.grey.shade300,
+                                        ),
+                                  child: SizedBox(
+                                    height: 130.h,
+                                    width: 110.w,
+                                    child: Column(
+                                      children: [
+                                        Container(
+                                          width: 110.w,
+                                          height: 110.w,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: Colors.grey.shade300,
+                                            ),
+                                            color: Colors.grey.shade200,
                                           ),
-                                          color: Colors.grey.shade200,
-                                        ),
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(
-                                            Dimensions.radiusLarge.r,
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(100),
+                                            child: isLoading
+                                                ? const SizedBox()
+                                                : CustomImage(
+                                                    image:
+                                                        '${categoryController.categoryList![index].imageFullUrl}',
+                                                    fit: BoxFit.cover,
+                                                  ),
                                           ),
-                                          child: isLoading
-                                              ? const SizedBox()
-                                              : CustomImage(
-                                                  image:
-                                                      '${categoryController.categoryList![index].imageFullUrl}',
-                                                  fit: BoxFit.cover,
-                                                ),
                                         ),
-                                      ),
-                                      SizedBox(height: 4.h),
-                                      Text(
-                                        category?.name ?? "Loading...",
-                                        style: robotoBold.copyWith(
-                                          fontSize: 11.sp,
+                                        SizedBox(height: 4.h),
+                                        Text(
+                                          category?.name ?? "Loading...",
+                                          style: robotoBold.copyWith(
+                                            fontSize: 11.sp,
+                                          ),
+                                          maxLines: 1,
+                                          textAlign: TextAlign.center,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                        maxLines: 1,
-                                        textAlign: TextAlign.center,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
                               );
@@ -874,87 +869,89 @@ class _GroceryHomeScreenState extends State<GroceryHomeScreen> {
                 },
               ),
             ),
-            const SliverToBoxAdapter(
-              child: SizedBox(height: Dimensions.paddingSizeDefault),
-            ),
             SliverToBoxAdapter(
               child: Container(
                 child: Column(
                   children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 8.0,
-                        vertical: 12,
-                      ),
-                      child: Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.amber.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12.0),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.03),
-                              offset: const Offset(0, 2),
-                              blurRadius: 6,
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: 44.w,
-                              height: 44.h,
-                              alignment: Alignment.center,
-                              margin: const EdgeInsets.only(right: 12),
-                              child: CustomAssetImageWidget(
-                                "assets/image/brain.png",
-                                width: 44.w,
-                                height: 44.h,
-                              ),
-                            ),
-                            Container(
-                              width: 1,
-                              height: 44,
-                              color: Colors.black12,
-                              margin: const EdgeInsets.only(right: 12),
-                            ),
-                            Expanded(
-                              child: RichText(
-                                text: TextSpan(
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 11.sp,
-                                    height: 1.25,
-                                  ),
-                                  children: const [
-                                    TextSpan(
-                                      text:
-                                          "We're currently in our AYT testing phase\n",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    ),
-                                    TextSpan(
-                                      text: "to ",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    ),
-                                    TextSpan(
-                                      text: "fine-tune your experience",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                    // Padding(
+                    //   padding: EdgeInsets.symmetric(
+                    //     horizontal: 8.0,
+                    //     vertical: 12,
+                    //   ),
+                    //   child: Container(
+                    //     width: double.infinity,
+                    //     padding: EdgeInsets.all(12),
+                    //     decoration: BoxDecoration(
+                    //       color: Colors.amber.withValues(alpha: 0.1),
+                    //       borderRadius: BorderRadius.circular(12.0),
+                    //       boxShadow: [
+                    //         BoxShadow(
+                    //           color: Colors.black.withOpacity(0.03),
+                    //           offset: const Offset(0, 2),
+                    //           blurRadius: 6,
+                    //         ),
+                    //       ],
+                    //     ),
+                    //     child: Row(
+                    //       crossAxisAlignment: CrossAxisAlignment.center,
+                    //       children: [
+                    //         Container(
+                    //           width: 44.w,
+                    //           height: 44.h,
+                    //           alignment: Alignment.center,
+                    //           margin: const EdgeInsets.only(right: 12),
+                    //           child: CustomAssetImageWidget(
+                    //             "assets/image/brain.png",
+                    //             width: 44.w,
+                    //             height: 44.h,
+                    //           ),
+                    //         ),
+                    //         Container(
+                    //           width: 1,
+                    //           height: 44,
+                    //           color: Colors.black12,
+                    //           margin: const EdgeInsets.only(right: 12),
+                    //         ),
+                    //         Expanded(
+                    //           child: RichText(
+                    //             text: TextSpan(
+                    //               style: TextStyle(
+                    //                 color: Colors.black,
+                    //                 fontSize: 11.sp,
+                    //                 height: 1.25,
+                    //               ),
+                    //               children: const [
+                    //                 TextSpan(
+                    //                   text:
+                    //                       "We're currently in our AYT testing phase\n",
+                    //                   style: TextStyle(
+                    //                     fontWeight: FontWeight.w400,
+                    //                   ),
+                    //                 ),
+                    //                 TextSpan(
+                    //                   text: "to ",
+                    //                   style: TextStyle(
+                    //                     fontWeight: FontWeight.w400,
+                    //                   ),
+                    //                 ),
+                    //                 TextSpan(
+                    //                   text: "fine-tune your experience",
+                    //                   style: TextStyle(
+                    //                     fontWeight: FontWeight.w700,
+                    //                   ),
+                    //                 ),
+                    //               ],
+                    //             ),
+                    //           ),
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+                  
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 12.0),
+                      child: BannerViewGrocery(isFeatured: false),
                     ),
                     SizedBox(height: 10.h),
                     // isLoggedIn ? const VisitAgainView() : const SizedBox(),
@@ -968,10 +965,10 @@ class _GroceryHomeScreenState extends State<GroceryHomeScreen> {
                     const BestReviewItemView(),
                     // const JustForYouView(),
                     const TopOffersNearMe(),
-                    // const ItemThatYouLoveView(forShop: false),
-                    // isLoggedIn ? const PromoCodeBannerView() : const SizedBox(),
-                    // const NewOnMartView(isPharmacy: false, isShop: false),
-                    // const PromotionalBannerView(),
+                    const ItemThatYouLoveView(forShop: false),
+                    AuthHelper.isLoggedIn() ? const PromoCodeBannerView() : const SizedBox(),
+                    const NewOnMartView(isPharmacy: false, isShop: false),
+                    const PromotionalBannerView(),
                   ],
                 ),
               ),

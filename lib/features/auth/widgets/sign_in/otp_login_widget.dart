@@ -51,28 +51,24 @@ class OtpLoginWidget extends StatelessWidget {
           ),
           const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
-          Align(
-            alignment: Alignment.centerLeft,
-            child: InkWell(
-              onTap: () => authController.toggleRememberMe(),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(
-                    height: 24, width: 24,
-                    child: Checkbox(
-                      side: BorderSide(color: Theme.of(context).hintColor),
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      activeColor: Theme.of(context).primaryColor,
-                      value: authController.isActiveRememberMe,
-                      onChanged: (bool? isChecked) => authController.toggleRememberMe(),
-                    ),
+          InkWell(
+            onTap: () => authController.toggleRememberMe(),
+            child: Row(
+              children: [
+                SizedBox(
+                  height: 24, width: 24,
+                  child: Checkbox(
+                    side: BorderSide(color: Theme.of(context).hintColor),
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    activeColor: Theme.of(context).primaryColor,
+                    value: authController.isActiveRememberMe,
+                    onChanged: (bool? isChecked) => authController.toggleRememberMe(),
                   ),
-                  const SizedBox(width: Dimensions.paddingSizeSmall),
+                ),
+                const SizedBox(width: Dimensions.paddingSizeSmall),
 
-                  Text('remember_me'.tr, style: robotoRegular),
-                ],
-              ),
+                Expanded(child: Text('remember_me'.tr, style: robotoRegular)),
+              ],
             ),
           ),
           const SizedBox(height: Dimensions.paddingSizeLarge),
@@ -94,7 +90,7 @@ class OtpLoginWidget extends StatelessWidget {
 
           socialEnable && isDesktop ? const SizedBox(height: Dimensions.paddingSizeLarge) : const SizedBox(),
 
-          !socialEnable ? const SizedBox(height: 100) : const SizedBox(),
+          !socialEnable ? const SizedBox(height: 10) : const SizedBox(),
 
         ]),
       );
@@ -168,28 +164,24 @@ class OtpLoginWidgetApp extends StatelessWidget {
                 ),
                 const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: InkWell(
-                    onTap: () => authController.toggleRememberMe(),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SizedBox(
-                          height: 24, width: 24,
-                          child: Checkbox(
-                            side: BorderSide(color: Theme.of(context).hintColor),
-                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            activeColor: Theme.of(context).primaryColor,
-                            value: authController.isActiveRememberMe,
-                            onChanged: (bool? isChecked) => authController.toggleRememberMe(),
-                          ),
+                InkWell(
+                  onTap: () => authController.toggleRememberMe(),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        height: 24, width: 24,
+                        child: Checkbox(
+                          side: BorderSide(color: Theme.of(context).hintColor),
+                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          activeColor: Theme.of(context).primaryColor,
+                          value: authController.isActiveRememberMe,
+                          onChanged: (bool? isChecked) => authController.toggleRememberMe(),
                         ),
-                        const SizedBox(width: Dimensions.paddingSizeSmall),
+                      ),
+                      const SizedBox(width: Dimensions.paddingSizeSmall),
 
-                        Text('remember_me'.tr, style: robotoRegular.copyWith(color: Theme.of(context).cardColor)),
-                      ],
-                    ),
+                      Expanded(child: Text('remember_me'.tr, style: robotoRegular.copyWith(color: Theme.of(context).cardColor))),
+                    ],
                   ),
                 ),
                 const SizedBox(height: Dimensions.paddingSizeLarge),
