@@ -77,6 +77,10 @@ class _LanguageBottomSheetWidgetState extends State<LanguageBottomSheetWidget> {
                 buttonText: 'update'.tr,
                 onPressed: () {
                   if(localizationController.languages.isNotEmpty && localizationController.selectedLanguageIndex != -1) {
+                    localizationController.setLanguage(Locale(
+                      AppConstants.languages[localizationController.selectedLanguageIndex].languageCode!,
+                      AppConstants.languages[localizationController.selectedLanguageIndex].countryCode,
+                    ));
                     localizationController.saveCacheLanguage(Locale(
                       AppConstants.languages[localizationController.selectedLanguageIndex].languageCode!,
                       AppConstants.languages[localizationController.selectedLanguageIndex].countryCode,

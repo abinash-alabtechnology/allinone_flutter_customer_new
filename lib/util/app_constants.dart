@@ -326,11 +326,11 @@ class AppConstants {
 
   static List<LanguageModel> languages = [
     LanguageModel(imageUrl: Images.english, languageName: 'English', countryCode: 'US', languageCode: 'en'),
-    LanguageModel(imageUrl: Images.indian, languageName: 'தமிழ்', countryCode: 'IN', languageCode: 'en'),
-    LanguageModel(imageUrl: Images.indian, languageName: 'తెలుగు', countryCode: 'IN', languageCode: 'en'),
-    LanguageModel(imageUrl: Images.indian, languageName: 'ಕನ್ನಡ', countryCode: 'IN', languageCode: 'en'),
-    LanguageModel(imageUrl: Images.indian, languageName: 'हिन्दी', countryCode: 'IN', languageCode: 'en'),
-    LanguageModel(imageUrl: Images.indian, languageName: 'മലയാളം', countryCode: 'IN', languageCode: 'en'),
+    // LanguageModel(imageUrl: Images.indian, languageName: 'தமிழ்', countryCode: 'IN', languageCode: 'ta'),
+    LanguageModel(imageUrl: Images.indian, languageName: 'తెలుగు', countryCode: 'IN', languageCode: 'te'),
+    // LanguageModel(imageUrl: Images.indian, languageName: 'ಕನ್ನಡ', countryCode: 'IN', languageCode: 'kn'),
+    LanguageModel(imageUrl: Images.indian, languageName: 'हिन्दी', countryCode: 'IN', languageCode: 'hi'),
+    // LanguageModel(imageUrl: Images.indian, languageName: 'മലയാളം', countryCode: 'IN', languageCode: 'ml'),
     // LanguageModel(imageUrl: Images.arabic, languageName: 'عربى', countryCode: 'SA', languageCode: 'ar'),
     // LanguageModel(imageUrl: Images.spanish, languageName: 'Spanish', countryCode: 'ES', languageCode: 'es'),
     // LanguageModel(imageUrl: Images.bengali, languageName: 'Bengali', countryCode: 'BN', languageCode: 'bn'),

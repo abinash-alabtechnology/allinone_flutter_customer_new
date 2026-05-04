@@ -27,8 +27,7 @@ class FeaturedCategoriesView extends StatelessWidget {
           for (Item product in itemController.featuredCategoriesItem!.items!) {
             if(itemController.selectedCategory == 0) {
               products.add(product);
-            }
-            if(categoryList[itemController.selectedCategory].id == product.categoryId){
+            } else if(categoryList.length > itemController.selectedCategory && categoryList[itemController.selectedCategory].id == product.categoryId){
               products.add(product);
             }
           }

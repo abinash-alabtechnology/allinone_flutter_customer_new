@@ -67,8 +67,7 @@ class _WebBasicMedicineNearbyViewWidgetState extends State<WebBasicMedicineNearb
         for (var product in itemController.basicMedicineModel!.products!) {
           if(selectedCategory == 0) {
             products.add(product);
-          }
-          if (product.categoryIds!.any((category) => category.id == categories[selectedCategory].id)) {
+          } else if (product.categoryIds != null && product.categoryIds!.any((category) => category.id == categories[selectedCategory].id)) {
             products.add(product);
           }
         }

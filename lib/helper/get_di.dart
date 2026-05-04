@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:handy_allinone/features/brands/controllers/brands_controller.dart';
 import 'package:handy_allinone/features/brands/domain/repositories/brands_repository.dart';
 import 'package:handy_allinone/features/brands/domain/repositories/brands_repository_interface.dart';
@@ -508,13 +509,17 @@ Future<Map<String, Map<String, String>>> init() async {
   /// Retrieving localized data
   Map<String, Map<String, String>> languages = {};
   for(LanguageModel languageModel in AppConstants.languages) {
-    String jsonStringValues =  await rootBundle.loadString('assets/language/${languageModel.languageCode}.json');
-    Map<String, dynamic> mappedJson = jsonDecode(jsonStringValues);
-    Map<String, String> json = {};
-    mappedJson.forEach((key, value) {
-      json[key] = value.toString();
-    });
-    languages['${languageModel.languageCode}_${languageModel.countryCode}'] = json;
+    try {
+      String jsonStringValues =  await rootBundle.loadString('assets/language/${languageModel.languageCode}.json');
+      Map<String, dynamic> mappedJson = jsonDecode(jsonStringValues);
+      Map<String, String> json = {};
+      mappedJson.forEach((key, value) {
+        json[key] = value.toString();
+      });
+      languages['${languageModel.languageCode}_${languageModel.countryCode}'] = json;
+    } catch (e) {
+      debugPrint('Error loading language ${languageModel.languageCode}: $e');
+    }
   }
   return languages;
 }

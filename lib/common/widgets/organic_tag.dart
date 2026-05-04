@@ -53,8 +53,8 @@ class OrganicTag extends StatelessWidget {
           ) : BorderRadius.circular(Dimensions.radiusDefault),
         ),
         child: Row(
-          mainAxisAlignment: .center,
-          crossAxisAlignment: .center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Icon(Icons.eco,
               size: 12,

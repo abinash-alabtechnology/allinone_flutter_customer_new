@@ -34,8 +34,7 @@ class _ProductWithCategoriesViewState extends State<ProductWithCategoriesView> {
         for (var product in widget.fromShop ? itemController.reviewedItemList! : itemController.basicMedicineModel!.products!) {
           if(selectedCategory == 0) {
             products.add(product);
-          }
-          if(categories[selectedCategory].id == product.categoryIds?[0].id){
+          } else if(product.categoryIds != null && product.categoryIds!.isNotEmpty && categories[selectedCategory].id == product.categoryIds![0].id){
             products.add(product);
           }
         }

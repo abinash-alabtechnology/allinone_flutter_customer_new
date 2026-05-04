@@ -17,12 +17,6 @@ class LanguageCardWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        if(fromBottomSheet){
-          localizationController.setLanguage(Locale(
-            AppConstants.languages[index].languageCode!,
-            AppConstants.languages[index].countryCode,
-          ), fromBottomSheet: fromBottomSheet);
-        }
         localizationController.setSelectLanguageIndex(index);
       },
       child: Container(
