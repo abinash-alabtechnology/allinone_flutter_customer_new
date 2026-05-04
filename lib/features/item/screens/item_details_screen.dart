@@ -73,12 +73,15 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
             if (item != null && itemController.variationIndex != null) {
               List<String> variationList = [];
               for (int index = 0; index < item.choiceOptions!.length; index++) {
-                variationList.add(
-                  item
-                      .choiceOptions![index]
-                      .options![itemController.variationIndex![index]]
-                      .replaceAll(' ', ''),
-                );
+                if (itemController.variationIndex!.length > index &&
+                    item.choiceOptions![index].options!.length > itemController.variationIndex![index]) {
+                  variationList.add(
+                    item
+                        .choiceOptions![index]
+                        .options![itemController.variationIndex![index]]
+                        .replaceAll(' ', ''),
+                  );
+                }
               }
               String variationType = '';
               bool isFirst = true;
@@ -116,15 +119,15 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
               List<AddOn> addOnIdList = [];
               List<AddOns> addOnsList = [];
               for (int index = 0; index < item.addOns!.length; index++) {
-                if (itemController.addOnActiveList[index]) {
+                if (itemController.addOnActiveList.length > index && itemController.addOnActiveList[index]) {
                   addonsCost =
                       addonsCost +
                       (item.addOns![index].price! *
-                          itemController.addOnQtyList[index]!);
+                          (itemController.addOnQtyList.length > index ? itemController.addOnQtyList[index]! : 1));
                   addOnIdList.add(
                     AddOn(
                       id: item.addOns![index].id,
-                      quantity: itemController.addOnQtyList[index],
+                      quantity: itemController.addOnQtyList.length > index ? itemController.addOnQtyList[index] : 1,
                     ),
                   );
                   addOnsList.add(item.addOns![index]);
@@ -158,8 +161,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
               List<int?> listOfAddOnQty = _getSelectedAddonQtnList(
                 addOnIdList: addOnIdList,
               );
-debugPrint("sjhjhs${itemController.cartIndex}");
-              debugPrint("sjhjhs${cartController.cartList}");
+
 
 
               cart = OnlineCart(
@@ -170,7 +172,7 @@ debugPrint("sjhjhs${itemController.cartIndex}");
                 '',
                 variation != null ? [variation] : [],
                 null,
-                (itemController.cartIndex != -1  && cartController.cartList.isNotEmpty)
+                (itemController.cartIndex != -1  && itemController.cartIndex < cartController.cartList.length)
                     ? cartController.cartList[itemController.cartIndex].quantity
                     : itemController.quantity,
                 listOfAddOnId,
@@ -335,33 +337,15 @@ debugPrint("sjhjhs${itemController.cartIndex}");
                                                                           .paddingSizeExtraSmall,
                                                                   vertical: 4,
                                                                 ),
-                                                            decoration: BoxDecoration(
-                                                              color:
-                                                                  itemController
-                                                                          .variationIndex![index] !=
-                                                                      i
-                                                                  ? Color(
-                                                                      0xFFE9F5E9,
-                                                                    )
-                                                                  : Color(
-                                                                      0xFFFDCC80,
-                                                                    ),
-                                                              borderRadius:
-                                                                  BorderRadius.circular(
-                                                                    7.r,
-                                                                  ),
-                                                              border:
-                                                                  itemController
-                                                                          .variationIndex![index] !=
-                                                                      i
-                                                                  ? Border.all(
-                                                                      color: Theme.of(
-                                                                        context,
-                                                                      ).disabledColor,
-                                                                      width: 1,
-                                                                    )
-                                                                  : null,
-                                                            ),
+                                                              decoration: BoxDecoration(
+                                                                color: (itemController.variationIndex!.length > index && itemController.variationIndex![index] != i)
+                                                                    ? const Color(0xFFE9F5E9)
+                                                                    : const Color(0xFFFDCC80),
+                                                                borderRadius: BorderRadius.circular(7.r),
+                                                                border: (itemController.variationIndex!.length > index && itemController.variationIndex![index] != i)
+                                                                    ? Border.all(color: Theme.of(context).disabledColor, width: 1)
+                                                                    : null,
+                                                              ),
                                                             child: Text(
                                                               item
                                                                   .choiceOptions![index]
@@ -373,9 +357,7 @@ debugPrint("sjhjhs${itemController.cartIndex}");
                                                                       .ellipsis,
                                                               style: robotoBold.copyWith(
                                                                 color:
-                                                                    itemController
-                                                                            .variationIndex![index] !=
-                                                                        i
+                                                                    (itemController.variationIndex!.length > index && itemController.variationIndex![index] != i)
                                                                     ? Colors
                                                                           .grey
                                                                     : Colors
@@ -488,21 +470,13 @@ debugPrint("sjhjhs${itemController.cartIndex}");
                                                                       .isLoading
                                                                   ? null
                                                                   : () {
-                                                                      if (itemController
-                                                                              .cartIndex !=
-                                                                          -1) {
-                                                                        if (cartController
-                                                                                .cartList[itemController.cartIndex]
-                                                                                .quantity! >
-                                                                            1) {
+                                                                      if (itemController.cartIndex != -1 && itemController.cartIndex < cartController.cartList.length) {
+                                                                        if (cartController.cartList[itemController.cartIndex].quantity! > 1) {
                                                                           cartController.setQuantity(
                                                                             false,
-                                                                            itemController
-                                                                                .cartIndex,
+                                                                            itemController.cartIndex,
                                                                             stock,
-                                                                            cartController
-                                                                                .cartList[itemController.cartIndex]
-                                                                                .quantity,
+                                                                            cartController.cartList[itemController.cartIndex].quantity,
                                                                           );
                                                                         }
                                                                       } else {
@@ -550,17 +524,9 @@ debugPrint("sjhjhs${itemController.cartIndex}");
                                                             Padding(
                                                               padding: const EdgeInsets.symmetric(horizontal: 4.0),
                                                               child: Text(
-                                                                itemController
-                                                                            .cartIndex !=
-                                                                        -1
-                                                                    ? cartController
-                                                                          .cartList[itemController
-                                                                              .cartIndex]
-                                                                          .quantity
-                                                                          .toString()
-                                                                    : itemController
-                                                                          .quantity
-                                                                          .toString(),
+                                                                itemController.cartIndex != -1 && itemController.cartIndex < cartController.cartList.length
+                                                                    ? cartController.cartList[itemController.cartIndex].quantity.toString()
+                                                                    : itemController.quantity.toString(),
                                                                 style: robotoMedium
                                                                     .copyWith(
                                                                       fontSize:
@@ -576,17 +542,12 @@ debugPrint("sjhjhs${itemController.cartIndex}");
                                                                       .isLoading
                                                                   ? null
                                                                   : () =>
-                                                                        itemController
-                                                                                .cartIndex !=
-                                                                            -1
+                                                                        itemController.cartIndex != -1 && itemController.cartIndex < cartController.cartList.length
                                                                         ? cartController.setQuantity(
                                                                             true,
-                                                                            itemController
-                                                                                .cartIndex,
+                                                                            itemController.cartIndex,
                                                                             stock,
-                                                                            cartController
-                                                                                .cartList[itemController.cartIndex]
-                                                                                .quantityLimit,
+                                                                            cartController.cartList[itemController.cartIndex].quantityLimit,
                                                                           )
                                                                         : itemController.setQuantity(
                                                                             true,

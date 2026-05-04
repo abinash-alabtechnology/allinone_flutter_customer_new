@@ -266,13 +266,19 @@ class ItemService implements ItemServiceInterface {
   @override
   double? getStartingPrice(Item item) {
     double? startingPrice = 0;
-    if (item.choiceOptions != null && item.choiceOptions!.isNotEmpty) {
+    if (item.choiceOptions != null && item.choiceOptions!.isNotEmpty && item.variations != null && item.variations!.isNotEmpty) {
       List<double?> priceList = [];
       for (var variation in item.variations!) {
-        priceList.add(variation.price);
+        if(variation.price != null) {
+          priceList.add(variation.price);
+        }
       }
-      priceList.sort((a, b) => a!.compareTo(b!));
-      startingPrice = priceList[0];
+      if(priceList.isNotEmpty) {
+        priceList.sort((a, b) => a!.compareTo(b!));
+        startingPrice = priceList[0];
+      } else {
+        startingPrice = item.price;
+      }
     } else {
       startingPrice = item.price;
     }

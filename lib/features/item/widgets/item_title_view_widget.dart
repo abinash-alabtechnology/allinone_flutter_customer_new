@@ -42,15 +42,21 @@ class ItemTitleViewWidget extends StatelessWidget {
     final bool isLoggedIn = AuthHelper.isLoggedIn();
     double? startingPrice;
     double? endingPrice;
-    if (item!.variations!.isNotEmpty) {
+    if (item!.variations != null && item!.variations!.isNotEmpty) {
       List<double?> priceList = [];
       for (var variation in item!.variations!) {
-        priceList.add(variation.price);
+        if (variation.price != null) {
+          priceList.add(variation.price);
+        }
       }
-      priceList.sort((a, b) => a!.compareTo(b!));
-      startingPrice = priceList[0];
-      if (priceList[0]! < priceList[priceList.length - 1]!) {
-        endingPrice = priceList[priceList.length - 1];
+      if (priceList.isNotEmpty) {
+        priceList.sort((a, b) => a!.compareTo(b!));
+        startingPrice = priceList[0];
+        if (priceList.length > 1 && priceList[0]! < priceList[priceList.length - 1]!) {
+          endingPrice = priceList[priceList.length - 1];
+        }
+      } else {
+        startingPrice = item!.price;
       }
     } else {
       startingPrice = item!.price;
