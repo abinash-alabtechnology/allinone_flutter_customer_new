@@ -226,6 +226,8 @@ class Images {
   static const String paymentSelect = 'assets/image/payment_select.png';
   static const String codIcon = 'assets/image/cod_icon.png';
   static const String prescriptionIcon = 'assets/image/predcription_icon.png';
+  static const String prescriptionBackground = 'assets/image/precriptionbg.png';
+  static const String pharmacyBanner = 'assets/image/pharmacybanner.png';
   static const String messengerIcon = 'assets/image/messenger_icon.png';
   static const String whatsappIcon = 'assets/image/whatsapp_icon.png';
   static const String noAddress = 'assets/image/no_address.png';

@@ -29,6 +29,7 @@ import 'package:handy_allinone/common/widgets/organic_tag.dart';
 import 'package:handy_allinone/features/store/screens/store_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:handy_allinone/util/app_constants.dart';
 
 class ItemWidget extends StatelessWidget {
   final Item? item;
@@ -64,6 +65,9 @@ class ItemWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool ltr = Get.find<LocalizationController>().isLtr;
     bool desktop = ResponsiveHelper.isDesktop(context);
+    bool isPharmacy = Get.find<SplashController>().module != null &&
+        Get.find<SplashController>().module!.moduleType.toString().toLowerCase() ==
+            AppConstants.pharmacy.toLowerCase();
     double? discount;
     String? discountType;
     bool isAvailable;
@@ -131,7 +135,13 @@ class ItemWidget extends StatelessWidget {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
                   color: Theme.of(context).cardColor,
-                  boxShadow: const [
+                  boxShadow: isPharmacy ? [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ] : const [
                     BoxShadow(
                       color: Colors.black12,
                       blurRadius: 5,
@@ -205,7 +215,107 @@ class ItemWidget extends StatelessWidget {
                         ),
                   child: TextHover(
                     builder: (hovered) {
-                      return Column(
+                      return isPharmacy ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                vertical: desktop
+                                    ? 0
+                                    : 2,
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    height: imageHeight ?? (desktop ? 120 : 90),
+                                    width: imageWidth ?? (desktop ? 120 : 90),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF8F9FA),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: Colors.grey.shade100),
+                                    ),
+                                    padding: const EdgeInsets.all(8),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: CustomImage(
+                                        isHovered: hovered,
+                                        image: '${isStore ? store != null ? store!.logoFullUrl : '' : item!.imageFullUrl}',
+                                        fit: BoxFit.contain,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: Dimensions.paddingSizeDefault),
+
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          isStore ? store!.name! : item!.name!,
+                                          style: robotoBold.copyWith(
+                                            fontSize: Dimensions.fontSizeDefault,
+                                            color: Colors.black87,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 2),
+
+                                        !isStore && item!.genericName != null && item!.genericName!.isNotEmpty ? Text(
+                                          item!.genericName!.join(', '),
+                                          style: robotoRegular.copyWith(
+                                            fontSize: Dimensions.fontSizeSmall,
+                                            color: Colors.grey.shade600,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ) : const SizedBox(),
+
+                                        !isStore && item!.unitType != null ? Text(
+                                          '${item!.unitType}',
+                                          style: robotoRegular.copyWith(
+                                            fontSize: Dimensions.fontSizeSmall,
+                                            color: Colors.grey.shade500,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ) : const SizedBox(),
+
+                                        const SizedBox(height: 2),
+
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              isStore ? '' : PriceConverter.convertPrice(item!.price, discount: discount, discountType: discountType),
+                                              style: robotoBold.copyWith(
+                                                fontSize: 16,
+                                                color: Colors.black,
+                                              ),
+                                              textDirection: TextDirection.ltr,
+                                            ),
+
+                                            !isStore ? CartCountViewPharmacy(
+                                              item: item!,
+                                              index: index,
+                                            ) : const SizedBox(),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          index == length!-1 ? const SizedBox() : Padding(
+                            padding: EdgeInsets.only(left: desktop ? 130 : 100),
+                            child: Divider(color: Theme.of(context).disabledColor.withValues(alpha: 0.1), thickness: 1),
+                          ),
+                        ],
+                      ) : Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Expanded(

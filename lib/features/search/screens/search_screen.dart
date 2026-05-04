@@ -22,6 +22,7 @@ import 'package:handy_allinone/features/search/widgets/search_field_widget.dart'
 import 'package:handy_allinone/features/search/widgets/search_result_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:handy_allinone/util/app_constants.dart';
 import 'package:handy_allinone/features/store/widgets/bottom_cart_widget.dart';
 
 import '../../../voice_search.dart';
@@ -73,6 +74,10 @@ class SearchScreenState extends State<SearchScreen> with TickerProviderStateMixi
 
   @override
   Widget build(BuildContext context) {
+    bool isPharmacy = Get.find<SplashController>().module != null &&
+        Get.find<SplashController>().module!.moduleType.toString().toLowerCase() ==
+            AppConstants.pharmacy.toLowerCase();
+
     return PopScope(
       canPop: true,
       onPopInvokedWithResult: (didPop, result) async {
@@ -83,6 +88,7 @@ class SearchScreenState extends State<SearchScreen> with TickerProviderStateMixi
         }
       },
       child: Scaffold(
+        backgroundColor: isPharmacy ? const Color(0xFFF5F5F5) : Theme.of(context).colorScheme.surface,
         appBar: ResponsiveHelper.isDesktop(context) ? const WebMenuBar() : null,
         endDrawer: const MenuDrawer(), endDrawerEnableOpenDragGesture: false,
         body: Stack(
@@ -210,15 +216,15 @@ class SearchScreenState extends State<SearchScreen> with TickerProviderStateMixi
                   Container(
                     width: Dimensions.webMaxWidth,
                     decoration: BoxDecoration(
-                      color: Get.find<ThemeController>().darkTheme ? Colors.black12 : Theme.of(context).primaryColor,
-                      boxShadow: Get.find<ThemeController>().darkTheme ? null : [BoxShadow(color: Theme.of(context).disabledColor.withValues(alpha: 0.2), blurRadius: 3, offset: const Offset(0, 5))]
+                      color: Get.find<ThemeController>().darkTheme ? Colors.black12 : isPharmacy ? Colors.white : Theme.of(context).primaryColor,
+                      boxShadow: Get.find<ThemeController>().darkTheme ? null : [BoxShadow(color: Theme.of(context).disabledColor.withValues(alpha: 0.1), blurRadius: 3, offset: const Offset(0, 5))]
                     ),
-                  padding: const EdgeInsets.only(bottom: 10,top:40),
+                  padding: EdgeInsets.only(bottom: 10, top: isPharmacy ? MediaQuery.of(context).padding.top : 40),
                   child: Container(
                     margin:const EdgeInsets.symmetric(horizontal: 10),
                     decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
-                      border: Border.all(color: Theme.of(context).disabledColor),
+                      border: Border.all(color: isPharmacy ? Colors.grey.shade200 : Theme.of(context).disabledColor),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(children: [
@@ -233,17 +239,17 @@ class SearchScreenState extends State<SearchScreen> with TickerProviderStateMixi
                             searchController.setStore(false);
                           }
                         },
-                        icon: const Icon(Icons.arrow_back_ios_new),
+                        icon: Icon(Icons.arrow_back_ios_new, color: isPharmacy ? Colors.black : Theme.of(context).cardColor),
                       ),
 
                       Expanded(child: SearchFieldWidget(
                         controller: _searchController,
-                        radius: 50,
-                        // filledColor: Theme.of(context).disabledColor.withValues(alpha: 0.1),
+                        radius: 12,
+                        prefixIcon: isPharmacy ? Icons.search : null,
+                        suffixIcon: isPharmacy ? Icons.mic : null,
+                        filledColor: isPharmacy ? const Color(0xFFF1F5F9) : null,
                         hint: Get.find<SplashController>().configModel!.moduleConfig!.module!.showRestaurantText!
                             ? 'search_food_or_restaurant'.tr : 'search_item_or_store'.tr,
-                        // prefixIcon: _searchController.text.isNotEmpty ? Icons.clear : null,
-                        // suffixIcon:null,
                         iconPressed: () {
                           _showSuggestion = false;
                           searchController.setSearchMode(true);
@@ -255,23 +261,22 @@ class SearchScreenState extends State<SearchScreen> with TickerProviderStateMixi
                         onChanged: (text) {
                           searchController.setSearchText(text);
                           _searchSuggestions(text);
-                          // _searchController.text = searchController.searchText!;
                         },
                         onSubmit: (text) => _actionSearch(true, _searchController.text.trim(), false),
                       )),
-                      IconButton(
+                      if (!isPharmacy) IconButton(
                         icon: Icon(CupertinoIcons.search,color: Theme.of(context).disabledColor,),
                         onPressed: (){
                           _actionSearch(true, _searchController.text.trim(), false);
                         },
                       ),
-                      const SizedBox(width: Dimensions.paddingSizeSmall),
-                      const Padding(
+                      if (!isPharmacy) const SizedBox(width: Dimensions.paddingSizeSmall),
+                      if (!isPharmacy) const Padding(
                         padding: EdgeInsets.symmetric(vertical: 8.0),
                         child: SizedBox(height: 30,child:VerticalDivider(color: Colors.grey,width: 2,)),
                       ),
-                      const SizedBox(width: Dimensions.paddingSizeSmall),
-                   VoiceSearchIcon(
+                      if (!isPharmacy) const SizedBox(width: Dimensions.paddingSizeSmall),
+                      if (!isPharmacy) VoiceSearchIcon(
                           controller: _searchController,
                           onSearch: (text) {
                             _actionSearch(true, text, false);

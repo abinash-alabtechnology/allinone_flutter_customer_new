@@ -233,176 +233,68 @@ class PharmacyCategoryView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Shop by Category', style: robotoBold.copyWith(fontSize: 18, color: Colors.black87)),
+              TextButton(
+                onPressed: () {
+                  Get.toNamed(RouteHelper.getCategoryRoute());
+                },
+                child: Text('View all', style: robotoMedium.copyWith(color: const Color(0xFF1B5E5E), fontSize: 14)),
+              ),
+            ],
+          ),
+        ),
         SizedBox(
-          height: 160,
+          height: 120,
           child: categoryController.categoryList != null
               ? ListView.builder(
                   controller: scrollController,
                   physics: const BouncingScrollPhysics(),
-                  shrinkWrap: true,
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.only(
-                    left: Dimensions.paddingSizeDefault,
-                    top: Dimensions.paddingSizeDefault,
-                  ),
-                  itemCount: categoryController.categoryList!.length > 10
-                      ? 10
-                      : categoryController.categoryList!.length,
+                  padding: const EdgeInsets.only(left: Dimensions.paddingSizeDefault),
+                  itemCount: categoryController.categoryList!.length,
                   itemBuilder: (context, index) {
+                    final category = categoryController.categoryList![index];
                     return Padding(
-                      padding: const EdgeInsets.only(
-                        bottom: Dimensions.paddingSizeDefault,
-                        right: Dimensions.paddingSizeSmall,
-                        top: Dimensions.paddingSizeDefault,
-                      ),
+                      padding: const EdgeInsets.only(right: 20),
                       child: InkWell(
                         onTap: () {
-                          if (index == 9 &&
-                              categoryController.categoryList!.length > 10) {
-                            Get.toNamed(RouteHelper.getCategoryRoute());
-                          } else {
-                            Get.toNamed(
-                              RouteHelper.getCategoryItemRoute(
-                                categoryController.categoryList![index].id,
-                                categoryController.categoryList![index].name!,
-                              ),
-                            );
-                          }
+                          Get.toNamed(RouteHelper.getCategoryItemRoute(category.id, category.name!));
                         },
-                        borderRadius: BorderRadius.circular(
-                          Dimensions.radiusSmall,
-                        ),
-                        child: Container(
-                          width: 70,
-                          decoration: BoxDecoration(
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(100),
-                              topRight: Radius.circular(100),
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              height: 70,
+                              width: 70,
+                              child: CustomImage(
+                                image: category.imageFullUrl ?? '',
+                                height: 35,
+                                width: 35,
+                                fit: BoxFit.contain,
+                              ),
                             ),
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Theme.of(
-                                  context,
-                                ).primaryColor.withValues(alpha: 0.3),
-                                Theme.of(
-                                  context,
-                                ).cardColor.withValues(alpha: 0.3),
-                              ],
+                            const SizedBox(height: 10),
+                            SizedBox(
+                              width: 80,
+                              child: Text(
+                                category.name ?? '',
+                                style: robotoMedium.copyWith(fontSize: 13, color: Colors.grey.shade700, height: 1.2),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                              ),
                             ),
-                          ),
-                          child: Column(
-                            children: [
-                              Stack(
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: const BorderRadius.only(
-                                      topLeft: Radius.circular(100),
-                                      topRight: Radius.circular(100),
-                                    ),
-                                    child: CustomImage(
-                                      image:
-                                          '${categoryController.categoryList![index].imageFullUrl}',
-                                      height: 60,
-                                      width: double.infinity,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                  (index == 9 &&
-                                          categoryController
-                                                  .categoryList!
-                                                  .length >
-                                              10)
-                                      ? Positioned(
-                                          right: 0,
-                                          left: 0,
-                                          top: 0,
-                                          bottom: 0,
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  const BorderRadius.only(
-                                                    topLeft: Radius.circular(
-                                                      100,
-                                                    ),
-                                                    topRight: Radius.circular(
-                                                      100,
-                                                    ),
-                                                  ),
-                                              gradient: LinearGradient(
-                                                begin: Alignment.topCenter,
-                                                end: Alignment.bottomCenter,
-                                                colors: [
-                                                  Theme.of(context).primaryColor
-                                                      .withValues(alpha: 0.4),
-                                                  Theme.of(context).primaryColor
-                                                      .withValues(alpha: 0.6),
-                                                  Theme.of(context).primaryColor
-                                                      .withValues(alpha: 0.4),
-                                                ],
-                                              ),
-                                            ),
-                                            child: Center(
-                                              child: Text(
-                                                '+${categoryController.categoryList!.length - 10}',
-                                                style: robotoMedium.copyWith(
-                                                  fontSize: Dimensions
-                                                      .fontSizeExtraLarge,
-                                                  color: Theme.of(
-                                                    context,
-                                                  ).cardColor,
-                                                ),
-                                                maxLines: 2,
-                                                overflow: TextOverflow.ellipsis,
-                                                textAlign: TextAlign.center,
-                                              ),
-                                            ),
-                                          ),
-                                        )
-                                      : const SizedBox(),
-                                ],
-                              ),
-                              const SizedBox(
-                                height: Dimensions.paddingSizeSmall,
-                              ),
-                              Expanded(
-                                child: Text(
-                                  (index == 9 &&
-                                          categoryController
-                                                  .categoryList!
-                                                  .length >
-                                              10)
-                                      ? 'see_all'.tr
-                                      : categoryController
-                                            .categoryList![index]
-                                            .name!,
-                                  style: robotoMedium.copyWith(
-                                    fontSize: Dimensions.fontSizeSmall,
-                                    color:
-                                        (index == 9 &&
-                                            categoryController
-                                                    .categoryList!
-                                                    .length >
-                                                10)
-                                        ? Theme.of(context).primaryColor
-                                        : Theme.of(
-                                            context,
-                                          ).textTheme.bodyMedium!.color,
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ],
-                          ),
+                          ],
                         ),
                       ),
                     );
                   },
                 )
-              : PharmacyCategoryShimmer(categoryController: categoryController),
+              : const SizedBox(),
         ),
       ],
     );

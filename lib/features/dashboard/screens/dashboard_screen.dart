@@ -29,6 +29,7 @@ import 'package:handy_allinone/util/app_constants.dart';
 import 'package:handy_allinone/util/dimensions.dart';
 import 'package:handy_allinone/util/images.dart';
 import 'package:handy_allinone/common/widgets/custom_dialog.dart';
+import 'package:handy_allinone/common/widgets/custom_asset_image_widget.dart';
 import 'package:handy_allinone/features/checkout/widgets/congratulation_dialogue.dart';
 import 'package:handy_allinone/features/dashboard/widgets/address_bottom_sheet_widget.dart';
 import 'package:handy_allinone/features/favourite/screens/favourite_screen.dart';
@@ -383,9 +384,12 @@ class DashboardScreenState extends State<DashboardScreen> {
                               const MenuScreen(),
                               HistoryScreen(),
                             ];
+
+                            bool isPharmacy = splashController.module != null && splashController.module!.moduleType == AppConstants.pharmacy;
+
                             return  Column(
-                              mainAxisAlignment: .end,
-                              crossAxisAlignment: .end,
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 if(splashController.module!=null && splashController.module?.id!=null)   Align(
                                   alignment: Alignment.centerRight,
@@ -427,10 +431,33 @@ class DashboardScreenState extends State<DashboardScreen> {
                                         ? 1.0
                                         : 0.0,
                                     child: Column(
-                                      mainAxisAlignment: .end,
-                                      crossAxisAlignment: .end,
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      crossAxisAlignment: CrossAxisAlignment.end,
                                       children: [
-                                        Padding(
+                                        isPharmacy ? Container(
+                                          width: size.width,
+                                          height: GetPlatform.isIOS ? 90 : 75,
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(context).cardColor,
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black.withValues(alpha: 0.05),
+                                                blurRadius: 10,
+                                                offset: const Offset(0, -5),
+                                              ),
+                                            ],
+                                          ),
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                            children: [
+                                              _pharmacyNavItem(context, 'Home', Images.homeSelect, Images.homeUnselect, _pageIndex == 0, () => _setPage(0)),
+                                              _pharmacyNavItem(context, 'Categories', Images.moduleIcon, Images.moduleIcon, _pageIndex == 1, () => _setPage(1)),
+                                              _pharmacyNavItem(context, 'Orders', Images.orderSelect, Images.orderUnselect, _pageIndex == 4, () => _setPage(4)),
+                                              _pharmacyNavItem(context, 'Health Corner', Images.heartsvg, Images.heartsvg, _pageIndex == 3, () => _setPage(3)),
+                                              _pharmacyNavItem(context, 'Account', Images.user, Images.user, _pageIndex == 5, () => _setPage(5)),
+                                            ],
+                                          ),
+                                        ) : Padding(
                                           padding: EdgeInsets.only(
                                               left: 18.w, right: 18.w,bottom: 18.w),
                                           child: Card(
@@ -459,8 +486,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                       children: [
                                                         if((splashController.module != null && splashController.configModel!.module == null))
-                                                          SizedBox.shrink(),
-
+                                                          const SizedBox.shrink(),
                                                         GetBuilder<SplashController>(
                                                           builder: (splashController) {
                                                             if ((splashController.module != null && splashController.configModel!.module == null)) {
@@ -478,7 +504,6 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                             }
                                                           },
                                                         ),
-
                                                         BottomNavItemWidget(
                                                             title: 'home'.tr,
                                                             selectedIcon:
@@ -491,7 +516,6 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                               isBookingTab = false;
                                                             });
                                                             _setPage(0);}
-
                                                         ),
                                                         BottomNavItemWidget(
                                                           title: 'Ride'.tr,
@@ -504,7 +528,6 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                             setState(() {
                                                               isBookingTab = true;
                                                             });
-
                                                             if (['accepted', 'arrived', 'in_progress', 'dropped']
                                                                 .contains(_rideStatus)) {
                                                               Get.to(() => RideConfirmedScreen(
@@ -532,165 +555,31 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                             debugPrint("is this true $isBookingTab");
                                                           },
                                                         ),
-
-                                                     if(_pageIndex != 2) BottomNavItemWidget(
-                                                          title: isParcel
-                                                              ? 'address'.tr
-                                                              : isTaxi
-                                                              ? 'wishlist'
-                                                              .tr
-                                                              : 'favourite'
-                                                              .tr,
-                                                          selectedIcon: isParcel
-                                                              ? Images
-                                                              .addressSelect
-                                                              : Images.heartsvg,
-                                                          unSelectedIcon: isParcel
-                                                              ? Images
-                                                              .addressUnselect
-                                                              : Images
-                                                              .favouriteUnselect,
-                                                          isSelected:
-                                                          _pageIndex == 1,
-                                                          onTap: () =>
-                                                              _setPage(1),
-                                                        ),
-                                                        // Stack(
-                                                        //   clipBehavior:
-                                                        //       Clip.none,
-                                                        //   children: [
-                                                        //     BottomNavItemWidget(
-                                                        //       title: isParcel
-                                                        //           ? 'add'.tr
-                                                        //           : 'cart'.tr,
-                                                        //       selectedIcon:
-                                                        //           isParcel
-                                                        //               ? Images
-                                                        //                   .add
-                                                        //               : Images
-                                                        //                   .cartsvg,
-                                                        //       unSelectedIcon:
-                                                        //           isParcel
-                                                        //               ? Images
-                                                        //                   .add
-                                                        //               : Images
-                                                        //                   .cartsvg,
-                                                        //       isSelected:
-                                                        //           _pageIndex ==
-                                                        //               2,
-                                                        //       onTap: () {
-                                                        //         if (isParcel) {
-                                                        //           showModalBottomSheet(
-                                                        //             context:
-                                                        //                 context,
-                                                        //             isScrollControlled:
-                                                        //                 true,
-                                                        //             backgroundColor:
-                                                        //                 Colors
-                                                        //                     .transparent,
-                                                        //             builder:
-                                                        //                 (con) =>
-                                                        //                     ParcelBottomSheetWidget(
-                                                        //               parcelCategoryList:
-                                                        //                   Get.find<ParcelController>()
-                                                        //                       .parcelCategoryList,
-                                                        //             ),
-                                                        //           );
-                                                        //         } else if (isTaxiWithCache) {
-                                                        //           Get.to(() =>
-                                                        //               const TaxiCartScreen());
-                                                        //         } else {
-                                                        //           Get.find<CartController>().availableList !=
-                                                        //                       null &&
-                                                        //                   Get.find<CartController>()
-                                                        //                       .availableList
-                                                        //                       .isNotEmpty
-                                                        //               ? Get.to(() => const CartScreen(
-                                                        //                   fromNav:
-                                                        //                       false))
-                                                        //               : _setPage(
-                                                        //                   2);
-                                                        //         }
-                                                        //       },
-                                                        //     ),
-                                                        //     GetBuilder<
-                                                        //         CartController>(
-                                                        //       builder:
-                                                        //           (cartController) {
-                                                        //         return cartController
-                                                        //                 .cartList
-                                                        //                 .isNotEmpty
-                                                        //             ? Positioned(
-                                                        //                 top: 2,
-                                                        //                 right:
-                                                        //                     2,
-                                                        //                 child:
-                                                        //                     Container(
-                                                        //                   height:
-                                                        //                       16,
-                                                        //                   width:
-                                                        //                       16,
-                                                        //                   alignment:
-                                                        //                       Alignment.center,
-                                                        //                   decoration:
-                                                        //                       BoxDecoration(
-                                                        //                     shape:
-                                                        //                         BoxShape.circle,
-                                                        //                     color:
-                                                        //                         Theme.of(context).colorScheme.error,
-                                                        //                     border:
-                                                        //                         Border.all(
-                                                        //                       width: 1,
-                                                        //                       color: Theme.of(context).cardColor,
-                                                        //                     ),
-                                                        //                   ),
-                                                        //                   child:
-                                                        //                       Text(
-                                                        //                     cartController.cartList.length.toString(),
-                                                        //                     style:
-                                                        //                         robotoRegular.copyWith(
-                                                        //                       fontSize: 10,
-                                                        //                       color: Theme.of(context).cardColor,
-                                                        //                     ),
-                                                        //                   ),
-                                                        //                 ),
-                                                        //               )
-                                                        //             : const SizedBox();
-                                                        //       },
-                                                        //     ),
-                                                        //   ],
-                                                        // ),
-
-                                                        // BottomNavItemWidget(
-                                                        //   title: isParcel ? 'add'.tr :  'cart'.tr ,
-                                                        //   selectedIcon:
-                                                        //   isParcel ? Images.add :
-                                                        //   Images.cartsvg,
-                                                        //   unSelectedIcon:
-                                                        //   isParcel ? Images.add : Images.cartsvg,
-                                                        //   isSelected: _pageIndex == 2,
-                                                        //   onTap: () {  if (isParcel) {
-                                                        //     showModalBottomSheet(
-                                                        //       context: context,
-                                                        //       isScrollControlled: true,
-                                                        //       backgroundColor: Colors.transparent,
-                                                        //       builder: (con) => ParcelBottomSheetWidget(
-                                                        //           parcelCategoryList: Get.find<ParcelController>()
-                                                        //               .parcelCategoryList),
-                                                        //     );
-                                                        //   }
-                                                        //   else if (isTaxiWithCache) {
-                                                        //     Get.to(() => const TaxiCartScreen());
-                                                        //   }
-                                                        //   else {
-                                                        //      // _setPage(2);
-                                                        //     Get.find<CartController>().availableList != null &&
-                                                        //         Get.find<CartController>().availableList.isNotEmpty ?
-                                                        //       Get.to(() => const CartScreen(fromNav:true)) :_setPage(2);
-                                                        //   }},),
+                                                      if(_pageIndex != 2) BottomNavItemWidget(
+                                                           title: isParcel
+                                                               ? 'address'.tr
+                                                               : isTaxi
+                                                               ? 'wishlist'
+                                                               .tr
+                                                               : 'favourite'
+                                                               .tr,
+                                                           selectedIcon: isParcel
+                                                               ? Images
+                                                               .addressSelect
+                                                               : Images.heartsvg,
+                                                           unSelectedIcon: isParcel
+                                                               ? Images
+                                                               .addressUnselect
+                                                               : Images
+                                                               .favouriteUnselect,
+                                                           isSelected:
+                                                           _pageIndex == 1,
+                                                           onTap: () =>
+                                                               _setPage(1),
+                                                         ),
                                                         BottomNavItemWidget(
                                                           title: (isBookingTab || _pageIndex == 6 )
-                                                              ? 'Bookings'.tr   // 👈 changed title
+                                                              ? 'Bookings'.tr
                                                               : (isTaxi ? 'trips'.tr : 'orders'.tr),
                                                           selectedIcon: Images.ordersvg,
                                                           unSelectedIcon: Images.ordersvg,
@@ -698,22 +587,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                           onTap: () => _setPage(isBookingTab
                                                               ? 6 : 4) ,
                                                         ),
-
-
-
-
-                                                        // BottomNavItemWidget(
-                                                        //   title: 'menu'.tr,
-                                                        //   selectedIcon: Images
-                                                        //       .settingssvg,
-                                                        //   unSelectedIcon: Images
-                                                        //       .settingssvg,
-                                                        //   isSelected:
-                                                        //       _pageIndex == 4,
-                                                        //   onTap: () =>
-                                                        //       _setPage(4),
-                                                        // ),
-                                                        SizedBox.shrink()
+                                                        const SizedBox.shrink()
                                                       ],
                                                     ),
                                                   ),
@@ -725,13 +599,13 @@ class DashboardScreenState extends State<DashboardScreen> {
                                       ],
                                     ),
                                   ),
-                                ):SizedBox(),
+                                ):const SizedBox(),
                               ],
-                            )
-                            ;
+                            );
                           }),
-                    ),
-                  ]),
+                        ),
+                    ],
+                  ),
                   persistentContentHeight: (widget.fromSplash &&
                       Get.find<LocationController>()
                           .showLocationSuggestion &&
@@ -814,6 +688,32 @@ class DashboardScreenState extends State<DashboardScreen> {
                 ? Theme.of(context).primaryColor
                 : Theme.of(context).disabledColor.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(Dimensions.radiusDefault)));
+  }
+
+  Widget _pharmacyNavItem(BuildContext context, String title, String selectedIcon, String unSelectedIcon, bool isSelected, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CustomAssetImageWidget(
+            isSelected ? selectedIcon : unSelectedIcon,
+            height: 25,
+            width: 25,
+            color: isSelected ? Theme.of(context).primaryColor : Colors.grey,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: TextStyle(
+              color: isSelected ? Theme.of(context).primaryColor : Colors.grey,
+              fontSize: 12,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

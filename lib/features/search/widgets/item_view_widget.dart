@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:handy_allinone/common/widgets/item_view.dart';
 import 'package:handy_allinone/common/widgets/web_item_view.dart';
+import 'package:handy_allinone/util/app_constants.dart';
+import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
 
 class ItemViewWidget extends StatelessWidget {
   final bool isItem;
@@ -13,6 +15,9 @@ class ItemViewWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isPharmacy = Get.find<SplashController>().module != null &&
+        Get.find<SplashController>().module!.moduleType.toString().toLowerCase() ==
+            AppConstants.pharmacy.toLowerCase();
     return Scaffold(
       body: GetBuilder<search.SearchController>(builder: (searchController) {
         return SingleChildScrollView(
@@ -21,7 +26,7 @@ class ItemViewWidget extends StatelessWidget {
                 width: Dimensions.webMaxWidth,
                 child: ResponsiveHelper.isDesktop(context) ? WebItemsView(
                   isStore: isItem, items: searchController.searchItemList, stores: searchController.searchStoreList,
-                ) :isItem?
+                ) : (isPharmacy || isItem) ?
                 ItemsView(
                   isStore: isItem, items: searchController.searchItemList, stores: searchController.searchStoreList,
                 ):

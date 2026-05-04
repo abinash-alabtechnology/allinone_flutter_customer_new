@@ -385,3 +385,81 @@ class CartCountViewStore extends StatelessWidget {
     });
   }
 }
+class CartCountViewPharmacy extends StatelessWidget {
+  final Item item;
+  final Widget? child;
+  final int? index;
+  const CartCountViewPharmacy({super.key, required this.item, this.child, this.index = -1});
+
+  @override
+  Widget build(BuildContext context) {
+    return GetBuilder<CartController>(builder: (cartController) {
+      int cartQty = cartController.cartQuantity(item.id!);
+      int cartIndex = cartController.isExistInCart(item.id, cartController.cartVariant(item.id!), false, null);
+      return cartQty != 0 ? Center(
+        child: Container(
+          width: 89.w,
+          decoration: BoxDecoration(
+            color: const Color(0xFF24AE5F),
+            borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+          ),
+          child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+            InkWell(
+              onTap: cartController.isLoading ? null : () {
+                if (cartController.cartList[cartIndex].quantity! > 1) {
+                  cartController.setDirectlyAddToCartIndex(index);
+                  cartController.setQuantity(false, cartIndex, cartController.cartList[cartIndex].stock, cartController.cartList[cartIndex].item!.quantityLimit);
+                }else {
+                  cartController.removeFromCart(cartIndex);
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
+                child: Icon(
+                  Icons.remove, size: 16.h, color: Colors.white,
+                ),
+              ),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
+              child: cartController.isLoading && cartController.directAddCartItemIndex == index
+                  ? SizedBox(height: 10.h, width: 10.w, child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                  : Text(cartQty.toString(),
+                style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall, color: Colors.white),
+              ) ,
+            ),
+
+            InkWell(
+              onTap: cartController.isLoading ? null : () {
+                cartController.setDirectlyAddToCartIndex(index);
+                cartController.setQuantity(true, cartIndex, cartController.cartList[cartIndex].stock, cartController.cartList[cartIndex].quantityLimit);
+              },
+              child: Container(
+                padding: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
+                child: Icon(
+                  Icons.add, size: 16, color: Colors.white,
+                ),
+              ),
+            ),
+          ]),
+        ),
+      ) : InkWell(
+        onTap: () {
+          Get.find<ItemController>().itemDirectlyAddToCart(item, context);
+        },
+        child: child ?? Container(
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+            color: const Color(0xFF24AE5F),
+          ),
+          child: Text("Add", style: robotoBold.copyWith(
+            fontSize: 14.sp,
+            color: Colors.white,
+          )),
+        ),
+      );
+    });
+  }
+}

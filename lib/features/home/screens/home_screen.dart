@@ -508,8 +508,8 @@ class _HomeScreenState extends State<HomeScreen> {
       bool isParcel = splashController.module != null &&
           splashController.module!.moduleType.toString() == AppConstants.parcel;
       bool isPharmacy = splashController.module != null &&
-          splashController.module!.moduleType.toString() ==
-              AppConstants.pharmacy;
+          splashController.module!.moduleType.toString().toLowerCase() ==
+              AppConstants.pharmacy.toLowerCase();
       bool isFood = splashController.module != null &&
           splashController.module!.moduleType.toString() == AppConstants.food;
       bool isShop = splashController.module != null &&
@@ -523,6 +523,8 @@ class _HomeScreenState extends State<HomeScreen> {
       bool isMeat = splashController.module != null &&
           splashController.module!.moduleName.toString().toLowerCase() ==
               "meat";
+      debugPrint("Current Module Type: ${splashController.module?.moduleType}");
+      debugPrint("isPharmacy: $isPharmacy");
       getrainornot();
 
       return isGrocery
@@ -548,7 +550,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 : null,
             endDrawer: const MenuDrawer(),
             endDrawerEnableOpenDragGesture: false,
-            backgroundColor: Theme.of(context).colorScheme.surface,
+            backgroundColor: isPharmacy ? const Color(0xFFF5F5F5) : Theme.of(context).colorScheme.surface,
             body: isParcel
                 ?  ParcelCategoryScreen()
                 :Stack(
@@ -952,22 +954,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
 
-                          if (isMeat)
+                          if (isMeat || isPharmacy)
                             !isGrocery
                                 ? SliverAppBar(
                               floating: true,
                               elevation: 0,
                               automaticallyImplyLeading:
                               false,
-                              surfaceTintColor:
-                              Theme.of(context)
+                              surfaceTintColor: isPharmacy ? Colors.transparent : Theme.of(context)
                                   .primaryColor,
                               backgroundColor:
                               ResponsiveHelper
                                   .isDesktop(
                                   context)
                                   ? Colors.transparent
-                                  : Theme.of(context)
+                                  : isPharmacy ? Colors.white : Theme.of(context)
                                   .primaryColor,
                               title: Center(
                                 child: Container(
@@ -978,7 +979,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       .isLtr
                                       ? 60
                                       : 70,
-                                  color: Theme.of(context)
+                                  color: isPharmacy ? Colors.white : Theme.of(context)
                                       .primaryColor,
                                   child: Row(
                                     children: [
@@ -1008,7 +1009,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 .moduleIcon,
                                             height: 30,
                                             width: 30,
-                                            color: Theme.of(
+                                            color: isPharmacy ? Colors.black : Theme.of(
                                                 context)
                                                 .cardColor,
                                           ),
@@ -1055,7 +1056,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                         style:
                                                         robotoMedium.copyWith(
                                                           color:
-                                                          Theme.of(context).cardColor,
+                                                          isPharmacy ? Colors.black : Theme.of(context).cardColor,
                                                           fontSize:
                                                           Dimensions.fontSizeDefault,
                                                         ),
@@ -1070,7 +1071,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                             child: Text(
                                                               userAddress!.address!,
                                                               style: robotoRegular.copyWith(
-                                                                color: Theme.of(context).cardColor,
+                                                                color: isPharmacy ? Colors.black.withValues(alpha: 0.6) : Theme.of(context).cardColor,
                                                                 fontSize: Dimensions.fontSizeSmall,
                                                               ),
                                                               maxLines: 1,
@@ -1079,7 +1080,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                           ),
                                                           Icon(
                                                             Icons.expand_more,
-                                                            color: Theme.of(context).cardColor,
+                                                            color: isPharmacy ? Colors.black : Theme.of(context).cardColor,
                                                             size: 18,
                                                           ),
                                                         ],
@@ -1107,8 +1108,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                                       .bell,
                                                   size:
                                                   25,
-                                                  color: Theme.of(context)
-                                                      .cardColor,
+                                                  color: isPharmacy ? Colors.black : Theme.of(context)
+                                                       .cardColor,
                                                 ),
                                                 if (notificationController
                                                     .hasNotification)
@@ -1152,8 +1153,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               pinned: true,
                               delegate: SliverDelegate(
                                   callback: (val) {},
-                                  height: isMeat ? 60 : 0,
-                                  child: isMeat
+                                  height: (isMeat || isPharmacy) ? 60 : 0,
+                                  child: (isMeat || isPharmacy)
                                       ? Center(
                                       child: Stack(
                                           children: [
@@ -1167,8 +1168,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   .surface,
                                               child: Column(
                                                   children: [
-                                                    Expanded(
-                                                        child: Container(color: Theme.of(context).primaryColor)),
+                                                      Expanded(
+                                                          child: Container(color: isPharmacy ? Colors.white : Theme.of(context).primaryColor)),
                                                     Expanded(
                                                         child: Container(color: Colors.transparent)),
                                                   ]),
@@ -1230,7 +1231,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                       ("${(category.name?.capitalizeFirst)}"),
                                                                       textStyle: robotoRegular.copyWith(
                                                                         fontSize: Dimensions.fontSizeLarge,
-                                                                        color: Theme.of(context).primaryColor,
+                                                                         color: isPharmacy ? Colors.black.withValues(alpha: 0.8) : Theme.of(context).primaryColor,
                                                                       ),
                                                                     ))
                                                                         .toList(),
@@ -1263,7 +1264,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                       Icon(
                                                         CupertinoIcons.mic,
                                                         size: 25,
-                                                        color: Theme.of(context).primaryColor,
+                                                        color: isPharmacy ? Colors.black : Theme.of(context).primaryColor,
                                                       ),
                                                       const SizedBox(width: Dimensions.paddingSizeExtraSmall),
                                                     ],
@@ -1288,7 +1289,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             .start,
                                         children: [
                                           !isMeat
-                                              ? !isGrocery
+                                              ? !isGrocery && !isPharmacy
                                               ? ClipRRect(
                                               borderRadius: const BorderRadius
                                                   .only(
@@ -1361,7 +1362,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                               ? const TaxiHomeScreen()
                                               : const SizedBox(),
                                         ]),
-                                    !isMeat
+                                    !isMeat && !isPharmacy
                                         ? !isGrocery
                                         ? Positioned(
                                       top: 20,
@@ -1494,7 +1495,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         .shrink()
                                         : const SizedBox
                                         .shrink(),
-                                    !isMeat
+                                    !isMeat && !isPharmacy
                                         ? !isGrocery
                                         ? Positioned(
                                       top: 80,
@@ -1509,7 +1510,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         color: searchBgShow
                                             ? Get.find<ThemeController>().darkTheme
                                             ? Theme.of(context).colorScheme.surface
-                                            : Theme.of(context).cardColor
+                                            : isPharmacy ? const Color(0xFFF5F5F5) : Theme.of(context).cardColor
                                             : null,
                                         padding: const EdgeInsets
                                             .symmetric(
@@ -1566,7 +1567,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                 ("${(category.name?.capitalizeFirst)}"),
                                                                 textStyle: robotoRegular.copyWith(
                                                                   fontSize: Dimensions.fontSizeLarge,
-                                                                  color: Theme.of(context).primaryColor,
+                                                                  color: isPharmacy ? Colors.black : Theme.of(context).primaryColor,
                                                                 ),
                                                               ))
                                                                   .toList(),
@@ -1624,7 +1625,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
 
-                          !showMobileModule && !isTaxi
+                          !showMobileModule && !isTaxi && !isPharmacy
                               ? SliverPersistentHeader(
                             pinned: true,
                             delegate: SafeAreaSliverDelegate(
@@ -1646,7 +1647,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               : const SliverToBoxAdapter(),
 
                           SliverToBoxAdapter(
-                            child: !showMobileModule && !isTaxi
+                            child: !showMobileModule && !isTaxi && !isPharmacy
                                 ? Center(
                               child: Column(
                                 children: [

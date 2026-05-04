@@ -3,6 +3,9 @@ import 'package:handy_allinone/helper/responsive_helper.dart';
 import 'package:handy_allinone/util/dimensions.dart';
 import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:handy_allinone/util/app_constants.dart';
+import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
+import 'package:get/get.dart';
 
 import 'custom_image.dart';
 
@@ -109,7 +112,76 @@ class ItemShimmer extends StatelessWidget {
     final base = Colors.grey.shade300;
     final highlight = Colors.grey.shade100;
 
-    return   Column(
+    bool isPharmacy = Get.find<SplashController>().module != null &&
+        Get.find<SplashController>().module!.moduleType.toString().toLowerCase() ==
+            AppConstants.pharmacy.toLowerCase();
+
+    return isPharmacy ? Skeletonizer(
+      enabled: true,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          children: [
+            Container(
+              height: 90,
+              width: 90,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    height: 16,
+                    width: 150,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    height: 14,
+                    width: 100,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        height: 20,
+                        width: 60,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                      Container(
+                        height: 30,
+                        width: 70,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    ) : Column(
       children: [
         Skeletonizer(
           enabled: true,
@@ -118,96 +190,26 @@ class ItemShimmer extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 Stack(
                   children: [
                     Container(
-                      height: 130,
+                      height: 80,
                       width: double.infinity,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(15),
                         color: Colors.grey.shade300,
                       ),
                     ),
-
-                    // Heart icon box
-                    Positioned(
-                      top: 5,
-                      left: 5,
-                      child: Container(
-                        height: 30,
-                        width: 30,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade300,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-
-                    Positioned(
-                      bottom: 15,
-                      right: 5,
-                      child: Container(
-                        height: 35,
-                        width: 70,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade300,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                    ),
                   ],
                 ),
-
-                const SizedBox(height: 12),
-
-                Container(
-                  height: 20,
-                  width: 60,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(7),
-                  ),
-                ),
-
                 const SizedBox(height: 8),
-
-                Container(
-                  height: 16,
-                  width: 140,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                ),
-
-                const SizedBox(height: 6),
-
-                Container(
-                  height: 14,
-                  width: 100,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-
-                Container(
-                  height: 18,
-                  width: 60,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                ),
-
+                Container(height: 12, width: 60, color: Colors.grey.shade300),
+                const SizedBox(height: 4),
+                Container(height: 10, width: 100, color: Colors.grey.shade300),
               ],
             ),
           ),
         ),
-
       ],
     );
   }
