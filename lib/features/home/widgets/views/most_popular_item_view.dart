@@ -78,7 +78,7 @@ class MostPopularItemView extends StatelessWidget {
 
 
                 SizedBox(
-                  height: 520,
+                  height: 460.h,
                   width: Get.width,
                   child: Skeletonizer(
                     enabled: Get.find<ItemController>().isLoading,
@@ -87,7 +87,7 @@ class MostPopularItemView extends StatelessWidget {
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         mainAxisSpacing: 12,
-                        mainAxisExtent: 150.w,
+                        mainAxisExtent: 120.w,
                         crossAxisSpacing: 12,
                       ),
                       padding: const EdgeInsets.only(left: Dimensions.paddingSizeDefault),

@@ -14,18 +14,24 @@ import 'Controller/vehiclelistController.dart';
 import 'model/bookinghistorymodel.dart';
 import 'model/captionmodel.dart';
 
-void showTripDetailBottomSheet(BuildContext context, int bookingId, String rideStatus) async {
+void showTripDetailBottomSheet(
+  BuildContext context,
+  int bookingId,
+  String rideStatus,
+) async {
   final databaseRef = FirebaseDatabase.instanceFor(
     app: Firebase.app(),
-      databaseURL:  AppConstants.firebaseDBURL,
+    databaseURL: AppConstants.firebaseDBURL,
   ).ref('bookings/$bookingId');
 
-  final snapshot = await databaseRef.get(); // ✅ One-time fetch, no onValue.listen
+  final snapshot = await databaseRef
+      .get(); // ✅ One-time fetch, no onValue.listen
   final data = snapshot.value;
 
   if (data != null && data is Map) {
     final pickupLocation = data['pickup_location'] ?? 'Unknown pickup location';
-    final dropoffLocation = data['dropoff_location'] ?? 'Unknown dropoff location';
+    final dropoffLocation =
+        data['dropoff_location'] ?? 'Unknown dropoff location';
     final totalFare = data['fare_amount']?.toString() ?? '0';
 
     showModalBottomSheet(
@@ -56,16 +62,27 @@ void showTripDetailBottomSheet(BuildContext context, int bookingId, String rideS
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
-                    boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
+                    boxShadow: [
+                      BoxShadow(color: Colors.black12, blurRadius: 4),
+                    ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.circle, size: 10, color: Colors.green),
+                          const Icon(
+                            Icons.circle,
+                            size: 10,
+                            color: Colors.green,
+                          ),
                           const SizedBox(width: 8),
-                          Expanded(child: Text(pickupLocation, overflow: TextOverflow.ellipsis)),
+                          Expanded(
+                            child: Text(
+                              pickupLocation,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -73,7 +90,12 @@ void showTripDetailBottomSheet(BuildContext context, int bookingId, String rideS
                         children: [
                           const Icon(Icons.circle, size: 10, color: Colors.red),
                           const SizedBox(width: 8),
-                          Expanded(child: Text(dropoffLocation, overflow: TextOverflow.ellipsis)),
+                          Expanded(
+                            child: Text(
+                              dropoffLocation,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -87,17 +109,36 @@ void showTripDetailBottomSheet(BuildContext context, int bookingId, String rideS
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
-                    boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
+                    boxShadow: [
+                      BoxShadow(color: Colors.black12, blurRadius: 4),
+                    ],
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text('Total ₹$totalFare', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 4),
-                        const Text('Paying by Cash', style: TextStyle(fontSize: 14, color: Colors.grey)),
-                      ]),
-                      Image.asset('assets/image/money.png', width: 28, height: 28, fit: BoxFit.contain),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Total ₹$totalFare',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Paying by Cash',
+                            style: TextStyle(fontSize: 14, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                      Image.asset(
+                        'assets/image/money.png',
+                        width: 28,
+                        height: 28,
+                        fit: BoxFit.contain,
+                      ),
                     ],
                   ),
                 ),
@@ -111,7 +152,9 @@ void showTripDetailBottomSheet(BuildContext context, int bookingId, String rideS
                       backgroundColor: Colors.black,
                       foregroundColor: Colors.white,
                       elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
                     onPressed: () {
                       Navigator.pop(context);
@@ -131,32 +174,39 @@ void showTripDetailBottomSheet(BuildContext context, int bookingId, String rideS
 }
 
 void showwaitingdriverBottomSheet(BuildContext context) {
-
   showModalBottomSheet(
     isDismissible: false,
     enableDrag: false,
     context: context,
-    shape:  RoundedRectangleBorder(
+    shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
-    builder: (_) =>  WillPopScope(
-        onWillPop: () async => false,child: const FindingDriverContent()),
+    builder: (_) => WillPopScope(
+      onWillPop: () async => false,
+      child: const FindingDriverContent(),
+    ),
   );
 }
+
 void showRideScheduledsBottomSheet(BuildContext context) {
-
   showModalBottomSheet(
     isDismissible: false,
     enableDrag: false,
     context: context,
-    shape:  RoundedRectangleBorder(
+    shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
-    builder: (_) =>  WillPopScope(
-        onWillPop: () async => false,child: const FindingDriverContent()),
+    builder: (_) => WillPopScope(
+      onWillPop: () async => false,
+      child: const FindingDriverContent(),
+    ),
   );
 }
-Future<bool> showCancelReasonBottomSheet(BuildContext context, int bookingId) async {
+
+Future<bool> showCancelReasonBottomSheet(
+  BuildContext context,
+  int bookingId,
+) async {
   final result = await showModalBottomSheet<bool>(
     context: context,
     isScrollControlled: true,
@@ -192,7 +242,7 @@ Future<bool> showCancelReasonBottomSheet(BuildContext context, int bookingId) as
                   "Driver insisted on taking directly/offline",
                   "No Driver Found",
                   "Driver not moving",
-                  "Other Reason"
+                  "Other Reason",
                 ].map((reason) {
                   return Container(
                     margin: const EdgeInsets.only(bottom: 12),
@@ -210,10 +260,17 @@ Future<bool> showCancelReasonBottomSheet(BuildContext context, int bookingId) as
                       onPressed: () async {
                         await Future.delayed(const Duration(milliseconds: 100));
 
-                        bool confirmed = await showCancelConfirmationSheet(context, bookingId, reason);
+                        bool confirmed = await showCancelConfirmationSheet(
+                          context,
+                          bookingId,
+                          reason,
+                        );
 
                         if (context.mounted) {
-                          Navigator.pop(context, confirmed); // ✅ Always returns true or false
+                          Navigator.pop(
+                            context,
+                            confirmed,
+                          ); // ✅ Always returns true or false
                         }
                       },
                       child: Text(reason, textAlign: TextAlign.center),
@@ -252,9 +309,14 @@ Future<bool> showCancelReasonBottomSheet(BuildContext context, int bookingId) as
   return result ?? false;
 }
 
-
-Future<bool> showCancelConfirmationSheet(BuildContext context, int? bookingId, String reason) async {
-  final VehicleListController vehicleController = Get.put(VehicleListController(apiClient: Get.find()));
+Future<bool> showCancelConfirmationSheet(
+  BuildContext context,
+  int? bookingId,
+  String reason,
+) async {
+  final VehicleListController vehicleController = Get.put(
+    VehicleListController(apiClient: Get.find()),
+  );
 
   final result = await showModalBottomSheet<bool>(
     context: context,
@@ -281,49 +343,54 @@ Future<bool> showCancelConfirmationSheet(BuildContext context, int? bookingId, S
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
-                child: Obx(() { final isLoading = vehicleController.isLoading.value;
+                child: Obx(() {
+                  final isLoading = vehicleController.isLoading.value;
                   return ElevatedButton(
-                  onPressed: isLoading ? null :() async {
-                    Map<String, dynamic> bookingcancelData = {
-                      "booking_id": bookingId,
-                      "cancel_reason": reason,
-                      "type": "user"
-                    };
-                    bool success = await vehicleController.cancelBookingAndVerify(bookingcancelData, bookingId);
-                    if (success) {
-                      bool result = await showBookingCancelledBottomSheet(context, null, "driver unavailable");
-                      if (result) {
-                        await SharedService.clearOngoingBooking();
-                        Navigator.pop(context,result);
-                      }
-                      else {
-                        Navigator.pop(context, result);
-                      }
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey.shade200,
-                    foregroundColor: Colors.red,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
+                    onPressed: isLoading
+                        ? null
+                        : () async {
+                            Map<String, dynamic> bookingcancelData = {
+                              "booking_id": bookingId,
+                              "cancel_reason": reason,
+                              "type": "user",
+                            };
+                            bool success = await vehicleController
+                                .cancelBookingAndVerify(
+                                  bookingcancelData,
+                                  bookingId,
+                                );
+                            if (success) {
+                              await SharedService.clearOngoingBooking();
+                              Navigator.pop(context, true);
+                            }
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey.shade200,
+                      foregroundColor: Colors.red,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
                     ),
-                  ),
-                  child:  isLoading
-                      ? const SizedBox(
-                    height: 22,
-                    width: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      color: Colors.red,
-                    ),
-                  )
-                      : Text(
-                    "Cancel Ride",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                );}),
+                    child: isLoading
+                        ? const SizedBox(
+                            height: 22,
+                            width: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              color: Colors.red,
+                            ),
+                          )
+                        : Text(
+                            "Cancel Ride",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                  );
+                }),
               ),
 
               const SizedBox(height: 12),
@@ -359,16 +426,12 @@ Future<bool> showCancelConfirmationSheet(BuildContext context, int? bookingId, S
   return result ?? false;
 }
 
-
-Future<bool> showBookingCancelledBottomSheet(
-    BuildContext context,
-    String? crnNumber,
-    String reason,
-    )
-async {
-  final Completer<bool> completer = Completer<bool>();
-
-  await showModalBottomSheet(
+void showBookingCancelledBottomSheet(
+  BuildContext context,
+  String? crnNumber,
+  String reason,
+) {
+  showModalBottomSheet(
     context: context,
     isScrollControlled: true,
     isDismissible: false,
@@ -398,10 +461,7 @@ async {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Image.asset(
-                    Images.checked,
-                    height: 48,
-                  ),
+                  Image.asset(Images.checked, height: 48),
                 ],
               ),
               const SizedBox(height: 12),
@@ -422,10 +482,12 @@ async {
 
                     await Future.delayed(Duration.zero);
 
-                    Get.offAll(() => const DashboardScreen(
-                      pageIndex: 0,
-                      fromSplash: false,
-                    ));
+                    Get.offAll(
+                      () => const DashboardScreen(
+                        pageIndex: 0,
+                        fromSplash: false,
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
@@ -448,10 +510,7 @@ async {
       );
     },
   );
-
-  return completer.future;
 }
-
 
 void showRideScheduledBottomSheet(BuildContext context) {
   showModalBottomSheet(
@@ -500,16 +559,16 @@ void showRideScheduledBottomSheet(BuildContext context) {
               ],
             ),
 
-
             const SizedBox(height: 20),
-
 
             // Got it button
             InkWell(
               onTap: () {
                 print("ghthdgdthbt");
                 try {
-                  Get.offAll(() => DashboardScreen(pageIndex: 1, fromSplash: false));
+                  Get.offAll(
+                    () => DashboardScreen(pageIndex: 1, fromSplash: false),
+                  );
                 } catch (e, stack) {
                   print('Navigation error: $e');
                   print('Stack: $stack');
@@ -533,8 +592,6 @@ void showRideScheduledBottomSheet(BuildContext context) {
                 ),
               ),
             ),
-
-
           ],
         ),
       );

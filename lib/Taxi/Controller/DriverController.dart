@@ -18,24 +18,34 @@ class DriverController extends GetxController {
     try {
       final dbRef = FirebaseDatabase.instanceFor(
         app: Firebase.app(),
-        databaseURL:  AppConstants.firebaseDBURL,
+        databaseURL: AppConstants.firebaseDBURL,
       ).ref();
 
       final DataSnapshot snapshot = await dbRef.child('drivers').get();
 
-      if (snapshot.exists && snapshot.value != null) {
-        final Map<String, dynamic> data = Map<String, dynamic>.from(snapshot.value as Map);
+      if (snapshot.exists && snapshot.value != null && snapshot.value is Map) {
+        // print("Driver Data Response: ${snapshot.value}");
+        final Map<String, dynamic> data = Map<String, dynamic>.from(
+          snapshot.value as Map,
+        );
 
         final List<Driver> loadedDrivers = [];
 
         data.forEach((key, value) {
-          final driverMap = Map<String, dynamic>.from(value);
-          final driver = Driver.fromMap(driverMap);
-          loadedDrivers.add(driver);
+          if (value is Map) {
+            final driverMap = Map<String, dynamic>.from(value);
+            final driver = Driver.fromMap(driverMap);
+            loadedDrivers.add(driver);
+          }
         });
 
         driverList.value = loadedDrivers;
       } else {
+        if (snapshot.value != null && snapshot.value is! Map) {
+          print(
+            "⚠️ Unexpected data format for drivers: ${snapshot.value.runtimeType}",
+          );
+        }
         driverList.clear();
       }
     } catch (e) {
@@ -47,7 +57,7 @@ class DriverController extends GetxController {
     try {
       final dbRef = FirebaseDatabase.instanceFor(
         app: Firebase.app(),
-        databaseURL:  AppConstants.firebaseDBURL,
+        databaseURL: AppConstants.firebaseDBURL,
       ).ref();
 
       final snapshot = await dbRef.child('drivers/$driverId').get();
@@ -68,21 +78,31 @@ class DriverController extends GetxController {
     try {
       final dbRef = FirebaseDatabase.instanceFor(
         app: Firebase.app(),
-        databaseURL:  AppConstants.firebaseDBURL,
+        databaseURL: AppConstants.firebaseDBURL,
       ).ref();
 
-      final DataSnapshot snapshot = await dbRef.child('bookings/$bookingId').get();
+      final DataSnapshot snapshot = await dbRef
+          .child('bookings/$bookingId')
+          .get();
 
       print("Snapshot fetched.");
 
       if (snapshot.exists && snapshot.value != null) {
-        final Map<String, dynamic> booking = Map<String, dynamic>.from(snapshot.value as Map);
+        final Map<String, dynamic> booking = Map<String, dynamic>.from(
+          snapshot.value as Map,
+        );
 
         print("📦 Booking ID: $bookingId");
         print("   🚗 Vehicle Type: ${booking['type']}");
-        print("   📍 Pickup: ${booking['pickup_location']} (${booking['pickup_lat']}, ${booking['pickup_lng']})");
-        print("   📍 Dropoff: ${booking['dropoff_location']} (${booking['dropoff_lat']}, ${booking['dropoff_lng']})");
-        print("   👤 Passenger: ${booking['passenger_name']} - ${booking['passenger_phone']}");
+        print(
+          "   📍 Pickup: ${booking['pickup_location']} (${booking['pickup_lat']}, ${booking['pickup_lng']})",
+        );
+        print(
+          "   📍 Dropoff: ${booking['dropoff_location']} (${booking['dropoff_lat']}, ${booking['dropoff_lng']})",
+        );
+        print(
+          "   👤 Passenger: ${booking['passenger_name']} - ${booking['passenger_phone']}",
+        );
         print("   💰 Fare: ${booking['fare_amount']}");
         print("   📅 Scheduled At: ${booking['scheduled_at']}");
       } else {
@@ -92,7 +112,6 @@ class DriverController extends GetxController {
       print("❌ Error while fetching booking: $e");
     }
   }
-
 
   Future<void> loadGoogleMapKey() async {
     try {
@@ -107,12 +126,15 @@ class DriverController extends GetxController {
           onMapKeyLoaded();
         }
       } else {
-        print("❌ Failed to fetch Google Map Key. Status: ${response.statusCode}");
+        print(
+          "❌ Failed to fetch Google Map Key. Status: ${response.statusCode}",
+        );
       }
     } catch (e) {
       print("❌ Exception while loading map key: $e");
     }
   }
+
   void onMapKeyLoaded() {
     // Use the key here if needed
     print("🗺️ Ready to use Map Key: $googleMapsApiKey");
@@ -122,7 +144,6 @@ class DriverController extends GetxController {
 
   // If you need a getter
   String? get mapKey => googleMapsApiKey;
-
 
   Future<CaptainDetailsData?> fetchCaptainDetails(int captainId) async {
     print("🔄 Fetching captain details for ID: $captainId");
@@ -155,8 +176,4 @@ class DriverController extends GetxController {
 
     return captainDetails;
   }
-
-
-
-
 }

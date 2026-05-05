@@ -697,11 +697,11 @@ class _GroceryHomeScreenState extends State<GroceryHomeScreen> {
                             );
                           },
                         ),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 12.0),
-                          child: BannerViewGrocery(isFeatured: false),
-                        ),
-                        const SizedBox(height: 8),
+                        // const Padding(
+                        //   padding: EdgeInsets.symmetric(horizontal: 12.0),
+                        //   child: BannerViewGrocery(isFeatured: false),
+                        // ),
+                        // const SizedBox(height: 8),
                       ],
                     ),
                   ),

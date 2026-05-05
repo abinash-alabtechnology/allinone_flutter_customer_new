@@ -11,7 +11,7 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
-import 'package:lottie/lottie.dart' hide Marker ;
+import 'package:lottie/lottie.dart' hide Marker;
 import 'package:shimmer/shimmer.dart';
 import 'package:handy_allinone/features/dashboard/screens/dashboard_screen.dart';
 import 'package:handy_allinone/features/profile/controllers/profile_controller.dart';
@@ -28,7 +28,6 @@ import 'Locationpicker.dart';
 import 'TripDetails.dart';
 import 'ridesummary.dart';
 import 'sharedservice.dart';
-
 
 class Taxihome extends StatefulWidget {
   final bool showBottomSheet;
@@ -48,18 +47,19 @@ class Taxihome extends StatefulWidget {
   State<Taxihome> createState() => _TaxihomeState();
 }
 
-class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
+class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
   final VehicleListController vehicleController = Get.put(
-      VehicleListController(apiClient: Get.find()));
+    VehicleListController(apiClient: Get.find()),
+  );
   final DriverController controller = Get.put(
-      DriverController(apiClient: Get.find()));
+    DriverController(apiClient: Get.find()),
+  );
   final TextEditingController pickupController = TextEditingController();
   final TextEditingController destinationController = TextEditingController();
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
-
 
   LatLng? _currentPosition;
   LatLng? _pickupLatLng;
@@ -94,7 +94,12 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
     _startDriverStream();
     if (widget.showBottomSheet && widget.bookingId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        showContactingDriversBottomSheet(context,widget.bookingId!,widget.userId!,widget.otp!);
+        showContactingDriversBottomSheet(
+          context,
+          widget.bookingId!,
+          widget.userId!,
+          widget.otp!,
+        );
       });
     }
     initCall();
@@ -113,6 +118,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
     _driverFetchTimer?.cancel();
     super.dispose();
   }
+
   Future<void> _loadRecentLocations() async {
     final locations = await RecentLocationService.getRecentLocations();
     setState(() {
@@ -122,9 +128,6 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
       print("📍 ${loc.address} (${loc.latitude}, ${loc.longitude})");
     }
   }
-
-
-
 
   String _formatTime(TimeOfDay time) {
     final now = DateTime.now();
@@ -151,13 +154,16 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
     }
 
     Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
+      desiredAccuracy: LocationAccuracy.high,
+    );
 
     _currentPosition = LatLng(position.latitude, position.longitude);
     _pickupLatLng = _currentPosition;
 
     List<Placemark> placemarks = await placemarkFromCoordinates(
-        position.latitude, position.longitude);
+      position.latitude,
+      position.longitude,
+    );
     if (placemarks.isNotEmpty) {
       Placemark place = placemarks.first;
       _pickupAddress = '${place.name}, ${place.subLocality}, ${place.locality}';
@@ -179,7 +185,8 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
           markerId: const MarkerId('pickup'),
           position: _pickupLatLng!,
           icon: BitmapDescriptor.defaultMarkerWithHue(
-              BitmapDescriptor.hueGreen),
+            BitmapDescriptor.hueGreen,
+          ),
         ),
       if (_dropoffLatLng != null)
         Marker(
@@ -191,6 +198,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
     markers.notifyListeners();
     markers.value = updatedMarkers;
   }
+
   void _startDriverStream() {
     _driverFetchTimer?.cancel();
 
@@ -199,6 +207,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
       await controller.fetchRealtimeDrivers();
     });
   }
+
   void _startAllMarkersAnimation([String? vehicleType]) async {
     _pickupRotationTimer?.cancel();
     markerRotations.clear();
@@ -220,7 +229,9 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
 
     Map<String, LatLng> lastPositions = {};
 
-    _pickupRotationTimer = Timer.periodic(const Duration(seconds: 1), (_) async {
+    _pickupRotationTimer = Timer.periodic(const Duration(seconds: 1), (
+      _,
+    ) async {
       final filteredDrivers = controller.driverList.where((driver) {
         if (_pickupLatLng == null) return false;
 
@@ -231,7 +242,8 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
           driver.long,
         );
 
-        final matchesVehicle = vehicleType == null ||
+        final matchesVehicle =
+            vehicleType == null ||
             driver.type.toLowerCase() == vehicleType.toLowerCase();
 
         return distanceInMeters <= 3000 && matchesVehicle;
@@ -248,12 +260,15 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
         lastPositions[markerId] = currentPosition;
 
         double speedFactor = driver.speed;
-        double newLat = lastPosition.latitude +
+        double newLat =
+            lastPosition.latitude +
             (currentPosition.latitude - lastPosition.latitude) * speedFactor;
-        double newLng = lastPosition.longitude +
+        double newLng =
+            lastPosition.longitude +
             (currentPosition.longitude - lastPosition.longitude) * speedFactor;
 
-        final icon = vehicleIcons[driver.type.toLowerCase()] ??
+        final icon =
+            vehicleIcons[driver.type.toLowerCase()] ??
             BitmapDescriptor.defaultMarker;
 
         animatedMarkers.add(
@@ -272,13 +287,17 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
           Marker(
             markerId: const MarkerId('pickup'),
             position: _pickupLatLng!,
-            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              BitmapDescriptor.hueGreen,
+            ),
           ),
         if (_dropoffLatLng != null)
           Marker(
             markerId: const MarkerId('dropoff'),
             position: _dropoffLatLng!,
-            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              BitmapDescriptor.hueRed,
+            ),
           ),
       };
 
@@ -286,10 +305,17 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
       markers.notifyListeners();
     });
   }
+
   void showCancelConfirmationbookingSheet(
-      BuildContext context, int bookingId, String reason, int? retryStep, int userId) {
-    final VehicleListController vehicleController =
-    Get.put(VehicleListController(apiClient: Get.find()));
+    BuildContext context,
+    int bookingId,
+    String reason,
+    int? retryStep,
+    int userId,
+  ) {
+    final VehicleListController vehicleController = Get.put(
+      VehicleListController(apiClient: Get.find()),
+    );
 
     showModalBottomSheet(
       context: context,
@@ -319,50 +345,60 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
                 // Cancel Ride button
                 SizedBox(
                   width: double.infinity,
-                  child:Obx(() { final isLoading = vehicleController.isLoading.value;
-                  return ElevatedButton(
-                    onPressed: isLoading ? null:() async {
-                      Map<String, dynamic> bookingcancelData = {
-                        "booking_id": bookingId,
-                        "cancel_reason": reason,
-                        "type": "user",
-                      };
+                  child: Obx(() {
+                    final isLoading = vehicleController.isLoading.value;
+                    return ElevatedButton(
+                      onPressed: isLoading
+                          ? null
+                          : () async {
+                              Map<String, dynamic> bookingcancelData = {
+                                "booking_id": bookingId,
+                                "cancel_reason": reason,
+                                "type": "user",
+                              };
 
-                      bool success = await vehicleController.cancelBookingAndVerify(
-                          bookingcancelData, bookingId);
-                      print("dfsggfvs $success");
-                      if (success) {
-                        bookingTimer?.cancel();
-                        bool result = await showBookingCancelledBottomSheet(
-                            ctx, null, "driver unavailable");
-                        print("Fgdgdfgsd $result");
-                        // if (result) {
-                        //   Navigator.pop(ctx);
-                        // }
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey.shade200,
-                      foregroundColor: Colors.red,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
+                              bool success = await vehicleController
+                                  .cancelBookingAndVerify(
+                                    bookingcancelData,
+                                    bookingId,
+                                  );
+                              print("dfsggfvs $success");
+                              if (success) {
+                                bookingTimer?.cancel();
+                                showBookingCancelledBottomSheet(
+                                  ctx,
+                                  null,
+                                  "driver unavailable",
+                                );
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey.shade200,
+                        foregroundColor: Colors.red,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                        ),
                       ),
-                    ),
-                    child:  isLoading
-                        ? const SizedBox(
-                      height: 22,
-                      width: 22,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        color: Colors.red,
-                      ),
-                    ): Text(
-                      "Cancel Ride",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                  );}),
+                      child: isLoading
+                          ? const SizedBox(
+                              height: 22,
+                              width: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: Colors.red,
+                              ),
+                            )
+                          : Text(
+                              "Cancel Ride",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                    );
+                  }),
                 ),
 
                 const SizedBox(height: 12),
@@ -380,7 +416,9 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
                           "radius": nextRadius,
                         };
 
-                        bool success = await vehicleController.retrybooking(retryBooking);
+                        bool success = await vehicleController.retrybooking(
+                          retryBooking,
+                        );
 
                         if (success && ctx.mounted) {
                           print("ghgfhf");
@@ -416,12 +454,10 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
     String reason =
         "No drivers accepted your ride within ${2 * (retryCount + 1)} minutes.";
 
-    bookingTimer = Timer(const Duration(minutes: 2), () async
-    {
+    bookingTimer = Timer(const Duration(minutes: 2), () async {
       if (!context.mounted) return;
 
       debugPrint("🔔 Retry timer fired — showing cancel confirmation");
-
 
       // Give it time to close cleanly
       // await Future.delayed(const Duration(milliseconds: 300));
@@ -435,10 +471,8 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
           userId,
         );
       }
-    }
-    );
+    });
   }
-
 
   Future<void> _drawPolyline() async {
     if (_pickupLatLng == null || _dropoffLatLng == null) return;
@@ -446,14 +480,20 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
     final polylinePoints = PolylinePoints(apiKey: googleMapsApiKey);
     List<LatLng> polylineCoordinates = [];
 
-
-    final PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-      request: PolylineRequest(
-        origin: PointLatLng(_pickupLatLng!.latitude, _pickupLatLng!.longitude),
-        destination: PointLatLng(_dropoffLatLng!.latitude, _dropoffLatLng!.longitude),
-        mode: TravelMode.driving,
-      ),
-    );
+    final PolylineResult result = await polylinePoints
+        .getRouteBetweenCoordinates(
+          request: PolylineRequest(
+            origin: PointLatLng(
+              _pickupLatLng!.latitude,
+              _pickupLatLng!.longitude,
+            ),
+            destination: PointLatLng(
+              _dropoffLatLng!.latitude,
+              _dropoffLatLng!.longitude,
+            ),
+            mode: TravelMode.driving,
+          ),
+        );
 
     if (result.points.isNotEmpty) {
       for (var point in result.points) {
@@ -464,7 +504,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
         _polylines.clear();
         _polylines.add(
           Polyline(
-            polylineId:  PolylineId("route"),
+            polylineId: PolylineId("route"),
             points: polylineCoordinates,
             color: Theme.of(context).primaryColor,
             width: 5,
@@ -523,16 +563,17 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.grey.shade900,
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
                 onPressed: () {
                   scheduletime.value = true;
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     selectedTime.value = temp;
                   });
-                  print("✅ Scheduled Time: ${DateFormat('yyyy-MM-dd HH:mm:ss').format(
-                    DateTime.now().copyWith(hour: temp.hour, minute: temp.minute),
-                  )}");
+                  print(
+                    "✅ Scheduled Time: ${DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now().copyWith(hour: temp.hour, minute: temp.minute))}",
+                  );
                   Navigator.pop(context);
                 },
                 child: const Text(
@@ -543,7 +584,6 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
             ],
           ),
         );
-
       },
     );
   }
@@ -562,6 +602,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
     final total = fare < baseFare ? baseFare : fare;
     return '₹${total.round()}';
   }
+
   Future<void> _processSelectedLocation({
     required String status,
     required LatLng latLng,
@@ -625,6 +666,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
       }
     });
   }
+
   Future<void> _openLocationPicker(String status) async {
     if (_pickupLatLng == null || _pickupAddress == null) {
       if (_currentPosition != null && _currentAddress.isNotEmpty) {
@@ -721,6 +763,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
     }
     return 'a Ride';
   }
+
   Widget _buildLocationTile({
     required Color iconColor,
     required TextEditingController controller,
@@ -731,18 +774,14 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
       title: TextField(
         controller: controller,
         enabled: false,
-        decoration: const InputDecoration(
-          border: InputBorder.none,
-        ),
+        decoration: const InputDecoration(border: InputBorder.none),
       ),
       trailing: IconButton(
-        icon:  Icon(Icons.edit, color: Theme.of(context).primaryColor),
+        icon: Icon(Icons.edit, color: Theme.of(context).primaryColor),
         onPressed: onTap,
       ),
     );
   }
-
-
 
   void _onVehicleSelected(int index) {
     setState(() {
@@ -755,24 +794,24 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
         _startAllMarkersAnimation('bike');
       } else if (vehicleName.contains('auto')) {
         _startAllMarkersAnimation('auto');
-      }  else if (vehicleName.contains('car')) {
+      } else if (vehicleName.contains('car')) {
         _startAllMarkersAnimation('car');
-      }
-      else {
+      } else {
         _pickupRotationTimer?.cancel();
       }
     });
   }
 
-  Widget _buildRideTile(int idx,
-      String title,
-      String subtitle,
-      String price,
-      String eta,
-      String imageUrl, {
-        required bool isSelected,
-        required VoidCallback onTap,
-      }) {
+  Widget _buildRideTile(
+    int idx,
+    String title,
+    String subtitle,
+    String price,
+    String eta,
+    String imageUrl, {
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
     bool isSelected = selectedRideIndex1 == idx;
     return GestureDetector(
       onTap: () {
@@ -786,17 +825,25 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
         margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isSelected
+              ? Theme.of(context).primaryColor.withOpacity(0.05)
+              : Colors.white,
           borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected
+                ? Theme.of(context).primaryColor
+                : Colors.transparent,
+            width: 1.5,
+          ),
           boxShadow: isSelected
               ? [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.7),
-              blurRadius: 10,
-              spreadRadius: 1,
-              offset: Offset(0, 3),
-            ),
-          ]
+                  BoxShadow(
+                    color: Theme.of(context).primaryColor.withOpacity(0.2),
+                    blurRadius: 8,
+                    spreadRadius: 1,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
               : [],
         ),
         child: Row(
@@ -807,14 +854,15 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
               height: 40,
               fit: BoxFit.contain,
               errorBuilder: (_, __, ___) =>
-              const Icon(Icons.image_not_supported),
+                  const Icon(Icons.image_not_supported),
               loadingBuilder: (_, child, loadingProgress) {
                 if (loadingProgress == null) return child;
                 return const SizedBox(
                   width: 40,
                   height: 40,
                   child: Center(
-                      child: CircularProgressIndicator(strokeWidth: 2)),
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
                 );
               },
             ),
@@ -823,17 +871,36 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge)
+                  Text(
+                    title,
+                    style: robotoBold.copyWith(
+                      fontSize: Dimensions.fontSizeExtraLarge,
+                    ),
                   ),
-                  Text(subtitle, style:  robotoRegular.copyWith(fontSize: Dimensions.fontSizeDefault)),
+                  Text(
+                    subtitle,
+                    style: robotoRegular.copyWith(
+                      fontSize: Dimensions.fontSizeDefault,
+                    ),
+                  ),
                 ],
               ),
             ),
             Column(
               children: [
-                Text(price, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraLarge)),
-                Text(eta,
-                    style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault,color:Colors.grey)),
+                Text(
+                  price,
+                  style: robotoRegular.copyWith(
+                    fontSize: Dimensions.fontSizeExtraLarge,
+                  ),
+                ),
+                Text(
+                  eta,
+                  style: robotoMedium.copyWith(
+                    fontSize: Dimensions.fontSizeDefault,
+                    color: Colors.grey,
+                  ),
+                ),
               ],
             ),
           ],
@@ -841,15 +908,18 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
       ),
     );
   }
+
   void initCall() {
-    if (AuthHelper.isLoggedIn() && Get.find<ProfileController>().userInfoModel == null) {
+    if (AuthHelper.isLoggedIn() &&
+        Get.find<ProfileController>().userInfoModel == null) {
       Get.find<ProfileController>().getUserInfo();
     }
     Get.find<ProfileController>().initData();
   }
 
   void _updateUserFields(ProfileController profileController) {
-    if (profileController.userInfoModel != null && _phoneController.text.isEmpty) {
+    if (profileController.userInfoModel != null &&
+        _phoneController.text.isEmpty) {
       _firstNameController.text = profileController.userInfoModel?.fName ?? '';
       _lastNameController.text = profileController.userInfoModel?.lName ?? '';
       _phoneController.text = profileController.userInfoModel?.phone ?? '';
@@ -868,9 +938,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
             color: Colors.white,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(color: Colors.black),
-            boxShadow: [
-              const BoxShadow(color: Colors.black12, blurRadius: 4)
-            ],
+            boxShadow: [const BoxShadow(color: Colors.black12, blurRadius: 4)],
           ),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           child: Row(
@@ -891,362 +959,406 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
       ),
     );
   }
+
   LatLng _getOffsetPosition(LatLng position, double offsetInMeters) {
     double offsetInDegrees = offsetInMeters / 111000;
     return LatLng(position.latitude - offsetInDegrees, position.longitude);
   }
+
   void _moveCameraToOffset(LatLng target, double offsetInMeters) {
     double offsetInDegrees = offsetInMeters / 111000;
-    LatLng offsetPosition = LatLng(target.latitude - offsetInDegrees, target.longitude);
+    LatLng offsetPosition = LatLng(
+      target.latitude - offsetInDegrees,
+      target.longitude,
+    );
     _mapController.animateCamera(CameraUpdate.newLatLng(offsetPosition));
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: GetBuilder<ProfileController>(builder: (profileController) {
-        _updateUserFields(profileController);
-        return Stack(
-          children: [
-            _currentPosition == null
-                ? Shimmer.fromColors(
-              baseColor: Colors.grey[300]!,
-              highlightColor: Colors.grey[100]!,
-              child: Container(color: Colors.white),
-            )
-                : ValueListenableBuilder<Set<Marker>>(
-              valueListenable: markers,
-              builder: (context, markerSet, _) {
-                return GoogleMap(
-                  padding: EdgeInsets.only(
-                    bottom:
-                    MediaQuery.of(context).size.height * 0.4,
-                  ),
-                  initialCameraPosition: CameraPosition(
-                    target: _getOffsetPosition(_currentPosition!, 150), // shift 150m down
-                    zoom: 16,
-                  ),
-                  myLocationEnabled: true,
-                  polylines: _polylines,
-                  zoomControlsEnabled: false,
-                  markers: markerSet,
-                  onMapCreated: (controller) {
-                    _mapController = controller;
+      body: GetBuilder<ProfileController>(
+        builder: (profileController) {
+          _updateUserFields(profileController);
+          return Stack(
+            children: [
+              _currentPosition == null
+                  ? Shimmer.fromColors(
+                      baseColor: Colors.grey[300]!,
+                      highlightColor: Colors.grey[100]!,
+                      child: Container(color: Colors.white),
+                    )
+                  : ValueListenableBuilder<Set<Marker>>(
+                      valueListenable: markers,
+                      builder: (context, markerSet, _) {
+                        return GoogleMap(
+                          padding: EdgeInsets.only(
+                            bottom: MediaQuery.of(context).size.height * 0.4,
+                          ),
+                          initialCameraPosition: CameraPosition(
+                            target: _getOffsetPosition(
+                              _currentPosition!,
+                              150,
+                            ), // shift 150m down
+                            zoom: 16,
+                          ),
+                          myLocationEnabled: true,
+                          polylines: _polylines,
+                          zoomControlsEnabled: false,
+                          markers: markerSet,
+                          onMapCreated: (controller) {
+                            _mapController = controller;
 
-                    Future.delayed(Duration(milliseconds: 3), () {
-                      _moveCameraToOffset(_currentPosition!, 150);
-                    });
-                  },
-                );
-
-              },
-            ),
-            _dropoffLatLng == null ?
-            Positioned(
-              top: 0,
-              left: 16,
-              right: 16,
-              child: buildSearchBar(_pickupAddress ?? "Search pickup location"),
-            ) : Positioned(
-              top: 50,
-              left: 16,
-              child: GestureDetector(
-                onTap: () {
-                  Get.find<SplashController>().showBottomNavBar;
-                  Get.offAll(() => DashboardScreen(pageIndex: 0, fromSplash: false));        },
-                child: Container(
-                  height: 42,
-                  width: 42,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.15),
-                        blurRadius: 6,
-                        offset: const Offset(0, 3),
+                            Future.delayed(Duration(milliseconds: 3), () {
+                              _moveCameraToOffset(_currentPosition!, 150);
+                            });
+                          },
+                        );
+                      },
+                    ),
+              _dropoffLatLng == null
+                  ? Positioned(
+                      top: 0,
+                      left: 16,
+                      right: 16,
+                      child: buildSearchBar(
+                        _pickupAddress ?? "Search pickup location",
                       ),
-                    ],
-                  ),
-                  child:  Icon(
-                    CupertinoIcons.back,
-                    color: Theme.of(context).cardColor,
-                    size: 22,
-                  ),
-                ),
-              ),
-            ),
-            _dropoffLatLng == null
-                ? const SizedBox.shrink()
-                :   Positioned(
-              bottom: -10,
-              left: 16,
-              right: 16,
-                  child: Obx(() {
-                                final isLoading = vehicleController.isLoading.value;
-                                if (vehicleController.vehicleList.isEmpty ||
-                    selectedRideIndex1 >= vehicleController.vehicleList.length) {
-                  return const SizedBox.shrink();
-                                }
-                                final selectedVehicle =
-                                vehicleController.vehicleList[selectedRideIndex1];
-
-                                final fare = _calculateEstimatedFare(
-                  selectedVehicle.baseFare,
-                  selectedVehicle.pricePerKm,
-                  selectedVehicle.pricePerMin,
-                                );
-
-                                return Padding(
-                  padding: const EdgeInsets.only(bottom: 100, left: 16, right: 16),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).primaryColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                    )
+                  : Positioned(
+                      top: 50,
+                      left: 16,
+                      child: GestureDetector(
+                        onTap: () {
+                          Get.find<SplashController>().showBottomNavBar;
+                          Get.offAll(
+                            () => DashboardScreen(
+                              pageIndex: 0,
+                              fromSplash: false,
+                            ),
+                          );
+                        },
+                        child: Container(
+                          height: 42,
+                          width: 42,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.15),
+                                blurRadius: 6,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            CupertinoIcons.back,
+                            color: Theme.of(context).cardColor,
+                            size: 22,
+                          ),
                         ),
                       ),
-                      onPressed: (isLoading || _currentPosition == null)
-                          ? null
-                          : () async {
-                        final name =
-                            "${_firstNameController.text} ${_lastNameController.text}";
-                        final phone = _phoneController.text;
+                    ),
+              _dropoffLatLng == null
+                  ? const SizedBox.shrink()
+                  : Positioned(
+                      bottom: -10,
+                      left: 16,
+                      right: 16,
+                      child: Obx(() {
+                        final isLoading = vehicleController.isLoading.value;
+                        if (vehicleController.vehicleList.isEmpty ||
+                            selectedRideIndex1 >=
+                                vehicleController.vehicleList.length) {
+                          return const SizedBox.shrink();
+                        }
+                        final selectedVehicle =
+                            vehicleController.vehicleList[selectedRideIndex1];
 
-                        DateTime now = DateTime.now();
-                        TimeOfDay selected =
-                            selectedTime.value ?? TimeOfDay.fromDateTime(now);
-
-                        DateTime scheduledDateTime = DateTime(
-                          now.year,
-                          now.month,
-                          now.day,
-                          selected.hour,
-                          selected.minute,
+                        final fare = _calculateEstimatedFare(
+                          selectedVehicle.baseFare,
+                          selectedVehicle.pricePerKm,
+                          selectedVehicle.pricePerMin,
                         );
 
-                        Map<String, dynamic> bookingData = {
-                          "pickup_location": _pickupAddress,
-                          "dropoff_location": _dropoffAddress,
-                          "pickup_lat": _pickupLatLng!.latitude,
-                          "pickup_lng": _pickupLatLng!.longitude,
-                          "dropoff_lat": _dropoffLatLng!.latitude,
-                          "dropoff_lng": _dropoffLatLng!.longitude,
-                          "distance_km":
-                          _calculateDistanceKm().toStringAsFixed(2),
-                          "fare_amount": fare.replaceAll('₹', ''),
-                          "vehicle_price_type_id": selectedVehicle.id,
-                          "passenger_name": name,
-                          "passenger_phone": phone,
-                          "payment_method": "cash",
-                          "scheduled_at": DateFormat('yyyy-MM-dd HH:mm:ss')
-                              .format(scheduledDateTime),
-                        };
+                        return Padding(
+                          padding: const EdgeInsets.only(
+                            bottom: 100,
+                            left: 16,
+                            right: 16,
+                          ),
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: 56,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Theme.of(context).primaryColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              onPressed: (isLoading || _currentPosition == null)
+                                  ? null
+                                  : () async {
+                                      final name =
+                                          "${_firstNameController.text} ${_lastNameController.text}";
+                                      final phone = _phoneController.text;
 
-                        showBookingConfirmationDialog(context, bookingData);
-                      },
-                      child: isLoading
-                          ? const SizedBox(
-                        height: 22,
-                        width: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                          : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.local_taxi, color: Colors.white),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Book ${_getRideTitle(selectedRideIndex1)} • ₹${fare.replaceAll('₹', '')}',
-                            style:  robotoBlack.copyWith(
-                              color:Theme.of(context).cardColor,
-                              fontSize: Dimensions.fontSizeLarge,
+                                      DateTime now = DateTime.now();
+                                      TimeOfDay selected =
+                                          selectedTime.value ??
+                                          TimeOfDay.fromDateTime(now);
+
+                                      DateTime scheduledDateTime = DateTime(
+                                        now.year,
+                                        now.month,
+                                        now.day,
+                                        selected.hour,
+                                        selected.minute,
+                                      );
+
+                                      Map<String, dynamic> bookingData = {
+                                        "pickup_location": _pickupAddress,
+                                        "dropoff_location": _dropoffAddress,
+                                        "pickup_lat": _pickupLatLng!.latitude,
+                                        "pickup_lng": _pickupLatLng!.longitude,
+                                        "dropoff_lat": _dropoffLatLng!.latitude,
+                                        "dropoff_lng":
+                                            _dropoffLatLng!.longitude,
+                                        "distance_km": _calculateDistanceKm()
+                                            .toStringAsFixed(2),
+                                        "fare_amount": fare.replaceAll('₹', ''),
+                                        "vehicle_price_type_id":
+                                            selectedVehicle.id,
+                                        "passenger_name": name,
+                                        "passenger_phone": phone,
+                                        "payment_method": "cash",
+                                        "scheduled_at": DateFormat(
+                                          'yyyy-MM-dd HH:mm:ss',
+                                        ).format(scheduledDateTime),
+                                      };
+
+                                      showBookingConfirmationDialog(
+                                        context,
+                                        bookingData,
+                                      );
+                                    },
+                              child: isLoading
+                                  ? const SizedBox(
+                                      height: 22,
+                                      width: 22,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        const Icon(
+                                          Icons.local_taxi,
+                                          color: Colors.white,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          'Book ${_getRideTitle(selectedRideIndex1)} • ₹${fare.replaceAll('₹', '')}',
+                                          style: robotoBlack.copyWith(
+                                            color: Theme.of(context).cardColor,
+                                            fontSize: Dimensions.fontSizeLarge,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                             ),
                           ),
-                        ],
-                      ),
+                        );
+                      }),
                     ),
-                  ),
-                                );
-                              }),
-                ),
-            Obx(() => AnimatedOpacity(
-              duration: const Duration(milliseconds: 300),
-              opacity: showDraggableSheet.value ? 1.0 : 0.0,
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: Container(
-
-                  height: _dropoffLatLng == null ? MediaQuery.of(context).size.height * 0.4 :MediaQuery.of(context).size.height * 0.6,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-                  ),
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 5),
-                      child: _dropoffLatLng == null
-                          ? _buildSearchDestination()
-                          : _buildBookingDetails(context),
+              Obx(
+                () => AnimatedOpacity(
+                  duration: const Duration(milliseconds: 300),
+                  opacity: showDraggableSheet.value ? 1.0 : 0.0,
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      height: _dropoffLatLng == null
+                          ? MediaQuery.of(context).size.height * 0.4
+                          : MediaQuery.of(context).size.height * 0.6,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(30),
+                        ),
+                      ),
+                      child: SingleChildScrollView(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 5),
+                          child: _dropoffLatLng == null
+                              ? _buildSearchDestination()
+                              : _buildBookingDetails(context),
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
-            )),
-
-          ],
-        );
-      }),
+            ],
+          );
+        },
+      ),
       floatingActionButton: _dropoffLatLng == null
           ? const SizedBox.shrink()
           : Obx(() {
-        final isLoading = vehicleController.isLoading.value;
-        if (vehicleController.vehicleList.isEmpty ||
-            selectedRideIndex1 >= vehicleController.vehicleList.length) {
-          return const SizedBox.shrink();
-        }
-        final selectedVehicle =
-        vehicleController.vehicleList[selectedRideIndex1];
+              final isLoading = vehicleController.isLoading.value;
+              if (vehicleController.vehicleList.isEmpty ||
+                  selectedRideIndex1 >= vehicleController.vehicleList.length) {
+                return const SizedBox.shrink();
+              }
+              final selectedVehicle =
+                  vehicleController.vehicleList[selectedRideIndex1];
 
-        final fare = _calculateEstimatedFare(
-          selectedVehicle.baseFare,
-          selectedVehicle.pricePerKm,
-          selectedVehicle.pricePerMin,
-        );
+              final fare = _calculateEstimatedFare(
+                selectedVehicle.baseFare,
+                selectedVehicle.pricePerKm,
+                selectedVehicle.pricePerMin,
+              );
 
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
-          child: SizedBox(
-            width: double.infinity,
-            height: 56,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              onPressed: (isLoading || _currentPosition == null)
-                  ? null
-                  : () async {
-                final name =
-                    "${_firstNameController.text} ${_lastNameController.text}";
-                final phone = _phoneController.text;
-
-                DateTime now = DateTime.now();
-                TimeOfDay selected =
-                    selectedTime.value ?? TimeOfDay.fromDateTime(now);
-
-                DateTime scheduledDateTime = DateTime(
-                  now.year,
-                  now.month,
-                  now.day,
-                  selected.hour,
-                  selected.minute,
-                );
-
-                Map<String, dynamic> bookingData = {
-                  "pickup_location": _pickupAddress,
-                  "dropoff_location": _dropoffAddress,
-                  "pickup_lat": _pickupLatLng!.latitude,
-                  "pickup_lng": _pickupLatLng!.longitude,
-                  "dropoff_lat": _dropoffLatLng!.latitude,
-                  "dropoff_lng": _dropoffLatLng!.longitude,
-                  "distance_km":
-                  _calculateDistanceKm().toStringAsFixed(2),
-                  "fare_amount": fare.replaceAll('₹', ''),
-                  "vehicle_price_type_id": selectedVehicle.id,
-                  "passenger_name": name,
-                  "passenger_phone": phone,
-                  "payment_method": "cash",
-                  "scheduled_at": DateFormat('yyyy-MM-dd HH:mm:ss')
-                      .format(scheduledDateTime),
-                };
-
-                showBookingConfirmationDialog(context, bookingData);
-              },
-              child: isLoading
-                  ? const SizedBox(
-                height: 22,
-                width: 22,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
-                ),
-              )
-                  : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.local_taxi, color: Colors.white),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Book ${_getRideTitle(selectedRideIndex1)} • ₹${fare.replaceAll('₹', '')}',
-                    style:  robotoBlack.copyWith(
-                      color:Theme.of(context).cardColor,
-                      fontSize: Dimensions.fontSizeLarge,
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).primaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
+                    onPressed: (isLoading || _currentPosition == null)
+                        ? null
+                        : () async {
+                            final name =
+                                "${_firstNameController.text} ${_lastNameController.text}";
+                            final phone = _phoneController.text;
+
+                            DateTime now = DateTime.now();
+                            TimeOfDay selected =
+                                selectedTime.value ??
+                                TimeOfDay.fromDateTime(now);
+
+                            DateTime scheduledDateTime = DateTime(
+                              now.year,
+                              now.month,
+                              now.day,
+                              selected.hour,
+                              selected.minute,
+                            );
+
+                            Map<String, dynamic> bookingData = {
+                              "pickup_location": _pickupAddress,
+                              "dropoff_location": _dropoffAddress,
+                              "pickup_lat": _pickupLatLng!.latitude,
+                              "pickup_lng": _pickupLatLng!.longitude,
+                              "dropoff_lat": _dropoffLatLng!.latitude,
+                              "dropoff_lng": _dropoffLatLng!.longitude,
+                              "distance_km": _calculateDistanceKm()
+                                  .toStringAsFixed(2),
+                              "fare_amount": fare.replaceAll('₹', ''),
+                              "vehicle_price_type_id": selectedVehicle.id,
+                              "passenger_name": name,
+                              "passenger_phone": phone,
+                              "payment_method": "cash",
+                              "scheduled_at": DateFormat(
+                                'yyyy-MM-dd HH:mm:ss',
+                              ).format(scheduledDateTime),
+                            };
+
+                            showBookingConfirmationDialog(context, bookingData);
+                          },
+                    child: isLoading
+                        ? const SizedBox(
+                            height: 22,
+                            width: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.local_taxi, color: Colors.white),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Book ${_getRideTitle(selectedRideIndex1)} • ₹${fare.replaceAll('₹', '')}',
+                                style: robotoBlack.copyWith(
+                                  color: Theme.of(context).cardColor,
+                                  fontSize: Dimensions.fontSizeLarge,
+                                ),
+                              ),
+                            ],
+                          ),
                   ),
-                ],
-              ),
-            ),
-          ),
-        );
-      }),
-      floatingActionButtonLocation:
-      FloatingActionButtonLocation.centerDocked,
+                ),
+              );
+            }),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 
-  Widget module(String name, String description, String image,
-      BuildContext context) {
-    return SafeArea(child: Padding(
-      padding: const EdgeInsets.all(2.0),
-      child: Container(
-        width: MediaQuery
-            .of(context)
-            .size
-            .width * 0.45,
-        height: 70,
-        decoration: BoxDecoration(color: Colors.grey.shade200,
-            borderRadius: BorderRadius.all(Radius.circular(10))),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text(name, style: robotoBold.copyWith(),),
-                  Text(description, style: robotoRegular.copyWith(fontSize: 9),)
-                ],
-              ),
-              Image.asset(image)
-            ],
+  Widget module(
+    String name,
+    String description,
+    String image,
+    BuildContext context,
+  ) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(2.0),
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.45,
+          height: 70,
+          decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(name, style: robotoBold.copyWith()),
+                    Text(
+                      description,
+                      style: robotoRegular.copyWith(fontSize: 9),
+                    ),
+                  ],
+                ),
+                Image.asset(image),
+              ],
+            ),
           ),
         ),
       ),
-    ));
+    );
   }
+
   Widget _buildSearchDestination() {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          ),
+          BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
         ],
       ),
       child: Column(
@@ -1274,42 +1386,41 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
             ),
           ),
 
-          if (recentLocations.isNotEmpty) Divider(height: 1, color: Colors.grey[300]),
+          if (recentLocations.isNotEmpty)
+            Divider(height: 1, color: Colors.grey[300]),
           if (recentLocations.isNotEmpty) ...[
-          ...recentLocations.take(4).map((loc) {
-            return ListTile(
-              dense: true,
-              leading: Icon(Icons.history, color: Colors.grey),
-              title: Text(
-                loc.address,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 14),
-              ),
-              onTap: () {
-                if(_currentPosition != null){
-                  _processSelectedLocation(
-                    status: "Dropoff",
-                    latLng: LatLng(loc.latitude, loc.longitude),
-                    address: loc.address,
-                  );
-                }
-                else{
-                  Get.snackbar(
-                    "Error",
-                    "Please Wait...",
-                    snackPosition: SnackPosition.BOTTOM,
-                  );
-                }
-                // _processSelectedLocation(
-                //   status: "Dropoff",
-                //   latLng: LatLng(loc.latitude, loc.longitude),
-                //   address: loc.address,
-                // );
-              },
-            );
-          }).toList(),
-        ]
-          else ...[
+            ...recentLocations.take(4).map((loc) {
+              return ListTile(
+                dense: true,
+                leading: Icon(Icons.history, color: Colors.grey),
+                title: Text(
+                  loc.address,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 14),
+                ),
+                onTap: () {
+                  if (_currentPosition != null) {
+                    _processSelectedLocation(
+                      status: "Dropoff",
+                      latLng: LatLng(loc.latitude, loc.longitude),
+                      address: loc.address,
+                    );
+                  } else {
+                    Get.snackbar(
+                      "Error",
+                      "Please Wait...",
+                      snackPosition: SnackPosition.BOTTOM,
+                    );
+                  }
+                  // _processSelectedLocation(
+                  //   status: "Dropoff",
+                  //   latLng: LatLng(loc.latitude, loc.longitude),
+                  //   address: loc.address,
+                  // );
+                },
+              );
+            }).toList(),
+          ] else ...[
             Align(
               alignment: Alignment.topCenter,
               child: Column(
@@ -1332,16 +1443,15 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
                           children: [
                             TextSpan(
                               text: "Welcome aboard! ",
-                              style:  TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
                               ),
                             ),
                             TextSpan(
-                              text: "Wishing you a smooth and joyful journey ahead 🚖✨",
-                              style: TextStyle(
-                                fontWeight: FontWeight.w400,
-                              ),
+                              text:
+                                  "Wishing you a smooth and joyful journey ahead 🚖✨",
+                              style: TextStyle(fontWeight: FontWeight.w400),
                             ),
                           ],
                         ),
@@ -1351,14 +1461,11 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
                 ],
               ),
             ),
-
-    ]
-
-          ,]
-    ),
+          ],
+        ],
+      ),
     );
   }
-
 
   Widget _buildBookingDetails(BuildContext context) {
     return Column(
@@ -1432,23 +1539,30 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
           ],
         ),
         Padding(
-          padding: const EdgeInsets.only(left: 20.0,right: 25.0),
-          child: Row(crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-
-            Text("Total Distance:",style: robotoBold.copyWith(
-              fontSize: Dimensions.fontSizeExtraLarge,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
-            ),),
-            Text("${_calculateDistanceKm().toStringAsFixed(2)} KM",style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
-            ),),
-          ],),
+          padding: const EdgeInsets.only(left: 20.0, right: 25.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Total Distance:",
+                style: robotoBold.copyWith(
+                  fontSize: Dimensions.fontSizeExtraLarge,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+              Text(
+                "${_calculateDistanceKm().toStringAsFixed(2)} KM",
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
+          ),
         ),
-
-
 
         Obx(() {
           if (vehicleController.isLoading.value) {
@@ -1461,9 +1575,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
           }
 
           if (vehicleController.hasError.value) {
-            return Center(
-              child: Text(vehicleController.errorMessage.value),
-            );
+            return Center(child: Text(vehicleController.errorMessage.value));
           }
 
           return AnimationLimiter(
@@ -1482,9 +1594,10 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
                 );
 
                 final matchingDrivers = controller.driverList
-                    .where((d) =>
-                d.vehicletype.toLowerCase() ==
-                    v.name.toLowerCase())
+                    .where(
+                      (d) =>
+                          d.vehicletype.toLowerCase() == v.name.toLowerCase(),
+                    )
                     .toList();
 
                 double? minEta;
@@ -1499,19 +1612,16 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
                     );
 
                     final distanceKm = distanceMeters / 1000;
-                    final speedKmph =
-                    (driver.speed * 3.6).clamp(5, 60);
+                    final speedKmph = (driver.speed * 3.6).clamp(5, 60);
                     final eta = (distanceKm / speedKmph) * 60;
 
-                    if (eta.isFinite &&
-                        (minEta == null || eta < minEta)) {
+                    if (eta.isFinite && (minEta == null || eta < minEta)) {
                       minEta = eta;
                     }
                   }
                 }
 
-                final etaText =
-                minEta != null ? '${minEta.round()} min' : '';
+                final etaText = minEta != null ? '${minEta.round()} min' : '';
 
                 return AnimationConfiguration.staggeredList(
                   position: i,
@@ -1677,23 +1787,27 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
   //   );
   // }
   void _closeBottomSheetAndGoHome(
-      BuildContext bottomSheetContext,
-      StreamSubscription bookingListener,
-      ) {
+    BuildContext bottomSheetContext,
+    StreamSubscription bookingListener, [
+    Timer? countdownTimer,
+  ]) {
     bookingTimer?.cancel();
     bookingListener.cancel();
+    countdownTimer?.cancel();
 
     if (Navigator.canPop(bottomSheetContext)) {
       Navigator.pop(bottomSheetContext);
     }
 
-    Get.offAll(() => DashboardScreen(
-      pageIndex: 0,
-      fromSplash: false,
-    ));
+    Get.offAll(() => DashboardScreen(pageIndex: 0, fromSplash: false));
   }
 
-  void showContactingDriversBottomSheet(BuildContext context, int? bookingId, int? userId, String? otp) {
+  void showContactingDriversBottomSheet(
+    BuildContext context,
+    int? bookingId,
+    int? userId,
+    String? otp,
+  ) {
     print("🟡 showContactingDriversBottomSheet called");
 
     if (bookingId == null || userId == null || otp == null) {
@@ -1713,11 +1827,13 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (BuildContext bottomSheetContext) {
+        Timer? countdownTimer;
+        int remainingSeconds = 300; // 5 minutes
         // startRetryTimer(bottomSheetContext, bookingId, retryCount);
 
         final dbRef = FirebaseDatabase.instanceFor(
           app: Firebase.app(),
-          databaseURL:  AppConstants.firebaseDBURL,
+          databaseURL: AppConstants.firebaseDBURL,
         ).ref('bookings/$bookingId');
 
         bookingListener = dbRef.onValue.listen((DatabaseEvent event) {
@@ -1753,115 +1869,304 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
               driverIdsMap is Map &&
               driverIdsMap.isNotEmpty) {
             final rawDriverKey = driverIdsMap.keys.first;
-            final driverId =
-            int.tryParse(rawDriverKey.replaceAll(RegExp(r'[^0-9]'), ''));
+            final driverId = int.tryParse(
+              rawDriverKey.replaceAll(RegExp(r'[^0-9]'), ''),
+            );
 
             if (driverId != null) {
-              SharedService.saveOngoingBooking(bookingId, driverId, userId, otp);
+              SharedService.saveOngoingBooking(
+                bookingId,
+                driverId,
+                userId,
+                otp,
+              );
 
               bookingTimer?.cancel();
               bookingListener.cancel();
+              countdownTimer?.cancel();
 
               Future.delayed(const Duration(milliseconds: 300), () {
                 if (Navigator.canPop(bottomSheetContext)) {
                   Navigator.pop(bottomSheetContext);
                 }
 
-                Get.to(() => RideConfirmedScreen(
-                  Bookingid: bookingId ?? 0,
-                  driverid: driverId ?? 0,
-                  userId: userId ?? 0,
-                  otp: otp ?? "1234",
-                ));
+                Get.to(
+                  () => RideConfirmedScreen(
+                    Bookingid: bookingId ?? 0,
+                    driverid: driverId ?? 0,
+                    userId: userId ?? 0,
+                    otp: otp ?? "1234",
+                  ),
+                );
               });
             }
           }
         });
 
-        return WillPopScope(
-          onWillPop:  () async {
-          Get.offAll(() => DashboardScreen(pageIndex: 0, fromSplash: false));
-          return false; // or true, based on whether you want to allow popping
-        },
-          child: SizedBox(
-            height: 300,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                children: [
-                  const Text(
-                    "Hang tight, finding drivers close by...",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  Lottie.asset('assets/animation/searching_drivers.json', height: 200),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                        left:8.0 , right: 8.0),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child:ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        onPressed: ()  async {
-                          bookingListener.cancel();
-                          print("SDfsfd $bookingId");// Cancel the booking listener first
+        return StatefulBuilder(
+          builder: (context, setState) {
+            if (countdownTimer == null) {
+              countdownTimer = Timer.periodic(const Duration(seconds: 1), (
+                timer,
+              ) {
+                if (remainingSeconds > 0) {
+                  setState(() {
+                    remainingSeconds--;
+                  });
+                } else {
+                  timer.cancel();
+                }
+              });
+            }
 
-                          bool success = await showCancelReasonBottomSheet(bottomSheetContext, bookingId);
-                          print('dfgdg the responce of the cancel $success');
-                          if (!success) {
-                            print("⏳ User choose not to cancel — restarting driver search");
+            String minutes = (remainingSeconds ~/ 60).toString().padLeft(
+              2,
+              '0',
+            );
+            String seconds = (remainingSeconds % 60).toString().padLeft(2, '0');
+            double progress = remainingSeconds / 300.0;
 
-                            Future.delayed(const Duration(milliseconds: 300), () {
-                              if (bottomSheetContext.mounted) {
-                                showContactingDriversBottomSheet(
-                                  safeContext,
-                                  bookingId,
-                                  userId,
-                                  otp,
-                                );
-                              } else {
-                                if (Navigator.canPop(bottomSheetContext)) {
-                                  Navigator.pop(bottomSheetContext);
-                                }
-                                print("⚠️ Safe context no longer mounted");
-                              }
-                            });
-                          }
-                        },
-
-                        child: Text(
-                          'Cancel Ride',
-                          style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeExtraLarge),
+            return WillPopScope(
+              onWillPop: () async {
+                Get.offAll(
+                  () => DashboardScreen(pageIndex: 0, fromSplash: false),
+                );
+                return false; // or true, based on whether you want to allow popping
+              },
+              child: SizedBox(
+                height: 380,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      const Text(
+                        "Hang tight, finding drivers close by...",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
+                      const SizedBox(height: 12),
+
+                      // Highly Appealing Timer UI
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Theme.of(
+                                context,
+                              ).primaryColor.withOpacity(0.15),
+                              blurRadius: 20,
+                              spreadRadius: 5,
+                              offset: const Offset(0, 5),
+                            ),
+                          ],
+                          border: Border.all(
+                            color: Theme.of(
+                              context,
+                            ).primaryColor.withOpacity(0.15),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.access_time_rounded,
+                                      color: Theme.of(context).primaryColor,
+                                      size: 24,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    const Text(
+                                      "Estimated wait time",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(
+                                      context,
+                                    ).primaryColor.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    "$minutes:$seconds",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w900,
+                                      color: Theme.of(context).primaryColor,
+                                      letterSpacing: 1.0,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            LayoutBuilder(
+                              builder: (context, constraints) {
+                                return Stack(
+                                  children: [
+                                    Container(
+                                      height: 12,
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey[200],
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                    ),
+                                    AnimatedContainer(
+                                      duration: const Duration(seconds: 1),
+                                      curve: Curves.linear,
+                                      height: 12,
+                                      width: constraints.maxWidth * progress,
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            Theme.of(
+                                              context,
+                                            ).primaryColor.withOpacity(0.5),
+                                            Theme.of(context).primaryColor,
+                                          ],
+                                          begin: Alignment.centerLeft,
+                                          end: Alignment.centerRight,
+                                        ),
+                                        borderRadius: BorderRadius.circular(10),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Theme.of(
+                                              context,
+                                            ).primaryColor.withOpacity(0.3),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 10),
+                      Lottie.asset(
+                        'assets/animation/searching_drivers.json',
+                        height: 160,
+                      ),
+
+                      const Spacer(),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          onPressed: () async {
+                            bookingListener.cancel();
+                            countdownTimer?.cancel();
+                            print(
+                              "SDfsfd $bookingId",
+                            ); // Cancel the booking listener first
+
+                            bool success = await showCancelReasonBottomSheet(
+                              bottomSheetContext,
+                              bookingId,
+                            );
+                            print('dfgdg the responce of the cancel $success');
+                            if (!success) {
+                              print(
+                                "⏳ User choose not to cancel — restarting driver search",
+                              );
+
+                              Future.delayed(
+                                const Duration(milliseconds: 300),
+                                () {
+                                  if (bottomSheetContext.mounted) {
+                                    showContactingDriversBottomSheet(
+                                      safeContext,
+                                      bookingId,
+                                      userId,
+                                      otp,
+                                    );
+                                  } else {
+                                    if (Navigator.canPop(bottomSheetContext)) {
+                                      Navigator.pop(bottomSheetContext);
+                                    }
+                                    print("⚠️ Safe context no longer mounted");
+                                  }
+                                },
+                              );
+                            } else {
+                              // Successfully cancelled, pop the searching drivers sheet
+                              if (Navigator.canPop(bottomSheetContext)) {
+                                Navigator.pop(bottomSheetContext);
+                              }
+                              // And show the confirmation popup
+                              showBookingCancelledBottomSheet(
+                                safeContext,
+                                null,
+                                "user cancelled",
+                              );
+                            }
+                          },
+                          child: Text(
+                            'Cancel Ride',
+                            style: robotoMedium.copyWith(
+                              fontSize: Dimensions.fontSizeExtraLarge,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );
   }
 
   void showBookingConfirmationDialog(
-      BuildContext context, Map<String, dynamic> bookingData) {
-
+    BuildContext context,
+    Map<String, dynamic> bookingData,
+  ) {
     GoogleMapController? _mapController;
     Set<Polyline> _polylines = {};
     bool routeDrawn = false;
 
     LatLng pickup = LatLng(
-        bookingData["pickup_lat"], bookingData["pickup_lng"]);
+      bookingData["pickup_lat"],
+      bookingData["pickup_lng"],
+    );
     LatLng dropoff = LatLng(
-        bookingData["dropoff_lat"], bookingData["dropoff_lng"]);
+      bookingData["dropoff_lat"],
+      bookingData["dropoff_lng"],
+    );
 
     showGeneralDialog(
       context: context,
@@ -1870,35 +2175,40 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
       barrierColor: Colors.black.withOpacity(0.35), // dim background
       transitionDuration: const Duration(milliseconds: 300),
       pageBuilder: (context, anim1, anim2) {
-
         return BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6), // 👈 BLUR
           child: Center(
             child: Dialog(
-              insetPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+              insetPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 24,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
               child: StatefulBuilder(
                 builder: (context, setState) {
-
                   Future<void> drawRoutePolyline() async {
                     if (routeDrawn) return;
 
-                    PolylinePoints polylinePoints =
-                    PolylinePoints(apiKey: googleMapsApiKey);
-
-                    PolylineResult result =
-                    await polylinePoints.getRouteBetweenCoordinates(
-                      request: PolylineRequest(
-                        origin: PointLatLng(
-                            pickup.latitude, pickup.longitude),
-                        destination: PointLatLng(
-                            dropoff.latitude, dropoff.longitude),
-                        mode: TravelMode.driving,
-                      ),
+                    PolylinePoints polylinePoints = PolylinePoints(
+                      apiKey: googleMapsApiKey,
                     );
+
+                    PolylineResult result = await polylinePoints
+                        .getRouteBetweenCoordinates(
+                          request: PolylineRequest(
+                            origin: PointLatLng(
+                              pickup.latitude,
+                              pickup.longitude,
+                            ),
+                            destination: PointLatLng(
+                              dropoff.latitude,
+                              dropoff.longitude,
+                            ),
+                            mode: TravelMode.driving,
+                          ),
+                        );
 
                     if (result.points.isNotEmpty) {
                       final routePoints = result.points
@@ -1948,17 +2258,18 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
                   });
 
                   return SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.75, // 👈 BIGGER
+                    height:
+                        MediaQuery.of(context).size.height * 0.75, // 👈 BIGGER
                     width: MediaQuery.of(context).size.width * 0.95,
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Column(
                         children: [
-
                           Text(
                             "Confirm Your Booking",
                             style: robotoBold.copyWith(
-                                fontSize: Dimensions.fontSizeLarge),
+                              fontSize: Dimensions.fontSizeLarge,
+                            ),
                           ),
 
                           const SizedBox(height: 12),
@@ -1968,29 +2279,29 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
                             child: SizedBox(
                               height: 340,
                               child: GoogleMap(
-                                initialCameraPosition:
-                                CameraPosition(target: pickup, zoom: 14),
+                                initialCameraPosition: CameraPosition(
+                                  target: pickup,
+                                  zoom: 14,
+                                ),
                                 markers: {
                                   Marker(
-                                    markerId:
-                                    const MarkerId('pickup'),
+                                    markerId: const MarkerId('pickup'),
                                     position: pickup,
-                                    icon: BitmapDescriptor
-                                        .defaultMarkerWithHue(
-                                        BitmapDescriptor.hueGreen),
+                                    icon: BitmapDescriptor.defaultMarkerWithHue(
+                                      BitmapDescriptor.hueGreen,
+                                    ),
                                   ),
                                   Marker(
-                                    markerId:
-                                    const MarkerId('dropoff'),
+                                    markerId: const MarkerId('dropoff'),
                                     position: dropoff,
-                                    icon: BitmapDescriptor
-                                        .defaultMarkerWithHue(
-                                        BitmapDescriptor.hueRed),
+                                    icon: BitmapDescriptor.defaultMarkerWithHue(
+                                      BitmapDescriptor.hueRed,
+                                    ),
                                   ),
                                 },
                                 polylines: _polylines,
                                 onMapCreated: (controller) =>
-                                _mapController = controller,
+                                    _mapController = controller,
                                 myLocationButtonEnabled: false,
                                 zoomControlsEnabled: false,
                               ),
@@ -2002,15 +2313,17 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Icon(Icons.location_on,
-                                  color: Colors.green),
+                              const Icon(
+                                Icons.location_on,
+                                color: Colors.green,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   bookingData["pickup_location"],
                                   style: robotoMedium.copyWith(
-                                      fontSize:
-                                      Dimensions.fontSizeLarge),
+                                    fontSize: Dimensions.fontSizeLarge,
+                                  ),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -2023,15 +2336,14 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Icon(Icons.flag,
-                                  color: Colors.red),
+                              const Icon(Icons.flag, color: Colors.red),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   bookingData["dropoff_location"],
                                   style: robotoMedium.copyWith(
-                                      fontSize:
-                                      Dimensions.fontSizeLarge),
+                                    fontSize: Dimensions.fontSizeLarge,
+                                  ),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -2044,27 +2356,29 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
                           Container(
                             width: double.infinity,
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 10),
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
                             decoration: BoxDecoration(
-                              color: Theme.of(context)
-                                  .primaryColor
-                                  .withOpacity(0.1),
-                              borderRadius:
-                              BorderRadius.circular(10),
+                              color: Theme.of(
+                                context,
+                              ).primaryColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(10),
                             ),
                             child: Row(
                               children: [
                                 Text(
                                   "Distance: ${bookingData["distance_km"]} km",
                                   style: robotoMedium.copyWith(
-                                      fontSize: Dimensions.fontSizeExtraLarge
-                                      ),
+                                    fontSize: Dimensions.fontSizeExtraLarge,
+                                  ),
                                 ),
                                 const Spacer(),
                                 Text(
                                   "Fare: ₹${bookingData["fare_amount"]}",
                                   style: robotoMedium.copyWith(
-                                     fontSize: Dimensions.fontSizeExtraLarge),
+                                    fontSize: Dimensions.fontSizeExtraLarge,
+                                  ),
                                 ),
                               ],
                             ),
@@ -2076,82 +2390,86 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
                             children: [
                               Expanded(
                                 child: ElevatedButton(
-                                  onPressed: () =>
-                                      Navigator.pop(context),
+                                  onPressed: () => Navigator.pop(context),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.black,
-                                    shape:
-                                    RoundedRectangleBorder(
-                                      borderRadius:
-                                      BorderRadius.circular(12),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
                                   ),
-                                  child: Text("Cancel",
-                                      style: robotoMedium.copyWith( fontSize: Dimensions.fontSizeExtraLarge,color: Theme.of(context).cardColor)),
+                                  child: Text(
+                                    "Cancel",
+                                    style: robotoMedium.copyWith(
+                                      fontSize: Dimensions.fontSizeExtraLarge,
+                                      color: Theme.of(context).cardColor,
+                                    ),
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: ElevatedButton(
-                                  onPressed:
-                                  vehicleController.isLoading.value
+                                  onPressed: vehicleController.isLoading.value
                                       ? null
                                       : () async {
+                                          vehicleController.isLoading.value =
+                                              true;
 
-                                    vehicleController.isLoading.value = true;
+                                          final success =
+                                              await vehicleController
+                                                  .bookingdata(bookingData);
 
-                                    final success =
-                                    await vehicleController
-                                        .bookingdata(bookingData);
+                                          final bookingId =
+                                              vehicleController.lastBookingId;
+                                          final userId =
+                                              vehicleController.userId!;
+                                          final otp = vehicleController.otp!;
 
-                                    final bookingId =
-                                        vehicleController.lastBookingId;
-                                    final userId =
-                                    vehicleController.userId!;
-                                    final otp =
-                                    vehicleController.otp!;
+                                          SharedService.saveBookingIdToPrefs(
+                                            bookingId ?? 0,
+                                            userId,
+                                            otp,
+                                          );
 
-                                    SharedService
-                                        .saveBookingIdToPrefs(
-                                        bookingId ?? 0,
-                                        userId,
-                                        otp);
+                                          vehicleController.isLoading.value =
+                                              false;
 
-                                    vehicleController.isLoading.value = false;
-
-                                    if (success && bookingId != null) {
-                                      Navigator.pop(context);
-                                      showDraggableSheet.value = false;
-                                      showContactingDriversBottomSheet(
-                                          context,
-                                          bookingId,
-                                          userId,
-                                          otp);
-                                    }
-                                  },
+                                          if (success && bookingId != null) {
+                                            Navigator.pop(context);
+                                            showDraggableSheet.value = false;
+                                            showContactingDriversBottomSheet(
+                                              context,
+                                              bookingId,
+                                              userId,
+                                              otp,
+                                            );
+                                          }
+                                        },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                    Theme.of(context)
-                                        .primaryColor,
-                                    shape:
-                                    RoundedRectangleBorder(
-                                      borderRadius:
-                                      BorderRadius.circular(12),
+                                    backgroundColor: Theme.of(
+                                      context,
+                                    ).primaryColor,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
                                   ),
-                                  child:
-                                  vehicleController.isLoading.value
+                                  child: vehicleController.isLoading.value
                                       ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child:
-                                    CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                      : Text("Confirm",
-                                      style:  robotoMedium.copyWith( fontSize: Dimensions.fontSizeExtraLarge,color: Theme.of(context).cardColor)),
+                                          height: 20,
+                                          width: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: Colors.white,
+                                          ),
+                                        )
+                                      : Text(
+                                          "Confirm",
+                                          style: robotoMedium.copyWith(
+                                            fontSize:
+                                                Dimensions.fontSizeExtraLarge,
+                                            color: Theme.of(context).cardColor,
+                                          ),
+                                        ),
                                 ),
                               ),
                             ],
@@ -2168,8 +2486,6 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
       },
     );
   }
-
-
 
   // void showBookingConfirmationDialog(BuildContext context, Map<String, dynamic> bookingData) {
   //   GoogleMapController? _mapController;
@@ -2435,59 +2751,59 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
                     color: Colors.white,
                   ),
                   const SizedBox(height: 8),
-                  Container(
-                    height: 12,
-                    width: 100,
-                    color: Colors.white,
-                  ),
+                  Container(height: 12, width: 100, color: Colors.white),
                 ],
               ),
             ),
             const SizedBox(width: 12),
             // Price placeholder
-            Container(
-              width: 50,
-              height: 14,
-              color: Colors.white,
-            ),
+            Container(width: 50, height: 14, color: Colors.white),
           ],
         ),
       ),
     );
   }
 
-  Widget submodule(String name, String description, String image,
-      BuildContext context) {
-    return SafeArea(child: Padding(
-      padding: const EdgeInsets.all(2.0),
-      child: Container(
-        width: MediaQuery
-            .of(context)
-            .size
-            .width * 0.4,
-        height: 70,
-        decoration: BoxDecoration(color: Colors.grey.shade200,
-            borderRadius: BorderRadius.all(Radius.circular(10))),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text(name, style: robotoBold.copyWith(),),
-                  Text(description, style: robotoRegular.copyWith(fontSize: 9),)
-                ],
-              ),
-              Image.asset(image)
-            ],
+  Widget submodule(
+    String name,
+    String description,
+    String image,
+    BuildContext context,
+  ) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(2.0),
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.4,
+          height: 70,
+          decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(name, style: robotoBold.copyWith()),
+                    Text(
+                      description,
+                      style: robotoRegular.copyWith(fontSize: 9),
+                    ),
+                  ],
+                ),
+                Image.asset(image),
+              ],
+            ),
           ),
         ),
       ),
-    ));
+    );
   }
 
   Widget buildLocationRow(IconData icon, String text) {
@@ -2497,19 +2813,14 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver{
         children: [
           Icon(icon, color: Colors.grey),
           const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              text,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
+          Expanded(child: Text(text, overflow: TextOverflow.ellipsis)),
           const Icon(Icons.chevron_right, color: Colors.grey),
         ],
       ),
     );
   }
-
 }
+
 void showRideCancelledPopup() {
   if (Get.isDialogOpen ?? false) return;
 
@@ -2518,13 +2829,11 @@ void showRideCancelledPopup() {
       onWillPop: () async => false,
       child: AlertDialog(
         title: const Text("Ride Cancelled"),
-        content: const Text(
-          "Your ride has been cancelled by the admin.",
-        ),
+        content: const Text("Your ride has been cancelled by the admin."),
         actions: [
           TextButton(
             onPressed: () {
-            Get.back();
+              Get.back();
             },
             child: const Text("OK"),
           ),
