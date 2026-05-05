@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:handy_allinone/util/dimensions.dart';
 import 'package:handy_allinone/util/images.dart';
 import 'package:handy_allinone/util/styles.dart';
+import 'package:handy_allinone/helper/route_helper.dart';
 
 class PrescriptionBannerView extends StatelessWidget {
   const PrescriptionBannerView({super.key});
@@ -44,7 +45,7 @@ class PrescriptionBannerView extends StatelessWidget {
                       ),
                       const SizedBox(height: Dimensions.paddingSizeDefault),
                       InkWell(
-                        onTap: () {},
+                        onTap: () => Get.toNamed(RouteHelper.getPrescriptionUploadRoute()),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [

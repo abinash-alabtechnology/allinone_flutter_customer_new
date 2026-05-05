@@ -416,20 +416,16 @@ class DashboardScreenState extends State<DashboardScreen> {
                                         child: BottomCartWidget()),
                                   ),
                                 ),
-                                splashController.showBottomNav
+                                splashController.showBottomNav || true
                                     ?    AnimatedSlide(
                                   duration:
                                   const Duration(milliseconds: 300),
                                   curve: Curves.easeInOut,
-                                  offset: splashController.showBottomNav
-                                      ? Offset.zero
-                                      : const Offset(0, 1),
+                                  offset: Offset.zero,
                                   child: AnimatedOpacity(
                                     duration:
                                     const Duration(milliseconds: 300),
-                                    opacity: splashController.showBottomNav
-                                        ? 1.0
-                                        : 0.0,
+                                    opacity: 1.0,
                                     child: Column(
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       crossAxisAlignment: CrossAxisAlignment.end,
@@ -494,6 +490,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                                 title: "Main",
                                                                 selectedIcon: Images.arrow,
                                                                 unSelectedIcon: Images.arrow,
+                                                                activeColor: const Color(0xFF16A34A),
                                                                 onTap: () {
                                                                   splashController.removeModule();
                                                                   Get.find<StoreController>().resetStoreData();
@@ -512,6 +509,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                             Images.logotransparent,
                                                             isSelected:
                                                             _pageIndex == 0,
+                                                            activeColor: const Color(0xFF16A34A),
                                                             onTap: () {     setState(() {
                                                               isBookingTab = false;
                                                             });
@@ -522,6 +520,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                           selectedIcon: Images.TaxiIcon,
                                                           unSelectedIcon: Images.TaxiIcon,
                                                           isSelected: _pageIndex == 2,
+                                                          activeColor: const Color(0xFF16A34A),
                                                           onTap: _showRideBanner
                                                               ? () {
                                                             debugPrint("🚕 Tapped. Status: $_rideStatus");
@@ -574,6 +573,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                                .favouriteUnselect,
                                                            isSelected:
                                                            _pageIndex == 1,
+                                                           activeColor: const Color(0xFF16A34A),
                                                            onTap: () =>
                                                                _setPage(1),
                                                          ),
@@ -584,6 +584,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                           selectedIcon: Images.ordersvg,
                                                           unSelectedIcon: Images.ordersvg,
                                                           isSelected:  _pageIndex == ((isBookingTab || _pageIndex == 6 ) ? 6 : 4),
+                                                          activeColor: const Color(0xFF16A34A),
                                                           onTap: () => _setPage(isBookingTab
                                                               ? 6 : 4) ,
                                                         ),
@@ -691,6 +692,7 @@ class DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _pharmacyNavItem(BuildContext context, String title, String selectedIcon, String unSelectedIcon, bool isSelected, VoidCallback onTap) {
+    final Color activeColor = const Color(0xFF16A34A);
     return InkWell(
       onTap: onTap,
       child: Column(
@@ -700,13 +702,13 @@ class DashboardScreenState extends State<DashboardScreen> {
             isSelected ? selectedIcon : unSelectedIcon,
             height: 25,
             width: 25,
-            color: isSelected ? Theme.of(context).primaryColor : Colors.grey,
+            color: isSelected ? activeColor : Colors.grey,
           ),
           const SizedBox(height: 4),
           Text(
             title,
             style: TextStyle(
-              color: isSelected ? Theme.of(context).primaryColor : Colors.grey,
+              color: isSelected ? activeColor : Colors.grey,
               fontSize: 12,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             ),

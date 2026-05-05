@@ -6,6 +6,7 @@ import 'package:handy_allinone/features/item/domain/models/item_model.dart';
 import 'package:handy_allinone/helper/price_converter.dart';
 import 'package:handy_allinone/util/dimensions.dart';
 import 'package:handy_allinone/util/styles.dart';
+import 'package:handy_allinone/common/widgets/custom_ink_well.dart';
 
 class PharmacyOrderAgainView extends StatelessWidget {
   const PharmacyOrderAgainView({super.key});
@@ -56,9 +57,12 @@ class PharmacyOrderAgainView extends StatelessWidget {
                 String? discountType = item.storeId != null ? item.discountType : 'percent';
                 double priceWithDiscount = PriceConverter.convertWithDiscount(item.price, discount, discountType)!;
                 
-                return Container(
-                  width: 230,
-                  margin: const EdgeInsets.only(right: Dimensions.paddingSizeDefault, bottom: 10),
+                return CustomInkWell(
+                  onTap: () => itemController.navigateToItemPage(item, context),
+                  radius: 12,
+                  child: Container(
+                    width: 230,
+                    margin: const EdgeInsets.only(right: Dimensions.paddingSizeDefault, bottom: 10),
                   padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
                   decoration: BoxDecoration(
                     color: Theme.of(context).cardColor,
@@ -111,15 +115,18 @@ class PharmacyOrderAgainView extends StatelessWidget {
                                   PriceConverter.convertPrice(priceWithDiscount),
                                   style: robotoBold.copyWith(fontSize: 16, color: Colors.black),
                                 ),
-                                Container(
-                                  height: 28,
-                                  width: 28,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFE8F5E9),
-                                    shape: BoxShape.circle,
-                                    border: Border.all(color: const Color(0xFF4CAF50).withValues(alpha: 0.2), width: 1),
+                                InkWell(
+                                  onTap: () => itemController.itemDirectlyAddToCart(item, context),
+                                  child: Container(
+                                    height: 28,
+                                    width: 28,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFE8F5E9),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: const Color(0xFF4CAF50).withValues(alpha: 0.2), width: 1),
+                                    ),
+                                    child: const Icon(Icons.add, color: Color(0xFF4CAF50), size: 18),
                                   ),
-                                  child: const Icon(Icons.add, color: Color(0xFF4CAF50), size: 18),
                                 ),
                               ],
                             ),
@@ -127,6 +134,7 @@ class PharmacyOrderAgainView extends StatelessWidget {
                         ),
                       ),
                     ],
+                  ),
                   ),
                 );
               },

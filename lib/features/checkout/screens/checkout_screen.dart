@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:intl/intl.dart';
+import 'package:handy_allinone/features/order/screens/prescription_upload_screen.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -357,21 +359,20 @@ class CheckoutScreenState extends State<CheckoutScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Module? module = Get
-        .find<SplashController>()
-        .configModel!
-        .moduleConfig!
-        .module;
-    bool guestCheckoutPermission = AuthHelper.isGuestLoggedIn() && Get
-        .find<SplashController>()
-        .configModel!
-        .guestCheckoutStatus!;
+    Module? module = Get.find<SplashController>().configModel!.moduleConfig!.module;
+    bool guestCheckoutPermission = AuthHelper.isGuestLoggedIn() && Get.find<SplashController>().configModel!.guestCheckoutStatus!;
     bool isLoggedIn = AuthHelper.isLoggedIn();
     bool isGuestLogIn = AuthHelper.isGuestLoggedIn();
+    bool isPharmacy = Get.find<SplashController>().module?.moduleType == 'pharmacy';
 
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor.withOpacity(0.001),
-      appBar: CustomAppBar3(title: 'checkout'.tr),
+      backgroundColor: isPharmacy ? const Color(0xFFFFFBF7) : Theme.of(context).primaryColor.withOpacity(0.001),
+      appBar: CustomAppBar3(
+        title: 'checkout'.tr,
+        bgcolor: isPharmacy ? const Color(0xFFFFFBF7) : Theme.of(context).primaryColor,
+        textcolor: isPharmacy ? Colors.black : Theme.of(context).cardColor,
+        iconcolor: isPharmacy ? Colors.black : Theme.of(context).cardColor,
+      ),
       endDrawer: const MenuDrawer(), endDrawerEnableOpenDragGesture: false,
       body: guestCheckoutPermission || AuthHelper.isLoggedIn() ?
       GetBuilder<
@@ -703,7 +704,11 @@ class CheckoutScreenState extends State<CheckoutScreen> {
             _setSinglePaymentActive();
 
             return (checkoutController.distance != null &&
-                checkoutController.store != null) ? (_cartList != null && _cartList!.isNotEmpty) ? Column(
+                checkoutController.store != null) ? (_cartList != null && _cartList!.isNotEmpty) ? isPharmacy ? _buildPharmacyCheckoutUI(
+              checkoutController, cartController, couponController, total, subTotal, discount, referralDiscount, 
+              orderAmount, maxCodOrderAmount, originalCharge, deliveryCharge, addressList, tomorrowClosed, 
+              todayClosed, isPrescriptionRequired, module, variations, itemDiscountPrice,
+            ) : Column(
               children: [
                 ResponsiveHelper.isDesktop(context) ? Container(
                   height: 64,
@@ -1351,268 +1356,255 @@ class CheckoutScreenState extends State<CheckoutScreen> {
         child: CustomButton(
             isLoading: checkoutController.isLoading,
             buttonText: 'place_order'.tr,
-            onPressed: checkoutController.acceptTerms ? () {
-
-
-              final city = checkoutController.cityController?.text.trim();
-              final state = checkoutController.stateController?.text.trim();
-              final country = checkoutController.countryController?.text.trim();
-              final pincode = checkoutController.pincodeController?.text.trim();
-              bool isAvailable = true;
-              DateTime scheduleStartDate = DateTime.now();
-              DateTime scheduleEndDate = DateTime.now();
-              bool isGuestLogIn = AuthHelper.isGuestLoggedIn();
-               bool hasSubscription = _cartList?.any((e) => e!.isSubscribed ?? false) ?? false;
-
-               if(!hasSubscription && (checkoutController.timeSlots == null || checkoutController.timeSlots!.isEmpty)) {
-                 isAvailable = false;
-               }else if (checkoutController.timeSlots != null && checkoutController.timeSlots!.isNotEmpty) {
-                 DateTime date = checkoutController.selectedDateSlot == 0 ? DateTime.now() : DateTime.now().add(const Duration(days: 1));
-                 DateTime startTime = checkoutController.timeSlots![checkoutController.selectedTimeSlot].startTime!;
-                 DateTime endTime = checkoutController.timeSlots![checkoutController.selectedTimeSlot].endTime!;
-                 scheduleStartDate = DateTime(date.year, date.month, date.day, startTime.hour, startTime.minute+1);
-                 scheduleEndDate = DateTime(date.year, date.month, date.day, endTime.hour, endTime.minute+1);
-                 if(_cartList != null){
-                   for (CartModel? cart in _cartList!) {
-                     if (!DateConverter.isAvailable(
-                       cart!.item!.availableTimeStarts, cart.item!.availableTimeEnds,
-                       time: checkoutController.store!.scheduleOrder! ? scheduleStartDate : null,
-                     ) && !DateConverter.isAvailable(
-                       cart.item!.availableTimeStarts, cart.item!.availableTimeEnds,
-                       time: checkoutController.store!.scheduleOrder! ? scheduleEndDate : null,
-                     )) {
-                       isAvailable = false;
-                       break;
-                     }
-                   }
-                 }
-               }
-
-               if(hasSubscription && isAvailable && checkoutController.dropTime != null) {
-                 for (CartModel? cart in _cartList!) {
-                   if (cart!.isSubscribed ?? false) {
-                     DateTime dt = DateFormat('HH:mm:ss').parse(checkoutController.dropTime!);
-                     if (!DateConverter.isAvailable(cart.item!.availableTimeStarts, cart.item!.availableTimeEnds, time: dt)) {
-                       isAvailable = false;
-                       break;
-                     }
-                   }
-                 }
-               }
-
-               if(isGuestLogIn && checkoutController.guestAddress == null && checkoutController.orderType != 'take_away') {
-                 showCustomSnackBar('please_setup_your_delivery_address_first'.tr);
-               } else if(isGuestLogIn && checkoutController.orderType == 'take_away' && guestContactPersonNameController.text.isEmpty) {
-                 showCustomSnackBar('please_enter_contact_person_name'.tr);
-               } else if(isGuestLogIn && checkoutController.orderType == 'take_away' && guestContactPersonNumberController.text.isEmpty) {
-                 showCustomSnackBar('please_enter_contact_person_number'.tr);
-               }else if(isGuestLogIn && checkoutController.orderType == 'take_away' && guestEmailController.text.isEmpty) {
-                 showCustomSnackBar('please_enter_contact_person_email'.tr);
-               }else if(isGuestLogIn && checkoutController.isCreateAccount && guestPasswordController.text.isEmpty) {
-                 showCustomSnackBar('enter_password'.tr);
-               }else if(isGuestLogIn && checkoutController.isCreateAccount && guestConfirmPasswordController.text.isEmpty) {
-                 showCustomSnackBar('enter_confirm_password'.tr);
-               }else if(isGuestLogIn && checkoutController.isCreateAccount && (guestPasswordController.text != guestConfirmPasswordController.text)) {
-                 showCustomSnackBar('confirm_password_does_not_matched'.tr);
-               }
-               ///newly added by ak
-               ///
-              else if (address.isEmpty &&
-                   checkoutController.orderType != 'take_away') {
-                 showCustomSnackBar('Please add address');
-               }
-               else if (address[checkoutController.addressIndex!].id==null &&
-                   checkoutController.orderType != 'take_away') {
-                 showCustomSnackBar('Please enter valid address');
-               }
-               // else if ((state == null || state.isEmpty) &&
-               //     checkoutController.orderType != 'take_away') {
-               //   showCustomSnackBar('Please enter state');
-               // }
-               // else if ((country == null || country.isEmpty) &&
-               //     checkoutController.orderType != 'take_away') {
-               //   showCustomSnackBar('Please enter country');
-               // }
-               // else if ((pincode == null || pincode.isEmpty) &&
-               //     checkoutController.orderType != 'take_away') {
-               //   showCustomSnackBar('Please enter pincode');
-               // }
-               else if(isPrescriptionRequired && checkoutController.pickedPrescriptions.isEmpty) {
-                 showCustomSnackBar('you_must_upload_prescription_for_this_order'.tr);
-               } else if(!_isCashOnDeliveryActive! && !_isDigitalPaymentActive! && !_isWalletActive) {
-                 showCustomSnackBar('no_payment_method_is_enabled'.tr);
-               }else if(checkoutController.paymentMethodIndex == -1) {
-                 if(ResponsiveHelper.isDesktop(context)){
-                   Get.dialog(Dialog(backgroundColor: Colors.transparent, child: PaymentMethodBottomSheet(
-                     isCashOnDeliveryActive: _isCashOnDeliveryActive!, isDigitalPaymentActive: _isDigitalPaymentActive!,
-                     isWalletActive: _isWalletActive, storeId: widget.storeId, totalPrice: total, isOfflinePaymentActive: _isOfflinePaymentActive,
-                   )));
-                 }else{
-                   showModalBottomSheet(
-                     context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
-                     builder: (con) => PaymentMethodBottomSheet(
-                       isCashOnDeliveryActive: _isCashOnDeliveryActive!, isDigitalPaymentActive: _isDigitalPaymentActive!,
-                       isWalletActive: _isWalletActive, storeId: widget.storeId, totalPrice: total, isOfflinePaymentActive: _isOfflinePaymentActive,
-                     ),
-                   );
-                 }
-               } else if(orderAmount < checkoutController.store!.minimumOrder! && widget.storeId == null) {
-                 showCustomSnackBar('${'minimum_order_amount_is'.tr} ${checkoutController.store!.minimumOrder}');
-               }else if(checkoutController.tipController.text.isNotEmpty && checkoutController.tipController.text != 'not_now' && double.parse(checkoutController.tipController.text.trim()) < 0) {
-                 showCustomSnackBar('tips_can_not_be_negative'.tr);
-               }else if((checkoutController.selectedDateSlot == 0 && todayClosed) || (checkoutController.selectedDateSlot == 1 && tomorrowClosed)) {
-                 showCustomSnackBar(Get.find<SplashController>().configModel!.moduleConfig!.module!.showRestaurantText!
-                     ? 'restaurant_is_closed'.tr : 'store_is_closed'.tr);
-               }else if(checkoutController.paymentMethodIndex == 0 && _isCashOnDeliveryActive! && maxCodOrderAmount != null && maxCodOrderAmount != 0 && (total > maxCodOrderAmount) && widget.storeId == null){
-                 showCustomSnackBar('${'you_cant_order_more_then'.tr} ${PriceConverter.convertPrice(maxCodOrderAmount)} ${'in_cash_on_delivery'.tr}');
-               }else if(checkoutController.paymentMethodIndex != 0 && widget.storeId != null){
-                 showCustomSnackBar('payment_method_is_not_available'.tr);
-               }else if (!hasSubscription && (checkoutController.timeSlots == null || checkoutController.timeSlots!.isEmpty)) {
-                 if(checkoutController.store!.scheduleOrder!) {
-                   showCustomSnackBar('select_a_time'.tr);
-                 }else {
-                   showCustomSnackBar(Get.find<SplashController>().configModel!.moduleConfig!.module!.showRestaurantText!
-                       ? 'restaurant_is_closed'.tr : 'store_is_closed'.tr);
-                 }
-               }else if (!isAvailable) {
-                 showCustomSnackBar('one_or_more_products_are_not_available_for_this_selected_time'.tr);
-              }else if (hasSubscription && (checkoutController.startDate == null || checkoutController.endDate == null)) {
-                showCustomSnackBar('please_select_subscription_date_range'.tr);
-              } else if (hasSubscription && checkoutController.dropTime == null) {
-                showCustomSnackBar('please_select_subscription_time'.tr);
-              }else if (checkoutController.orderType != 'take_away' && checkoutController.distance == -1 && deliveryCharge == -1) {
-                showCustomSnackBar('delivery_fee_not_set_yet'.tr);
-              }else if (widget.storeId != null && checkoutController.pickedPrescriptions.isEmpty) {
-                showCustomSnackBar('please_upload_your_prescription_images'.tr);
-              }else if (!checkoutController.acceptTerms) {
-                showCustomSnackBar('please_accept_privacy_policy_trams_conditions_refund_policy_first'.tr);
-              }
-              else {
-
-                AddressModel? finalAddress = isGuestLogIn ? checkoutController.guestAddress : address[checkoutController.addressIndex!];
-
-                if(isGuestLogIn && checkoutController.orderType == 'take_away') {
-                  String number = checkoutController.countryDialCode! + guestContactPersonNumberController.text;
-                  finalAddress = AddressModel(contactPersonName: guestContactPersonNameController.text, contactPersonNumber: number,
-                    address: AddressHelper.getUserAddressFromSharedPref()!.address!, latitude: AddressHelper.getUserAddressFromSharedPref()!.latitude,
-                    longitude: AddressHelper.getUserAddressFromSharedPref()!.longitude, zoneId: AddressHelper.getUserAddressFromSharedPref()!.zoneId,
-                    email: guestEmailController.text,
-                  );
-                }
-
-                if(!isGuestLogIn && finalAddress!.contactPersonNumber == 'null'){
-                  finalAddress.contactPersonNumber = Get.find<ProfileController>().userInfoModel!.phone;
-                }
-
-                if(widget.storeId == null){
-
-                  List<OnlineCart> carts = [];
-                  for (int index = 0; index < _cartList!.length; index++) {
-                    CartModel cart = _cartList![index]!;
-                    List<int?> addOnIdList = [];
-                    List<int?> addOnQtyList = [];
-                    for (var addOn in cart.addOnIds!) {
-                      addOnIdList.add(addOn.id);
-                      addOnQtyList.add(addOn.quantity);
-                    }
-
-                    List<OrderVariation> variations = [];
-                    if(Get.find<SplashController>().getModuleConfig(cart.item!.moduleType).newVariation!) {
-                      for(int i=0; i<cart.item!.foodVariations!.length; i++) {
-                        if(cart.foodVariations![i].contains(true)) {
-                          variations.add(OrderVariation(name: cart.item!.foodVariations![i].name, values: OrderVariationValue(label: [])));
-                          for(int j=0; j<cart.item!.foodVariations![i].variationValues!.length; j++) {
-                            if(cart.foodVariations![i][j]!) {
-                              variations[variations.length-1].values!.label!.add(cart.item!.foodVariations![i].variationValues![j].level);
-                            }
-                          }
-                        }
-                      }
-                    }
-                     carts.add(OnlineCart(
-                       cart.id, cart.item!.id, cart.isCampaign! ? cart.item!.id : null,
-                       cart.discountedPrice.toString(), '',
-                       Get.find<SplashController>().getModuleConfig(cart.item!.moduleType).newVariation! ? null : cart.variation,
-                       Get.find<SplashController>().getModuleConfig(cart.item!.moduleType).newVariation! ? variations : null,
-                       cart.quantity, addOnIdList, cart.addOns, addOnQtyList, 'Item', cart.isSubscribed ?? false, itemType: "App\\Models\\Item",
-                     ));
-                  }
-
-                  for (var cart in _cartList!) {
-                    print("---- Checkout item final check: ${cart?.item?.name}, isSubscribed: ${cart?.isSubscribed}");
-                  }
-                  print("---- Final order hasSubscription: $hasSubscription");
-
-                  if(hasSubscription && (checkoutController.startDate == null || checkoutController.endDate == null || checkoutController.dropTime == null)) {
-                    showCustomSnackBar('please_select_subscription_date_and_time'.tr);
-                    return;
-                  }
-
-                  String? city = finalAddress!.city;
-                  String? state = finalAddress.state;
-                  String? country = finalAddress.country;
-                  String? pincode = finalAddress.pincode;
-
-                  PlaceOrderBodyModel placeOrderBody = PlaceOrderBodyModel(
-                    cart: carts, couponDiscountAmount: Get.find<CouponController>().discount, distance: checkoutController.distance,
-                    scheduleAt: !checkoutController.store!.scheduleOrder! ? null : (checkoutController.selectedDateSlot == 0
-                        && checkoutController.selectedTimeSlot == 0) ? null : DateConverter.dateToDateAndTime(scheduleEndDate),
-                    orderAmount: total, orderNote: checkoutController.noteController.text, orderType: checkoutController.orderType,
-                    paymentMethod: checkoutController.paymentMethodIndex == 0 ? 'cash_on_delivery'
-                        : checkoutController.paymentMethodIndex == 1 ? 'wallet'
-                        : checkoutController.paymentMethodIndex == 2 ? 'digital_payment' : 'offline_payment',
-                    couponCode: (Get.find<CouponController>().discount! > 0 || (Get.find<CouponController>().coupon != null
-                        && Get.find<CouponController>().freeDelivery)) ? Get.find<CouponController>().coupon!.code : null,
-                    storeId: _cartList![0]!.item!.storeId,
-                    address: finalAddress!.address, latitude: finalAddress.latitude, longitude: finalAddress.longitude,
-                    senderZoneId: null, addressType: finalAddress.addressType,
-                    contactPersonName: finalAddress.contactPersonName ?? '${Get.find<ProfileController>().userInfoModel!.fName} '
-                        '${Get.find<ProfileController>().userInfoModel!.lName}',
-                    contactPersonNumber: finalAddress.contactPersonNumber ?? Get.find<ProfileController>().userInfoModel!.phone,
-                    streetNumber: isGuestLogIn ? finalAddress.streetNumber??'' : checkoutController.streetNumberController.text.trim(),
-                    house: isGuestLogIn ? finalAddress.house??'' : checkoutController.houseController.text.trim(),
-                    floor: isGuestLogIn ? finalAddress.floor??'' : checkoutController.floorController.text.trim(),
-                    discountAmount: discount, taxAmount: tax, receiverDetails: null, parcelCategoryId: null,
-                    chargePayer: null, dmTips: (checkoutController.orderType == 'take_away' || checkoutController.tipController.text == 'not_now') ? '' : checkoutController.tipController.text.trim(),
-                    cutlery: Get.find<CartController>().addCutlery ? 1 : 0,
-                    unavailableItemNote: Get.find<CartController>().notAvailableIndex != -1 ? Get.find<CartController>().notAvailableList[Get.find<CartController>().notAvailableIndex] : '',
-                    deliveryInstruction: checkoutController.selectedInstruction != -1 ? AppConstants.deliveryInstructionList[checkoutController.selectedInstruction] : '',
-                    partialPayment: checkoutController.isPartialPay ? 1 : 0, guestId: isGuestLogIn ? int.parse(AuthHelper.getGuestId()) : 0,
-                    isBuyNow: widget.fromCart ? 0 : 1, guestEmail: isGuestLogIn ? finalAddress.email : null,
-                    extraPackagingAmount: Get.find<CartController>().needExtraPackage ? checkoutController.store!.extraPackagingAmount : 0,
-                    createNewUser: checkoutController.isCreateAccount ? 1 : 0, password: guestPasswordController.text,
-                    otherchargesamount:checkoutController.store?.otherchargeenabled==true? checkoutController.store?.otherchargeamount??0.0:0.0,
-                    otherchargeslabel: checkoutController.store?.otherchargeenabled==true? checkoutController.store?.otherchargelabel??"":"",
-                    city:city,
-                    state: state,
-                    country: country,
-                    pincode: pincode,
-                    isSubscribed: hasSubscription,
-                    startDate: checkoutController.startDate,
-                    endDate: checkoutController.endDate,
-                    dropTime: checkoutController.dropTime,
-                  );
-                  if(checkoutController.paymentMethodIndex == 3){
-                    Get.toNamed(RouteHelper.getOfflinePaymentScreen(
-                      placeOrderBody: placeOrderBody, zoneId: checkoutController.store!.zoneId!, total: checkoutController.viewTotalPrice!,
-                      maxCodOrderAmount: maxCodOrderAmount, fromCart: widget.fromCart, isCodActive: _isCashOnDeliveryActive, forParcel: false,
-                    ));
-                  } else {
-                    checkoutController.placeOrder(placeOrderBody, checkoutController.store!.zoneId, total, maxCodOrderAmount, widget.fromCart, _isCashOnDeliveryActive!, checkoutController.pickedPrescriptions);
-                  }
-                }else{
-                  checkoutController.placePrescriptionOrder(
-                    widget.storeId, checkoutController.store!.zoneId, checkoutController.distance,
-                    finalAddress!.address!, finalAddress.longitude!, finalAddress.latitude!, checkoutController.noteController.text,
-                    checkoutController.pickedPrescriptions, (checkoutController.orderType == 'take_away' || checkoutController.tipController.text == 'not_now')
-                      ? '' : checkoutController.tipController.text.trim(), checkoutController.selectedInstruction != -1
-                      ? AppConstants.deliveryInstructionList[checkoutController.selectedInstruction] : '', 0, 0, widget.fromCart, _isCashOnDeliveryActive!,
-                  );
-                }
-              }
-            } : null),
+            onPressed: checkoutController.acceptTerms ? () => _onPlaceOrderPressed(
+              checkoutController, todayClosed, tomorrowClosed, orderAmount, deliveryCharge, tax, discount, total, maxCodOrderAmount, isPrescriptionRequired,
+            ) : null),
       ),
     );
+  }
+
+  void _onPlaceOrderPressed(CheckoutController checkoutController, bool todayClosed, bool tomorrowClosed,
+      double orderAmount, double? deliveryCharge, double tax, double? discount, double total, double? maxCodOrderAmount, bool isPrescriptionRequired) {
+
+    final city = checkoutController.cityController?.text.trim();
+    final state = checkoutController.stateController?.text.trim();
+    final country = checkoutController.countryController?.text.trim();
+    final pincode = checkoutController.pincodeController?.text.trim();
+    bool isAvailable = true;
+    DateTime scheduleStartDate = DateTime.now();
+    DateTime scheduleEndDate = DateTime.now();
+    bool isGuestLogIn = AuthHelper.isGuestLoggedIn();
+    bool hasSubscription = _cartList?.any((e) => e!.isSubscribed ?? false) ?? false;
+
+    if(!hasSubscription && (checkoutController.timeSlots == null || checkoutController.timeSlots!.isEmpty)) {
+      isAvailable = false;
+    }else if (checkoutController.timeSlots != null && checkoutController.timeSlots!.isNotEmpty) {
+      DateTime date = checkoutController.selectedDateSlot == 0 ? DateTime.now() : DateTime.now().add(const Duration(days: 1));
+      DateTime startTime = checkoutController.timeSlots![checkoutController.selectedTimeSlot].startTime!;
+      DateTime endTime = checkoutController.timeSlots![checkoutController.selectedTimeSlot].endTime!;
+      scheduleStartDate = DateTime(date.year, date.month, date.day, startTime.hour, startTime.minute+1);
+      scheduleEndDate = DateTime(date.year, date.month, date.day, endTime.hour, endTime.minute+1);
+      if(_cartList != null){
+        for (CartModel? cart in _cartList!) {
+          if (!DateConverter.isAvailable(
+            cart!.item!.availableTimeStarts, cart.item!.availableTimeEnds,
+            time: checkoutController.store!.scheduleOrder! ? scheduleStartDate : null,
+          ) && !DateConverter.isAvailable(
+            cart.item!.availableTimeStarts, cart.item!.availableTimeEnds,
+            time: checkoutController.store!.scheduleOrder! ? scheduleEndDate : null,
+          )) {
+            isAvailable = false;
+            break;
+          }
+        }
+      }
+    }
+
+    if(hasSubscription && isAvailable && checkoutController.dropTime != null) {
+      for (CartModel? cart in _cartList!) {
+        if (cart!.isSubscribed ?? false) {
+          DateTime dt = DateFormat('HH:mm:ss').parse(checkoutController.dropTime!);
+          if (!DateConverter.isAvailable(cart.item!.availableTimeStarts, cart.item!.availableTimeEnds, time: dt)) {
+            isAvailable = false;
+            break;
+          }
+        }
+      }
+    }
+
+    if(isGuestLogIn && checkoutController.guestAddress == null && checkoutController.orderType != 'take_away') {
+      showCustomSnackBar('please_setup_your_delivery_address_first'.tr);
+    } else if(isGuestLogIn && checkoutController.orderType == 'take_away' && guestContactPersonNameController.text.isEmpty) {
+      showCustomSnackBar('please_enter_contact_person_name'.tr);
+    } else if(isGuestLogIn && checkoutController.orderType == 'take_away' && guestContactPersonNumberController.text.isEmpty) {
+      showCustomSnackBar('please_enter_contact_person_number'.tr);
+    }else if(isGuestLogIn && checkoutController.orderType == 'take_away' && guestEmailController.text.isEmpty) {
+      showCustomSnackBar('please_enter_contact_person_email'.tr);
+    }else if(isGuestLogIn && checkoutController.isCreateAccount && guestPasswordController.text.isEmpty) {
+      showCustomSnackBar('enter_password'.tr);
+    }else if(isGuestLogIn && checkoutController.isCreateAccount && guestConfirmPasswordController.text.isEmpty) {
+      showCustomSnackBar('enter_confirm_password'.tr);
+    }else if(isGuestLogIn && checkoutController.isCreateAccount && (guestPasswordController.text != guestConfirmPasswordController.text)) {
+      showCustomSnackBar('confirm_password_does_not_matched'.tr);
+    }
+    ///newly added by ak
+    ///
+    else if (address.isEmpty &&
+        checkoutController.orderType != 'take_away') {
+      showCustomSnackBar('Please add address');
+    }
+    else if (address[checkoutController.addressIndex!].id==null &&
+        checkoutController.orderType != 'take_away') {
+      showCustomSnackBar('Please enter valid address');
+    }
+    else if(isPrescriptionRequired && checkoutController.pickedPrescriptions.isEmpty) {
+      showCustomSnackBar('you_must_upload_prescription_for_this_order'.tr);
+    } else if(!_isCashOnDeliveryActive! && !_isDigitalPaymentActive! && !_isWalletActive) {
+      showCustomSnackBar('no_payment_method_is_enabled'.tr);
+    }else if(checkoutController.paymentMethodIndex == -1) {
+      if(ResponsiveHelper.isDesktop(context)){
+        Get.dialog(Dialog(backgroundColor: Colors.transparent, child: PaymentMethodBottomSheet(
+          isCashOnDeliveryActive: _isCashOnDeliveryActive!, isDigitalPaymentActive: _isDigitalPaymentActive!,
+          isWalletActive: _isWalletActive, storeId: widget.storeId, totalPrice: total, isOfflinePaymentActive: _isOfflinePaymentActive,
+        )));
+      }else{
+        showModalBottomSheet(
+          context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
+          builder: (con) => PaymentMethodBottomSheet(
+            isCashOnDeliveryActive: _isCashOnDeliveryActive!, isDigitalPaymentActive: _isDigitalPaymentActive!,
+            isWalletActive: _isWalletActive, storeId: widget.storeId, totalPrice: total, isOfflinePaymentActive: _isOfflinePaymentActive,
+          ),
+        );
+      }
+    } else if(orderAmount < checkoutController.store!.minimumOrder! && widget.storeId == null) {
+      showCustomSnackBar('${'minimum_order_amount_is'.tr} ${checkoutController.store!.minimumOrder}');
+    }else if(checkoutController.tipController.text.isNotEmpty && checkoutController.tipController.text != 'not_now' && double.parse(checkoutController.tipController.text.trim()) < 0) {
+      showCustomSnackBar('tips_can_not_be_negative'.tr);
+    }else if((checkoutController.selectedDateSlot == 0 && todayClosed) || (checkoutController.selectedDateSlot == 1 && tomorrowClosed)) {
+      showCustomSnackBar(Get.find<SplashController>().configModel!.moduleConfig!.module!.showRestaurantText!
+          ? 'restaurant_is_closed'.tr : 'store_is_closed'.tr);
+    }else if(checkoutController.paymentMethodIndex == 0 && _isCashOnDeliveryActive! && maxCodOrderAmount != null && maxCodOrderAmount != 0 && (total > maxCodOrderAmount) && widget.storeId == null){
+      showCustomSnackBar('${'you_cant_order_more_then'.tr} ${PriceConverter.convertPrice(maxCodOrderAmount)} ${'in_cash_on_delivery'.tr}');
+    }else if(checkoutController.paymentMethodIndex != 0 && widget.storeId != null){
+      showCustomSnackBar('payment_method_is_not_available'.tr);
+    }else if (!hasSubscription && (checkoutController.timeSlots == null || checkoutController.timeSlots!.isEmpty)) {
+      if(checkoutController.store!.scheduleOrder!) {
+        showCustomSnackBar('select_a_time'.tr);
+      }else {
+        showCustomSnackBar(Get.find<SplashController>().configModel!.moduleConfig!.module!.showRestaurantText!
+            ? 'restaurant_is_closed'.tr : 'store_is_closed'.tr);
+      }
+    }else if (!isAvailable) {
+      showCustomSnackBar('one_or_more_products_are_not_available_for_this_selected_time'.tr);
+    }else if (hasSubscription && (checkoutController.startDate == null || checkoutController.endDate == null)) {
+      showCustomSnackBar('please_select_subscription_date_range'.tr);
+    } else if (hasSubscription && checkoutController.dropTime == null) {
+      showCustomSnackBar('please_select_subscription_time'.tr);
+    }else if (checkoutController.orderType != 'take_away' && checkoutController.distance == -1 && deliveryCharge == -1) {
+      showCustomSnackBar('delivery_fee_not_set_yet'.tr);
+    }else if (widget.storeId != null && checkoutController.pickedPrescriptions.isEmpty) {
+      showCustomSnackBar('please_upload_your_prescription_images'.tr);
+    }else if (!checkoutController.acceptTerms) {
+      showCustomSnackBar('please_accept_privacy_policy_trams_conditions_refund_policy_first'.tr);
+    }
+    else {
+
+      AddressModel? finalAddress = isGuestLogIn ? checkoutController.guestAddress : address[checkoutController.addressIndex!];
+
+      if(isGuestLogIn && checkoutController.orderType == 'take_away') {
+        String number = checkoutController.countryDialCode! + guestContactPersonNumberController.text;
+        finalAddress = AddressModel(contactPersonName: guestContactPersonNameController.text, contactPersonNumber: number,
+          address: AddressHelper.getUserAddressFromSharedPref()!.address!, latitude: AddressHelper.getUserAddressFromSharedPref()!.latitude,
+          longitude: AddressHelper.getUserAddressFromSharedPref()!.longitude, zoneId: AddressHelper.getUserAddressFromSharedPref()!.zoneId,
+          email: guestEmailController.text,
+        );
+      }
+
+      if(!isGuestLogIn && finalAddress!.contactPersonNumber == 'null'){
+        finalAddress.contactPersonNumber = Get.find<ProfileController>().userInfoModel!.phone;
+      }
+
+      if(widget.storeId == null){
+
+        List<OnlineCart> carts = [];
+        for (int index = 0; index < _cartList!.length; index++) {
+          CartModel cart = _cartList![index]!;
+          List<int?> addOnIdList = [];
+          List<int?> addOnQtyList = [];
+          for (var addOn in cart.addOnIds!) {
+            addOnIdList.add(addOn.id);
+            addOnQtyList.add(addOn.quantity);
+          }
+
+          List<OrderVariation> variations = [];
+          if(Get.find<SplashController>().getModuleConfig(cart.item!.moduleType).newVariation!) {
+            for(int i=0; i<cart.item!.foodVariations!.length; i++) {
+              if(cart.foodVariations![i].contains(true)) {
+                variations.add(OrderVariation(name: cart.item!.foodVariations![i].name, values: OrderVariationValue(label: [])));
+                for(int j=0; j<cart.item!.foodVariations![i].variationValues!.length; j++) {
+                  if(cart.foodVariations![i][j]!) {
+                    variations[variations.length-1].values!.label!.add(cart.item!.foodVariations![i].variationValues![j].level);
+                  }
+                }
+              }
+            }
+          }
+          carts.add(OnlineCart(
+            cart.id, cart.item!.id, cart.isCampaign! ? cart.item!.id : null,
+            cart.discountedPrice.toString(), '',
+            Get.find<SplashController>().getModuleConfig(cart.item!.moduleType).newVariation! ? null : cart.variation,
+            Get.find<SplashController>().getModuleConfig(cart.item!.moduleType).newVariation! ? variations : null,
+            cart.quantity, addOnIdList, cart.addOns, addOnQtyList, 'Item', cart.isSubscribed ?? false, itemType: "App\\Models\\Item",
+          ));
+        }
+
+        if(hasSubscription && (checkoutController.startDate == null || checkoutController.endDate == null || checkoutController.dropTime == null)) {
+          showCustomSnackBar('please_select_subscription_date_and_time'.tr);
+          return;
+        }
+
+        String? city = finalAddress!.city;
+        String? state = finalAddress.state;
+        String? country = finalAddress.country;
+        String? pincode = finalAddress.pincode;
+
+        PlaceOrderBodyModel placeOrderBody = PlaceOrderBodyModel(
+          cart: carts, couponDiscountAmount: Get.find<CouponController>().discount, distance: checkoutController.distance,
+          scheduleAt: !checkoutController.store!.scheduleOrder! ? null : (checkoutController.selectedDateSlot == 0
+              && checkoutController.selectedTimeSlot == 0) ? null : DateConverter.dateToDateAndTime(scheduleEndDate),
+          orderAmount: total, orderNote: checkoutController.noteController.text, orderType: checkoutController.orderType,
+          paymentMethod: checkoutController.paymentMethodIndex == 0 ? 'cash_on_delivery'
+              : checkoutController.paymentMethodIndex == 1 ? 'wallet'
+              : checkoutController.paymentMethodIndex == 2 ? 'digital_payment' : 'offline_payment',
+          couponCode: (Get.find<CouponController>().discount! > 0 || (Get.find<CouponController>().coupon != null
+              && Get.find<CouponController>().freeDelivery)) ? Get.find<CouponController>().coupon!.code : null,
+          storeId: _cartList![0]!.item!.storeId,
+          address: finalAddress!.address, latitude: finalAddress.latitude, longitude: finalAddress.longitude,
+          senderZoneId: null, addressType: finalAddress.addressType,
+          contactPersonName: finalAddress.contactPersonName ?? '${Get.find<ProfileController>().userInfoModel!.fName} '
+              '${Get.find<ProfileController>().userInfoModel!.lName}',
+          contactPersonNumber: finalAddress.contactPersonNumber ?? Get.find<ProfileController>().userInfoModel!.phone,
+          streetNumber: isGuestLogIn ? finalAddress.streetNumber??'' : checkoutController.streetNumberController.text.trim(),
+          house: isGuestLogIn ? finalAddress.house??'' : checkoutController.houseController.text.trim(),
+          floor: isGuestLogIn ? finalAddress.floor??'' : checkoutController.floorController.text.trim(),
+          discountAmount: discount, taxAmount: tax, receiverDetails: null, parcelCategoryId: null,
+          chargePayer: null, dmTips: (checkoutController.orderType == 'take_away' || checkoutController.tipController.text == 'not_now') ? '' : checkoutController.tipController.text.trim(),
+          cutlery: Get.find<CartController>().addCutlery ? 1 : 0,
+          unavailableItemNote: Get.find<CartController>().notAvailableIndex != -1 ? Get.find<CartController>().notAvailableList[Get.find<CartController>().notAvailableIndex] : '',
+          deliveryInstruction: checkoutController.selectedInstruction != -1 ? AppConstants.deliveryInstructionList[checkoutController.selectedInstruction] : '',
+          partialPayment: checkoutController.isPartialPay ? 1 : 0, guestId: isGuestLogIn ? int.parse(AuthHelper.getGuestId()) : 0,
+          isBuyNow: widget.fromCart ? 0 : 1, guestEmail: isGuestLogIn ? finalAddress.email : null,
+          extraPackagingAmount: Get.find<CartController>().needExtraPackage ? checkoutController.store!.extraPackagingAmount : 0,
+          createNewUser: checkoutController.isCreateAccount ? 1 : 0, password: guestPasswordController.text,
+          otherchargesamount:checkoutController.store?.otherchargeenabled==true? checkoutController.store?.otherchargeamount??0.0:0.0,
+          otherchargeslabel: checkoutController.store?.otherchargeenabled==true? checkoutController.store?.otherchargelabel??"":"",
+          city:city,
+          state: state,
+          country: country,
+          pincode: pincode,
+          isSubscribed: hasSubscription,
+          startDate: checkoutController.startDate,
+          endDate: checkoutController.endDate,
+          dropTime: checkoutController.dropTime,
+        );
+        if(checkoutController.paymentMethodIndex == 3){
+          Get.toNamed(RouteHelper.getOfflinePaymentScreen(
+            placeOrderBody: placeOrderBody, zoneId: checkoutController.store!.zoneId!, total: checkoutController.viewTotalPrice!,
+            maxCodOrderAmount: maxCodOrderAmount, fromCart: widget.fromCart, isCodActive: _isCashOnDeliveryActive, forParcel: false,
+          ));
+        } else {
+          checkoutController.placeOrder(placeOrderBody, checkoutController.store!.zoneId, total, maxCodOrderAmount, widget.fromCart, _isCashOnDeliveryActive!, checkoutController.pickedPrescriptions);
+        }
+      }else{
+        checkoutController.placePrescriptionOrder(
+          widget.storeId, checkoutController.store!.zoneId, checkoutController.distance,
+          finalAddress!.address!, finalAddress.longitude!, finalAddress.latitude!, checkoutController.noteController.text,
+          checkoutController.pickedPrescriptions, (checkoutController.orderType == 'take_away' || checkoutController.tipController.text == 'not_now')
+            ? '' : checkoutController.tipController.text.trim(), checkoutController.selectedInstruction != -1
+            ? AppConstants.deliveryInstructionList[checkoutController.selectedInstruction] : '', 0, 0, widget.fromCart, _isCashOnDeliveryActive!,
+        );
+      }
+    }
   }
 
 
@@ -2213,6 +2205,338 @@ class CheckoutScreenState extends State<CheckoutScreen> {
       }
     }
     return PriceConverter.toFixed(referralDiscount);
+  }
+
+  Widget _buildPharmacyCheckoutUI(
+    CheckoutController checkoutController, CartController cartController, CouponController couponController,
+    double total, double subTotal, double? discount, double referralDiscount, double orderAmount,
+    double? maxCodOrderAmount, double originalCharge, double deliveryCharge, List<DropdownItem<int>> addressList,
+    bool tomorrowClosed, bool todayClosed, bool isPrescriptionRequired, Module? module, double variations,
+    double? itemDiscountPrice,
+  ) {
+    bool isDesktop = ResponsiveHelper.isDesktop(context);
+
+    return Column(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            controller: _scrollController,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Center(
+              child: SizedBox(
+                width: Dimensions.webMaxWidth,
+                child: Column(
+                  children: [
+                    // Pharmacy Items List
+                    ListView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: cartController.cartList.length,
+                      itemBuilder: (context, index) {
+                        return Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, spreadRadius: 1)],
+                            border: Border.all(color: Colors.grey.shade100),
+                          ),
+                          child: CartItemWidget(
+                            fromCheckout: true,
+                            cart: cartController.cartList[index],
+                            cartIndex: index,
+                            addOns: cartController.addOnsList[index],
+                            isAvailable: cartController.availableList[index],
+                            showDivider: index != cartController.cartList.length - 1,
+                          ),
+                        );
+                      },
+                    ),
+
+
+
+                    // Delivery Address Card
+                    Container(
+                      margin: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10)],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('Deliver to', style: robotoBold.copyWith(fontSize: 16)),
+                              InkWell(
+                                onTap: () => Get.toNamed(RouteHelper.getAccessLocationRoute('checkout')),
+                                child: Text('Change', style: robotoBold.copyWith(color: const Color(0xFF16A34A), fontSize: 13)),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              const Icon(Icons.location_on_outlined, color: Colors.grey, size: 20),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  AddressHelper.getUserAddressFromSharedPref()?.address ?? 'Select Address',
+                                  style: robotoRegular.copyWith(fontSize: 14, color: Colors.grey.shade700),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Prescription Section (if required)
+                    if (isPrescriptionRequired)
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFEF9C3).withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: const Color(0xFFFEF08A)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.description_outlined, color: Color(0xFF854D0E), size: 20),
+                                const SizedBox(width: 8),
+                                Text('Prescription Required', style: robotoBold.copyWith(fontSize: 14, color: const Color(0xFF854D0E))),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                             Text('This order contains items that require a valid medical prescription.', 
+                              style: robotoRegular.copyWith(fontSize: 12, color: const Color(0xFF854D0E))),
+                            const SizedBox(height: 12),
+
+                            if(checkoutController.pickedPrescriptions.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: SizedBox(
+                                  height: 60,
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: checkoutController.pickedPrescriptions.length,
+                                    itemBuilder: (context, index) {
+                                      return Container(
+                                        margin: const EdgeInsets.only(right: 8),
+                                        width: 60,
+                                        height: 60,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(color: const Color(0xFFFEF08A)),
+                                          image: DecorationImage(
+                                            image: FileImage(File(checkoutController.pickedPrescriptions[index].path)),
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                            CustomButton(
+                              buttonText: 'Upload Prescription',
+                              onPressed: () => Get.to(() => const PrescriptionUploadScreen()),
+                              radius: 8,
+                              height: 35,
+                              color: const Color(0xFF854D0E),
+                              fontSize: 12,
+                            ),
+                          ],
+                        ),
+                      ),
+
+                    // Bill Details Card
+                    Container(
+                      margin: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10)],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Bill Details', style: robotoBold.copyWith(fontSize: 16)),
+                          const SizedBox(height: 20),
+                          _buildBillRow('Item Total', PriceConverter.convertPrice(subTotal)),
+                          const SizedBox(height: 12),
+                          _buildBillRow('Delivery Fee', deliveryCharge == 0 ? 'FREE' : PriceConverter.convertPrice(deliveryCharge), isGreen: deliveryCharge == 0),
+                          if (discount! > 0) ...[
+                            const SizedBox(height: 12),
+                            _buildBillRow('Discount', '- ${PriceConverter.convertPrice(discount)}', isGreen: true),
+                          ],
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            child: Divider(height: 1, color: Color(0xFFF1F5F9)),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('Total Amount', style: robotoBold.copyWith(fontSize: 18)),
+                              PriceConverter.convertAnimationPrice(
+                                total,
+                                textStyle: robotoBold.copyWith(fontSize: 18, color: const Color(0xFF16A34A)),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Payment Method Section
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10)],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('Payment Method', style: robotoBold.copyWith(fontSize: 16)),
+                              if (checkoutController.paymentMethodIndex != -1)
+                                TextButton(
+                                  onPressed: () => _onPlaceOrderPressed(checkoutController, todayClosed, tomorrowClosed, orderAmount, deliveryCharge, checkoutController.orderTax!, discount, total, maxCodOrderAmount, isPrescriptionRequired),
+                                  child: Text('Change', style: robotoMedium.copyWith(color: const Color(0xFF16A34A))),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          if (checkoutController.paymentMethodIndex == -1)
+                            InkWell(
+                              onTap: () => _onPlaceOrderPressed(checkoutController, todayClosed, tomorrowClosed, orderAmount, deliveryCharge, checkoutController.orderTax!, discount, total, maxCodOrderAmount, isPrescriptionRequired),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF1F5F9),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.account_balance_wallet_outlined, color: Color(0xFF64748B)),
+                                    const SizedBox(width: 12),
+                                    Text('Select Payment Method', style: robotoMedium.copyWith(color: const Color(0xFF64748B))),
+                                    const Spacer(),
+                                    const Icon(Icons.chevron_right, color: Color(0xFF64748B)),
+                                  ],
+                                ),
+                              ),
+                            )
+                          else
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF0FDF4),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: const Color(0xFFDCFCE7)),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    checkoutController.paymentMethodIndex == 0 ? Icons.money : 
+                                    checkoutController.paymentMethodIndex == 1 ? Icons.account_balance_wallet : 
+                                    checkoutController.paymentMethodIndex == 2 ? Icons.payment : Icons.offline_pin,
+                                    color: const Color(0xFF16A34A),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    checkoutController.paymentMethodIndex == 0 ? 'Cash on Delivery' : 
+                                    checkoutController.paymentMethodIndex == 1 ? 'Wallet' : 
+                                    checkoutController.paymentMethodIndex == 2 ? checkoutController.digitalPaymentName ?? 'Digital Payment' : 'Offline Payment',
+                                    style: robotoMedium.copyWith(color: const Color(0xFF16A34A)),
+                                  ),
+                                  const Spacer(),
+                                  const Icon(Icons.check_circle, color: const Color(0xFF16A34A), size: 20),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 100), // Space for sticky button
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+
+        // Sticky Action Bar
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, -5))],
+          ),
+          child: SafeArea(
+            child: Row(
+              children: [
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Total Amount', style: robotoRegular.copyWith(fontSize: 12, color: Colors.grey)),
+                    PriceConverter.convertAnimationPrice(total, textStyle: robotoBold.copyWith(fontSize: 20, color: const Color(0xFF16A34A))),
+                  ],
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: CustomButton(
+                    buttonText: widget.fromCart ? 'Proceed to Payment' : 'Place Order',
+                    onPressed: checkoutController.acceptTerms ? () => _onPlaceOrderPressed(
+                      checkoutController, todayClosed, tomorrowClosed, orderAmount, deliveryCharge,
+                      checkoutController.orderTax!, discount, total, maxCodOrderAmount, isPrescriptionRequired,
+                    ) : null,
+                    radius: 12,
+                    height: 50,
+                    color: const Color(0xFF16A34A),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBillRow(String label, String value, {bool isGreen = false}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: robotoRegular.copyWith(fontSize: 14, color: Colors.grey.shade600)),
+        Text(
+          value,
+          style: robotoBold.copyWith(
+            fontSize: 14,
+            color: isGreen ? const Color(0xFF16A34A) : Colors.black,
+          ),
+        ),
+      ],
+    );
   }
 
   Future<void> showCashBackSnackBar() async {

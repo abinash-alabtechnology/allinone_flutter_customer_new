@@ -86,6 +86,7 @@ import 'package:handy_allinone/features/update/screens/update_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:handy_allinone/features/wallet/screens/wallet_screen.dart';
+import 'package:handy_allinone/features/order/screens/prescription_upload_screen.dart';
 
 import '../features/razorpay-ak/razor_native_pay.dart';
 
@@ -148,6 +149,7 @@ class RouteHelper {
   static const String delivarTracking = '/delivar-tracking';
   static const String deliveryQuotationList = '/delivery-quotation-list';
   static const String quotationImage = '/quotation-image';
+  static const String prescriptionUpload = '/prescription-upload';
 
   static const String offlinePaymentScreen = '/offline-payment-screen';
   static const String flashSaleDetailsScreen = '/flash-sale-details-screen';
@@ -182,6 +184,7 @@ class RouteHelper {
     }
     return '$splash?data=$data';
   }
+  static String getPrescriptionUploadRoute() => prescriptionUpload;
   static String getLanguageRoute(String page) => '$language?page=$page';
   static String getOnBoardingRoute() => onBoarding;
   static String getSignInRoute(String page) => '$signIn?page=$page';
@@ -414,7 +417,7 @@ class RouteHelper {
       resetToken: Get.parameters['token'], number: Get.parameters['phone'], fromPasswordChange: Get.parameters['page'] == 'password-change',
       email: Get.parameters['email'],
     )),
-    GetPage(name: search,  customTransition: ZoomInTransition(),
+    GetPage(name: search,  transition: Transition.fadeIn,
        page: () => getRoute(SearchScreen(queryText: Get.parameters['query']))),
     GetPage(name: store,  customTransition: ZoomInTransition(),
       page: () {
@@ -535,9 +538,14 @@ class RouteHelper {
     GetPage(name: itemCampaign,customTransition: ZoomInTransition(), page: () => getRoute(ItemCampaignScreen(isJustForYou: Get.parameters['just-for-you'] == 'true'))),
     GetPage(name: support,customTransition: ZoomInTransition(), page: () => const SupportScreen()),
     GetPage(name: update,customTransition: ZoomInTransition(), page: () => UpdateScreen(isUpdate: Get.parameters['update'] == 'true')),
-    GetPage(name: cart,customTransition: ZoomInTransition(), page: () => getRoute(const CheckoutScreen(
-      cartList:null, fromCart: true, storeId: null,
-    ))),
+    GetPage(name: cart,customTransition: ZoomInTransition(), page: () {
+      bool isPharmacy = Get.find<SplashController>().module?.moduleType == 'pharmacy';
+      if(isPharmacy) {
+        return getRoute(const CartScreen(fromNav: false));
+      } else {
+        return getRoute(const CheckoutScreen(cartList: null, fromCart: true, storeId: null));
+      }
+    }),
     GetPage(name: addAddress,customTransition: ZoomInTransition(), page: () => getRoute(AddAddressScreen(
       fromCheckout: Get.parameters['page'] == 'checkout', fromRide: Get.parameters['ride'] == 'true', zoneId: int.parse(Get.parameters['zone_id']!),
       fromNavBar: Get.parameters['navbar'] == 'true',
@@ -658,6 +666,7 @@ class RouteHelper {
         return const NotFound();
       }
     }),
+    GetPage(name: prescriptionUpload, page: () => const PrescriptionUploadScreen()),
   ];
 
   static Widget getRoute(Widget navigateTo, {AccessLocationScreen? locationScreen, bool byPuss = false}) {

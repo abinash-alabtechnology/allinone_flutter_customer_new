@@ -126,6 +126,7 @@ class BottomNavItemWidget extends StatelessWidget {
   final String title;
   final Function? onTap;
   final bool isSelected;
+  final Color? activeColor;
 
   const BottomNavItemWidget({
     super.key,
@@ -134,6 +135,7 @@ class BottomNavItemWidget extends StatelessWidget {
     required this.title,
     required this.selectedIcon,
     required this.unSelectedIcon,
+    this.activeColor,
   });
 
   @override
@@ -150,6 +152,8 @@ class BottomNavItemWidget extends StatelessWidget {
     final double containerHeight =
         (GetPlatform.isIOS ? 90 : 73) * heightFactor.clamp(0.9, 1.1);
 
+    final Color primaryColor = activeColor ?? Theme.of(context).primaryColor;
+
     return InkWell(
       onTap: onTap as void Function()?,
       borderRadius: BorderRadius.circular(12),
@@ -159,24 +163,13 @@ class BottomNavItemWidget extends StatelessWidget {
         height: containerHeight,
         decoration: BoxDecoration(
           color:
-          isSelected ? Theme.of(context).primaryColor.withAlpha(15) : Colors.transparent,
+          isSelected ? primaryColor.withAlpha(15) : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
-          // boxShadow: isSelected
-          //     ? [
-          //   BoxShadow(
-          //     color: Theme.of(context)
-          //         .primaryColor
-          //         .withValues(alpha: 0.1),
-          //     blurRadius: 12,
-          //     offset: const Offset(0, 4),
-          //   ),
-          // ]
-          //     : [],
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4.0),
           child: Column(
-            crossAxisAlignment: .center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               AnimatedSwitcher(
@@ -189,7 +182,7 @@ class BottomNavItemWidget extends StatelessWidget {
                   height: iconSize,
                   width: iconSize,
                   color: isSelected
-                      ? Theme.of(context).primaryColor
+                      ? primaryColor
                       : Colors.black,
                 ),
               ),

@@ -328,468 +328,181 @@ class ItemTitleViewWidget extends StatelessWidget {
           )
         : Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(30),
+                topRight: Radius.circular(30),
+              ),
               color: Theme.of(context).cardColor,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, -5),
+                ),
+              ],
             ),
-            padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+            padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
             child: GetBuilder<ItemController>(
               builder: (itemController) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                      mainAxisAlignment: .start,
-                      crossAxisAlignment: .start,
-                      children: [
-                        Expanded(
-                          child: Row(
-                            mainAxisAlignment: .start,
-                            crossAxisAlignment: .start,
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  item?.name?.capitalizeFirst ?? '',
-                                  style: robotoBold.copyWith(fontSize: 16.r),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              SizedBox(
-                                width:
-                                    item!.isStoreHalalActive! &&
-                                        item!.isHalalItem!
-                                    ? Dimensions.paddingSizeExtraSmall
-                                    : 0,
-                              ),
-
-                              item!.isStoreHalalActive! && item!.isHalalItem!
-                                  ? CustomToolTip(
-                                      message: 'this_is_a_halal_food'.tr,
-                                      preferredDirection: AxisDirection.up,
-                                      child: const CustomAssetImageWidget(
-                                        Images.halalTag,
-                                        height: 30,
-                                        width: 30,
-                                      ),
-                                    )
-                                  : const SizedBox(),
-                              /*item!.availableTimeStarts != null ? const SizedBox() : */
-                            ],
-                          ),
-                        ),
-
-                        GetBuilder<FavouriteController>(
-                          builder: (favouriteController) {
-                            return AddFavouriteViewItemDetails(item: item);
-                            //   InkWell(
-                            //   onTap: () {
-                            //     if(isLoggedIn){
-                            //       if(favouriteController.wishItemIdList.contains(item!.id)) {
-                            //         favouriteController.removeFromFavouriteList(item!.id, false);
-                            //       }else {
-                            //         favouriteController.addToFavouriteList(item, null, false);
-                            //       }
-                            //     }else {
-                            //       showCustomSnackBar('you_are_not_logged_in'.tr);
-                            //     }
-                            //   },
-                            //   child: Icon(
-                            //     favouriteController.wishItemIdList.contains(item!.id) ? Icons.favorite : Icons.favorite_border, size: 30,
-                            //     color: favouriteController.wishItemIdList.contains(item!.id) ? Theme.of(context).primaryColor : Theme.of(context).disabledColor,
-                            //   ),
-                            // );
-                          },
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 5),
-
-                    (item!.genericName != null && item!.genericName!.isNotEmpty)
-                        ? Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Wrap(
-                                children: List.generate(
-                                  item!.genericName!.length,
-                                  (index) {
-                                    return Text(
-                                      '${item!.genericName![index]}${item!.genericName!.length - 1 == index ? '.' : ', '}',
-                                      style: robotoRegular.copyWith(
-                                        color: Theme.of(context)
-                                            .textTheme
-                                            .bodyLarge!
-                                            .color
-                                            ?.withValues(alpha: 0.5),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                              const SizedBox(
-                                height: Dimensions.paddingSizeExtraSmall,
-                              ),
-                            ],
-                          )
-                        : const SizedBox(),
-                    SizedBox(height: 10.h),
-                    Wrap(
-                      alignment: .start,
-                      runSpacing: 10.h,
-                      children: [
-                        InkWell(
-                          onTap: () {
-                            if (inStorePage) {
-                              Get.back();
-                            } else {
-                              Get.offNamed(
-                                RouteHelper.getStoreRoute(
-                                  id: item!.storeId,
-                                  page: 'item',
-                                ),
-                              );
-                            }
-                          },
-                          child: Container(
-                            height: 33,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8.r),
-                              color: Color(0xFFFFF2DF),
-                            ),
-                            child: IntrinsicWidth(
-                              child: Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    0,
-                                    5,
-                                    5,
-                                    5,
-                                  ),
-                                  child: IntrinsicWidth(
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 4.0,
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          SizedBox(width: 5.w),
-                                          CustomAssetImageWidget(
-                                            Images.checklist,
-                                            width: 18.w,
-                                            height: 18.h,
-                                          ),
-                                          SizedBox(width: 5.w),
-                                          Text(
-                                            item!.storeName?.capitalizeFirst ??
-                                                "",
-                                            style: robotoRegular.copyWith(
-                                              fontSize: 12.sp,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 10.w),
-                        Container(
-                          height: 33,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: Dimensions.paddingSizeSmall,
-                            vertical: Dimensions.paddingSizeExtraSmall,
-                          ),
-                          decoration: BoxDecoration(
-                            color: inStock
-                                ? Colors.red.shade100
-                                : Colors.green.shade100,
-                            borderRadius: BorderRadius.circular(8.r),
-                          ),
-                          child: IntrinsicWidth(
-                            child: Row(
-                              children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      width: 1,
-                                      color: inStock
-                                          ? Colors.red
-                                          : Colors.green,
-                                    ),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(1.0),
-                                    child: Icon(
-                                      inStock ? Icons.close : Icons.check,
-                                      size: 10,
-                                      color: inStock
-                                          ? Colors.red
-                                          : Colors.green,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(width: 5.w),
-                                Text(
-                                  inStock ? 'out_of_stock'.tr : 'in_stock'.tr,
-                                  style: robotoRegular.copyWith(
-                                    color: inStock ? Colors.red : Colors.green,
-                                    fontSize: 12.sp,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 10.w),
-
-                        item!.isSubscription! ? Container(
-                          height: 33,
-                          padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeExtraSmall),
-                          decoration: BoxDecoration(
-                            color: Colors.red.shade100,
-                            borderRadius: BorderRadius.circular(8.r),
-                          ),
-                          child: IntrinsicWidth(child: Center(
-                            child: Text(
-                              'Subscription Available'.tr,
-                              style: robotoRegular.copyWith(color: Colors.red, fontSize: 12.sp, fontWeight: FontWeight.w500),
-                            ),
-                          )),
-                        ) : const SizedBox(),
-                        item!.isSubscription! ? SizedBox(width: 10.w) : const SizedBox(),
-
-                        (Get.find<SplashController>()
-                                    .configModel!
-                                    .moduleConfig!
-                                    .module!
-                                    .unit! &&
-                                item!.unitType != null)
-                            ? Container(
-                                height: 35,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: Dimensions.paddingSizeSmall,
-                                  vertical: Dimensions.paddingSizeExtraSmall,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade200,
-                                  borderRadius: BorderRadius.circular(8.r),
-                                ),
-                                child: IntrinsicWidth(
-                                  child: Center(
-                                    child: Text(
-                                      item?.unitType ?? "",
-                                      style: robotoRegular.copyWith(
-                                        color: Colors.grey,
-                                        fontSize: 12.sp,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              )
-                            : SizedBox(),
-                      ],
-                    ),
-                    const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "MRP:",
+                                item?.name?.capitalizeFirst ?? '',
                                 style: robotoBold.copyWith(
-                                  color: Colors.grey.shade500,
-                                  fontSize: Dimensions.fontSizeExtraLarge,
-                                  fontWeight: FontWeight.w500,
+                                  fontSize: 22.sp,
+                                  color: const Color(0xFF1A1A1A),
                                 ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              discount! > 0
-                                  ? Row(
-                                children: [
-                                  Text(
-                                    '${PriceConverter.convertPrice(startingPrice)}'
-                                        '${endingPrice != null ? ' - ${PriceConverter.convertPrice(endingPrice)}' : ''}',
-                                    textDirection: TextDirection.ltr,
-                                    style: robotoRegular.copyWith(
-                                      color: Theme.of(context).hintColor,
-                                      decoration:
-                                      TextDecoration.lineThrough,
-                                      fontSize:
-                                      12.sp,
-                                    ),
+                              if (item?.unitType != null)
+                                Text(
+                                  item!.unitType!,
+                                  style: robotoRegular.copyWith(
+                                    fontSize: 14.sp,
+                                    color: Colors.grey,
                                   ),
-                                  const SizedBox(width: 5),
-                                  Text(
-                                    'MRP (incl. of all taxes)',
-                                    style: robotoRegular.copyWith(
-                                      color: Theme.of(context).hintColor,
-                                      decoration: TextDecoration.none,
-                                      // no strike-through
-                                      fontSize:
-                                      12.sp,
-                                    ),
-                                  ),
-                                ],
-                              )
-                                  : const SizedBox(),
-                              SizedBox(height: discount > 0 ? 5 : 0),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    '${PriceConverter.convertPrice(startingPrice, discount: discount, discountType: discountType)}'
-                                    '${endingPrice != null ? ' - ${PriceConverter.convertPrice(endingPrice, discount: discount, discountType: discountType)}' : ''}',
-                                    style: robotoBold.copyWith(
-                                      color: Colors.black,
-                                      fontSize: Dimensions.fontSizeExtraLarge,
-                                    ),
-                                    textDirection: TextDirection.ltr,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  discount! > 0
-                                      ? Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.red.shade700,
-                                            borderRadius: BorderRadius.circular(8.r)
-                                          ),
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 8.0,
-                                              vertical: 2,
-                                            ),
-                                            child: Text(
-                                              '${discount.toStringAsFixed(0)}% OFF',
-                                              style: robotoBold.copyWith(
-                                                color: Theme.of(
-                                                  context,
-                                                ).cardColor,
-                                                fontSize: 12.sp,
-                                              ),
-                                            ),
-                                          ),
-                                        )
-                                      : const SizedBox(),
-                                ],
-                              ),
-                              const SizedBox(height: 10),
-
-                              Row(
-                                mainAxisAlignment: .spaceBetween,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFF2E9FF), // same purple shade from screenshot
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        CustomAssetImageWidget(
-                                          Images.card,
-                                          color: const Color(0xFF4CAF50), // green icon like screenshot
-                                          height: 25,
-                                          width: 25,
-                                          fit: BoxFit.fill,
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              "Secure payments",
-                                              style: robotoBold.copyWith(
-                                                fontSize: 10.sp,
-                                                color: Colors.black87,
-                                              ),
-                                            ),
-                                            Text(
-                                              "100% protected checkout",
-                                              style: robotoRegular.copyWith(
-                                                fontSize: 6,
-                                                color: Colors.black54,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  SizedBox(width: 5,),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFE9FFE9),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        CustomAssetImageWidget(
-                                          Images.approve,
-                                          color: const Color(0xFF4CAF50),
-                                          height: 25,
-                                          width: 25,
-                                          fit: BoxFit.fill,
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              "Original products",
-                                              style: robotoBold.copyWith(
-                                                fontSize: 12.sp,
-                                                color: Colors.black87,
-                                              ),
-                                            ),
-                                            Text(
-                                              "Trusted and verified brands",
-                                              style: robotoRegular.copyWith(
-                                                fontSize: 6.sp,
-                                                color: Colors.black54,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                ],
-                              ),
-
+                                ),
                             ],
                           ),
                         ),
+                        const SizedBox(width: Dimensions.paddingSizeSmall),
+                        GetBuilder<FavouriteController>(
+                          builder: (favouriteController) {
+                            return AddFavouriteViewItemDetails(item: item);
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 15),
 
-                        Column(
-                          children: [
-                            // ((Get.find<SplashController>().configModel!.moduleConfig!.module!.unit! && item!.unitType != null)
-                            // || (Get.find<SplashController>().configModel!.moduleConfig!.module!.vegNonVeg! && Get.find<SplashController>().configModel!.toggleVegNonVeg!)) ? Container(
-                            //   padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeExtraSmall, horizontal: Dimensions.paddingSizeSmall),
-                            //   decoration: BoxDecoration(
-                            //     borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                            //     color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                            //   ),
-                            //   child: Text(
-                            //     Get.find<SplashController>().configModel!.moduleConfig!.module!.unit! ? item!.unitType ?? ''
-                            //         : item!.veg == 0 ? 'non_veg'.tr : 'veg'.tr,
-                            //     style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).primaryColor),
-                            //   ),
-                            // ) : const SizedBox(),
-                            // const SizedBox(height: Dimensions.paddingSizeDefault),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _buildBadge(
+                          context,
+                          icon: Images.checklist,
+                          text: item!.storeName?.capitalizeFirst ?? "",
+                          color: const Color(0xFFFFF7ED),
+                          textColor: const Color(0xFFC2410C),
+                          iconColor: const Color(0xFFEA580C),
+                        ),
+                        _buildBadge(
+                          context,
+                          isIconData: !inStock ? Icons.check : Icons.close,
+                          text: !inStock ? 'in_stock'.tr : 'out_of_stock'.tr,
+                          color: !inStock ? const Color(0xFFF0FDF4) : const Color(0xFFFEF2F2),
+                          textColor: !inStock ? const Color(0xFF15803D) : const Color(0xFFB91C1C),
+                        ),
+                        if (item!.isSubscription!)
+                          _buildBadge(
+                            context,
+                            text: 'Subscription Available'.tr,
+                            color: const Color(0xFFEFF6FF),
+                            textColor: const Color(0xFF1D4ED8),
+                          ),
+                      ],
+                    ),
+                    
+                    const SizedBox(height: 20),
 
-                            // OrganicTag(item: item!, fromDetails: true),
-                          ],
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (discount! > 0)
+                                Row(
+                                  children: [
+                                    Text(
+                                      PriceConverter.convertPrice(startingPrice),
+                                      style: robotoRegular.copyWith(
+                                        color: Colors.grey,
+                                        decoration: TextDecoration.lineThrough,
+                                        fontSize: 14.sp,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'MRP (incl. of all taxes)',
+                                      style: robotoRegular.copyWith(
+                                        color: Colors.grey,
+                                        fontSize: 12.sp,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Text(
+                                    PriceConverter.convertPrice(startingPrice, discount: discount, discountType: discountType),
+                                    style: robotoBold.copyWith(
+                                      color: Colors.black,
+                                      fontSize: 26.sp,
+                                    ),
+                                  ),
+                                  if (discount > 0) ...[
+                                    const SizedBox(width: 12),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFDC2626),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        '${discount.toStringAsFixed(0)}% OFF',
+                                        style: robotoBold.copyWith(
+                                          color: Colors.white,
+                                          fontSize: 12.sp,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildTrustBadge(
+                            context,
+                            title: "Secure payments",
+                            subtitle: "100% protected checkout",
+                            icon: Images.card,
+                            color: const Color(0xFFF5F3FF),
+                            iconColor: const Color(0xFF7C3AED),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildTrustBadge(
+                            context,
+                            title: "Original products",
+                            subtitle: "Trusted and verified brands",
+                            icon: Images.approve,
+                            color: const Color(0xFFF0FDF4),
+                            iconColor: const Color(0xFF16A34A),
+                          ),
                         ),
                       ],
                     ),
@@ -798,5 +511,73 @@ class ItemTitleViewWidget extends StatelessWidget {
               },
             ),
           );
+  }
+
+  Widget _buildBadge(BuildContext context, {String? text, String? icon, IconData? isIconData, Color? color, Color? textColor, Color? iconColor}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: color ?? Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null || isIconData != null) ...[
+            isIconData != null
+                ? Icon(isIconData, size: 14, color: textColor)
+                : CustomAssetImageWidget(icon!, width: 16, height: 16, color: iconColor),
+            const SizedBox(width: 6),
+          ],
+          Text(
+            text ?? "",
+            style: robotoMedium.copyWith(
+              fontSize: 12.sp,
+              color: textColor ?? Colors.grey.shade700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTrustBadge(BuildContext context, {required String title, required String subtitle, required String icon, required Color color, required Color iconColor}) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: CustomAssetImageWidget(icon, height: 20, width: 20, color: iconColor),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: robotoBold.copyWith(fontSize: 11.sp, color: Colors.black87),
+                ),
+                Text(
+                  subtitle,
+                  style: robotoRegular.copyWith(fontSize: 9.sp, color: Colors.black54),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

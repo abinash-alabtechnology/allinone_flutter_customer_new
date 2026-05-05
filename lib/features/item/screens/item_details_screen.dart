@@ -195,7 +195,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
 
             return Scaffold(
               key: _globalKey,
-              backgroundColor: Theme.of(context).cardColor,
+              backgroundColor: const Color(0xFFFFFDFB), // Premium light cream background
               endDrawer: const MenuDrawer(),
               endDrawerEnableOpenDragGesture: false,
               appBar: ResponsiveHelper.isDesktop(context)
@@ -338,13 +338,16 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                                                   vertical: 4,
                                                                 ),
                                                               decoration: BoxDecoration(
-                                                                color: (itemController.variationIndex!.length > index && itemController.variationIndex![index] != i)
-                                                                    ? const Color(0xFFE9F5E9)
-                                                                    : const Color(0xFFFDCC80),
-                                                                borderRadius: BorderRadius.circular(7.r),
-                                                                border: (itemController.variationIndex!.length > index && itemController.variationIndex![index] != i)
-                                                                    ? Border.all(color: Theme.of(context).disabledColor, width: 1)
-                                                                    : null,
+                                                                color: (itemController.variationIndex!.length > index && itemController.variationIndex![index] == i)
+                                                                    ? const Color(0xFFFFF7ED)
+                                                                    : Colors.white,
+                                                                borderRadius: BorderRadius.circular(12),
+                                                                border: Border.all(
+                                                                  color: (itemController.variationIndex!.length > index && itemController.variationIndex![index] == i)
+                                                                      ? const Color(0xFFEA580C)
+                                                                      : Colors.grey.shade300,
+                                                                  width: 1.5,
+                                                                ),
                                                               ),
                                                             child: Text(
                                                               item
@@ -355,13 +358,11 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                                               overflow:
                                                                   TextOverflow
                                                                       .ellipsis,
-                                                              style: robotoBold.copyWith(
-                                                                color:
-                                                                    (itemController.variationIndex!.length > index && itemController.variationIndex![index] != i)
-                                                                    ? Colors
-                                                                          .grey
-                                                                    : Colors
-                                                                          .black,
+                                                              style: robotoMedium.copyWith(
+                                                                fontSize: 14.sp,
+                                                                color: (itemController.variationIndex!.length > index && itemController.variationIndex![index] == i)
+                                                                    ? const Color(0xFFC2410C)
+                                                                    : Colors.grey.shade600,
                                                               ),
                                                             ),
                                                           ),
@@ -817,8 +818,19 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                   builder: (cartController) {
                                       return Container(
                                         width: 1170,
-                                        padding: const EdgeInsets.all(
-                                          Dimensions.paddingSizeSmall,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: Dimensions.paddingSizeDefault,
+                                          vertical: Dimensions.paddingSizeSmall,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black.withValues(alpha: 0.1),
+                                              blurRadius: 20,
+                                              offset: const Offset(0, -5),
+                                            ),
+                                          ],
                                         ),
                                         child: Column(children: [
 
@@ -1180,23 +1192,20 @@ class QuantityButton extends StatelessWidget {
               }
             },
       child: Container(
-        height: 30,
-        width: 30,
+        height: 35,
+        width: 35,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: (quantity! == 1 && !isIncrement) || cartController.isLoading
-              ? Theme.of(context).disabledColor.withValues(alpha: 0.1)
-              : Theme.of(context).primaryColor,
+          color: const Color(0xFFF3F4F6),
+          border: Border.all(color: Colors.grey.shade300, width: 1),
         ),
         child: Center(
           child: Icon(
             isIncrement ? Icons.add : Icons.remove,
-            color: isIncrement
-                ? Colors.white
-                : quantity! == 1
-                ? Theme.of(context).disabledColor
-                : Colors.white,
-            size: isCartWidget ? 26 : 20,
+            color: (quantity! == 1 && !isIncrement) || cartController.isLoading
+                ? Colors.grey.shade400
+                : const Color(0xFF1F2937),
+            size: 20,
           ),
         ),
       ),

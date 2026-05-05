@@ -658,6 +658,7 @@ class ItemController extends GetxController implements GetxService {
     _addOnActiveList = [];
     _selectedVariations = [];
     _collapseVariation = [];
+    _imageSliderIndex = 0;
     if(cart != null) {
       _quantity = cart.quantity;
       _addOnActiveList.addAll(itemServiceInterface.initializeCartAddonActiveList(cart.addOnIds, item!.addOns));
@@ -802,7 +803,7 @@ class ItemController extends GetxController implements GetxService {
   String? getDiscountType(Item item) => item.discountType;
 
   void navigateToItemPage(Item? item, BuildContext context, {bool inStore = false, bool isCampaign = false}) {
-    if(Get.find<SplashController>().configModel!.moduleConfig!.module!.showRestaurantText! || item!.moduleType == 'food') {
+    if((Get.find<SplashController>().configModel?.moduleConfig?.module?.showRestaurantText ?? false) || item?.moduleType == 'food') {
       ResponsiveHelper.isMobile(context) ? Get.bottomSheet(
         ItemBottomSheet(itemId: item!.id!, inStorePage: inStore, isCampaign: isCampaign),
         backgroundColor: Colors.transparent, isScrollControlled: true,
@@ -810,7 +811,7 @@ class ItemController extends GetxController implements GetxService {
         Dialog(child: ItemBottomSheet(itemId: item!.id!, inStorePage: inStore, isCampaign: isCampaign)),
       );
     }else {
-      Get.toNamed(RouteHelper.getItemDetailsRoute(item.id, inStore), arguments: ItemDetailsScreen(itemId: item.id!, inStorePage: inStore, isCampaign: isCampaign));
+      Get.toNamed(RouteHelper.getItemDetailsRoute(item?.id, inStore), arguments: ItemDetailsScreen(itemId: item!.id!, inStorePage: inStore, isCampaign: isCampaign));
     }
   }
 

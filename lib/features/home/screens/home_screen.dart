@@ -248,13 +248,17 @@ class _HomeScreenState extends State<HomeScreen> {
     final lat = double.tryParse(userAddress.latitude ?? '') ?? 0.0;
     final lng = double.tryParse(userAddress.longitude ?? '') ?? 0.0;
 
-    final weather = await getWeatherData(lat: lat, lng: lng);
+    try {
+      final weather = await getWeatherData(lat: lat, lng: lng);
 
-    weatherType.value = weather.weatherType;
+      weatherType.value = weather.weatherType;
 
-    hourlyTemp.value = weather.hourlyTemperature;
+      hourlyTemp.value = weather.hourlyTemperature;
 
-    debugPrint(weather.weatherType);
+      debugPrint(weather.weatherType);
+    } catch (e) {
+      debugPrint('Error fetching weather data: $e');
+    }
   }
   StreamSubscription<DatabaseEvent>? _rideStatusSubscription;
   Widget _buildFloatingIcon() {
@@ -866,7 +870,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           //                                         ? Positioned(
                           //                                             top: 0,
                           //                                             right: 0,
-                          //                                             child: Container(
+                          //                                             Container(
                           //                                               height: 10,
                           //                                               width: 10,
                           //                                               decoration: BoxDecoration(
@@ -917,7 +921,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           //                   decoration: const BoxDecoration(
                           //                     shape: BoxShape.circle,
                           //                   ),
-                          //                   child: Container(
+                          //                   Container(
                           //                     margin: const EdgeInsets.all(4),
                           //                     decoration: const BoxDecoration(
                           //                       shape: BoxShape.circle,
@@ -983,7 +987,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                       .primaryColor,
                                   child: Row(
                                     children: [
-                                      if (Get.find<SplashController>()
+                                      if (isPharmacy)
+                                        Padding(
+                                          padding: const EdgeInsets.only(right: 8.0),
+                                          child: Icon(
+                                            Icons.location_on_outlined,
+                                            color: Colors.black,
+                                            size: 20,
+                                          ),
+                                        )
+                                      else if (Get.find<SplashController>()
                                           .module !=
                                           null &&
                                           Get.find<SplashController>()
@@ -1015,7 +1028,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           ),
                                         ),
                                       const SizedBox(
-                                        width: 10,
+                                        width: 2,
                                       ),
                                       Expanded(
                                         child: InkWell(
@@ -1044,46 +1057,23 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   final userAddress =
                                                   AddressHelper
                                                       .getUserAddressFromSharedPref();
-                                                  return Column(
-                                                    crossAxisAlignment:
-                                                    CrossAxisAlignment
-                                                        .start,
+                                                  return Row(
                                                     children: [
-                                                      Text(
-                                                        AuthHelper.isLoggedIn()
-                                                            ? userAddress!.addressType!.tr
-                                                            : 'your_location'.tr,
-                                                        style:
-                                                        robotoMedium.copyWith(
-                                                          color:
-                                                          isPharmacy ? Colors.black : Theme.of(context).cardColor,
-                                                          fontSize:
-                                                          Dimensions.fontSizeDefault,
-                                                        ),
-                                                        maxLines:
-                                                        1,
-                                                        overflow:
-                                                        TextOverflow.ellipsis,
-                                                      ),
-                                                      Row(
-                                                        children: [
-                                                          Flexible(
-                                                            child: Text(
-                                                              userAddress!.address!,
-                                                              style: robotoRegular.copyWith(
-                                                                color: isPharmacy ? Colors.black.withValues(alpha: 0.6) : Theme.of(context).cardColor,
-                                                                fontSize: Dimensions.fontSizeSmall,
-                                                              ),
-                                                              maxLines: 1,
-                                                              overflow: TextOverflow.ellipsis,
-                                                            ),
-                                                          ),
-                                                          Icon(
-                                                            Icons.expand_more,
+                                                      Flexible(
+                                                        child: Text(
+                                                          userAddress!.address!,
+                                                          style: robotoMedium.copyWith(
                                                             color: isPharmacy ? Colors.black : Theme.of(context).cardColor,
-                                                            size: 18,
+                                                            fontSize: Dimensions.fontSizeDefault,
                                                           ),
-                                                        ],
+                                                          maxLines: 1,
+                                                          overflow: TextOverflow.ellipsis,
+                                                        ),
+                                                      ),
+                                                      Icon(
+                                                        Icons.expand_more,
+                                                        color: isPharmacy ? Colors.black : Theme.of(context).cardColor,
+                                                        size: 18,
                                                       ),
                                                     ],
                                                   );
@@ -1119,7 +1109,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     right:
                                                     0,
                                                     child:
-                                                    Container(
+                                                 Container(
                                                       height:
                                                       10,
                                                       width:
@@ -1142,6 +1132,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ),
                                     ],
                                   ),
+
                                 ),
                               ),
                               actions: const [SizedBox()],
@@ -1158,7 +1149,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ? Center(
                                       child: Stack(
                                           children: [
-                                            Container(
+                                                 Container(
                                               height: 60,
                                               width: Dimensions
                                                   .webMaxWidth,
@@ -1183,9 +1174,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                               InkWell(
                                                 onTap: () =>
                                                     Get.toNamed(
-                                                        RouteHelper.getSearchRoute()),
-                                                child:
-                                                Container(
+                                                         RouteHelper.getSearchRoute()),
+                                                 child: Container(
                                                   padding: const EdgeInsets
                                                       .symmetric(
                                                       horizontal:
@@ -1196,10 +1186,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                                       3),
                                                   decoration:
                                                   BoxDecoration(
-                                                    color:
-                                                    Theme.of(context).cardColor,
-                                                    border:
-                                                    Border.all(color: Theme.of(context).disabledColor.withAlpha(100)),
+                                                    color: isPharmacy ? const Color(0xFFF5F5F5) : Theme.of(context).cardColor,
+                                                    border: isPharmacy ? null : Border.all(color: Theme.of(context).disabledColor.withAlpha(100)),
                                                     borderRadius:
                                                     BorderRadius.circular(10),
                                                     // boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5, spreadRadius: 1)],
@@ -1207,66 +1195,39 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   child:
                                                   Row(
                                                     children: [
-                                                      Expanded(
-                                                        child: Row(
-                                                          mainAxisSize: MainAxisSize.min,
-                                                          children: <Widget>[
-                                                            const SizedBox(width: 10.0, height: 100.0),
-                                                            Text(
-                                                              'Search for',
-                                                              style: robotoRegular.copyWith(
-                                                                fontSize: Dimensions.fontSizeLarge,
-                                                              ),
-                                                            ),
-                                                            const SizedBox(width: 5, height: 100.0),
-                                                            GetBuilder<CategoryController>(
-                                                              builder: (categoryController) {
-                                                                if (categoryController.categoryList != null && categoryController.categoryList!.isNotEmpty) {
-                                                                  // Use AnimatedTextKit with RotateAnimatedText to animate categories
-                                                                  return AnimatedTextKit(
-                                                                    repeatForever: true,
-                                                                    animatedTexts: categoryController.categoryList!
-                                                                        .map((category) => RotateAnimatedText(
-                                                                      // Capitalize the first letter of each word
-                                                                      ("${(category.name?.capitalizeFirst)}"),
-                                                                      textStyle: robotoRegular.copyWith(
-                                                                        fontSize: Dimensions.fontSizeLarge,
-                                                                         color: isPharmacy ? Colors.black.withValues(alpha: 0.8) : Theme.of(context).primaryColor,
-                                                                      ),
-                                                                    ))
-                                                                        .toList(),
-                                                                  );
-                                                                } else {
-                                                                  return const Text('Loading categories...');
-                                                                }
-                                                              },
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                      const SizedBox(width: Dimensions.paddingSizeExtraSmall),
                                                       Icon(
                                                         CupertinoIcons.search,
-                                                        size: 25,
-                                                        color: Theme.of(context).disabledColor,
+                                                        size: 20,
+                                                        color: Colors.black.withValues(alpha: 0.5),
                                                       ),
-                                                      const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-                                                      const SizedBox(
-                                                          width: Dimensions.paddingSizeExtraSmall,
-                                                          child: Padding(
-                                                            padding: EdgeInsets.symmetric(vertical: 6.0),
-                                                            child: VerticalDivider(
-                                                              color: Colors.grey,
-                                                              width: 2,
-                                                            ),
-                                                          )),
-                                                      const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-                                                      Icon(
-                                                        CupertinoIcons.mic,
-                                                        size: 25,
-                                                        color: isPharmacy ? Colors.black : Theme.of(context).primaryColor,
+                                                      const SizedBox(width: Dimensions.paddingSizeSmall),
+                                                      Expanded(
+                                                        child: Text(
+                                                          isPharmacy ? 'Search medicines, health products...' : 'Search for...',
+                                                          style: robotoRegular.copyWith(
+                                                            fontSize: Dimensions.fontSizeDefault,
+                                                            color: Colors.black.withValues(alpha: 0.5),
+                                                          ),
+                                                        ),
                                                       ),
-                                                      const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+                                                      if (!isPharmacy) ...[
+                                                        const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+                                                        const SizedBox(
+                                                            width: Dimensions.paddingSizeExtraSmall,
+                                                            child: Padding(
+                                                              padding: EdgeInsets.symmetric(vertical: 6.0),
+                                                              child: VerticalDivider(
+                                                                color: Colors.grey,
+                                                                width: 2,
+                                                              ),
+                                                            )),
+                                                        const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+                                                        Icon(
+                                                          CupertinoIcons.mic,
+                                                          size: 25,
+                                                          color: Theme.of(context).primaryColor,
+                                                        ),
+                                                      ],
                                                     ],
                                                   ),
                                                 ),
@@ -1502,7 +1463,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       right: 5,
                                       left: 5,
                                       child:
-                                      Container(
+                                                 Container(
                                         height:
                                         50,
                                         width: Dimensions
@@ -1521,7 +1482,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           onTap: () =>
                                               Get.toNamed(RouteHelper.getSearchRoute()),
                                           child:
-                                          Container(
+                                                 Container(
                                             padding:
                                             const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
                                             margin:
@@ -2128,7 +2089,7 @@ class _BookingStatusBannerState extends State<BookingStatusBanner>
           child: Stack(
             children: [
               // Main gradient background
-              Container(
+                                                 Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(

@@ -157,13 +157,6 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
 
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark,
-      statusBarBrightness: Brightness.dark,
-      systemNavigationBarColor: Colors.transparent,
-      systemNavigationBarIconBrightness: Brightness.dark,
-    ));
 
     return GetBuilder<ThemeController>(builder: (themeController) {
       return GetBuilder<LocalizationController>(builder: (localizeController) {
@@ -189,23 +182,33 @@ class _MyAppState extends State<MyApp> {
               defaultTransition: Transition.zoom,
               transitionDuration: const Duration(milliseconds: 500),
               builder: (BuildContext context, widget) {
-                return MediaQuery(data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1)), child: Material(
-                  child: SafeArea(
-                    top: false, bottom: GetPlatform.isAndroid,
-                    child: Stack(children: [
-                      widget!,
-
-                      GetBuilder<SplashController>(builder: (splashController){
-                        if(!splashController.savedCookiesData && !splashController.getAcceptCookiesStatus(splashController.configModel != null ? splashController.configModel!.cookiesText! : '')){
-                          return ResponsiveHelper.isWeb() ? const Align(alignment: Alignment.bottomCenter, child: CookiesView()) : const SizedBox();
-                        }else{
-                          return const SizedBox();
-                        }
-                      })
-                    ]),
+                return MediaQuery(data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1)), child: AnnotatedRegion<SystemUiOverlayStyle>(
+                  value: SystemUiOverlayStyle(
+                    statusBarColor: Colors.transparent,
+                    statusBarIconBrightness: themeController.darkTheme ? Brightness.light : Brightness.dark,
+                    statusBarBrightness: themeController.darkTheme ? Brightness.dark : Brightness.light,
+                    systemNavigationBarColor: Colors.transparent,
+                    systemNavigationBarIconBrightness: themeController.darkTheme ? Brightness.light : Brightness.dark,
+                  ),
+                  child: Material(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    child: SafeArea(
+                      top: false, bottom: GetPlatform.isAndroid,
+                      child: Stack(children: [
+                        widget!,
+  
+                        GetBuilder<SplashController>(builder: (splashController){
+                          if(!splashController.savedCookiesData && !splashController.getAcceptCookiesStatus(splashController.configModel != null ? splashController.configModel!.cookiesText! : '')){
+                            return ResponsiveHelper.isWeb() ? const Align(alignment: Alignment.bottomCenter, child: CookiesView()) : const SizedBox();
+                          }else{
+                            return const SizedBox();
+                          }
+                        })
+                      ]),
+                    ),
                   ),
                 ));
-            },
+              },
             ),
           );
         });

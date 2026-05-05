@@ -97,3 +97,25 @@ class QuantityButton3 extends StatelessWidget {
     );
   }
 }
+
+class QuantityButtonPharmacy extends StatelessWidget {
+  final bool isIncrement;
+  final Function onTap;
+  final bool fromcart;
+  const QuantityButtonPharmacy({super.key, required this.isIncrement, required this.onTap, this.fromcart = false});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => onTap(),
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        child: Icon(
+          isIncrement ? Icons.add : Icons.remove,
+          size: 18,
+          color: isIncrement ? const Color(0xFF16A34A) : Colors.grey,
+        ),
+      ),
+    );
+  }
+}
