@@ -435,7 +435,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                         ),
                       ),
                       child: const Text(
-                        "Don't Cancel",
+                        "Don't Cancel gfhh",
                         style: TextStyle(fontSize: 16, color: Colors.black),
                       ),
                     ),
@@ -877,11 +877,17 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                       fontSize: Dimensions.fontSizeExtraLarge,
                     ),
                   ),
-                  Text(
-                    subtitle,
-                    style: robotoRegular.copyWith(
-                      fontSize: Dimensions.fontSizeDefault,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        subtitle,
+                        style: robotoRegular.copyWith(
+                          fontSize: Dimensions.fontSizeDefault,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.person, size: 16, color: Colors.grey),
+                    ],
                   ),
                 ],
               ),
@@ -1030,7 +1036,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                       left: 16,
                       child: GestureDetector(
                         onTap: () {
-                          Get.find<SplashController>().showBottomNavBar;
+                          Get.find<SplashController>().showBottomNavBar();
                           Get.offAll(
                             () => DashboardScreen(
                               pageIndex: 0,
@@ -1633,7 +1639,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                       child: _buildRideTile(
                         i,
                         v.name,
-                        '${v.seats} seats',
+                        '${v.seats}',
                         price,
                         etaText,
                         '${AppConstants.baseUrl}${AppConstants.Vehicleimage}${v.image}',
@@ -1766,7 +1772,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
   //             return _buildRideTile(
   //               i,
   //               v.name,
-  //               '${v.seats} seats',
+  //               '${v.seats}',
   //               price,
   //               etaText,
   //               '${AppConstants.baseUrl}${AppConstants.Vehicleimage}${v.image}',
@@ -1786,20 +1792,38 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
   //     ],
   //   );
   // }
-  void _closeBottomSheetAndGoHome(
+  void _handleRideCancellation(
     BuildContext bottomSheetContext,
+    BuildContext parentContext,
     StreamSubscription bookingListener, [
     Timer? countdownTimer,
+    bool showConfirmation = true,
   ]) {
     bookingTimer?.cancel();
     bookingListener.cancel();
     countdownTimer?.cancel();
 
-    if (Navigator.canPop(bottomSheetContext)) {
-      Navigator.pop(bottomSheetContext);
+    // Clear all modal sheets and dialogs to prevent overlapping
+    while (Get.isBottomSheetOpen ?? false) {
+      Get.back();
+    }
+    while (Get.isDialogOpen ?? false) {
+      Get.back();
     }
 
-    Get.offAll(() => DashboardScreen(pageIndex: 0, fromSplash: false));
+    if (showConfirmation) {
+      showBookingCancelledBottomSheet(
+        parentContext,
+        null,
+        "cancelled",
+      ).then((_) {
+        Get.find<SplashController>().showBottomNavBar();
+        Get.offAll(() => const DashboardScreen(
+              pageIndex: 1,
+              fromSplash: false,
+            ));
+      });
+    }
   }
 
   void showContactingDriversBottomSheet(
@@ -1822,6 +1846,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
       context: safeContext,
       isDismissible: false,
       enableDrag: false,
+      isScrollControlled: true,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -1837,11 +1862,10 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
         ).ref('bookings/$bookingId');
 
         bookingListener = dbRef.onValue.listen((DatabaseEvent event) {
-          // 🔴 CASE 1: Booking node deleted / not exists
           if (!event.snapshot.exists || event.snapshot.value == null) {
             print("❌ Booking does not exist or deleted");
 
-            _closeBottomSheetAndGoHome(bottomSheetContext, bookingListener);
+            _handleRideCancellation(bottomSheetContext, safeContext, bookingListener, null, true);
             return;
           }
 
@@ -1849,7 +1873,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
 
           if (data is! Map) {
             print("❌ Invalid booking data format");
-            _closeBottomSheetAndGoHome(bottomSheetContext, bookingListener);
+            _handleRideCancellation(bottomSheetContext, safeContext, bookingListener, null, true);
             return;
           }
 
@@ -1860,7 +1884,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
           if (rideStatus == 'cancelled') {
             print("❌ Ride cancelled");
 
-            _closeBottomSheetAndGoHome(bottomSheetContext, bookingListener);
+            _handleRideCancellation(bottomSheetContext, safeContext, bookingListener, null, true);
             return;
           }
 
@@ -1910,9 +1934,11 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                 timer,
               ) {
                 if (remainingSeconds > 0) {
-                  setState(() {
-                    remainingSeconds--;
-                  });
+                  if (context.mounted) {
+                    setState(() {
+                      remainingSeconds--;
+                    });
+                  }
                 } else {
                   timer.cancel();
                 }
@@ -1933,12 +1959,11 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                 );
                 return false; // or true, based on whether you want to allow popping
               },
-              child: SizedBox(
-                height: 380,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                       const Text(
                         "Hang tight, finding drivers close by...",
                         style: TextStyle(
@@ -2071,7 +2096,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                         height: 160,
                       ),
 
-                      const Spacer(),
+                      const SizedBox(height: 20),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
@@ -2084,51 +2109,17 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                             ),
                           ),
                           onPressed: () async {
-                            bookingListener.cancel();
-                            countdownTimer?.cancel();
-                            print(
-                              "SDfsfd $bookingId",
-                            ); // Cancel the booking listener first
-
+                            // Open the cancel reason sheet
+                            // Note: We don't cancel the listener here anymore to allow 
+                            // background status updates to handle the UI transition.
                             bool success = await showCancelReasonBottomSheet(
                               bottomSheetContext,
                               bookingId,
                             );
-                            print('dfgdg the responce of the cancel $success');
-                            if (!success) {
-                              print(
-                                "⏳ User choose not to cancel — restarting driver search",
-                              );
 
-                              Future.delayed(
-                                const Duration(milliseconds: 300),
-                                () {
-                                  if (bottomSheetContext.mounted) {
-                                    showContactingDriversBottomSheet(
-                                      safeContext,
-                                      bookingId,
-                                      userId,
-                                      otp,
-                                    );
-                                  } else {
-                                    if (Navigator.canPop(bottomSheetContext)) {
-                                      Navigator.pop(bottomSheetContext);
-                                    }
-                                    print("⚠️ Safe context no longer mounted");
-                                  }
-                                },
-                              );
-                            } else {
-                              // Successfully cancelled, pop the searching drivers sheet
-                              if (Navigator.canPop(bottomSheetContext)) {
-                                Navigator.pop(bottomSheetContext);
-                              }
-                              // And show the confirmation popup
-                              showBookingCancelledBottomSheet(
-                                safeContext,
-                                null,
-                                "user cancelled",
-                              );
+                            if (success) {
+                              print("✅ Cancellation confirmed by user — clearing search UI");
+                              _handleRideCancellation(bottomSheetContext, safeContext, bookingListener, countdownTimer, false);
                             }
                           },
                           child: Text(
@@ -2143,10 +2134,9 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                     ],
                   ),
                 ),
-              ),
-            );
-          },
-        );
+              );
+            },
+          );
       },
     );
   }
@@ -2833,7 +2823,10 @@ void showRideCancelledPopup() {
         actions: [
           TextButton(
             onPressed: () {
-              Get.back();
+              Get.find<SplashController>().showBottomNavBar();
+              Get.offAll(
+                () => const DashboardScreen(pageIndex: 0, fromSplash: false),
+              );
             },
             child: const Text("OK"),
           ),

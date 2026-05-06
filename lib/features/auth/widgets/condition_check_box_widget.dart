@@ -58,20 +58,20 @@ class ConditionCheckBoxWidget extends StatelessWidget {
         },
       ),
 const SizedBox(width: 5,),
-      forDeliveryMan ? const SizedBox() : Text( '* ', style: robotoRegular.copyWith(color: Theme.of(context).cardColor)),
+      forDeliveryMan ? const SizedBox() : Text( '* ', style: robotoRegular.copyWith(color: Theme.of(context).textTheme.bodyMedium!.color)),
 
       Flexible(
         child: RichText(
           text: TextSpan(children: [
             TextSpan(
               text: forDeliveryMan ? 'i_agree_with_all_the'.tr :'i_agree_with_all_the'.tr,
-              style: robotoRegular.copyWith(color: forDeliveryMan ? Theme.of(context).textTheme.bodyMedium!.color : kIsWeb?Theme.of(context).disabledColor:Theme.of(context).cardColor, fontSize: forDeliveryMan ? Dimensions.fontSizeDefault : Dimensions.fontSizeSmall),
+              style: robotoRegular.copyWith(color: forDeliveryMan ? Theme.of(context).textTheme.bodyMedium!.color : kIsWeb?Theme.of(context).disabledColor:Theme.of(context).textTheme.bodyMedium!.color, fontSize: forDeliveryMan ? Dimensions.fontSizeDefault : Dimensions.fontSizeSmall),
             ),
             const TextSpan(text: ' '),
             TextSpan(
               recognizer: TapGestureRecognizer()..onTap = () => Get.toNamed(RouteHelper.getHtmlRoute('terms-and-condition')),
               text: 'terms_conditions'.tr,
-              style: robotoMedium.copyWith(color: kIsWeb?Theme.of(context).disabledColor:Theme.of(context).cardColor),
+              style: robotoMedium.copyWith(color: kIsWeb?Theme.of(context).disabledColor:Theme.of(context).textTheme.bodyMedium!.color),
             ),
           ]),
         ),

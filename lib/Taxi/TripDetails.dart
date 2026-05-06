@@ -13,6 +13,8 @@ import 'Controller/DriverController.dart';
 import 'Controller/vehiclelistController.dart';
 import 'model/bookinghistorymodel.dart';
 import 'model/captionmodel.dart';
+import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
+import 'package:lottie/lottie.dart';
 
 void showTripDetailBottomSheet(
   BuildContext context,
@@ -98,6 +100,7 @@ void showTripDetailBottomSheet(
                           ),
                         ],
                       ),
+
                     ],
                   ),
                 ),
@@ -228,6 +231,11 @@ Future<bool> showCancelReasonBottomSheet(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                Lottie.asset(
+                  'assets/animation/searching_drivers.json',
+                  height: 120,
+                ),
+                const SizedBox(height: 16),
                 const Text(
                   "Why would you like to cancel?",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -336,6 +344,13 @@ Future<bool> showCancelConfirmationSheet(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 12),
+              Center(
+                child: Lottie.asset(
+                  'assets/animation/searching_drivers.json',
+                  height: 120,
+                ),
+              ),
+              const SizedBox(height: 16),
               const Text(
                 "Are you sure you want to cancel the ride?",
                 style: TextStyle(color: Colors.black54),
@@ -360,8 +375,17 @@ Future<bool> showCancelConfirmationSheet(
                                   bookingId,
                                 );
                             if (success) {
+                              await showBookingCancelledBottomSheet(
+                                context,
+                                null,
+                                "cancelled",
+                              );
                               await SharedService.clearOngoingBooking();
-                              Navigator.pop(context, true);
+                              Get.find<SplashController>().showBottomNavBar();
+                              Get.offAll(() => const DashboardScreen(
+                                    pageIndex: 0,
+                                    fromSplash: false,
+                                  ));
                             }
                           },
                     style: ElevatedButton.styleFrom(
@@ -426,12 +450,12 @@ Future<bool> showCancelConfirmationSheet(
   return result ?? false;
 }
 
-void showBookingCancelledBottomSheet(
+Future<bool> showBookingCancelledBottomSheet(
   BuildContext context,
   String? crnNumber,
   String reason,
-) {
-  showModalBottomSheet(
+) async {
+  final result = await showModalBottomSheet<bool>(
     context: context,
     isScrollControlled: true,
     isDismissible: false,
@@ -461,7 +485,7 @@ void showBookingCancelledBottomSheet(
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Image.asset(Images.checked, height: 48),
+                  Image.asset(Images.cancelGif, height: 60),
                 ],
               ),
               const SizedBox(height: 12),
@@ -476,18 +500,8 @@ void showBookingCancelledBottomSheet(
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () async {
-                    print("sdfsf is this is triggered ");
-                    Get.until((route) => route.isFirst);
-
-                    await Future.delayed(Duration.zero);
-
-                    Get.offAll(
-                      () => const DashboardScreen(
-                        pageIndex: 0,
-                        fromSplash: false,
-                      ),
-                    );
+                  onPressed: () {
+                    Navigator.pop(context, true);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
@@ -510,6 +524,7 @@ void showBookingCancelledBottomSheet(
       );
     },
   );
+  return result ?? false;
 }
 
 void showRideScheduledBottomSheet(BuildContext context) {

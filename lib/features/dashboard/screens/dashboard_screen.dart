@@ -413,7 +413,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                                       child: isPharmacy ? const BottomCartWidget() : const BottomCartWidgetStore()),
                                 ),
                                 ),
-                                splashController.showBottomNav || true
+                                splashController.showBottomNav
                                     ?    AnimatedSlide(
                                   duration:
                                   const Duration(milliseconds: 300),
@@ -551,7 +551,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                             debugPrint("is this true $isBookingTab");
                                                           },
                                                         ),
-                                                      if(_pageIndex != 2) BottomNavItemWidget(
+                                                      if(_pageIndex != 2 && _pageIndex != 4 && _pageIndex != 6) BottomNavItemWidget(
                                                            title: isParcel
                                                                ? 'address'.tr
                                                                : isTaxi
@@ -672,6 +672,7 @@ class DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _setPage(int pageIndex) {
+    Get.find<SplashController>().showBottomNavBar();
     setState(() {
       _pageController!.jumpToPage(pageIndex);
       _pageIndex = pageIndex;
