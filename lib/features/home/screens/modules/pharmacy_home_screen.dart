@@ -17,6 +17,7 @@ import 'package:handy_allinone/features/home/widgets/views/category_view.dart';
 import 'package:handy_allinone/helper/auth_helper.dart';
 import 'package:handy_allinone/util/dimensions.dart';
 import 'package:handy_allinone/util/styles.dart';
+import 'package:handy_allinone/features/home/widgets/views/pharmacy/pharmacy_information_section.dart';
 import 'package:handy_allinone/util/images.dart';
 
 class PharmacyHomeScreen extends StatelessWidget {
@@ -39,7 +40,8 @@ class PharmacyHomeScreen extends StatelessWidget {
         const CategoryView(),
 
         const PharmacyPromotionalBanner(), // Custom banner matching the image
-        const SizedBox(height: 120),
+        const PharmacyInformationSection(),
+        const SizedBox(height: 100),
 
         // const ProductWithCategoriesView(),
         // const NewOnMartView(isShop: false, isPharmacy: true, isNewStore: true),

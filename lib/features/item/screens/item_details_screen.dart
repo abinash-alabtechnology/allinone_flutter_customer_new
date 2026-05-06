@@ -414,9 +414,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
 
                                                         Text(
                                                           PriceConverter.convertPrice(
-                                                            itemController
-                                                                        .cartIndex !=
-                                                                    -1
+                                                            (itemController.cartIndex != -1 && itemController.cartIndex < Get.find<CartController>().cartList.length)
                                                                 ? _getItemDetailsDiscountPrice(
                                                                     cart:
                                                                         Get.find<

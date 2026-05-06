@@ -9,6 +9,7 @@ import 'package:handy_allinone/helper/responsive_helper.dart';
 import 'package:handy_allinone/util/dimensions.dart';
 import 'package:handy_allinone/util/styles.dart';
 import 'package:handy_allinone/features/checkout/widgets/time_slot_bottom_sheet.dart';
+import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
 
 class TimeSlotSection extends StatelessWidget {
   final int? storeId;
@@ -92,7 +93,7 @@ class TimeSlotSection extends StatelessWidget {
 
                 Expanded(
                   child: ((checkoutController.selectedDateSlot == 0 && todayClosed) || (checkoutController.selectedDateSlot == 1 && tomorrowClosed))
-                    ? Center(child: Text(module!.showRestaurantText! ? 'restaurant_is_closed'.tr : 'store_is_closed'.tr))
+                    ? Center(child: Text(Get.find<SplashController>().module?.moduleType == 'pharmacy' ? 'pharmacy_is_closed'.tr : module!.showRestaurantText! ? 'restaurant_is_closed'.tr : 'store_is_closed'.tr))
                     : Text(checkoutController.preferableTime.isNotEmpty ? checkoutController.preferableTime : 'instance'.tr),
                 ),
 

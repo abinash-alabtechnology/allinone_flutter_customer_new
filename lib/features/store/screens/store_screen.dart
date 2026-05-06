@@ -75,6 +75,7 @@ class StoreScreen extends StatefulWidget {
 class _StoreScreenState extends State<StoreScreen> {
   final ScrollController scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
+  final GlobalKey _menuKey = GlobalKey();
 
   @override
   void initState() {
@@ -152,7 +153,9 @@ class _StoreScreenState extends State<StoreScreen> {
       endDrawer: const MenuDrawer(),
       endDrawerEnableOpenDragGesture: false,
       backgroundColor: Theme.of(context).colorScheme.surface,
-      body: GetBuilder<StoreController>(
+      body: Stack(
+        children: [
+          GetBuilder<StoreController>(
         builder: (storeController) {
           return GetBuilder<CategoryController>(
             builder: (categoryController) {
@@ -291,20 +294,17 @@ class _StoreScreenState extends State<StoreScreen> {
                                 backgroundColor: Theme.of(context).cardColor,
                                 leading: IconButton(
                                   icon: Container(
-                                    height: 50,
-                                    width: 50,
+                                    height: 40,
+                                    width: 40,
                                     decoration: BoxDecoration(
-                                      border: Border.all(
-                                        width: 1,
-                                        color: Colors.grey,
-                                      ),
-                                      borderRadius: BorderRadius.circular(10),
-                                      color: Colors.black45,
+                                      shape: BoxShape.circle,
+                                      color: Colors.black.withOpacity(0.3),
                                     ),
                                     alignment: Alignment.center,
                                     child: Icon(
-                                      Icons.chevron_left,
-                                      color: Theme.of(context).cardColor,
+                                      Icons.arrow_back_ios_new_rounded,
+                                      color: Colors.white,
+                                      size: 18,
                                     ),
                                   ),
                                   onPressed: () => Get.back(),
@@ -1225,7 +1225,7 @@ class _StoreScreenState extends State<StoreScreen> {
                                           ),
                                         ),
 
-                                        SizedBox(height: 5),
+                                        /* SizedBox(height: 5),
                                         Container(
                                           height: 115,
                                           child: ListView.builder(
@@ -1405,7 +1405,7 @@ class _StoreScreenState extends State<StoreScreen> {
                                               );
                                             },
                                           ),
-                                        ),
+                                        ), */
                                       ],
                                     ),
                                   ),
@@ -1442,6 +1442,7 @@ class _StoreScreenState extends State<StoreScreen> {
                                       isStore: false,
                                       stores: null,
                                       isScrollable: false,
+                                      isGridView: false,
                                       backButton: scrollToTop,
                                       categoryname: storeController
                                           .categoryList![storeController.categoryIndex].name!,
@@ -1467,17 +1468,60 @@ class _StoreScreenState extends State<StoreScreen> {
                       ],
                     )
                   : QuoteScreen();
-              // const StoreDetailsScreenShimmerWidget();
             },
           );
         },
       ),
+          GetBuilder<StoreController>(
+            builder: (storeController) {
+              return GetBuilder<CategoryController>(
+                builder: (categoryController) {
+                  bool isPharmacy = Get.find<SplashController>().module != null &&
+                      Get.find<SplashController>().module!.moduleType.toString().toLowerCase() ==
+                          AppConstants.pharmacy.toLowerCase();
+
+                  return (storeController.store != null &&
+                          storeController.store!.name != null &&
+                          categoryController.categoryList != null)
+                      ? Positioned(
+                          bottom: 0, left: 0, right: 0,
+                          child: SafeArea(
+                            child: GetBuilder<CartController>(
+                              builder: (cartController) {
+                                return cartController.cartList.isNotEmpty &&
+                                        !ResponsiveHelper.isDesktop(context)
+                                    ? Container(
+                                        margin: isPharmacy ? EdgeInsets.zero : EdgeInsets.fromLTRB(Dimensions.paddingSizeDefault, 0, Dimensions.paddingSizeDefault, Dimensions.paddingSizeDefault),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF2A2A2A),
+                                          borderRadius: isPharmacy
+                                            ? BorderRadius.only(
+                                                topLeft: Radius.circular(30.r),
+                                                topRight: Radius.circular(30.r),
+                                              )
+                                            : BorderRadius.circular(Dimensions.radiusLarge),
+                                          boxShadow: isPharmacy ? [] : [
+                                            BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 5)),
+                                          ],
+                                        ),
+                                        child: const BottomCartWidgetStore(),
+                                      )
+                                    : const SizedBox();
+                              },
+                            ),
+                          ),
+                        )
+                      : const SizedBox();
+                },
+              );
+            },
+          ),
+        ],
+      ),
 
       floatingActionButton: GetBuilder<StoreController>(
         builder: (storeController) {
-          return Visibility(
-            visible:
-                storeController.showFavButton &&
+          bool showPrescription = storeController.showFavButton &&
                 Get.find<SplashController>()
                     .configModel!
                     .moduleConfig!
@@ -1486,138 +1530,139 @@ class _StoreScreenState extends State<StoreScreen> {
                 (storeController.store != null &&
                     storeController.store!.prescriptionOrder!) &&
                 Get.find<SplashController>().configModel!.prescriptionStatus! &&
-                AuthHelper.isLoggedIn(),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                boxShadow: [
-                  BoxShadow(
-                    color: Theme.of(
-                      context,
-                    ).primaryColor.withValues(alpha: 0.5),
-                    blurRadius: 10,
-                    offset: const Offset(2, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 800),
-                    width: storeController.currentState == true
-                        ? 0
-                        : ResponsiveHelper.isDesktop(context)
-                        ? 180
-                        : 150,
-                    height: 30,
-                    curve: Curves.linear,
-                    child: Center(
-                      child: Text(
-                        'prescription_order'.tr,
-                        textAlign: TextAlign.center,
-                        style: robotoMedium.copyWith(
-                          color: Theme.of(context).primaryColor,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ),
+                AuthHelper.isLoggedIn();
 
-                  InkWell(
-                    onTap: () {
-                      Get.find<CheckoutController>().updateFirstTime();
-                      Get.toNamed(
-                        RouteHelper.getCheckoutRoute(
-                          'prescription',
-                          storeId: storeController.store!.id,
-                        ),
-                        arguments: CheckoutScreen(
-                          fromCart: false,
-                          cartList: null,
-                          storeId: storeController.store!.id,
-                        ),
-                      );
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor,
-                        borderRadius: BorderRadius.circular(
-                          Dimensions.radiusSmall,
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              if (showPrescription)
+                Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Theme.of(
+                          context,
+                        ).primaryColor.withValues(alpha: 0.5),
+                        blurRadius: 10,
+                        offset: const Offset(2, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 800),
+                        width: storeController.currentState == true
+                            ? 0
+                            : ResponsiveHelper.isDesktop(context)
+                            ? 180
+                            : 150,
+                        height: 30,
+                        curve: Curves.linear,
+                        child: Center(
+                          child: Text(
+                            'prescription_order'.tr,
+                            textAlign: TextAlign.center,
+                            style: robotoMedium.copyWith(
+                              color: Theme.of(context).primaryColor,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ),
-                      padding: const EdgeInsets.all(
-                        Dimensions.paddingSizeSmall,
+
+                      InkWell(
+                        onTap: () {
+                          Get.find<CheckoutController>().updateFirstTime();
+                          Get.toNamed(
+                            RouteHelper.getCheckoutRoute(
+                              'prescription',
+                              storeId: storeController.store!.id,
+                            ),
+                            arguments: CheckoutScreen(
+                              fromCart: false,
+                              cartList: null,
+                              storeId: storeController.store!.id,
+                            ),
+                          );
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor,
+                            borderRadius: BorderRadius.circular(
+                              Dimensions.radiusSmall,
+                            ),
+                          ),
+                          padding: const EdgeInsets.all(
+                            Dimensions.paddingSizeSmall,
+                          ),
+                          child: Image.asset(
+                            Images.prescriptionIcon,
+                            height: 25,
+                            width: 25,
+                          ),
+                        ),
                       ),
-                      child: Image.asset(
-                        Images.prescriptionIcon,
-                        height: 25,
-                        width: 25,
+                    ],
+                  ),
+                ),
+
+              if (showPrescription) const SizedBox(height: Dimensions.paddingSizeSmall),
+
+              Visibility(
+                visible: storeController.showFavButton,
+                child: GestureDetector(
+                  key: _menuKey,
+                  onTap: () => showCategoryPopup(context, storeController, _menuKey),
+                  child: Container(
+                    height: 65,
+                    width: 65,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [const Color(0xFF2D2D2D), Colors.black],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.4),
+                          blurRadius: 15,
+                          spreadRadius: 2,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                      border: Border.all(color: Colors.white.withOpacity(0.1), width: 1.5),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.restaurant_menu_rounded, color: Colors.white, size: 26),
+                        const SizedBox(height: 2),
+                        Text(
+                          "MENU",
+                          style: robotoBold.copyWith(
+                            color: Colors.white,
+                            fontSize: 10,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           );
         },
       ),
 
-      bottomNavigationBar: GetBuilder<StoreController>(
-        builder: (storeController) {
-          return GetBuilder<CategoryController>(
-            builder: (categoryController) {
-              return (storeController.store != null &&
-                      storeController.store!.name != null &&
-                      categoryController.categoryList != null)
-                  ? SafeArea(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Color(0xFF2A2A2A),
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(30.r),
-                            topRight: Radius.circular(30.r),
-                          ),
-                        ),
-                        child: IntrinsicHeight(
-                          child: GetBuilder<CartController>(
-                            builder: (cartController) {
-                              return cartController.cartList.isNotEmpty &&
-                                      !ResponsiveHelper.isDesktop(context)
-                                  ? Align(
-                                      alignment: Alignment.centerRight,
-                                      child: Padding(
-                                        padding: EdgeInsets.only(
-                                          top: 5.h,
-                                          left: 18.w,
-                                          right: 18.w,
-                                          bottom: 4.w,
-                                        ),
-                                        child: Container(
-                                          width: double.infinity,
-                                          decoration: BoxDecoration(
-                                            color: Colors.transparent,
-                                            borderRadius: BorderRadius.circular(
-                                              15,
-                                            ),
-                                          ),
-                                          child: BottomCartWidgetStore(),
-                                        ),
-                                      ),
-                                    )
-                                  : const SizedBox();
-                            },
-                          ),
-                        ),
-                      ),
-                    )
-                  : SizedBox();
-            },
-          );
-        },
-      ),
+      bottomNavigationBar: const SizedBox(),
     );
   }
 }

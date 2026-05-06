@@ -7,6 +7,7 @@ import 'package:handy_allinone/features/cart/widgets/not_available_bottom_sheet_
 import 'package:handy_allinone/features/checkout/controllers/checkout_controller.dart';
 import 'package:handy_allinone/features/coupon/controllers/coupon_controller.dart';
 import 'package:handy_allinone/features/profile/controllers/profile_controller.dart';
+import 'package:handy_allinone/common/widgets/confirmation_dialog.dart';
 import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
 import 'package:handy_allinone/features/store/controllers/store_controller.dart';
 import 'package:handy_allinone/features/cart/domain/models/cart_model.dart';
@@ -17,6 +18,7 @@ import 'package:handy_allinone/helper/module_helper.dart';
 import 'package:handy_allinone/helper/price_converter.dart';
 import 'package:handy_allinone/helper/responsive_helper.dart';
 import 'package:handy_allinone/helper/route_helper.dart';
+import 'package:handy_allinone/util/app_constants.dart';
 import 'package:handy_allinone/util/dimensions.dart';
 import 'package:handy_allinone/util/images.dart';
 import 'package:handy_allinone/util/styles.dart';
@@ -29,6 +31,7 @@ import 'package:handy_allinone/common/widgets/menu_drawer.dart';
 import 'package:handy_allinone/common/widgets/no_data_screen.dart';
 import 'package:handy_allinone/common/widgets/web_constrained_box.dart';
 import 'package:handy_allinone/common/widgets/web_page_title_widget.dart';
+import 'package:handy_allinone/features/checkout/widgets/time_slot_bottom_sheet.dart';
 import 'package:handy_allinone/features/cart/widgets/cart_item_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -36,7 +39,6 @@ import 'package:handy_allinone/features/cart/widgets/web_cart_items_widget.dart'
 import 'package:handy_allinone/features/cart/widgets/web_suggested_item_view_widget.dart';
 import 'package:handy_allinone/features/home/screens/home_screen.dart';
 import 'package:handy_allinone/features/store/screens/store_screen.dart';
-import 'package:handy_allinone/common/widgets/confirmation_dialog.dart';
 
 class CartScreen extends StatefulWidget {
   final bool fromNav;
@@ -192,34 +194,97 @@ class _CartScreenState extends State<CartScreen> {
                                   );
                                 },
                                 icon: const Icon(Icons.add_circle_outline, color: Color(0xFF16A34A)),
-                                label: Text('Add more items', style: robotoBold.copyWith(color: const Color(0xFF16A34A))),
+                                label: Text('Add more items', style: robotoBold.copyWith(color: Color(0xFF16A34A))),
                               ),
 
                               // Add Delivery Instructions
-                              Container(
-                                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: Colors.grey.shade100),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text('Add Delivery Instructions', style: robotoBold.copyWith(fontSize: 14)),
-                                          const SizedBox(height: 4),
-                                          Text('E.g. Leave at door', style: robotoRegular.copyWith(fontSize: 13, color: Colors.grey)),
-                                        ],
+                              GetBuilder<CheckoutController>(builder: (checkoutController) {
+                                return InkWell(
+                                  onTap: () {
+                                    Get.bottomSheet(
+                                      Container(
+                                        padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
+                                        decoration: const BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                                        ),
+                                        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                          Text('Delivery Instructions', style: robotoBold.copyWith(fontSize: 18)),
+                                          const SizedBox(height: 16),
+                                          ListView.builder(
+                                            shrinkWrap: true,
+                                            itemCount: AppConstants.deliveryInstructionList.length,
+                                            itemBuilder: (context, index) {
+                                              bool isSelected = checkoutController.selectedInstruction == index;
+                                              return InkWell(
+                                                onTap: () {
+                                                  checkoutController.setInstruction(index);
+                                                  Get.back();
+                                                },
+                                                child: Container(
+                                                  margin: const EdgeInsets.only(bottom: 12),
+                                                  padding: const EdgeInsets.all(16),
+                                                  decoration: BoxDecoration(
+                                                    color: isSelected ? const Color(0xFF16A34A).withValues(alpha: 0.1) : Colors.grey.shade50,
+                                                    borderRadius: BorderRadius.circular(12),
+                                                    border: Border.all(color: isSelected ? const Color(0xFF16A34A) : Colors.transparent),
+                                                  ),
+                                                  child: Row(children: [
+                                                    Icon(
+                                                      index == 0 ? Icons.door_front_door_outlined :
+                                                      index == 1 ? Icons.business :
+                                                      index == 2 ? Icons.chat_outlined : Icons.pets,
+                                                      color: isSelected ? const Color(0xFF16A34A) : Colors.black87,
+                                                    ),
+                                                    const SizedBox(width: 12),
+                                                    Expanded(
+                                                      child: Text(
+                                                        AppConstants.deliveryInstructionList[index].tr,
+                                                        style: robotoMedium.copyWith(color: isSelected ? const Color(0xFF16A34A) : Colors.black87),
+                                                      ),
+                                                    ),
+                                                    if (isSelected) const Icon(Icons.check_circle, color: Color(0xFF16A34A), size: 20),
+                                                  ]),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                          const SizedBox(height: 16),
+                                        ]),
                                       ),
+                                    );
+                                  },
+                                  child: Container(
+                                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: Colors.grey.shade100),
                                     ),
-                                    const Icon(Icons.edit_outlined, size: 20, color: Colors.black87),
-                                  ],
-                                ),
-                              ),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text('Add Delivery Instructions', style: robotoBold.copyWith(fontSize: 14)),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                checkoutController.selectedInstruction != -1 
+                                                  ? AppConstants.deliveryInstructionList[checkoutController.selectedInstruction].tr 
+                                                  : 'E.g. Leave at door', 
+                                                style: robotoRegular.copyWith(fontSize: 13, color: checkoutController.selectedInstruction != -1 ? const Color(0xFF16A34A) : Colors.grey),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Icon(checkoutController.selectedInstruction != -1 ? Icons.check_circle : Icons.edit_outlined, size: 20, color: checkoutController.selectedInstruction != -1 ? const Color(0xFF16A34A) : Colors.black87),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }),
 
                               // Bill Details
                               Padding(
@@ -621,11 +686,13 @@ class _CartScreenState extends State<CartScreen> {
       showCustomSnackBar('select_address_first'.tr);
     } else if (cartController.cartList.isEmpty) {
       showCustomSnackBar('cart_is_empty'.tr);
-    } else if(Get.find<StoreController>().store != null && Get.find<StoreController>().store!.open == 0 && !cartController.cartList.first.item!.scheduleOrder!) {
+    } else if (Get.find<StoreController>().store != null && Get.find<StoreController>().store!.open == 0 && !cartController.cartList.first.item!.scheduleOrder!) {
+      bool isPharmacy = Get.find<SplashController>().module?.moduleType == 'pharmacy';
+      bool showRestaurantText = Get.find<SplashController>().configModel?.moduleConfig?.module?.showRestaurantText ?? false;
       Get.dialog(ConfirmationDialog(
         icon: Images.closed,
-        title: 'restaurant_is_closed_title'.tr,
-        description: 'order_in_another_restaurant'.tr,
+        title: isPharmacy ? 'pharmacy_is_closed_title'.tr : showRestaurantText ? 'restaurant_is_closed_title'.tr : 'store_is_closed_title'.tr,
+        description: isPharmacy ? 'order_in_another_pharmacy'.tr : showRestaurantText ? 'order_in_another_restaurant'.tr : 'order_in_another_store'.tr,
         onYesPressed: () {
           cartController.clearCartList();
           Get.back();
@@ -758,7 +825,7 @@ class CheckoutButton extends StatelessWidget {
               ) : const SizedBox(),
               ResponsiveHelper.isDesktop(context) ? const SizedBox(height: Dimensions.paddingSizeSmall) : const SizedBox(),
 
-              !ResponsiveHelper.isDesktop(context) ? const SizedBox() :
+/*              !ResponsiveHelper.isDesktop(context) ? const SizedBox() :
               Container(
                 width: Dimensions.webMaxWidth,
                 decoration: BoxDecoration(
@@ -804,7 +871,7 @@ class CheckoutButton extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
+              ),*/
               ResponsiveHelper.isDesktop(context) ? const SizedBox(height: Dimensions.paddingSizeSmall) : const SizedBox(),
 
               SafeArea(

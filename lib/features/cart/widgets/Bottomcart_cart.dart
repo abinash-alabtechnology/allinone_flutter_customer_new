@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:handy_allinone/helper/route_helper.dart';
 import 'package:handy_allinone/features/cart/controllers/cart_controller.dart';
 import 'package:handy_allinone/common/widgets/confirmation_dialog.dart';
+import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
 import 'package:handy_allinone/features/store/controllers/store_controller.dart';
 import 'package:handy_allinone/util/images.dart';
 import 'package:handy_allinone/features/home/screens/home_screen.dart';
@@ -152,10 +153,12 @@ class BottomCartButton1 extends StatelessWidget {
 
 void _onViewCart(BuildContext context, CartController cartController) {
   if (Get.find<StoreController>().store != null && Get.find<StoreController>().store!.open == 0 && !cartController.cartList.first.item!.scheduleOrder!) {
+    bool isPharmacy = Get.find<SplashController>().module?.moduleType == 'pharmacy';
+    bool showRestaurantText = Get.find<SplashController>().configModel?.moduleConfig?.module?.showRestaurantText ?? false;
     Get.dialog(ConfirmationDialog(
       icon: Images.closed,
-      title: 'restaurant_is_closed_title'.tr,
-      description: 'order_in_another_restaurant'.tr,
+      title: isPharmacy ? 'pharmacy_is_closed_title'.tr : showRestaurantText ? 'restaurant_is_closed_title'.tr : 'store_is_closed_title'.tr,
+      description: isPharmacy ? 'order_in_another_pharmacy'.tr : showRestaurantText ? 'order_in_another_restaurant'.tr : 'order_in_another_store'.tr,
       onYesPressed: () {
         cartController.clearCartList();
         Get.back();

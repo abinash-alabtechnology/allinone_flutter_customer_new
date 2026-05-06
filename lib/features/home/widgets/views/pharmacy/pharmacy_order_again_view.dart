@@ -115,18 +115,15 @@ class PharmacyOrderAgainView extends StatelessWidget {
                                   PriceConverter.convertPrice(priceWithDiscount),
                                   style: robotoBold.copyWith(fontSize: 16, color: Colors.black),
                                 ),
-                                InkWell(
-                                  onTap: () => itemController.itemDirectlyAddToCart(item, context),
-                                  child: Container(
-                                    height: 28,
-                                    width: 28,
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFE8F5E9),
-                                      shape: BoxShape.circle,
-                                      border: Border.all(color: const Color(0xFF4CAF50).withValues(alpha: 0.2), width: 1),
-                                    ),
-                                    child: const Icon(Icons.add, color: Color(0xFF4CAF50), size: 18),
+                                Container(
+                                  height: 28,
+                                  width: 28,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFE8F5E9),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: const Color(0xFF4CAF50).withValues(alpha: 0.2), width: 1),
                                   ),
+                                  child: const Icon(Icons.add, color: Color(0xFF4CAF50), size: 18),
                                 ),
                               ],
                             ),
@@ -143,8 +140,89 @@ class PharmacyOrderAgainView extends StatelessWidget {
         ],
       );
       } else {
-        return const SizedBox();
+        return const PharmacyOrderAgainShimmer();
       }
     });
+  }
+}
+
+class PharmacyOrderAgainShimmer extends StatelessWidget {
+  const PharmacyOrderAgainShimmer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(height: 20, width: 100, color: Colors.grey[300]),
+              Container(height: 15, width: 60, color: Colors.grey[300]),
+            ],
+          ),
+        ),
+        const SizedBox(height: Dimensions.paddingSizeSmall),
+        SizedBox(
+          height: 120,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.only(left: Dimensions.paddingSizeDefault),
+            itemCount: 5,
+            itemBuilder: (context, index) {
+              return Container(
+                width: 230,
+                margin: const EdgeInsets.only(right: Dimensions.paddingSizeDefault, bottom: 10),
+                padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      height: 65, width: 65,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(height: 15, width: 100, color: Colors.grey[300]),
+                          const SizedBox(height: 5),
+                          Container(height: 12, width: 60, color: Colors.grey[300]),
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Container(height: 18, width: 50, color: Colors.grey[300]),
+                              Container(height: 25, width: 25, decoration: BoxDecoration(color: Colors.grey[300], shape: BoxShape.circle)),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
   }
 }

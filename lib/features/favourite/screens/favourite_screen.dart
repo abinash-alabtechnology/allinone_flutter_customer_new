@@ -39,12 +39,13 @@ class FavouriteScreenState extends State<FavouriteScreen> with SingleTickerProvi
 
   @override
   Widget build(BuildContext context) {
+    bool isPharmacy = Get.find<SplashController>().module != null && Get.find<SplashController>().module!.moduleType.toString() == 'pharmacy';
     return Scaffold(
-      appBar: CustomAppBar3(title: 'favourite'.tr, backButton: false),
+      appBar: CustomAppBar3(title: isPharmacy ? 'Health Corner' : 'favourite'.tr, backButton: false),
       endDrawer: const MenuDrawer(),endDrawerEnableOpenDragGesture: false,
       body: AuthHelper.isLoggedIn() ? SafeArea(child: Column(children: [
 
-        WebScreenTitleWidget(title: 'favourite'.tr),
+        WebScreenTitleWidget(title: isPharmacy ? 'Health Corner' : 'favourite'.tr),
 
         SizedBox(
           width: Dimensions.webMaxWidth,

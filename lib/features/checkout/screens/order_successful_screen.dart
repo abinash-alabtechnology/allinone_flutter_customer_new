@@ -21,6 +21,8 @@ import 'package:handy_allinone/common/widgets/web_menu_bar.dart';
 import 'package:handy_allinone/features/checkout/widgets/payment_failed_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:handy_allinone/helper/price_converter.dart';
 
 class OrderSuccessfulScreen extends StatefulWidget {
   final String? orderID;
@@ -119,8 +121,10 @@ class _OrderSuccessfulScreenState extends State<OrderSuccessfulScreen> {
               }
             }
 
+            bool isPharmacy = Get.find<SplashController>().module?.moduleType == 'pharmacy';
+
             return orderController.trackModel != null ? Center(
-              child: SingleChildScrollView(
+              child: isPharmacy ? _pharmacySuccessView(orderController) : SingleChildScrollView(
                 child: FooterView(child: SizedBox(width: Dimensions.webMaxWidth, child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                   success?Stack(
                     children: [
@@ -388,5 +392,122 @@ class _OrderSuccessfulScreenState extends State<OrderSuccessfulScreen> {
         ),
       ),
     );
+  }
+
+  Widget _pharmacySuccessView(OrderController orderController) {
+    String? orderIdToUse = orderId ?? widget.orderID;
+    var trackModel = orderController.trackModel!;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge),
+      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        const SizedBox(height: 40),
+        
+        // Large Check Icon
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: const Color(0xFF16A34A).withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(Icons.check_circle, size: 80, color: Color(0xFF16A34A)),
+        ),
+        const SizedBox(height: 24),
+
+        Text(
+          'Order Confirmed!',
+          style: robotoBold.copyWith(fontSize: 24, color: Colors.black),
+        ),
+        const SizedBox(height: 8),
+
+        Text(
+          'Order ID: ${orderIdToUse ?? ""}',
+          style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault, color: Colors.grey),
+        ),
+        const SizedBox(height: 16),
+
+        Text(
+          'We have received your order and it will be delivered soon.',
+          textAlign: TextAlign.center,
+          style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Colors.grey.shade600),
+        ),
+        const SizedBox(height: 32),
+
+        // Info Card
+        Container(
+          padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey.shade100),
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10)],
+          ),
+          child: Column(children: [
+            _buildInfoRow('Delivery in', '${trackModel.processingTime ?? "30-40"} mins', isBoldValue: true, valueColor: const Color(0xFF16A34A)),
+            const Divider(height: 32, color: Color(0xFFF3F4F6)),
+            _buildInfoRow('Deliver to', trackModel.deliveryAddress?.address ?? 'Home'),
+            const Divider(height: 32, color: Color(0xFFF3F4F6)),
+            if (trackModel.deliveryInstruction != null && trackModel.deliveryInstruction!.isNotEmpty) ...[
+              _buildInfoRow('Delivery Instruction', trackModel.deliveryInstruction!),
+              const Divider(height: 32, color: Color(0xFFF3F4F6)),
+            ],
+            _buildInfoRow(
+              'Payment',
+              'Paid via ${trackModel.paymentMethod?.replaceAll('_', ' ').capitalizeFirst ?? "Digital Payment"}',
+              trailing: Text(PriceConverter.convertPrice(trackModel.orderAmount), style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault)),
+            ),
+          ]),
+        ),
+        const SizedBox(height: 24),
+
+        Text(
+          'You will receive order updates on\nWhatsApp & SMS',
+          textAlign: TextAlign.center,
+          style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Colors.grey),
+        ),
+        const SizedBox(height: 48),
+
+        // Track Order Button
+        CustomButton(
+          buttonText: 'track_order'.tr,
+          radius: 12,
+          onPressed: () async {
+            final int orderIdInt = int.tryParse(orderIdToUse ?? '0') ?? 0;
+            if (AuthHelper.isLoggedIn()) {
+              await Get.toNamed(RouteHelper.getOrderTrackingRoute(orderIdInt, null));
+            }
+            Get.offAllNamed(RouteHelper.getInitialRoute());
+          },
+        ),
+        const SizedBox(height: 16),
+
+        TextButton(
+          onPressed: () => Get.offAllNamed(RouteHelper.getInitialRoute()),
+          child: Text(
+            'Continue Shopping',
+            style: robotoBold.copyWith(color: const Color(0xFF374151), fontSize: Dimensions.fontSizeDefault),
+          ),
+        ),
+        const SizedBox(height: 40),
+      ]),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value, {bool isBoldValue = false, Color? valueColor, Widget? trailing}) {
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text(label, style: robotoRegular.copyWith(color: Colors.grey, fontSize: Dimensions.fontSizeExtraSmall)),
+      const SizedBox(height: 8),
+      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        Expanded(
+          child: Text(
+            value,
+            style: isBoldValue 
+                ? robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault, color: valueColor ?? Colors.black)
+                : robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Colors.black),
+          ),
+        ),
+        if (trailing != null) trailing,
+      ]),
+    ]);
   }
 }

@@ -987,7 +987,19 @@ class _HomeScreenState extends State<HomeScreen> {
                                       .primaryColor,
                                   child: Row(
                                     children: [
-                                      if (isPharmacy)
+                                      if (isPharmacy) ...[
+                                        InkWell(
+                                          onTap: () {
+                                            Get.find<SplashController>().removeModule();
+                                            Get.find<StoreController>().resetStoreData();
+                                          },
+                                          child: Icon(
+                                            Icons.arrow_back_ios,
+                                            color: Colors.black,
+                                            size: 20,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 4),
                                         Padding(
                                           padding: const EdgeInsets.only(right: 8.0),
                                           child: Icon(
@@ -995,7 +1007,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                             color: Colors.black,
                                             size: 20,
                                           ),
-                                        )
+                                        ),
+                                      ]
                                       else if (Get.find<SplashController>()
                                           .module !=
                                           null &&

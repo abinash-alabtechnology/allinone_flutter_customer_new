@@ -44,6 +44,7 @@ import '../../../Taxi/sharedservice.dart';
 import '../../../helper/address_helper.dart';
 import '../../cart/controllers/cart_controller.dart';
 import 'package:handy_allinone/features/cart/screens/cart_screen.dart';
+import 'package:handy_allinone/features/category/screens/category_screen.dart';
 
 import '../../store/widgets/bottom_cart_widget.dart';
 
@@ -365,6 +366,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                                 splashController.module!.moduleType
                                     .toString() ==
                                     AppConstants.taxi);
+                            bool isPharmacy = splashController.module != null && splashController.module!.moduleType.toString() == AppConstants.pharmacy;
                             isParcel = isParcel && !isTaxiWithCache;
 
                             _screens = [
@@ -373,19 +375,17 @@ class DashboardScreenState extends State<DashboardScreen> {
                                   ? const AddressScreen(fromDashboard: true)
                                   : isTaxi
                                   ? const VehicleFavouriteScreen()
-                                  : const FavouriteScreen(),
+                                  : isPharmacy ? const CategoryScreen() : const FavouriteScreen(),
                               Taxihome(),
-                              Get.find<CartController>()
+                              isPharmacy ? const FavouriteScreen() : (Get.find<CartController>()
                                   .availableList
                                   .isNotEmpty
                                   ? const SizedBox()
-                                  : const CartScreen(fromNav: false),
+                                  : const CartScreen(fromNav: false)),
                               OrderScreen(index: isTaxi ? 1 : 0),
                               const MenuScreen(),
                               HistoryScreen(),
                             ];
-
-                            bool isPharmacy = splashController.module != null && splashController.module!.moduleType == AppConstants.pharmacy;
 
                             return  Column(
                               mainAxisAlignment: MainAxisAlignment.end,
@@ -394,27 +394,24 @@ class DashboardScreenState extends State<DashboardScreen> {
                                 if(splashController.module!=null && splashController.module?.id!=null)   Align(
                                   alignment: Alignment.centerRight,
                                   child: Padding(
-                                    padding: EdgeInsets.only(
-                                        left: 18.w, right: 18.w,bottom: 4.w),
-                                    child: Container(
-                                        decoration: BoxDecoration(
-                                          color: Colors.transparent,
-                                          borderRadius:
-                                          BorderRadius.circular(
-                                              15),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.lightGreenAccent
-                                                  .withValues(alpha: 0.3),
-                                              spreadRadius: 1,
-                                              blurRadius: 3,
-                                              offset: const Offset(0,
-                                                  2), // changes position of shadow
-                                            ),
-                                          ],
-                                        ),
-                                        child: BottomCartWidget()),
-                                  ),
+                                  padding: isPharmacy ? EdgeInsets.only(left: 18.w, right: 18.w, bottom: 4.w) : EdgeInsets.fromLTRB(Dimensions.paddingSizeDefault, 0, Dimensions.paddingSizeDefault, Dimensions.paddingSizeDefault),
+                                  child: Container(
+                                      decoration: BoxDecoration(
+                                        color: isPharmacy ? Colors.transparent : const Color(0xFF2A2A2A),
+                                        borderRadius: BorderRadius.circular(isPharmacy ? 15 : Dimensions.radiusLarge),
+                                        boxShadow: isPharmacy ? [
+                                          BoxShadow(
+                                            color: Colors.lightGreenAccent.withValues(alpha: 0.3),
+                                            spreadRadius: 1,
+                                            blurRadius: 3,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ] : [
+                                          BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 5)),
+                                        ],
+                                      ),
+                                      child: isPharmacy ? const BottomCartWidget() : const BottomCartWidgetStore()),
+                                ),
                                 ),
                                 splashController.showBottomNav || true
                                     ?    AnimatedSlide(
@@ -490,7 +487,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                                 title: "Main",
                                                                 selectedIcon: Images.arrow,
                                                                 unSelectedIcon: Images.arrow,
-                                                                activeColor: const Color(0xFF16A34A),
+                                                                activeColor: Theme.of(context).primaryColor,
                                                                 onTap: () {
                                                                   splashController.removeModule();
                                                                   Get.find<StoreController>().resetStoreData();
@@ -509,7 +506,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                             Images.logotransparent,
                                                             isSelected:
                                                             _pageIndex == 0,
-                                                            activeColor: const Color(0xFF16A34A),
+                                                            activeColor: Theme.of(context).primaryColor,
                                                             onTap: () {     setState(() {
                                                               isBookingTab = false;
                                                             });
@@ -520,7 +517,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                           selectedIcon: Images.TaxiIcon,
                                                           unSelectedIcon: Images.TaxiIcon,
                                                           isSelected: _pageIndex == 2,
-                                                          activeColor: const Color(0xFF16A34A),
+                                                          activeColor: Theme.of(context).primaryColor,
                                                           onTap: _showRideBanner
                                                               ? () {
                                                             debugPrint("🚕 Tapped. Status: $_rideStatus");
@@ -573,7 +570,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                                .favouriteUnselect,
                                                            isSelected:
                                                            _pageIndex == 1,
-                                                           activeColor: const Color(0xFF16A34A),
+                                                           activeColor: Theme.of(context).primaryColor,
                                                            onTap: () =>
                                                                _setPage(1),
                                                          ),
@@ -584,7 +581,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                           selectedIcon: Images.ordersvg,
                                                           unSelectedIcon: Images.ordersvg,
                                                           isSelected:  _pageIndex == ((isBookingTab || _pageIndex == 6 ) ? 6 : 4),
-                                                          activeColor: const Color(0xFF16A34A),
+                                                          activeColor: Theme.of(context).primaryColor,
                                                           onTap: () => _setPage(isBookingTab
                                                               ? 6 : 4) ,
                                                         ),
@@ -692,7 +689,7 @@ class DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _pharmacyNavItem(BuildContext context, String title, String selectedIcon, String unSelectedIcon, bool isSelected, VoidCallback onTap) {
-    final Color activeColor = const Color(0xFF16A34A);
+    final Color activeColor = Theme.of(context).primaryColor;
     return InkWell(
       onTap: onTap,
       child: Column(

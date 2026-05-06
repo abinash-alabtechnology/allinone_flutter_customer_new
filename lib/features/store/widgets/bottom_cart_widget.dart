@@ -276,13 +276,13 @@ class _BottomCartWidgetStoreState extends State<BottomCartWidgetStore>
         return InkWell(
           onTap: () => Get.toNamed(RouteHelper.getCartRoute()),
           child: Container(
-            width: Get.width * 0.93,
-            padding: EdgeInsets.only(right: 5.w),
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: 4.h),
             child: Column(
               children: [
                 Column(
                   children: [
-                    SizedBox(height: 5.h),
+                    SizedBox(height: 2.h),
                     GetBuilder<StoreController>(
                       builder: (storeController) {
                         double percentage = 0;
@@ -335,15 +335,15 @@ class _BottomCartWidgetStoreState extends State<BottomCartWidgetStore>
                             : const SizedBox();
                       },
                     ),
-                    SizedBox(height: 5.h),
+                    SizedBox(height: 2.h),
                     Container(
-                      padding: EdgeInsets.only(bottom: 5.h),
+                      padding: EdgeInsets.only(bottom: 2.h),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Expanded(
                             child: SizedBox(
-                              height: 45,
+                              height: 35,
                               child: ListView.builder(
                                 shrinkWrap: true,
                                 scrollDirection: Axis.horizontal,
@@ -366,8 +366,8 @@ class _BottomCartWidgetStoreState extends State<BottomCartWidgetStore>
                                               .item
                                               ?.imageFullUrl ??
                                               "",
-                                          height: 43,
-                                          width: 43,
+                                          height: 33,
+                                          width: 33,
                                           fit: BoxFit.cover,
                                         ),
                                       ),
@@ -384,8 +384,8 @@ class _BottomCartWidgetStoreState extends State<BottomCartWidgetStore>
                             // color: Colors.white,
                           ),
                           Container(
-                            height: 40.h,
-                            width: 40.w,
+                            height: 30.h,
+                            width: 30.w,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(8.r),
                               color: Theme.of(context).primaryColor,
@@ -407,12 +407,10 @@ class _BottomCartWidgetStoreState extends State<BottomCartWidgetStore>
                   ],
                 ),
                 Row(
-                  mainAxisAlignment: .start,
-                  crossAxisAlignment: .start,
                   children: [
-                    Text("Item: ${cartController.cartList.length}   ",style: robotoBold.copyWith(fontSize: 15,color:Theme.of(context).cardColor,fontWeight: FontWeight.w500),),
+                    Text("Item: ${cartController.cartList.length}   ",style: robotoBold.copyWith(fontSize: 13,color:Theme.of(context).cardColor,fontWeight: FontWeight.w500),),
                     Text("Total: ${PriceConverter.convertPrice(
-                        cartController.calculationCart())}",style: robotoBold.copyWith(fontSize: 15,color:Colors.grey.shade600,fontWeight: FontWeight.w500),)
+                        cartController.calculationCart())}",style: robotoBold.copyWith(fontSize: 13,color:Colors.grey.shade600,fontWeight: FontWeight.w500),)
                   ],
                 )
               ],

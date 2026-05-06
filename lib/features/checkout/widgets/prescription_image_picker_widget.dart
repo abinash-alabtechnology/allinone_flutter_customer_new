@@ -12,6 +12,8 @@ import 'package:handy_allinone/helper/responsive_helper.dart';
 import 'package:handy_allinone/util/dimensions.dart';
 import 'package:handy_allinone/util/styles.dart';
 
+import 'package:handy_allinone/helper/route_helper.dart';
+
 class PrescriptionImagePickerWidget extends StatelessWidget {
   final CheckoutController checkoutController;
   final int? storeId;
@@ -57,7 +59,7 @@ class PrescriptionImagePickerWidget extends StatelessWidget {
                   if(ResponsiveHelper.isDesktop(context)){
                     checkoutController.pickPrescriptionImage(isRemove: false, isCamera: false);
                   }else{
-                    Get.bottomSheet(const CameraButtonSheetWidget());
+                    Get.toNamed(RouteHelper.getPrescriptionUploadRoute());
                   }
                 },
                 child: DottedBorder(
@@ -134,7 +136,7 @@ class PrescriptionImagePickerWidget extends StatelessWidget {
         ),
       ),
 
-      isPrescriptionRequired ? Container(
+      isPrescriptionRequired && Get.find<SplashController>().module?.moduleType != 'pharmacy' ? Container(
         padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
         margin: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeExtremeLarge),
         decoration: BoxDecoration(

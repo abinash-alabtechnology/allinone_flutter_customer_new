@@ -84,7 +84,7 @@ class _TimeSlotBottomSheetState extends State<TimeSlotBottomSheet> {
 
                       Flexible(
                         child: ((checkoutController.selectedDateSlot == 0 && widget.todayClosed) || (checkoutController.selectedDateSlot == 1 && widget.tomorrowClosed))
-                            ? Center(child: Text(widget.module!.showRestaurantText! ? 'restaurant_is_closed'.tr : 'store_is_closed'.tr))
+                            ? Center(child: Text(Get.find<SplashController>().module?.moduleType == 'pharmacy' ? 'pharmacy_is_closed'.tr : widget.module!.showRestaurantText! ? 'restaurant_is_closed'.tr : 'store_is_closed'.tr))
                             : checkoutController.timeSlots != null
                             ? checkoutController.timeSlots!.isNotEmpty ? GridView.builder(
                             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

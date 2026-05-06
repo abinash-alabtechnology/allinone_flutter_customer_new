@@ -32,6 +32,7 @@ import 'package:handy_allinone/helper/route_helper.dart';
 import 'package:handy_allinone/util/app_constants.dart';
 import 'package:handy_allinone/util/dimensions.dart';
 import 'package:handy_allinone/util/styles.dart';
+import 'package:handy_allinone/util/images.dart';
 import 'package:handy_allinone/common/widgets/custom_app_bar.dart';
 import 'package:handy_allinone/common/widgets/custom_button.dart';
 import 'package:handy_allinone/common/widgets/custom_dropdown.dart';
@@ -44,6 +45,8 @@ import 'package:handy_allinone/features/checkout/widgets/payment_method_bottom_s
 import 'package:get/get.dart';
 import 'package:handy_allinone/features/checkout/widgets/bottom_section.dart';
 import 'package:handy_allinone/features/checkout/widgets/top_section.dart';
+import 'package:handy_allinone/features/checkout/widgets/prescription_image_picker_widget.dart';
+import 'package:handy_allinone/features/checkout/widgets/note_prescription_section.dart';
 import 'package:flutter/material.dart';
 
 import '../../../common/widgets/custom_asset_image_widget.dart';
@@ -366,12 +369,12 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     bool isPharmacy = Get.find<SplashController>().module?.moduleType == 'pharmacy';
 
     return Scaffold(
-      backgroundColor: isPharmacy ? const Color(0xFFFFFBF7) : Theme.of(context).primaryColor.withOpacity(0.001),
+      backgroundColor: isPharmacy ? const Color(0xFFFFFBF7) : Theme.of(context).primaryColor.withOpacity(0.01),
       appBar: CustomAppBar3(
-        title: 'checkout'.tr,
+        title: isPharmacy ? 'Address & Payment' : 'checkout'.tr,
         bgcolor: isPharmacy ? const Color(0xFFFFFBF7) : Theme.of(context).primaryColor,
-        textcolor: isPharmacy ? Colors.black : Theme.of(context).cardColor,
-        iconcolor: isPharmacy ? Colors.black : Theme.of(context).cardColor,
+        textcolor: isPharmacy ? Colors.black : Colors.white,
+        iconcolor: isPharmacy ? Colors.black : Colors.white,
       ),
       endDrawer: const MenuDrawer(), endDrawerEnableOpenDragGesture: false,
       body: guestCheckoutPermission || AuthHelper.isLoggedIn() ?
@@ -704,11 +707,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
             _setSinglePaymentActive();
 
             return (checkoutController.distance != null &&
-                checkoutController.store != null) ? (_cartList != null && _cartList!.isNotEmpty) ? isPharmacy ? _buildPharmacyCheckoutUI(
-              checkoutController, cartController, couponController, total, subTotal, discount, referralDiscount, 
-              orderAmount, maxCodOrderAmount, originalCharge, deliveryCharge, addressList, tomorrowClosed, 
-              todayClosed, isPrescriptionRequired, module, variations, itemDiscountPrice,
-            ) : Column(
+                checkoutController.store != null) ? (_cartList != null && _cartList!.isNotEmpty) ? Column(
               children: [
                 ResponsiveHelper.isDesktop(context) ? Container(
                   height: 64,
@@ -728,7 +727,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                       GetBuilder<StoreController>(builder: (storeController) {
                         return GetBuilder<CartController>(
                             builder: (cartController) {
-                              return (_cartList != null && _cartList!.isNotEmpty) ?
+                              return (!isPharmacy && _cartList != null && _cartList!.isNotEmpty) ?
                               Column(children: [
                                 Row(crossAxisAlignment: CrossAxisAlignment
                                     .start, children: [
@@ -789,25 +788,25 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                                 ),
                                                 const SizedBox(height: Dimensions
                                                     .paddingSizeDefault),
-                                                Padding(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                                                  child: InkWell(
-                                                    onTap: (){
-                                                      if(ResponsiveHelper.isDesktop(context)) {
-                                                        Get.dialog(const Dialog(child: NotAvailableBottomSheetWidget()));
-                                                      } else {
-                                                        showModalBottomSheet(
-                                                          context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
-                                                          builder: (con) => const NotAvailableBottomSheetWidget(),
-                                                        );
-                                                      }
-                                                    },
-                                                    child: Row(children: [
-                                                      Expanded(child: Text('if_any_product_is_not_available'.tr, style: robotoBold.copyWith(fontSize: 16), maxLines: 2, overflow: TextOverflow.ellipsis)),
-                                                      const Icon(Icons.arrow_forward_ios_sharp, size: 18),
-                                                    ]),
-                                                  ),
-                                                ),
+                                                /*Padding(
+                                                   padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                                                   child: InkWell(
+                                                     onTap: (){
+                                                       if(ResponsiveHelper.isDesktop(context)) {
+                                                         Get.dialog(const Dialog(child: NotAvailableBottomSheetWidget()));
+                                                       } else {
+                                                         showModalBottomSheet(
+                                                           context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
+                                                           builder: (con) => const NotAvailableBottomSheetWidget(),
+                                                         );
+                                                       }
+                                                     },
+                                                     child: Row(children: [
+                                                       Expanded(child: Text('if_any_product_is_not_available'.tr, style: robotoBold.copyWith(fontSize: 16), maxLines: 2, overflow: TextOverflow.ellipsis)),
+                                                       const Icon(Icons.arrow_forward_ios_sharp, size: 18),
+                                                     ]),
+                                                   ),
+                                                 ),*/
                                                 DottedBorder(
                                                   options:
                                                   CustomPathDottedBorderOptions(
@@ -910,7 +909,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                     ? WebSuggestedItemViewWidget(
                                     cartList: _cartList!.cast<CartModel>())
                                     : const SizedBox(),
-                                Padding(
+                                if (!isPharmacy) Padding(
                                   padding: EdgeInsets.symmetric(
                                     horizontal: 8.0,
                                     vertical: 12,
@@ -1012,7 +1011,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                   discount: discount,
                                   addOns: addOns,
                                   address: address,
-                                              isPrescriptionRequired: isPrescriptionRequired,
+                                  isPrescriptionRequired: isPrescriptionRequired,
                                   cartList: _cartList,
                                   isCashOnDeliveryActive: _isCashOnDeliveryActive!,
                                   isDigitalPaymentActive: _isDigitalPaymentActive!,
@@ -1081,8 +1080,8 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                       : 0,
                                   extraDiscount: extraDiscount,
                                 )),
-                              ]),
-                        ) : Column(crossAxisAlignment: CrossAxisAlignment.start,
+                              ]))
+                                    : isPharmacy ? _pharmacyCheckoutBody(checkoutController, total, _isCashOnDeliveryActive!, _isDigitalPaymentActive!, _isWalletActive, _isOfflinePaymentActive, isPrescriptionRequired) : Column(crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
 
                               TopSection(
@@ -1103,7 +1102,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                 isWalletActive: _isWalletActive,
                                 storeId: widget.storeId,
                                 total: total,
-                                     isPrescriptionRequired: isPrescriptionRequired,
+                                 isPrescriptionRequired: isPrescriptionRequired,
                                 isOfflinePaymentActive: _isOfflinePaymentActive,
                                 guestNameTextEditingController: guestContactPersonNameController,
                                 guestNumberTextEditingController: guestContactPersonNumberController,
@@ -1171,7 +1170,10 @@ class CheckoutScreenState extends State<CheckoutScreen> {
 
                 ResponsiveHelper.isDesktop(context)
                     ? const SizedBox()
-                    : SafeArea(
+                    : isPharmacy ? _pharmacyOrderPlaceButton(
+                      checkoutController, todayClosed, tomorrowClosed, orderAmount, deliveryCharge, checkoutController.orderTax!,
+                      discount, total, maxCodOrderAmount, isPrescriptionRequired,
+                    ) : SafeArea(
                       child: Container(
                                         decoration: BoxDecoration(
                       color: Colors.black87,
@@ -1344,6 +1346,151 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
+  Widget _pharmacyCheckoutBody(CheckoutController checkoutController, double total, bool isCashOnDeliveryActive, bool isDigitalPaymentActive, bool isWalletActive, bool isOfflinePaymentActive, bool isPrescriptionRequired) {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        _pharmacyDeliverToCard(checkoutController),
+        const SizedBox(height: Dimensions.paddingSizeLarge),
+
+        Text('Payment Options', style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
+        const SizedBox(height: Dimensions.paddingSizeSmall),
+
+        _pharmacyPaymentMethodsList(checkoutController, total, isCashOnDeliveryActive, isDigitalPaymentActive, isWalletActive, isOfflinePaymentActive),
+
+        const SizedBox(height: Dimensions.paddingSizeLarge),
+        PrescriptionImagePickerWidget(checkoutController: checkoutController, storeId: widget.storeId, isPrescriptionRequired: isPrescriptionRequired),
+        const SizedBox(height: Dimensions.paddingSizeSmall),
+        NoteAndPrescriptionSection(checkoutController: checkoutController, storeId: widget.storeId),
+      ]),
+    );
+  }
+
+  Widget _pharmacyDeliverToCard(CheckoutController checkoutController) {
+    AddressModel? selectedAddress = address.isNotEmpty ? address[checkoutController.addressIndex!] : null;
+    return Container(
+      padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+        border: Border.all(color: Colors.grey.withOpacity(0.1)),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)],
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text('Deliver To', style: robotoRegular.copyWith(color: Colors.grey, fontSize: Dimensions.fontSizeExtraSmall)),
+        const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+        
+        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Text(selectedAddress?.addressType?.tr ?? 'Home', style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
+          InkWell(
+            onTap: () async {
+              var result = await Get.toNamed(RouteHelper.getAddAddressRoute(true, false, checkoutController.store!.zoneId));
+              if (result != null && result is AddressModel) {
+                 // The address controller will update, and we might need to refresh
+              }
+            },
+            child: Text('Change', style: robotoBold.copyWith(color: const Color(0xFF16A34A), fontSize: Dimensions.fontSizeSmall)),
+          ),
+        ]),
+        const SizedBox(height: Dimensions.paddingSizeSmall),
+
+        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Icon(Icons.location_on_outlined, size: 18, color: Color(0xFF16A34A)),
+          const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+          Expanded(child: Text(selectedAddress?.address ?? '', style: robotoRegular.copyWith(color: Colors.grey, fontSize: Dimensions.fontSizeSmall), maxLines: 2, overflow: TextOverflow.ellipsis)),
+        ]),
+        const SizedBox(height: Dimensions.paddingSizeSmall),
+        Text('${selectedAddress?.contactPersonName ?? ''} - ${selectedAddress?.contactPersonNumber ?? ''}',
+            style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Colors.grey)),
+      ]),
+    );
+  }
+
+  Widget _pharmacyPaymentMethodsList(CheckoutController checkoutController, double total, bool isCashOnDeliveryActive, bool isDigitalPaymentActive, bool isWalletActive, bool isOfflinePaymentActive) {
+    return Column(children: [
+      if (isDigitalPaymentActive)
+        _pharmacyPaymentCard(
+          title: 'Online Payment',
+          subtitle: 'UPI, Credit/Debit Card, Net Banking',
+          icon: Icons.payments_outlined,
+          isSelected: checkoutController.paymentMethodIndex == 2 && checkoutController.digitalPaymentName == 'razor_pay',
+          onTap: () {
+            checkoutController.setPaymentMethod(2);
+            checkoutController.changeDigitalPaymentName('razor_pay');
+          },
+          customIcon: Image.asset(Images.digitalPay, height: 18),
+        ),
+
+      if (isCashOnDeliveryActive)
+        _pharmacyPaymentCard(
+          title: 'Cash On Delivery',
+          subtitle: 'Pay when you receive',
+          icon: Icons.account_balance_wallet_outlined,
+          isSelected: checkoutController.paymentMethodIndex == 0,
+          onTap: () => checkoutController.setPaymentMethod(0),
+        ),
+    ]);
+  }
+
+  Widget _pharmacyPaymentCard({required String title, required String subtitle, required IconData icon, required bool isSelected, required Function onTap, Widget? customIcon}) {
+    return InkWell(
+      onTap: onTap as void Function()?,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeSmall),
+        padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeSmall),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+          border: Border.all(color: isSelected ? const Color(0xFF16A34A).withOpacity(0.1) : Colors.grey.withOpacity(0.1), width: 1),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.01), blurRadius: 5)],
+        ),
+        child: Row(children: [
+          Icon(isSelected ? Icons.radio_button_checked : Icons.radio_button_off, color: isSelected ? const Color(0xFF16A34A) : Colors.grey, size: 22),
+          const SizedBox(width: Dimensions.paddingSizeDefault),
+
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(title, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault)),
+            Text(subtitle, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Colors.grey)),
+          ])),
+
+          customIcon ?? Icon(icon, size: 22, color: Colors.grey.withOpacity(0.5)),
+        ]),
+      ),
+    );
+  }
+
+  Widget _pharmacyOrderPlaceButton(CheckoutController checkoutController, bool todayClosed, bool tomorrowClosed,
+      double orderAmount, double? deliveryCharge, double tax, double? discount, double total, double? maxCodOrderAmount, bool isPrescriptionRequired) {
+    return Container(
+      padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5))],
+      ),
+      child: SafeArea(
+        child: InkWell(
+          onTap: checkoutController.isLoading ? null : () => _onPlaceOrderPressed(
+            checkoutController, todayClosed, tomorrowClosed, orderAmount, deliveryCharge, tax, discount, total, maxCodOrderAmount, isPrescriptionRequired,
+          ),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
+            decoration: BoxDecoration(
+              color: const Color(0xFF16A34A),
+              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+            ),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              Text('Place Order', style: robotoBold.copyWith(color: Colors.white, fontSize: Dimensions.fontSizeLarge)),
+              const SizedBox(height: 2),
+              Text('Total Amount: ${PriceConverter.convertPrice(total)}', style: robotoMedium.copyWith(color: Colors.white, fontSize: Dimensions.fontSizeDefault)),
+            ]),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _orderPlaceButton(CheckoutController checkoutController, bool todayClosed, bool tomorrowClosed,
       double orderAmount, double? deliveryCharge, double tax, double? discount, double total, double? maxCodOrderAmount, bool isPrescriptionRequired) {
 
@@ -1461,8 +1608,9 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     }else if(checkoutController.tipController.text.isNotEmpty && checkoutController.tipController.text != 'not_now' && double.parse(checkoutController.tipController.text.trim()) < 0) {
       showCustomSnackBar('tips_can_not_be_negative'.tr);
     }else if((checkoutController.selectedDateSlot == 0 && todayClosed) || (checkoutController.selectedDateSlot == 1 && tomorrowClosed)) {
-      showCustomSnackBar(Get.find<SplashController>().configModel!.moduleConfig!.module!.showRestaurantText!
-          ? 'restaurant_is_closed'.tr : 'store_is_closed'.tr);
+      bool isPharmacy = Get.find<SplashController>().module?.moduleType == 'pharmacy';
+      bool showRestaurantText = Get.find<SplashController>().configModel?.moduleConfig?.module?.showRestaurantText ?? false;
+      showCustomSnackBar(isPharmacy ? 'pharmacy_is_closed'.tr : showRestaurantText ? 'restaurant_is_closed'.tr : 'store_is_closed'.tr);
     }else if(checkoutController.paymentMethodIndex == 0 && _isCashOnDeliveryActive! && maxCodOrderAmount != null && maxCodOrderAmount != 0 && (total > maxCodOrderAmount) && widget.storeId == null){
       showCustomSnackBar('${'you_cant_order_more_then'.tr} ${PriceConverter.convertPrice(maxCodOrderAmount)} ${'in_cash_on_delivery'.tr}');
     }else if(checkoutController.paymentMethodIndex != 0 && widget.storeId != null){
@@ -1471,8 +1619,9 @@ class CheckoutScreenState extends State<CheckoutScreen> {
       if(checkoutController.store!.scheduleOrder!) {
         showCustomSnackBar('select_a_time'.tr);
       }else {
-        showCustomSnackBar(Get.find<SplashController>().configModel!.moduleConfig!.module!.showRestaurantText!
-            ? 'restaurant_is_closed'.tr : 'store_is_closed'.tr);
+        bool isPharmacy = Get.find<SplashController>().module?.moduleType == 'pharmacy';
+        bool showRestaurantText = Get.find<SplashController>().configModel?.moduleConfig?.module?.showRestaurantText ?? false;
+        showCustomSnackBar(isPharmacy ? 'pharmacy_is_closed'.tr : showRestaurantText ? 'restaurant_is_closed'.tr : 'store_is_closed'.tr);
       }
     }else if (!isAvailable) {
       showCustomSnackBar('one_or_more_products_are_not_available_for_this_selected_time'.tr);

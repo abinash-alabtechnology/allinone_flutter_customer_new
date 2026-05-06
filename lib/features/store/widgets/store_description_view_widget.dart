@@ -1297,213 +1297,62 @@ class _StoreDescriptionViewWidgetState
                   child: Row(
                     children: [
                       InkWell(
-                        onTap: () => Get.toNamed(
-                          RouteHelper.getStoreReviewRoute(
-                            widget.store!.id,
-                            widget.store!.name,
-                            widget.store!,
-                          ),
-                        ),
-                        child: Container(
-                          height: 70,
-                          decoration: BoxDecoration(
-                            color: Color(0xFFFEEFDC),
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: IntrinsicWidth(
-                            child: Center(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8.0,
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: .center,
-                                  crossAxisAlignment: .center,
-                                  children: [
-                                    CustomAssetImageWidget(
-                                      Images.storestar,
-                                      width: 30,
-                                      height: 30,
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          widget.store!.avgRating!
-                                              .toStringAsFixed(1),
-                                          style: robotoBold.copyWith(
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                        const SizedBox(
-                                          width: Dimensions
-                                              .paddingSizeExtraSmall,
-                                        ),
-                                        Text(
-                                          '${widget.store!.ratingCount} +',
-                                          style: robotoRegular.copyWith(
-                                            fontSize: 16,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
+                        onTap: () => Get.toNamed(RouteHelper.getStoreReviewRoute(widget.store!.id, widget.store!.name, widget.store!)),
+                        child: _buildInfoCard(
+                          context,
+                          const Color(0xFFFFF9F5),
+                          Colors.orange,
+                          Images.storestar,
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(widget.store!.avgRating!.toStringAsFixed(1), style: robotoBold.copyWith(fontSize: 16)),
+                              Text('${widget.store!.ratingCount}+ ratings', style: robotoRegular.copyWith(fontSize: 11, color: Colors.grey.shade600)),
+                            ],
                           ),
                         ),
                       ),
-                      SizedBox(width: 5),
+                      const SizedBox(width: 8),
+
                       InkWell(
-                        onTap: () => Get.toNamed(
-                          RouteHelper.getMapRoute(
-                            AddressModel(
-                              id: widget.store!.id,
-                              address: widget.store!.address,
-                              latitude: widget.store!.latitude,
-                              longitude: widget.store!.longitude,
-                              contactPersonNumber: '',
-                              contactPersonName: '',
-                              addressType: '',
-                            ),
-                            'store',
-                            Get.find<SplashController>()
-                                .getModuleConfig(
-                                  Get.find<SplashController>()
-                                      .module!
-                                      .moduleType!,
-                                )
-                                .newVariation!,
-                            storeName: widget.store!.name,
-                          ),
-                        ),
-                        child: Container(
-                          height: 70,
-                          decoration: BoxDecoration(
-                            color: Color(0xFFF0F6E8),
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8.0,
-                            ),
-                            child: IntrinsicWidth(
-                              child: Column(
-                                mainAxisAlignment: .center,
-                                crossAxisAlignment: .center,
-                                children: [
-                                  CustomAssetImageWidget(
-                                    Images.drivethru,
-                                    width: 30,
-                                    height: 30,
-                                  ),
-                                  SizedBox(height: 2),
-                                  Text(
-                                    'Drive Through',
-                                    style: robotoRegular.copyWith(
-                                      fontSize: Dimensions.fontSizeSmall,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
+                        onTap: () => Get.toNamed(RouteHelper.getMapRoute(
+                          AddressModel(id: widget.store!.id, address: widget.store!.address, latitude: widget.store!.latitude, longitude: widget.store!.longitude, contactPersonNumber: '', contactPersonName: '', addressType: ''),
+                          'store', Get.find<SplashController>().getModuleConfig(Get.find<SplashController>().module!.moduleType!).newVariation!, storeName: widget.store!.name,
+                        )),
+                        child: _buildInfoCard(
+                          context,
+                          const Color(0xFFF7FAF2),
+                          Colors.green,
+                          Images.drivethru,
+                          Text('Drive Thru', style: robotoMedium.copyWith(fontSize: 12, color: Colors.green.shade700)),
                         ),
                       ),
-                      SizedBox(width: 5),
-                      Container(
-                        height: 70,
-                        decoration: BoxDecoration(
-                          color: Color(0xFFFCF2F5),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: IntrinsicWidth(
-                          child: Center(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8.0,
-                              ),
-                              child: Row(
-                                children: [
-                                  CustomAssetImageWidget(
-                                    Images.splashstore,
-                                    width: 35,
-                                    height: 35,
-                                  ),
-                                  const SizedBox(
-                                    width: Dimensions.paddingSizeDefault,
-                                  ),
-                                  Column(
-                                    mainAxisAlignment: .center,
-                                    crossAxisAlignment: .center,
-                                    children: [
-                                      Text(
-                                        widget.store!.deliveryTime!,
-                                        style: robotoBold.copyWith(
-                                          fontSize: 18,
-                                          color: textColor,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 5),
-                                      Text(
-                                        'delivery_time'.tr,
-                                        style: robotoRegular.copyWith(
-                                          fontSize: Dimensions.fontSizeSmall,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
+                      const SizedBox(width: 8),
+
+                      _buildInfoCard(
+                        context,
+                        const Color(0xFFFFF7F9),
+                        Colors.pink,
+                        Images.splashstore,
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(widget.store!.deliveryTime!, style: robotoBold.copyWith(fontSize: 16)),
+                            Text('Delivery', style: robotoRegular.copyWith(fontSize: 11, color: Colors.pink.shade700)),
+                          ],
                         ),
                       ),
-                      (widget.store!.delivery! && widget.store!.freeDelivery!)
-                          ? SizedBox(width: 5)
-                          : const SizedBox(),
-                      (widget.store!.delivery! && widget.store!.freeDelivery!)
-                          ? Container(
-                              height: 70,
-                              decoration: BoxDecoration(
-                                color: Color(0xFFFCF2F5),
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              child: IntrinsicWidth(
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8.0,
-                                  ),
-                                  child: Column(
-                                    mainAxisAlignment: .center,
-                                    crossAxisAlignment: .center,
-                                    children: [
-                                      CustomAssetImageWidget(
-                                        Images.money,
-                                        height: 30,
-                                        width: 30,
-                                      ),
-                                      const SizedBox(
-                                        height:
-                                            Dimensions.paddingSizeExtraSmall,
-                                      ),
-                                      Text(
-                                        'free_delivery'.tr,
-                                        style: robotoRegular.copyWith(
-                                          fontSize: Dimensions.fontSizeSmall,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            )
-                          : const SizedBox(),
+                      
+                      if (widget.store!.delivery! && widget.store!.freeDelivery!) ...[
+                        const SizedBox(width: 8),
+                        _buildInfoCard(
+                          context,
+                          const Color(0xFFF2F6FF),
+                          Colors.blue,
+                          Images.money,
+                          Text('Free Delivery', style: robotoMedium.copyWith(fontSize: 12, color: Colors.blue.shade700)),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -1679,6 +1528,39 @@ class _StoreDescriptionViewWidgetState
             ),
           ),
       ],
+    );
+  }
+
+  Widget _buildInfoCard(BuildContext context, Color bgColor, Color accentColor, String iconPath, Widget content) {
+    return Container(
+      height: 70,
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: accentColor.withOpacity(0.1)),
+        boxShadow: [
+          BoxShadow(
+            color: accentColor.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: IntrinsicWidth(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CustomAssetImageWidget(iconPath, width: 28, height: 28),
+                const SizedBox(width: 8),
+                content,
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -2054,94 +1936,66 @@ class _StoreDescriptionViewWidgetFoodState
                                     );
                                   },
                                   child: Container(
-                                    margin: const EdgeInsets.only(right: 5),
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.8,
+                                    margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                    padding: const EdgeInsets.all(15),
                                     decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10),
-                                      color: Colors.transparent,
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(15),
+                                      border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.2)),
+                                      boxShadow: [
+                                        BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4)),
+                                      ],
                                     ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
+                                    child: Stack(
                                       children: [
                                         Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
                                           children: [
-                                            SvgPicture.asset(
-                                              Images.subtract,
-                                              width: 30,
-                                              height: 30,
-                                              color: Theme.of(
-                                                context,
-                                              ).primaryColor,
-                                            ),
-                                            const SizedBox(width: 10),
-                                            ConstrainedBox(
-                                              constraints: BoxConstraints(
-                                                maxWidth:
-                                                    MediaQuery.of(
-                                                      context,
-                                                    ).size.width *
-                                                    0.55,
+                                            Container(
+                                              padding: const EdgeInsets.all(10),
+                                              decoration: BoxDecoration(
+                                                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                                                shape: BoxShape.circle,
                                               ),
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      vertical: 2.0,
-                                                    ),
-                                                child: Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      '${couponController.couponRestList?[index].discountType == 'percent'
-                                                          ? '%'
-                                                          : couponController.couponRestList?[index].couponType == 'free_delivery'
-                                                          ? 'free_delivery'.tr
-                                                          : Get.find<SplashController>().configModel?.currencySymbol}'
-                                                      '${couponController.couponRestList?[index].couponType == 'free_delivery' ? '' : (couponController.couponRestList?[index].discount)?.toStringAsFixed(0)} '
-                                                      '${couponController.couponRestList?[index].couponType == 'free_delivery' ? '' : 'off'.tr}'
-                                                      '${couponController.couponRestList?[index].maxDiscount != null ? ' | UPTO ₹${(couponController.couponRestList?[index].maxDiscount)?.toStringAsFixed(0)}' : ''}',
-                                                      style: robotoBold
-                                                          .copyWith(
-                                                            fontSize: Dimensions
-                                                                .fontSizeLarge,
-                                                          ),
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ),
-                                                    const SizedBox(height: 2),
-                                                    // Code and expiry
-                                                    Text(
-                                                      "Use: ${couponController.couponRestList?[index].code ?? 'N/A'} | Valid Till: ${couponController.couponRestList?[index].expireDate != null ? DateFormat('dd-MMMM-yyyy').format(DateTime.parse(couponController.couponRestList![index].expireDate!)) : 'N/A'}",
-                                                      style: robotoRegular
-                                                          .copyWith(
-                                                            fontSize: Dimensions
-                                                                .fontSizeSmall,
-                                                          ),
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ),
-                                                  ],
-                                                ),
+                                              child: Icon(Icons.local_offer_rounded, color: Theme.of(context).primaryColor, size: 24),
+                                            ),
+                                            const SizedBox(width: 15),
+                                            Expanded(
+                                              child: Column(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    '${couponController.couponRestList?[index].discountType == 'percent' ? '%' : (couponController.couponRestList?[index].couponType == 'free_delivery' ? 'free_delivery'.tr : Get.find<SplashController>().configModel?.currencySymbol)}'
+                                                    '${couponController.couponRestList?[index].couponType == 'free_delivery' ? '' : (couponController.couponRestList?[index].discount)?.toStringAsFixed(0)} '
+                                                    '${couponController.couponRestList?[index].couponType == 'free_delivery' ? '' : 'off'.tr}',
+                                                    style: robotoBold.copyWith(fontSize: 18, color: Theme.of(context).primaryColor),
+                                                  ),
+                                                  const SizedBox(height: 2),
+                                                  Text(
+                                                    "Code: ${couponController.couponRestList?[index].code ?? 'N/A'}",
+                                                    style: robotoMedium.copyWith(fontSize: 14),
+                                                  ),
+                                                ],
                                               ),
                                             ),
                                           ],
                                         ),
-                                        // Index indicator
-                                        Text(
-                                          "${index + 1}/${couponController.couponRestList?.length ?? 0}",
-                                          style: robotoBold.copyWith(
-                                            color: Theme.of(
-                                              context,
-                                            ).primaryColor,
-                                            fontSize: 12,
+                                        Positioned(
+                                          right: 0,
+                                          top: 0,
+                                          bottom: 0,
+                                          child: Center(
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                              decoration: BoxDecoration(
+                                                color: Theme.of(context).primaryColor,
+                                                borderRadius: BorderRadius.circular(20),
+                                              ),
+                                              child: Text(
+                                                'COPY',
+                                                style: robotoBold.copyWith(color: Colors.white, fontSize: 10),
+                                              ),
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -2150,15 +2004,13 @@ class _StoreDescriptionViewWidgetFoodState
                                 );
                               },
                               options: CarouselOptions(
-                                height: 200,
+                                height: 110,
                                 enlargeCenterPage: true,
                                 autoPlay: true,
                                 scrollDirection: Axis.horizontal,
                                 autoPlayCurve: Curves.fastOutSlowIn,
                                 enableInfiniteScroll: true,
-                                autoPlayAnimationDuration: const Duration(
-                                  milliseconds: 700,
-                                ),
+                                autoPlayAnimationDuration: const Duration(milliseconds: 700),
                                 viewportFraction: 1,
                               ),
                             ),
@@ -2184,3 +2036,4 @@ class _StoreDescriptionViewWidgetFoodState
     );
   }
 }
+

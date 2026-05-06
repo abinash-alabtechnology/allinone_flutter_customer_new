@@ -153,7 +153,7 @@ class ItemShimmer extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -181,36 +181,56 @@ class ItemShimmer extends StatelessWidget {
           ],
         ),
       ),
-    ) : Column(
-      children: [
-        Skeletonizer(
-          enabled: true,
-          child: Padding(
-            padding: const EdgeInsets.all(4.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Stack(
-                  children: [
-                    Container(
-                      height: 80,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(15),
-                        color: Colors.grey.shade300,
-                      ),
-                    ),
-                  ],
+    ) : Skeletonizer(
+      enabled: isEnabled,
+      child: Padding(
+        padding: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
+        child: Container(
+          height: 120,
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+            border: Border.all(color: Colors.grey.shade100),
+          ),
+          child: Row(
+            children: [
+              Container(
+                height: 110,
+                width: 110,
+                margin: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
                 ),
-                const SizedBox(height: 8),
-                Container(height: 12, width: 60, color: Colors.grey.shade300),
-                const SizedBox(height: 4),
-                Container(height: 10, width: 100, color: Colors.grey.shade300),
-              ],
-            ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(height: 16, width: 150, color: Colors.grey.shade300),
+                      const SizedBox(height: 8),
+                      Container(height: 12, width: 100, color: Colors.grey.shade300),
+                      const Spacer(),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(height: 20, width: 60, color: Colors.grey.shade300),
+                          Container(height: 30, width: 70, decoration: BoxDecoration(
+                            color: Colors.grey.shade300,
+                            borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
+                          )),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-      ],
+      ),
     );
   }
 }

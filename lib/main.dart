@@ -173,7 +173,7 @@ class _MyAppState extends State<MyApp> {
               scrollBehavior: const MaterialScrollBehavior().copyWith(
                 dragDevices: {PointerDeviceKind.mouse, PointerDeviceKind.touch},
               ),
-              theme: themeController.darkTheme ? dark() : light(),
+              theme: themeController.darkTheme ? dark(color: splashController.module != null && splashController.module!.moduleType.toString() == AppConstants.pharmacy ? const Color(0xFF16A34A) : const Color(0xFFFF8110)) : light(color: splashController.module != null && splashController.module!.moduleType.toString() == AppConstants.pharmacy ? const Color(0xFF16A34A) : const Color(0xFFFF8110)),
               locale: localizeController.locale,
               translations: Messages(languages: widget.languages),
               fallbackLocale: Locale(AppConstants.languages[0].languageCode!, AppConstants.languages[0].countryCode),

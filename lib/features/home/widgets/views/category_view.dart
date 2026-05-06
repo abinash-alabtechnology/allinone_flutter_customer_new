@@ -249,7 +249,7 @@ class PharmacyCategoryView extends StatelessWidget {
           ),
         ),
         SizedBox(
-          height: 120,
+          height: 130,
           child: categoryController.categoryList != null
               ? ListView.builder(
                   controller: scrollController,
@@ -294,9 +294,50 @@ class PharmacyCategoryView extends StatelessWidget {
                     );
                   },
                 )
-              : const SizedBox(),
+              : const PharmacyCategoryShimmer(),
         ),
       ],
+    );
+  }
+}
+
+class PharmacyCategoryShimmer extends StatelessWidget {
+  const PharmacyCategoryShimmer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: 8,
+      padding: const EdgeInsets.only(left: Dimensions.paddingSizeDefault),
+      physics: const NeverScrollableScrollPhysics(),
+      scrollDirection: Axis.horizontal,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: const EdgeInsets.only(right: 20),
+          child: Shimmer(
+            duration: const Duration(seconds: 2),
+            enabled: true,
+            child: Column(
+              children: [
+                Container(
+                  height: 70,
+                  width: 70,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  height: 12,
+                  width: 60,
+                  color: Colors.grey[300],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -886,73 +927,6 @@ class FoodCategoryShimmer extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class PharmacyCategoryShimmer extends StatelessWidget {
-  final CategoryController categoryController;
-
-  const PharmacyCategoryShimmer({super.key, required this.categoryController});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(
-        vertical: Dimensions.paddingSizeDefault,
-      ),
-      itemCount: 8,
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.only(
-            bottom: Dimensions.paddingSizeDefault,
-            left: Dimensions.paddingSizeDefault,
-            top: Dimensions.paddingSizeDefault,
-          ),
-          child: Shimmer(
-            duration: const Duration(seconds: 2),
-            enabled: true,
-            child: Container(
-              width: 70,
-              decoration: const BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(100),
-                  topRight: Radius.circular(100),
-                ),
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    height: 60,
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(
-                      bottom: Dimensions.paddingSizeSmall,
-                    ),
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(100),
-                        topRight: Radius.circular(100),
-                      ),
-                      color: Colors.grey[300],
-                    ),
-                  ),
-                  const SizedBox(height: Dimensions.paddingSizeSmall),
-                  Expanded(
-                    child: Container(
-                      height: 10,
-                      width: 50,
-                      color: Colors.grey[300],
-                    ),
-                  ),
-                ],
-              ),
             ),
           ),
         );

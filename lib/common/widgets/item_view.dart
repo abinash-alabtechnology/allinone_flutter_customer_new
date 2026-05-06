@@ -290,10 +290,13 @@ class NewOnShimmerView extends StatelessWidget {
                                 child: Container(
                                   height: 5,
                                   width: 100,
-                                  color: Theme.of(context).cardColor,
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).cardColor,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
                                 ),
                               ),
-                              const SizedBox(height: 2),
+                              const SizedBox(height: 5),
 
                               Row(
                                 children: [
@@ -424,7 +427,10 @@ class ItemsViewStore extends StatefulWidget {
     this.showbackbutton = true,
     this.showfavourite = false,
     this.categoryname = "",
+    this.isGridView = true,
   });
+
+  final bool isGridView;
 
   @override
   State<ItemsViewStore> createState() => _ItemsViewStoreState();
@@ -475,38 +481,35 @@ class _ItemsViewStoreState extends State<ItemsViewStore> {
                                                 children: [
                                                   CustomAssetImageWidget(
                                                     Images.sparkle,
-                                                    color: Colors.yellow.shade700,
-                                                    height: 30,
-                                                    width: 30,
-                                                    fit: BoxFit.fill,
+                                                    color: Colors.amber,
+                                                    height: 24,
+                                                    width: 24,
+                                                    fit: BoxFit.contain,
                                                   ),
-                                                  SizedBox(width: 10),
+                                                  const SizedBox(width: 8),
                                                   Expanded(
                                                     child: Text(
                                                       widget.categoryname == "all" || widget.categoryname == "All" || widget.categoryname == ""
-                                                          ? ""
-                                                          ""
-                                                          "Discover All Items!"
-                                                          : "Discover All Items From (${widget.categoryname.toCapitalized() ?? ""}) !",
-                                                      maxLines: 2,
-                                                      overflow: TextOverflow.ellipsis,
-                                                      softWrap: true,
+                                                          ? "Discover Our Menu"
+                                                          : "Menu from ${widget.categoryname.toCapitalized()}",
                                                       style: robotoBold.copyWith(
-                                                        fontSize: 18,
-                                                        fontWeight: FontWeight.w700,
+                                                        fontSize: 20,
+                                                        color: Theme.of(context).textTheme.bodyLarge!.color,
+                                                        letterSpacing: -0.5,
                                                       ),
                                                     ),
                                                   ),
                                                 ],
                                               ),
                                             ),
-                                            SizedBox(height: 5),
-                                            Text(
-                                              'Swipe through categories and discover\nwhat\'s waiting for you',
-                                              style: robotoRegular.copyWith(
-                                                fontSize: 14,
-                                                color: Colors.grey.shade400,
-                                                fontWeight: FontWeight.w600,
+                                            Padding(
+                                              padding: const EdgeInsets.only(left: 4.0),
+                                              child: Text(
+                                                'Swipe through categories and discover what\'s waiting for you',
+                                                style: robotoRegular.copyWith(
+                                                  fontSize: 13,
+                                                  color: Theme.of(context).disabledColor.withOpacity(0.6),
+                                                ),
                                               ),
                                             ),
                                           ],
@@ -572,7 +575,7 @@ class _ItemsViewStoreState extends State<ItemsViewStore> {
                                     ),
                                   )
                                 : SizedBox(),
-                            GridView.builder(
+                            widget.isGridView ? GridView.builder(
                               key: UniqueKey(),
                               gridDelegate:
                                   SliverGridDelegateWithFixedCrossAxisCount(
@@ -657,6 +660,45 @@ class _ItemsViewStoreState extends State<ItemsViewStore> {
                                         inStore: widget.inStorePage,
                                       );
                               },
+                            ) : GridView.builder(
+                              key: UniqueKey(),
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisSpacing: Dimensions.paddingSizeSmall,
+                                mainAxisSpacing: 16,
+                                mainAxisExtent: 150,
+                                crossAxisCount: 1,
+                              ),
+                              physics: widget.isScrollable
+                                  ? const BouncingScrollPhysics()
+                                  : const NeverScrollableScrollPhysics(),
+                              shrinkWrap: widget.isScrollable ? false : true,
+                              itemCount: length,
+                              padding: widget.padding,
+                              itemBuilder: (context, index) {
+                                return widget.stores != null && widget.isStore
+                                    ? widget.isFoodOrGrocery! && widget.isStore
+                                          ? StoreCardWidget(
+                                              store: widget.stores![index],
+                                            )
+                                          : StoreCardWithDistance(
+                                              store: widget.stores![index]!,
+                                              fromAllStore: true,
+                                            )
+                                    : ItemWidget(
+                                        isStore: widget.isStore,
+                                        item: widget.isStore
+                                            ? null
+                                            : widget.items![index],
+                                        isFeatured: widget.isFeatured,
+                                        store: widget.isStore
+                                            ? widget.stores![index]
+                                            : null,
+                                        index: index,
+                                        length: length,
+                                        isCampaign: widget.isCampaign,
+                                        inStore: widget.inStorePage,
+                                      );
+                              },
                             ),
                           ],
                         ),
@@ -699,7 +741,7 @@ class _ItemsViewStoreState extends State<ItemsViewStore> {
                                     : 'no_store_available'.tr
                               : 'no_item_available'.tr),
                     )
-            : GridView.builder(
+            : widget.isGridView ? GridView.builder(
                 key: UniqueKey(),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisSpacing: ResponsiveHelper.isDesktop(context)
@@ -730,6 +772,31 @@ class _ItemsViewStoreState extends State<ItemsViewStore> {
                       : ResponsiveHelper.isDesktop(context)
                       ? 5
                       : 3,
+                ),
+                physics: widget.isScrollable
+                    ? const BouncingScrollPhysics()
+                    : const NeverScrollableScrollPhysics(),
+                shrinkWrap: widget.isScrollable ? false : true,
+                itemCount: widget.shimmerLength,
+                padding: widget.padding,
+                itemBuilder: (context, index) {
+                  return widget.isStore
+                      ? widget.isFoodOrGrocery!
+                            ? const StoreCardShimmer()
+                            : const NewOnShimmerView()
+                      : ItemShimmer(
+                          isEnabled: isNull,
+                          isStore: widget.isStore,
+                          hasDivider: index != widget.shimmerLength - 1,
+                        );
+                },
+              ) : GridView.builder(
+                key: UniqueKey(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisSpacing: Dimensions.paddingSizeSmall,
+                  mainAxisSpacing: Dimensions.paddingSizeSmall,
+                  mainAxisExtent: 130,
+                  crossAxisCount: 1,
                 ),
                 physics: widget.isScrollable
                     ? const BouncingScrollPhysics()

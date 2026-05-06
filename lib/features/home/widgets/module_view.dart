@@ -18,6 +18,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import '../../../common/models/module_model.dart';
 import '../../../common/widgets/custom_snackbar.dart';
 import '../../../helper/address_helper.dart';
+import 'package:handy_allinone/features/menu/screens/menu_screen.dart';
 import '../../../helper/responsive_helper.dart';
 import '../../../helper/route_helper.dart';
 import '../../../util/images.dart';
@@ -56,13 +57,22 @@ class ModuleView extends StatelessWidget {
               // Greeting Row
               GetBuilder<ProfileController>(builder: (profileController) {
                 String name = profileController.userInfoModel?.fName ?? 'User';
-                return Text(
-                  'Hello, $name 👋',
-                  style: GoogleFonts.inter(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF1F2937),
-                  ),
+                return Row(
+                  children: [
+                    InkWell(
+                      onTap: () => Get.to(() => const MenuScreen()),
+                      child: Image.asset('assets/image/profile_emoji.png', height: 40, width: 40),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Hello, $name 👋',
+                      style: GoogleFonts.inter(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF1F2937),
+                      ),
+                    ),
+                  ],
                 );
               }),
               const SizedBox(height: 12),

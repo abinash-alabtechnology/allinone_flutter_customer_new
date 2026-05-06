@@ -6,8 +6,7 @@ const Color(0xFFFF8110)
 }) => ThemeData(
   fontFamily: AppConstants.fontFamily,
   primaryColor: color,
-  secondaryHeaderColor:
-  Color(0xFFFF8110),
+  secondaryHeaderColor: color,
   disabledColor: const Color(0xFF9F9F9F),
   brightness: Brightness.light,
   hintColor: const Color(0xFF9F9F9F),

@@ -454,9 +454,24 @@ class SearchScreenState extends State<SearchScreen> with TickerProviderStateMixi
                   }),
                 )),
             Positioned(
-              bottom: 10,right: 10,
+              bottom: 10, left: Dimensions.paddingSizeDefault, right: Dimensions.paddingSizeDefault,
               child: GetBuilder<CartController>(builder: (cartController) {
-                return cartController.cartList.isNotEmpty && !ResponsiveHelper.isDesktop(context) ? IntrinsicWidth(child: const BottomCartWidget()) : const SizedBox();
+                bool isPharmacy = Get.find<SplashController>().module != null &&
+                    Get.find<SplashController>().module!.moduleType.toString().toLowerCase() ==
+                        AppConstants.pharmacy.toLowerCase();
+
+                return cartController.cartList.isNotEmpty && !ResponsiveHelper.isDesktop(context)
+                  ? Container(
+                      decoration: BoxDecoration(
+                        color: isPharmacy ? Colors.transparent : const Color(0xFF2A2A2A),
+                        borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+                        boxShadow: [
+                          BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 5)),
+                        ],
+                      ),
+                      child: isPharmacy ? const IntrinsicWidth(child: BottomCartWidget()) : const BottomCartWidgetStore(),
+                    )
+                  : const SizedBox();
               }),
             ),
           ],

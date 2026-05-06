@@ -133,19 +133,14 @@ class ItemWidget extends StatelessWidget {
                         bottom: Dimensions.paddingSizeSmall,
                       ),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                  borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
                   color: Theme.of(context).cardColor,
-                  boxShadow: isPharmacy ? [
+                  border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.12), width: 1),
+                  boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ] : const [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 5,
-                      spreadRadius: 1,
+                      color: Colors.black.withOpacity(0.06),
+                      blurRadius: 15,
+                      offset: const Offset(0, 6),
                     ),
                   ],
                 ),
@@ -345,12 +340,10 @@ class ItemWidget extends StatelessWidget {
                                               imageHeight ??
                                               (desktop
                                                   ? 120
-                                                  : length == null
-                                                  ? 100
-                                                  : 90),
+                                                  : 120),
                                           width:
                                               imageWidth ??
-                                              (desktop ? 120 : 90),
+                                              (desktop ? 120 : 120),
                                           fit: BoxFit.cover,
                                         ),
                                       ),
@@ -432,9 +425,10 @@ class ItemWidget extends StatelessWidget {
                                                 isStore
                                                     ? store!.name!
                                                     : item!.name!,
-                                                style: robotoMedium.copyWith(
+                                                style: robotoBold.copyWith(
                                                   fontSize:
-                                                      Dimensions.fontSizeSmall,
+                                                      Dimensions.fontSizeDefault,
+                                                  color: Theme.of(context).textTheme.bodyLarge?.color,
                                                 ),
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
@@ -454,7 +448,7 @@ class ItemWidget extends StatelessWidget {
                                                     Get.find<SplashController>()
                                                         .configModel!
                                                         .toggleVegNonVeg!)
-                                                ? Image.asset(
+                                                ? CustomAssetImageWidget(
                                                     item != null &&
                                                             item!.veg == 0
                                                         ? Images.nonVegImage
@@ -672,11 +666,11 @@ class ItemWidget extends StatelessWidget {
                                                       discountType:
                                                           discountType,
                                                     ),
-                                                    style: robotoMedium
-                                                        .copyWith(
-                                                          fontSize: Dimensions
-                                                              .fontSizeSmall,
-                                                        ),
+                                                    style: robotoBold.copyWith(
+                                                      fontSize: Dimensions
+                                                          .fontSizeDefault,
+                                                      color: Theme.of(context).primaryColor,
+                                                    ),
                                                     textDirection:
                                                         TextDirection.ltr,
                                                   ),
@@ -939,8 +933,6 @@ class ItemWidgetStore extends StatelessWidget {
                                       height:
                                           imageHeight ??
                                           (desktop
-                                              ? 130
-                                              : length == null
                                               ? 130
                                               : 130),
                                       width: double.infinity,
