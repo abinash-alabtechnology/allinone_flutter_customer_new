@@ -5,7 +5,7 @@ import 'package:handy_allinone/interfaces/repository_interface.dart';
 abstract class ItemRepositoryInterface implements RepositoryInterface {
   @override
   Future getList({int? offset, String? type, bool isPopularItem = false, bool isReviewedItem = false, bool isFeaturedCategoryItems = false, bool isRecommendedItems = false,
-    bool isCommonConditions = false, bool isDiscountedItems = false, DataSourceEnum? source,
+    bool isCommonConditions = false, bool isDiscountedItems = false, bool isSubscriptionItems = false, bool isFreshItems = false, DataSourceEnum? source,
     String? search, List<int>? categoryIds, List<String>? filter, int? rating, double? minPrice, double? maxPrice,
   });
   Future<BasicMedicineModel?> getBasicMedicine(DataSourceEnum source);

@@ -113,14 +113,14 @@ import 'package:timelines_plus/timelines_plus.dart';
 import 'package:dotted_line/dotted_line.dart';
 import '../../../checkout/widgets/payment_section.dart';
 
-class ParcelNewRequestScreen1 extends StatefulWidget {
+class ParcelNewRequestScreen extends StatefulWidget {
   final ParcelCategoryModel parcelCategory;
   final AddressModel pickedUpAddress;
   final AddressModel destinationAddress;
   final bool isCashOnDeliveryActive;
   final bool isDigitalPaymentActive;
 
-  const ParcelNewRequestScreen1({
+  const ParcelNewRequestScreen({
     super.key,
     required this.parcelCategory,
     required this.pickedUpAddress,
@@ -130,11 +130,11 @@ class ParcelNewRequestScreen1 extends StatefulWidget {
   });
 
   @override
-  State<ParcelNewRequestScreen1> createState() =>
-      _ParcelNewRequestScreen1State();
+  State<ParcelNewRequestScreen> createState() =>
+      _ParcelNewRequestScreenState();
 }
 
-class _ParcelNewRequestScreen1State extends State<ParcelNewRequestScreen1> {
+class _ParcelNewRequestScreenState extends State<ParcelNewRequestScreen> {
   bool isGuestLoggedIn = AuthHelper.isGuestLoggedIn();
   final TextEditingController _guestPasswordController =
       TextEditingController();
@@ -164,7 +164,11 @@ class _ParcelNewRequestScreen1State extends State<ParcelNewRequestScreen1> {
             zoneId: widget.pickedUpAddress.zoneId!,
           );
           dmTips = parcelController.tips;
-          total = charge + dmTips + additionalCharge;
+          double expressCharge = parcelController.deliveryTypeIndex == 1
+              ? (Get.find<SplashController>().configModel!.expressCheckoutCharge ??
+                  150.0)
+              : 0;
+          total = charge + dmTips + additionalCharge + expressCharge;
         }
         return Scaffold(
           appBar: CustomAppBar3(title: "PARCEL REQUEST", backButton: true),
@@ -193,6 +197,7 @@ class _ParcelNewRequestScreen1State extends State<ParcelNewRequestScreen1> {
               WhoWantToPay(
                 isCashOnDeliveryActive: widget.isCashOnDeliveryActive,
               ),
+              const DeliveryType(),
               SelectPaymentMethod(
                 isCashOnDeliveryActive: widget.isCashOnDeliveryActive,
                 isDigitalPaymentActive: widget.isDigitalPaymentActive,
@@ -217,57 +222,7 @@ class _ParcelNewRequestScreen1State extends State<ParcelNewRequestScreen1> {
   }
 }
 
-class ParcelNewRequestScreen extends StatefulWidget {
-  const ParcelNewRequestScreen({super.key});
 
-  @override
-  State<ParcelNewRequestScreen> createState() => _ParcelNewRequestScreenState();
-}
-
-class _ParcelNewRequestScreenState extends State<ParcelNewRequestScreen> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: CustomAppBar3(title: "PARCEL REQUEST", backButton: true),
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: 100,
-              width: double.infinity,
-              child: Timeline.tileBuilder(
-                builder: TimelineTileBuilder.connected(
-                  connectionDirection: ConnectionDirection.after,
-                  indicatorPositionBuilder: (context, index) => 0.3,
-                  nodePositionBuilder: (context, index) => 0.2,
-                  indicatorBuilder: (context, index) => Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      DotIndicator(
-                        size: 25,
-                        color: Theme.of(context).primaryColor,
-                        child: Center(child: Text(index.toString())),
-                      ),
-                      Text("${index + 1}"),
-                    ],
-                  ),
-                  connectorBuilder: (context, index, type) =>
-                      const SolidLineConnector(),
-                  itemExtentBuilder: (context, index) =>
-                      (MediaQuery.sizeOf(context).width / 2.6),
-                  contentsAlign: ContentsAlign.basic,
-                  itemCount: 3,
-                ),
-                physics: const NeverScrollableScrollPhysics(),
-                scrollDirection: Axis.horizontal,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class HeaderProcessTrackerDelegate extends SliverPersistentHeaderDelegate {
   final double height;
@@ -382,7 +337,7 @@ class ParcelPickupAndDropDetails extends StatelessWidget {
     return SliverToBoxAdapter(
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),
-        height: 800,
+        height: 820,
         child: Timeline.tileBuilder(
           padding: EdgeInsets.zero,
           builder: TimelineTileBuilder.connected(
@@ -1234,6 +1189,131 @@ class WhoWantToPay extends StatelessWidget {
       );
 }
 
+class DeliveryType extends StatelessWidget {
+  const DeliveryType({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverToBoxAdapter(
+      child: GetBuilder<ParcelController>(
+        builder: (parcelController) {
+          double expressCharge = Get.find<SplashController>()
+                  .configModel!
+                  .expressCheckoutCharge ??
+              150.0;
+          return Container(
+            margin: const EdgeInsets.only(left: 12, right: 12, top: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(width: 0.6, color: Colors.white38),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.shade300,
+                  blurRadius: 5,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  spacing: 8,
+                  children: [
+                    Icon(
+                      Icons.speed_rounded,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                    Text(
+                      "Delivery Type",
+                      style: robotoBold.copyWith(
+                        fontSize: Dimensions.fontSizeLarge,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => parcelController.setDeliveryTypeIndex(0, true),
+                        child: deliveryTypeContainer(
+                          parcelController.deliveryTypeIndex == 0,
+                          "Standard",
+                          "Regular delivery time",
+                          0,
+                          context,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => parcelController.setDeliveryTypeIndex(1, true),
+                        child: deliveryTypeContainer(
+                          parcelController.deliveryTypeIndex == 1,
+                          "Express",
+                          "Faster delivery",
+                          expressCharge,
+                          context,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget deliveryTypeContainer(
+          bool isSelected, String title, String subTitle, double charge, BuildContext context) =>
+      Container(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          color: isSelected
+              ? Theme.of(context).primaryColor.withValues(alpha: 0.2)
+              : Colors.grey.shade100,
+          border: Border.all(
+            width: isSelected ? 1.5 : 1,
+            color: isSelected
+                ? Theme.of(context).primaryColor
+                : Colors.grey.shade500,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(title, style: robotoBold),
+                if (isSelected)
+                  Icon(Icons.check_circle,
+                      color: Theme.of(context).primaryColor, size: 20),
+              ],
+            ),
+            Text(subTitle,
+                style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall)),
+            if (charge > 0)
+              Text(
+                "+ ${PriceConverter.convertPrice(charge)}",
+                style: robotoBold.copyWith(
+                    color: Theme.of(context).primaryColor,
+                    fontSize: Dimensions.fontSizeSmall),
+              ),
+          ],
+        ),
+      );
+}
+
 ///! Select payment method
 class SelectPaymentMethod extends StatelessWidget {
   final bool isGuestLoggedIn;
@@ -1349,6 +1429,28 @@ class SelectPaymentMethod extends StatelessWidget {
                                         .getWay!,
                                   );
                                 },
+                              ),
+                            ],
+                          )
+                        : const SizedBox(),
+                    (parcelController.offlineMethodList != null &&
+                            parcelController.payerIndex == 0)
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 10),
+                              Text(
+                                "Offline Payment Options",
+                                style: robotoBold.copyWith(),
+                              ),
+                              PaymentButtonNewCustom(
+                                paymentMethod: PaymentMethod.offline,
+                                icon: Images.codIcon,
+                                title: 'offline'.tr,
+                                subTitle: "pay via offline methods",
+                                isSelected: parcelController.paymentIndex == 3,
+                                onTap: () =>
+                                    parcelController.setPaymentIndex(3, true),
                               ),
                             ],
                           )
@@ -1487,6 +1589,26 @@ class OrderSummaryBooking extends StatelessWidget {
                         ],
                       )
                     : const SizedBox(),
+                (parcelController.deliveryTypeIndex == 1)
+                    ? Padding(
+                        padding: const EdgeInsets.only(
+                            top: Dimensions.paddingSizeSmall),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('Express Delivery Charge',
+                                style: robotoRegular),
+                            Text(
+                              '(+) ${PriceConverter.convertPrice(Get.find<SplashController>().configModel!.expressCheckoutCharge ?? 150.0)}',
+                              style: robotoRegular.copyWith(
+                                color: Colors.blueGrey,
+                              ),
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
+                        ),
+                      )
+                    : const SizedBox.shrink(),
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     vertical: Dimensions.paddingSizeSmall,
@@ -1752,7 +1874,7 @@ class PickUPAddressDetails extends StatelessWidget {
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       width: double.infinity,
-      height: 360,
+      // height: 350,
       child: Column(
         spacing: 10,
         children: [
@@ -1817,9 +1939,9 @@ class PickUPAddressDetails extends StatelessWidget {
                       ),
                       padding: const EdgeInsets.all(10),
                       child: Text(
-                        (pickedUpAddress.contactPersonName?.substring(0, 1) ??
-                                "")
-                            .toUpperCase(),
+                        (pickedUpAddress.contactPersonName != null && pickedUpAddress.contactPersonName!.isNotEmpty)
+                            ? pickedUpAddress.contactPersonName!.substring(0, 1).toUpperCase()
+                            : "",
                         style: robotoBold.copyWith(
                           fontSize: Dimensions.fontSizeLarge,
                           color: primaryColor,
@@ -1999,7 +2121,7 @@ class DropAddressDetails extends StatelessWidget {
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       width: double.infinity,
-      height: 360,
+      // height: 350,
       child: Column(
         spacing: 10,
         children: [
@@ -2064,12 +2186,9 @@ class DropAddressDetails extends StatelessWidget {
                       ),
                       padding: const EdgeInsets.all(10),
                       child: Text(
-                        (destinationAddress.contactPersonName?.substring(
-                                  0,
-                                  1,
-                                ) ??
-                                "")
-                            .toUpperCase(),
+                        (destinationAddress.contactPersonName != null && destinationAddress.contactPersonName!.isNotEmpty)
+                            ? destinationAddress.contactPersonName!.substring(0, 1).toUpperCase()
+                            : "",
                         style: robotoBold.copyWith(
                           fontSize: Dimensions.fontSizeLarge,
                           color: primaryColor,

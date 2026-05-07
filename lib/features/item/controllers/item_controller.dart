@@ -41,6 +41,12 @@ class ItemController extends GetxController implements GetxService {
   List<Categories>? _reviewedCategoriesList;
   List<Categories>? get reviewedCategoriesList => _reviewedCategoriesList;
 
+  List<Item>? _subscriptionItemList;
+  List<Item>? get subscriptionItemList => _subscriptionItemList;
+
+  List<Item>? _freshItemList;
+  List<Item>? get freshItemList => _freshItemList;
+
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
@@ -277,17 +283,21 @@ class ItemController extends GetxController implements GetxService {
     update();
   }
 
-  void applyFilters({bool isPopular = false, bool isSpecial = false}) {
+  void applyFilters({bool isPopular = false, bool isSpecial = false, bool isSubscription = false, bool isFresh = false}) {
     if(isPopular){
       getPopularItemList(notify: true, offset: '1', dataSource: DataSourceEnum.client);
     }else if(isSpecial){
       getDiscountedItemList(notify: true, offset: '1', dataSource: DataSourceEnum.client);
+    }else if(isSubscription){
+      getSubscriptionItemList(notify: true, offset: 1, dataSource: DataSourceEnum.client);
+    }else if(isFresh){
+      getFreshItemList(notify: true, offset: 1, dataSource: DataSourceEnum.client);
     }else{
       getReviewedItemList(notify: true, offset: '1', dataSource: DataSourceEnum.client);
     }
   }
 
-  void resetFilters({bool isPopular = false, bool isSpecial = false}) {
+  void resetFilters({bool isPopular = false, bool isSpecial = false, bool isSubscription = false, bool isFresh = false}) {
     _selectedCategoryIds.clear();
     _filter.clear();
     _rating = null;
@@ -306,6 +316,10 @@ class ItemController extends GetxController implements GetxService {
       getPopularItemList(offset: '1', dataSource: DataSourceEnum.client);
     } else if(isSpecial) {
       getDiscountedItemList(offset: '1', dataSource: DataSourceEnum.client);
+    } else if(isSubscription) {
+      getSubscriptionItemList(offset: 1, dataSource: DataSourceEnum.client);
+    } else if(isFresh) {
+      getFreshItemList(offset: 1, dataSource: DataSourceEnum.client);
     } else {
       getReviewedItemList(offset: '1', dataSource: DataSourceEnum.client);
     }
@@ -313,7 +327,7 @@ class ItemController extends GetxController implements GetxService {
     update();
   }
 
-  void clearFilters({bool isPopular = false, bool isSpecial = false}) {
+  void clearFilters({bool isPopular = false, bool isSpecial = false, bool isSubscription = false, bool isFresh = false}) {
     _selectedCategoryIds.clear();
     _filter.clear();
     _rating = null;
@@ -332,6 +346,10 @@ class ItemController extends GetxController implements GetxService {
       getPopularItemList(offset: '1', dataSource: DataSourceEnum.client, firstTimeCategoryLoad: true);
     } else if (isSpecial) {
       getDiscountedItemList(offset: '1', dataSource: DataSourceEnum.client, firstTimeCategoryLoad: true);
+    } else if (isSubscription) {
+      getSubscriptionItemList(offset: 1, dataSource: DataSourceEnum.client);
+    } else if (isFresh) {
+      getFreshItemList(offset: 1, dataSource: DataSourceEnum.client);
     } else {
       getReviewedItemList(offset: '1', dataSource: DataSourceEnum.client, firstTimeCategoryLoad: true);
     }
@@ -361,6 +379,8 @@ class ItemController extends GetxController implements GetxService {
     _discountedItemList = null;
     _featuredCategoriesItem = null;
     _recommendedItemList = null;
+    _subscriptionItemList = null;
+    _freshItemList = null;
   }
 
   void showBottomLoader() {
@@ -372,11 +392,15 @@ class ItemController extends GetxController implements GetxService {
     _offset = offset;
   }
 
-  bool hasMoreData({bool isPopular = false, bool isSpecial = false}) {
+  bool hasMoreData({bool isPopular = false, bool isSpecial = false, bool isSubscription = false, bool isFresh = false}) {
     if(isPopular){
       return _popularItemList != null && _popularItemList!.length < _pageSize!;
     }else if(isSpecial){
       return _discountedItemList != null && _discountedItemList!.length < _pageSize!;
+    }else if(isSubscription){
+      return _subscriptionItemList != null && _subscriptionItemList!.length < _pageSize!;
+    }else if(isFresh){
+      return _freshItemList != null && _freshItemList!.length < _pageSize!;
     }else{
       return _reviewedItemList != null && _reviewedItemList!.length < _pageSize!;
     }
@@ -542,6 +566,96 @@ class ItemController extends GetxController implements GetxService {
       _isLoading = false;
     }
     update();
+  }
+
+  Future<void> getSubscriptionItemList({required int offset, DataSourceEnum dataSource = DataSourceEnum.local, bool notify = false}) async {
+    if (_searchController.text.isEmpty) {
+      _isSearching = false;
+      if (notify) update();
+    } else {
+      _isSearching = true;
+      if (notify) update();
+    }
+
+    if(offset == 1) {
+      _offsetList = [];
+      _offset = 1;
+      _subscriptionItemList = null;
+      if(notify) update();
+    }
+
+    if (!_offsetList.contains(offset.toString())) {
+      _offsetList.add(offset.toString());
+
+      ItemModel? itemModel = await itemServiceInterface.getSubscriptionItemList(
+        source: dataSource, offset: offset, search: _searchController.text, categoryIds: _selectedCategoryIds, filter: _filter,
+        rating: _rating, minPrice: _selectedMinPrice, maxPrice: _selectedMaxPrice,
+      );
+
+      if (itemModel != null) {
+        if (offset == 1) {
+          _subscriptionItemList = [];
+        }
+        _subscriptionItemList!.addAll(itemModel.items!);
+        _pageSize = itemModel.totalSize;
+        _isLoading = false;
+      }
+      update();
+
+      if(dataSource == DataSourceEnum.local) {
+        getSubscriptionItemList(notify : notify, dataSource: DataSourceEnum.client, offset: 1);
+      }
+    } else {
+      if(_isLoading) {
+        _isLoading = false;
+        update();
+      }
+    }
+  }
+
+  Future<void> getFreshItemList({required int offset, DataSourceEnum dataSource = DataSourceEnum.local, bool notify = false}) async {
+    if (_searchController.text.isEmpty) {
+      _isSearching = false;
+      if (notify) update();
+    } else {
+      _isSearching = true;
+      if (notify) update();
+    }
+
+    if(offset == 1) {
+      _offsetList = [];
+      _offset = 1;
+      _freshItemList = null;
+      if(notify) update();
+    }
+
+    if (!_offsetList.contains(offset.toString())) {
+      _offsetList.add(offset.toString());
+
+      ItemModel? itemModel = await itemServiceInterface.getFreshItemList(
+        source: dataSource, offset: offset, search: _searchController.text, categoryIds: _selectedCategoryIds, filter: _filter,
+        rating: _rating, minPrice: _selectedMinPrice, maxPrice: _selectedMaxPrice,
+      );
+
+      if (itemModel != null) {
+        if (offset == 1) {
+          _freshItemList = [];
+        }
+        _freshItemList!.addAll(itemModel.items!);
+        _pageSize = itemModel.totalSize;
+        _isLoading = false;
+      }
+      update();
+
+      if(dataSource == DataSourceEnum.local) {
+        getFreshItemList(notify : notify, dataSource: DataSourceEnum.client, offset: 1);
+      }
+    } else {
+      if(_isLoading) {
+        _isLoading = false;
+        update();
+      }
+    }
   }
 
   Future<void> getFeaturedCategoriesItemList(bool reload, bool notify, {DataSourceEnum dataSource = DataSourceEnum.local, bool fromRecall = false}) async {

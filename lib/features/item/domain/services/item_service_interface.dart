@@ -10,6 +10,8 @@ abstract class ItemServiceInterface {
   Future<ItemModel?> getFeaturedCategoriesItemList(DataSourceEnum? source);
   Future<List<Item>?> getRecommendedItemList(String type, DataSourceEnum? source);
   Future<ItemModel?> getDiscountedItemList({required String type, DataSourceEnum? source, required int offset, String? search, List<int>? categoryIds, List<String>? filter, int? rating, double? minPrice, double? maxPrice});
+  Future<ItemModel?> getSubscriptionItemList({required int offset, DataSourceEnum? source, String? search, List<int>? categoryIds, List<String>? filter, int? rating, double? minPrice, double? maxPrice});
+  Future<ItemModel?> getFreshItemList({required int offset, DataSourceEnum? source, String? search, List<int>? categoryIds, List<String>? filter, int? rating, double? minPrice, double? maxPrice});
   Future<Item?> getItemDetails(int? itemID);
   Future<BasicMedicineModel?> getBasicMedicine(DataSourceEnum source);
   Future<List<CommonConditionModel>?> getCommonConditions();

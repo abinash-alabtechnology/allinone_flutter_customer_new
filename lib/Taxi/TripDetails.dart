@@ -37,136 +37,178 @@ void showTripDetailBottomSheet(
     final totalFare = data['fare_amount']?.toString() ?? '0';
 
     showModalBottomSheet(
-      isDismissible: false,
-      enableDrag: false,
+      isDismissible: true,
+      enableDrag: true,
       context: context,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       isScrollControlled: true,
       builder: (context) {
-        return WillPopScope(
-          onWillPop: () async => false,
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Trip Details',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 16),
-                // Pickup & Drop
-                Container(
-                  padding: const EdgeInsets.all(12),
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Handle
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  width: 40,
+                  height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(color: Colors.black12, blurRadius: 4),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.circle,
-                            size: 10,
-                            color: Colors.green,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              pickupLocation,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          const Icon(Icons.circle, size: 10, color: Colors.red),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              dropoffLocation,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                    ],
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                const SizedBox(height: 16),
+              ),
 
-                // Payment summary
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(color: Colors.black12, blurRadius: 4),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Total ₹$totalFare',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'Paying by Cash',
-                            style: TextStyle(fontSize: 14, color: Colors.grey),
-                          ),
-                        ],
-                      ),
-                      Image.asset(
-                        'assets/image/money.png',
-                        width: 28,
-                        height: 28,
-                        fit: BoxFit.contain,
-                      ),
-                    ],
-                  ),
+              const Text(
+                'Trip Summary',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
+              ),
+              const SizedBox(height: 20),
+
+              // Locations Card
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.grey.shade100),
                 ),
-
-                const SizedBox(height: 24),
-
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                child: Stack(
+                  children: [
+                    Column(
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), shape: BoxShape.circle),
+                              child: const Icon(Icons.location_on, size: 16, color: Colors.green),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                pickupLocation,
+                                style: const TextStyle(fontSize: 14, color: Colors.black87),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(color: Colors.red.withOpacity(0.1), shape: BoxShape.circle),
+                              child: const Icon(Icons.location_on, size: 16, color: Colors.red),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                dropoffLocation,
+                                style: const TextStyle(fontSize: 14, color: Colors.black87),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    // Connecting line
+                    Positioned(
+                      left: 12,
+                      top: 24,
+                      bottom: 24,
+                      child: Container(
+                        width: 1,
+                        color: Colors.grey.shade300,
                       ),
                     ),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Close'),
-                  ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 16),
+
+              // Payment summary Card
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.grey.shade100),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4)),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Fare Amount',
+                          style: TextStyle(fontSize: 13, color: Colors.grey),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '₹$totalFare',
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Image.asset('assets/image/money.png', width: 20, height: 20),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Cash',
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              SizedBox(
+                width: double.infinity,
+                height: 54,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Got it', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
           ),
         );
       },
@@ -180,7 +222,7 @@ void showwaitingdriverBottomSheet(BuildContext context) {
   showModalBottomSheet(
     isDismissible: false,
     enableDrag: false,
-    context: context,
+    context: Get.context!,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -195,7 +237,7 @@ void showRideScheduledsBottomSheet(BuildContext context) {
   showModalBottomSheet(
     isDismissible: false,
     enableDrag: false,
-    context: context,
+    context: Get.context!,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -211,7 +253,7 @@ Future<bool> showCancelReasonBottomSheet(
   int bookingId,
 ) async {
   final result = await showModalBottomSheet<bool>(
-    context: context,
+    context: Get.context!,
     isScrollControlled: true,
     isDismissible: false,
     enableDrag: false,
@@ -227,83 +269,104 @@ Future<bool> showCancelReasonBottomSheet(
         child: Padding(
           padding: mediaQuery.viewInsets,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Lottie.asset(
-                  'assets/animation/searching_drivers.json',
-                  height: 120,
+                // Handle
+                Center(
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 16),
+
                 const Text(
-                  "Why would you like to cancel?",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  "Reason for cancellation",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 8),
+                const Text(
+                  "Please tell us why you want to cancel your ride",
+                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
 
-                ...[
-                  "Driver denied drop location",
-                  "Driver demanded extra cash",
-                  "Driver unresponsive on chat/call",
-                  "Driver insisted on taking directly/offline",
-                  "No Driver Found",
-                  "Driver not moving",
-                  "Other Reason",
-                ].map((reason) {
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey.shade100,
-                        foregroundColor: Colors.black,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                      ),
-                      onPressed: () async {
-                        await Future.delayed(const Duration(milliseconds: 100));
-
-                        bool confirmed = await showCancelConfirmationSheet(
-                          context,
-                          bookingId,
-                          reason,
-                        );
-
-                        if (context.mounted) {
-                          Navigator.pop(
-                            context,
-                            confirmed,
-                          ); // ✅ Always returns true or false
-                        }
-                      },
-                      child: Text(reason, textAlign: TextAlign.center),
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.4),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        ...[
+                          "Driver denied drop location",
+                          "Driver demanded extra cash",
+                          "Driver unresponsive on chat/call",
+                          "Driver insisted on taking directly/offline",
+                          "No Driver Found",
+                          "Driver not moving",
+                          "Other Reason",
+                        ].map((reason) {
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            child: InkWell(
+                              onTap: () async {
+                                bool confirmed = await showCancelConfirmationSheet(
+                                  context,
+                                  bookingId,
+                                  reason,
+                                );
+                                if (context.mounted && confirmed) {
+                                  Navigator.pop(context, true);
+                                }
+                              },
+                              borderRadius: BorderRadius.circular(12),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade50,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.grey.shade100),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        reason,
+                                        style: const TextStyle(fontSize: 15, color: Colors.black87),
+                                      ),
+                                    ),
+                                    Icon(Icons.chevron_right, color: Colors.grey.shade400, size: 20),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ],
                     ),
-                  );
-                }).toList(),
+                  ),
+                ),
 
-                const SizedBox(height: 10),
+                const SizedBox(height: 16),
 
                 // "Don't Cancel" button
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
+                  height: 54,
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.black87,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    onPressed: () {
-                      Navigator.pop(context, false); // ✅ Always returns false
-                    },
-                    child: const Text("Don't Cancel"),
+                    child: const Text("Keep my ride", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                   ),
                 ),
               ],
@@ -327,7 +390,7 @@ Future<bool> showCancelConfirmationSheet(
   );
 
   final result = await showModalBottomSheet<bool>(
-    context: context,
+    context: Get.context!,
     isScrollControlled: true,
     isDismissible: false,
     enableDrag: false,
@@ -338,108 +401,97 @@ Future<bool> showCancelConfirmationSheet(
       return WillPopScope(
         onWillPop: () async => false,
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 12),
+              // Handle
               Center(
-                child: Lottie.asset(
-                  'assets/animation/searching_drivers.json',
-                  height: 120,
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
+              ),
+
+              Lottie.asset(
+                'assets/animation/searching_drivers.json',
+                height: 140,
               ),
               const SizedBox(height: 16),
               const Text(
-                "Are you sure you want to cancel the ride?",
-                style: TextStyle(color: Colors.black54),
+                "Cancel this ride?",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
               ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: Obx(() {
-                  final isLoading = vehicleController.isLoading.value;
-                  return ElevatedButton(
-                    onPressed: isLoading
-                        ? null
-                        : () async {
-                            Map<String, dynamic> bookingcancelData = {
-                              "booking_id": bookingId,
-                              "cancel_reason": reason,
-                              "type": "user",
-                            };
-                            bool success = await vehicleController
-                                .cancelBookingAndVerify(
-                                  bookingcancelData,
-                                  bookingId,
-                                );
-                            if (success) {
-                              await showBookingCancelledBottomSheet(
-                                context,
-                                null,
-                                "cancelled",
-                              );
-                              await SharedService.clearOngoingBooking();
-                              Get.find<SplashController>().showBottomNavBar();
-                              Get.offAll(() => const DashboardScreen(
-                                    pageIndex: 0,
-                                    fromSplash: false,
-                                  ));
-                            }
-                          },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey.shade200,
-                      foregroundColor: Colors.red,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
+              const SizedBox(height: 8),
+              const Text(
+                "Are you sure you want to cancel? This action cannot be undone.",
+                style: TextStyle(color: Colors.grey, fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              
+              Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 54,
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: Colors.grey.shade300),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: const Text("No, Back", style: TextStyle(color: Colors.black87, fontSize: 16)),
                       ),
                     ),
-                    child: isLoading
-                        ? const SizedBox(
-                            height: 22,
-                            width: 22,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                              color: Colors.red,
-                            ),
-                          )
-                        : Text(
-                            "Cancel Ride",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: SizedBox(
+                      height: 54,
+                      child: Obx(() {
+                        final isLoading = vehicleController.isLoading.value;
+                        return ElevatedButton(
+                          onPressed: isLoading
+                              ? null
+                              : () async {
+                                  Map<String, dynamic> bookingcancelData = {
+                                    "booking_id": bookingId,
+                                    "cancel_reason": reason,
+                                    "type": "user",
+                                  };
+                                  bool success = await vehicleController.cancelBookingAndVerify(
+                                    bookingcancelData,
+                                    bookingId,
+                                  );
+                                  if (success) {
+                                    // Feedback and navigation are handled globally by _handleRideCancellation in Taxi_home.dart
+                                  }
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red.shade600,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
-                  );
-                }),
-              ),
-
-              const SizedBox(height: 12),
-
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: () {
-                    Navigator.pop(context, false);
-                  },
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    side: BorderSide(color: Colors.grey.shade300),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
+                          child: isLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                )
+                              : const Text("Yes, Cancel", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        );
+                      }),
                     ),
                   ),
-                  child: const Text(
-                    "Don't Cancel",
-                    style: TextStyle(fontSize: 16, color: Colors.black),
-                  ),
-                ),
+                ],
               ),
-
-              const SizedBox(height: 10),
             ],
           ),
         ),
@@ -456,7 +508,7 @@ Future<bool> showBookingCancelledBottomSheet(
   String reason,
 ) async {
   final result = await showModalBottomSheet<bool>(
-    context: context,
+    context: Get.context!,
     isScrollControlled: true,
     isDismissible: false,
     enableDrag: false,
@@ -529,7 +581,7 @@ Future<bool> showBookingCancelledBottomSheet(
 
 void showRideScheduledBottomSheet(BuildContext context) {
   showModalBottomSheet(
-    context: context,
+    context: Get.context!,
     isScrollControlled: true,
     isDismissible: false,
     enableDrag: false,
@@ -582,7 +634,7 @@ void showRideScheduledBottomSheet(BuildContext context) {
                 print("ghthdgdthbt");
                 try {
                   Get.offAll(
-                    () => DashboardScreen(pageIndex: 1, fromSplash: false),
+                    () => DashboardScreen(pageIndex: 0, fromSplash: false),
                   );
                 } catch (e, stack) {
                   print('Navigation error: $e');

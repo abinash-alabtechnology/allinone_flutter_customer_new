@@ -89,6 +89,7 @@ class ConfigModel {
   String? searchimage;
     String? deliverurl;
     bool? delivarBooking;
+    double? expressCheckoutCharge;
 
   ConfigModel({
     this.businessName,
@@ -177,6 +178,7 @@ class ConfigModel {
     this.searchimage,
     this.deliverurl,
     this.delivarBooking,
+    this.expressCheckoutCharge,
   });
 
   ConfigModel.fromJson(Map<String, dynamic> json) {
@@ -298,6 +300,7 @@ class ConfigModel {
         delivarBooking = (json['delivar_booking']?.toString().toLowerCase().trim() == '1' || json['delivar_booking']?.toString().toLowerCase().trim() == 'true' || json['delivar_booking']?.toString().toLowerCase().trim() == '1.0' || json['delivar_booking'] == 1 || json['delivar_booking'] == true)
             || (json['deliver_booking']?.toString().toLowerCase().trim() == '1' || json['deliver_booking']?.toString().toLowerCase().trim() == 'true' || json['deliver_booking']?.toString().toLowerCase().trim() == '1.0' || json['deliver_booking'] == 1 || json['deliver_booking'] == true)
             || (json['delivar_booking_status']?.toString().toLowerCase().trim() == '1' || json['delivar_booking_status']?.toString().toLowerCase().trim() == 'true' || json['delivar_booking_status']?.toString().toLowerCase().trim() == '1.0' || json['delivar_booking_status'] == 1 || json['delivar_booking_status'] == true);
+    expressCheckoutCharge = json['express_checkout_charge']?.toDouble() ?? 150.0;
   }
 
   Map<String, dynamic> toJson() {
@@ -411,6 +414,7 @@ class ConfigModel {
     data['delivar_live_track_url'] = deliverurl;
     data['welcome_image_url'] = welcomeimage;
     data['delivar_booking'] = delivarBooking;
+    data['express_checkout_charge'] = expressCheckoutCharge;
     return data;
   }
 }

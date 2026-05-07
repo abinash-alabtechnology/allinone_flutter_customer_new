@@ -161,6 +161,8 @@ class AppConstants {
   static const String recommendedItemsUri = '/api/v1/items/recommended?filter=';
   static const String visitAgainStoreUri = '/api/v1/customer/visit-again';
   static const String discountedItemsUri = '/api/v1/items/discounted';
+  static const String getSubscriptionProductsUri = '/api/v1/items/get-subscription-products';
+  static const String getFreshProductsUri = '/api/v1/items/get-fresh-products';
   static const String parcelOtherBannerUri = '/api/v1/other-banners';
   static const String whyChooseUri = '/api/v1/other-banners/why-choose';
   static const String videoContentUri = '/api/v1/other-banners/video-content';

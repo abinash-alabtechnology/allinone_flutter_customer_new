@@ -39,6 +39,16 @@ class ItemService implements ItemServiceInterface {
   }
 
   @override
+  Future<ItemModel?> getSubscriptionItemList({required int offset, DataSourceEnum? source, String? search, List<int>? categoryIds, List<String>? filter, int? rating, double? minPrice, double? maxPrice}) async {
+    return await itemRepositoryInterface.getList(isSubscriptionItems: true, offset: offset, source: source, search: search, categoryIds: categoryIds, filter: filter, rating: rating, minPrice: minPrice, maxPrice: maxPrice);
+  }
+  
+  @override
+  Future<ItemModel?> getFreshItemList({required int offset, DataSourceEnum? source, String? search, List<int>? categoryIds, List<String>? filter, int? rating, double? minPrice, double? maxPrice}) async {
+    return await itemRepositoryInterface.getList(isFreshItems: true, offset: offset, source: source, search: search, categoryIds: categoryIds, filter: filter, rating: rating, minPrice: minPrice, maxPrice: maxPrice);
+  }
+
+  @override
   Future<Item?> getItemDetails(int? itemID) async {
     return await itemRepositoryInterface.get(itemID.toString());
   }

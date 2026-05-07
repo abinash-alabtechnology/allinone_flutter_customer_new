@@ -37,6 +37,7 @@ class Datum {
   bool status;
   DateTime createdAt;
   DateTime updatedAt;
+  int? discount;
 
   Datum({
     required this.id,
@@ -51,6 +52,7 @@ class Datum {
     required this.status,
     required this.createdAt,
     required this.updatedAt,
+    this.discount,
   });
 
   factory Datum.fromJson(Map<String, dynamic> json) => Datum(
@@ -66,6 +68,7 @@ class Datum {
     status: json["status"],
     createdAt: DateTime.parse(json["created_at"]),
     updatedAt: DateTime.parse(json["updated_at"]),
+    discount: json["discount"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -81,5 +84,6 @@ class Datum {
     "status": status,
     "created_at": createdAt.toIso8601String(),
     "updated_at": updatedAt.toIso8601String(),
+    "discount": discount,
   };
 }

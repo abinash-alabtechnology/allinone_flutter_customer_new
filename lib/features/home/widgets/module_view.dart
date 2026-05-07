@@ -402,14 +402,14 @@ class ModuleView extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 70,
                   fontWeight: FontWeight.w900,
-                  color: const Color(0xFFF3F4F6),
+                  color: const Color(0xFFE5E7EB),
                   height: 0.9,
                 ),
               ),
               const SizedBox(height: 12),
               RichText(
                 text: TextSpan(
-                  style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF9CA3AF)),
+                  style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF6B7280)),
                   children: [
                     const TextSpan(text: 'Crafted with '),
                     WidgetSpan(child: Icon(Icons.favorite, color: Colors.red.shade400, size: 16)),

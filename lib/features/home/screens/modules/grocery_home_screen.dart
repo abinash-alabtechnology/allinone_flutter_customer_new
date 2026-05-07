@@ -110,6 +110,8 @@ import '../../widgets/views/visit_again_view.dart';
 import '../../widgets/views/promo_code_banner_view.dart';
 import '../../widgets/views/item_that_you_love_view.dart';
 import '../../widgets/views/promotional_banner_view.dart';
+import '../../widgets/views/subscription_item_view.dart';
+import '../../widgets/views/fresh_item_view.dart';
 import '../home_screen.dart';
 
 class GroceryHomeScreen extends StatefulWidget {
@@ -733,7 +735,7 @@ class _GroceryHomeScreenState extends State<GroceryHomeScreen> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // const Gap(10),
+                       const Gap(10),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: Row(
@@ -819,13 +821,13 @@ class _GroceryHomeScreenState extends State<GroceryHomeScreen> {
                                           ),
                                         ),
                                   child: SizedBox(
-                                    height: 130.h,
-                                    width: 110.w,
+                                    height: 115.h,
+                                    width: 90.w,
                                     child: Column(
                                       children: [
                                         Container(
-                                          width: 110.w,
-                                          height: 110.w,
+                                          width: 90.w,
+                                          height: 90.w,
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
                                             border: Border.all(
@@ -961,14 +963,17 @@ class _GroceryHomeScreenState extends State<GroceryHomeScreen> {
                     // const FlashSaleViewWidget(),
                     // const BestStoreNearbyView(),
                     const MostPopularItemView(isFood: false, isShop: false),
+                    const SubscriptionItemView(isFood: false, isShop: false),
+                    const FreshItemView(isFood: false, isShop: false),
                     const MiddleSectionBannerView(),
                     const BestReviewItemView(),
                     // const JustForYouView(),
                     const TopOffersNearMe(),
-                    const ItemThatYouLoveView(forShop: false),
-                    AuthHelper.isLoggedIn() ? const PromoCodeBannerView() : const SizedBox(),
-                    const NewOnMartView(isPharmacy: false, isShop: false),
-                    const PromotionalBannerView(),
+                    // const ItemThatYouLoveView(forShop: false),
+                    // AuthHelper.isLoggedIn() ? const PromoCodeBannerView() : const SizedBox(),
+                    // const NewOnMartView(isPharmacy: false, isShop: false),
+                    // const PromotionalBannerView(),
+                    SizedBox(height: 100.h),
                   ],
                 ),
               ),

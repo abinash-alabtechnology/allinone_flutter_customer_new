@@ -58,6 +58,9 @@ class ParcelController extends GetxController implements GetxService {
   int _paymentIndex = -1;
   int get paymentIndex => _paymentIndex;
 
+  int _deliveryTypeIndex = 0;
+  int get deliveryTypeIndex => _deliveryTypeIndex;
+
   bool _acceptTerms = true;
   bool get acceptTerms => _acceptTerms;
 
@@ -298,6 +301,13 @@ class ParcelController extends GetxController implements GetxService {
 
   void setPaymentIndex(int index, bool notify) {
     _paymentIndex = index;
+    if(notify) {
+      update();
+    }
+  }
+
+  void setDeliveryTypeIndex(int index, bool notify) {
+    _deliveryTypeIndex = index;
     if(notify) {
       update();
     }

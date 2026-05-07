@@ -13,8 +13,10 @@ class ItemViewAllFilterBottomSheet extends StatelessWidget {
   final double? maxValue;
   final bool isPopular;
   final bool isSpecial;
+  final bool isSubscription;
+  final bool isFresh;
   final bool fromDialog;
-  const ItemViewAllFilterBottomSheet({super.key, this.maxValue, required this.isPopular, required this.isSpecial, this.fromDialog = false});
+  const ItemViewAllFilterBottomSheet({super.key, this.maxValue, required this.isPopular, required this.isSpecial, this.isSubscription = false, this.isFresh = false, this.fromDialog = false});
 
   @override
   Widget build(BuildContext context) {
@@ -229,7 +231,7 @@ class ItemViewAllFilterBottomSheet extends StatelessWidget {
                     color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
                     textColor: Theme.of(context).textTheme.bodyLarge!.color,
                     onPressed: () {
-                      itemController.resetFilters(isPopular: isPopular, isSpecial: isSpecial);
+                      itemController.resetFilters(isPopular: isPopular, isSpecial: isSpecial, isSubscription: isSubscription, isFresh: isFresh);
                       Navigator.pop(context);
                     }
                   ),
@@ -240,7 +242,7 @@ class ItemViewAllFilterBottomSheet extends StatelessWidget {
                   child: CustomButton(
                     buttonText: 'filter'.tr,
                     onPressed: () {
-                      itemController.applyFilters(isPopular: isPopular, isSpecial: isSpecial);
+                      itemController.applyFilters(isPopular: isPopular, isSpecial: isSpecial, isSubscription: isSubscription, isFresh: isFresh);
                       Navigator.pop(context);
                     },
                   ),
@@ -258,6 +260,8 @@ class ItemViewAllFilterBottomSheet1 extends StatefulWidget {
   final double? maxValue;
   final bool isPopular;
   final bool isSpecial;
+  final bool isSubscription;
+  final bool isFresh;
   final bool fromDialog;
 
   const ItemViewAllFilterBottomSheet1({
@@ -265,6 +269,8 @@ class ItemViewAllFilterBottomSheet1 extends StatefulWidget {
     this.maxValue,
     required this.isPopular,
     required this.isSpecial,
+    this.isSubscription = false,
+    this.isFresh = false,
     this.fromDialog = false,
   });
 
@@ -516,7 +522,9 @@ class _ItemViewAllFilterBottomSheetState
                       onPressed: () {
                         itemController.resetFilters(
                             isPopular: widget.isPopular,
-                            isSpecial: widget.isSpecial);
+                            isSpecial: widget.isSpecial,
+                            isSubscription: widget.isSubscription,
+                            isFresh: widget.isFresh);
                         Navigator.pop(context);
                       },
                     ),
@@ -528,7 +536,9 @@ class _ItemViewAllFilterBottomSheetState
                       onPressed: () {
                         itemController.applyFilters(
                             isPopular: widget.isPopular,
-                            isSpecial: widget.isSpecial);
+                            isSpecial: widget.isSpecial,
+                            isSubscription: widget.isSubscription,
+                            isFresh: widget.isFresh);
                         Navigator.pop(context);
                       },
                     ),

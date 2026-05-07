@@ -332,7 +332,7 @@ class RouteHelper {
   static String getNewUserSetupScreen({required String name, required String loginType, required String? phone, required String? email}) {
     return '$newUserSetupScreen?name=$name&login_type=$loginType&phone=$phone&email=$email';
   }
-  static String getItemViewAllScreen(bool isPopular, bool isSpecial) => '$itemViewAllScreen?page=${isPopular ? 'popular' : 'reviewed'}&special=${isSpecial.toString()}';
+  static String getItemViewAllScreen(bool isPopular, bool isSpecial, {bool isSubscription = false, bool isFresh = false}) => '$itemViewAllScreen?page=${isPopular ? 'popular' : isSpecial ? 'reviewed' : isSubscription ? 'subscription' : isFresh ? 'fresh' : 'reviewed'}&special=${isSpecial.toString()}&subscription=${isSubscription.toString()}&fresh=${isFresh.toString()}';
 
   static List<GetPage> routes = [
     GetPage(name: initial,
@@ -654,7 +654,12 @@ class RouteHelper {
       phone: Get.parameters['phone'] != '' && Get.parameters['phone'] != 'null' ? Get.parameters['phone']!.replaceAll(' ', '+') : null,
       email: Get.parameters['email'] != '' && Get.parameters['email'] != 'null' ? Get.parameters['email']!.replaceAll(' ', '+') : null,
     )),
-    GetPage(name: itemViewAllScreen,customTransition: ZoomInTransition(), page: () => getRoute(ItemViewAllScreen(isPopular: Get.parameters['page'] == 'popular', isSpecial: Get.parameters['special'] == 'true'))),
+    GetPage(name: itemViewAllScreen,customTransition: ZoomInTransition(), page: () => getRoute(ItemViewAllScreen(
+      isPopular: Get.parameters['page'] == 'popular',
+      isSpecial: Get.parameters['special'] == 'true',
+      isSubscription: Get.parameters['subscription'] == 'true',
+      isFresh: Get.parameters['fresh'] == 'true',
+    ))),
     GetPage(name: deliveryQuotationList, customTransition: ZoomInTransition(), page: () => getRoute(const DeliveryQuotationListScreen())),
     GetPage(name: quotationImage, customTransition: ZoomInTransition(), page: () {
       String? data = Get.parameters['data'];

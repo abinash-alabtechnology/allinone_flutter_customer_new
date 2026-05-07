@@ -66,9 +66,8 @@ class ItemRepository implements ItemRepositoryInterface {
     return conditionWiseProduct;
   }
 
-  @override
   Future getList({int? offset, String? type, bool isPopularItem = false, bool isReviewedItem = false, bool isFeaturedCategoryItems = false, bool isRecommendedItems = false,
-    bool isCommonConditions = false, bool isDiscountedItems = false, DataSourceEnum? source,
+    bool isCommonConditions = false, bool isDiscountedItems = false, bool isSubscriptionItems = false, bool isFreshItems = false, DataSourceEnum? source,
     String? search, List<int>? categoryIds, List<String>? filter, int? rating, double? minPrice, double? maxPrice,
   }) async {
     if(isPopularItem) {
@@ -83,7 +82,89 @@ class ItemRepository implements ItemRepositoryInterface {
       return await _getCommonConditions();
     } else if(isDiscountedItems) {
       return await _getDiscountedItemList(type: type!, source: source ?? DataSourceEnum.client, offset: offset!, search: search, categoryIds: categoryIds, filter: filter, rating: rating, minPrice: minPrice, maxPrice: maxPrice);
+    } else if(isSubscriptionItems) {
+      return await _getSubscriptionItemList(source: source ?? DataSourceEnum.client, offset: offset!, search: search, categoryIds: categoryIds, filter: filter, rating: rating, minPrice: minPrice, maxPrice: maxPrice);
+    } else if(isFreshItems) {
+      return await _getFreshItemList(source: source ?? DataSourceEnum.client, offset: offset!, search: search, categoryIds: categoryIds, filter: filter, rating: rating, minPrice: minPrice, maxPrice: maxPrice);
     }
+  }
+
+  Future<ItemModel?> _getSubscriptionItemList({required DataSourceEnum source, required int offset, String? search, List<int>? categoryIds, List<String>? filter, int? rating, double? minPrice, double? maxPrice}) async {
+    ItemModel? subscriptionItemModel;
+    String cacheId = '${AppConstants.getSubscriptionProductsUri}?offset=$offset&limit=20-${Get.find<SplashController>().module!.id!}';
+
+    final filterString = filter != null ? jsonEncode(filter) : [];
+    final categoryIdsString = categoryIds != null ? jsonEncode(categoryIds) : [];
+
+    Map<String, dynamic>? query = {
+      'offset': offset.toString(),
+      'limit': '20',
+      if (search != null && search.isNotEmpty) 'search': search,
+      if (categoryIds != null && categoryIds.isNotEmpty) 'category_ids': categoryIdsString,
+      if (filter != null && filter.isNotEmpty) 'filter': filterString,
+      if (rating != null) 'rating_count': rating.toString(),
+      if (minPrice != null) 'min_price': minPrice.toString(),
+      if (maxPrice != null) 'max_price': maxPrice.toString(),
+    };
+
+    String uri = Uri.parse(AppConstants.getSubscriptionProductsUri).replace(queryParameters: query).toString();
+
+    switch(source) {
+      case DataSourceEnum.client:
+        Response response = await apiClient.getData(uri);
+        if (response.statusCode == 200) {
+          subscriptionItemModel = ItemModel.fromJson(response.body);
+          LocalClient.organize(DataSourceEnum.client, cacheId, jsonEncode(response.body), apiClient.getHeader());
+        }
+        break;
+
+      case DataSourceEnum.local:
+        String? cacheResponseData = await LocalClient.organize(DataSourceEnum.local, cacheId, null, null);
+        if(cacheResponseData != null) {
+          subscriptionItemModel = ItemModel.fromJson(jsonDecode(cacheResponseData));
+        }
+        break;
+    }
+    return subscriptionItemModel;
+  }
+
+  Future<ItemModel?> _getFreshItemList({required DataSourceEnum source, required int offset, String? search, List<int>? categoryIds, List<String>? filter, int? rating, double? minPrice, double? maxPrice}) async {
+    ItemModel? freshItemModel;
+    String cacheId = '${AppConstants.getFreshProductsUri}?offset=$offset&limit=20-${Get.find<SplashController>().module!.id!}';
+
+    final filterString = filter != null ? jsonEncode(filter) : [];
+    final categoryIdsString = categoryIds != null ? jsonEncode(categoryIds) : [];
+
+    Map<String, dynamic>? query = {
+      'offset': offset.toString(),
+      'limit': '20',
+      if (search != null && search.isNotEmpty) 'search': search,
+      if (categoryIds != null && categoryIds.isNotEmpty) 'category_ids': categoryIdsString,
+      if (filter != null && filter.isNotEmpty) 'filter': filterString,
+      if (rating != null) 'rating_count': rating.toString(),
+      if (minPrice != null) 'min_price': minPrice.toString(),
+      if (maxPrice != null) 'max_price': maxPrice.toString(),
+    };
+
+    String uri = Uri.parse(AppConstants.getFreshProductsUri).replace(queryParameters: query).toString();
+
+    switch(source) {
+      case DataSourceEnum.client:
+        Response response = await apiClient.getData(uri);
+        if (response.statusCode == 200) {
+          freshItemModel = ItemModel.fromJson(response.body);
+          LocalClient.organize(DataSourceEnum.client, cacheId, jsonEncode(response.body), apiClient.getHeader());
+        }
+        break;
+
+      case DataSourceEnum.local:
+        String? cacheResponseData = await LocalClient.organize(DataSourceEnum.local, cacheId, null, null);
+        if(cacheResponseData != null) {
+          freshItemModel = ItemModel.fromJson(jsonDecode(cacheResponseData));
+        }
+        break;
+    }
+    return freshItemModel;
   }
 
   Future<ItemModel?> _getPopularItemList({required String type, required DataSourceEnum source, required int offset, String? search, List<int>? categoryIds, List<String>? filter, int? rating, double? minPrice, double? maxPrice}) async {

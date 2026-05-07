@@ -9,8 +9,10 @@ import 'package:handy_allinone/util/styles.dart';
 class ItemViewAllSortBottomSheet extends StatelessWidget {
   final bool isPopular;
   final bool isSpecial;
+  final bool isSubscription;
+  final bool isFresh;
   final bool fromDialog;
-  const ItemViewAllSortBottomSheet({super.key, required this.isPopular, required this.isSpecial, this.fromDialog = false});
+  const ItemViewAllSortBottomSheet({super.key, required this.isPopular, required this.isSpecial, this.isSubscription = false, this.isFresh = false, this.fromDialog = false});
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +82,7 @@ class ItemViewAllSortBottomSheet extends StatelessWidget {
                   color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
                   textColor: Theme.of(context).textTheme.bodyLarge!.color,
                   onPressed: () {
-                    itemController.resetFilters(isPopular: isPopular, isSpecial: isSpecial);
+                    itemController.resetFilters(isPopular: isPopular, isSpecial: isSpecial, isSubscription: isSubscription, isFresh: isFresh);
                     Navigator.pop(context);
                   },
                 ),
@@ -91,7 +93,7 @@ class ItemViewAllSortBottomSheet extends StatelessWidget {
                 child: CustomButton(
                   buttonText: 'sort_by'.tr,
                   onPressed: () {
-                    itemController.applyFilters(isPopular: isPopular, isSpecial: isSpecial);
+                    itemController.applyFilters(isPopular: isPopular, isSpecial: isSpecial, isSubscription: isSubscription, isFresh: isFresh);
                     Navigator.pop(context);
                   },
                 ),

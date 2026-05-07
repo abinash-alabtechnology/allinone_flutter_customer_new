@@ -126,6 +126,8 @@ class HomeScreen extends StatefulWidget {
 
         if (splash.module!.moduleType == AppConstants.grocery) {
           generalModuleGroup.add(flash.getFlashSale(reload, false));
+          generalModuleGroup.add(item.getSubscriptionItemList(offset: 1));
+          generalModuleGroup.add(item.getFreshItemList(offset: 1));
         }
 
         if (splash.module!.moduleType == AppConstants.ecommerce) {

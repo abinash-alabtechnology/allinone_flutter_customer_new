@@ -568,6 +568,58 @@ class PaymentButtonNewCustom extends StatelessWidget {
 
           ],
         ),
+        PaymentMethod.offline => Row(
+          children: [
+            IgnorePointer(
+              child: Checkbox(
+                shape: const CircleBorder(),
+                value: isSelected,
+                onChanged: (_) => onTap,
+              ),
+            ),
+            Expanded(
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Theme.of(context).disabledColor.withValues(alpha: 0.2),
+                        ),
+                        child: const Icon(
+                          Icons.money_off_rounded,
+                          color: Colors.black45,
+                          size: 15,
+                        ),
+                      ),
+                      const SizedBox(width: Dimensions.paddingSizeSmall),
+                      Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: robotoMedium.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (subTitle.isNotEmpty)
+                    Text(
+                      subTitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: robotoRegular.copyWith(
+                        fontSize: Dimensions.fontSizeExtraSmall,
+                        color: Theme.of(context).disabledColor,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
         _ => Row(
           children: [
             IgnorePointer(
@@ -586,6 +638,6 @@ class PaymentButtonNewCustom extends StatelessWidget {
       };
 }
 
-enum PaymentMethod { cod, wallet, online }
+enum PaymentMethod { cod, wallet, online, offline }
 
 

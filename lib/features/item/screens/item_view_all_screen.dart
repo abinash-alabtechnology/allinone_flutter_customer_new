@@ -29,13 +29,16 @@ import 'package:handy_allinone/common/widgets/custom_image.dart';
 import 'package:handy_allinone/common/widgets/discount_tag.dart';
 import 'package:handy_allinone/common/widgets/not_available_widget.dart';
 import 'package:handy_allinone/common/widgets/organic_tag.dart';
+import 'package:handy_allinone/common/widgets/custom_app_bar.dart';
 
 import '../../../common/widgets/card_design/item_card.dart';
 
 class ItemViewAllScreen extends StatefulWidget {
   final bool isPopular;
   final bool isSpecial;
-  const ItemViewAllScreen({super.key, this.isPopular = false, this.isSpecial = true});
+  final bool isSubscription;
+  final bool isFresh;
+  const ItemViewAllScreen({super.key, this.isPopular = false, this.isSpecial = true, this.isSubscription = false, this.isFresh = false});
 
   @override
   State<ItemViewAllScreen> createState() => _ItemViewAllScreenState();
@@ -50,7 +53,7 @@ class _ItemViewAllScreenState extends State<ItemViewAllScreen> {
     super.initState();
     ItemController itemController = Get.find<ItemController>();
     itemController.setOffset(1);
-    itemController.clearFilters(isPopular: widget.isPopular, isSpecial: widget.isSpecial);
+    itemController.clearFilters(isPopular: widget.isPopular, isSpecial: widget.isSpecial, isSubscription: widget.isSubscription, isFresh: widget.isFresh);
     itemController.clearSearch(withUpdate: false);
 
     _scrollController.addListener(() {
@@ -61,6 +64,10 @@ class _ItemViewAllScreenState extends State<ItemViewAllScreen> {
         items = itemController.popularItemList;
       } else if (widget.isSpecial) {
         items = itemController.discountedItemList;
+      } else if (widget.isSubscription) {
+        items = itemController.subscriptionItemList;
+      } else if (widget.isFresh) {
+        items = itemController.freshItemList;
       } else {
         items = itemController.reviewedItemList;
       }
@@ -78,6 +85,10 @@ class _ItemViewAllScreenState extends State<ItemViewAllScreen> {
             itemController.getPopularItemList(notify: false, dataSource: DataSourceEnum.client, offset: itemController.offset.toString());
           } else if (widget.isSpecial) {
             itemController.getDiscountedItemList(notify: false, dataSource: DataSourceEnum.client, offset: itemController.offset.toString());
+          } else if (widget.isSubscription) {
+            itemController.getSubscriptionItemList(notify: false, dataSource: DataSourceEnum.client, offset: itemController.offset);
+          } else if (widget.isFresh) {
+            itemController.getFreshItemList(notify: false, dataSource: DataSourceEnum.client, offset: itemController.offset);
           } else {
             itemController.getReviewedItemList(notify: false, dataSource: DataSourceEnum.client, offset: itemController.offset.toString());
           }
@@ -99,190 +110,154 @@ class _ItemViewAllScreenState extends State<ItemViewAllScreen> {
         items = itemController.popularItemList;
       }else if(widget.isSpecial){
         items = itemController.discountedItemList;
+      }else if(widget.isSubscription){
+        items = itemController.subscriptionItemList;
+      }else if(widget.isFresh){
+        items = itemController.freshItemList;
       }else{
         items = itemController.reviewedItemList;
       }
 
       return PopScope(
         canPop: true,
-        onPopInvokedWithResult: (didPop, result) {
-          Get.find<ItemController>().resetFilters(isPopular: widget.isPopular, isSpecial: widget.isSpecial);
+        onPopInvoked: (didPop) {
+          Get.find<ItemController>().resetFilters(isPopular: widget.isPopular, isSpecial: widget.isSpecial, isSubscription: widget.isSubscription, isFresh: widget.isFresh);
           Get.find<ItemController>().clearSearch();
         },
         child: Scaffold(
-          body: SafeArea(
-            child: Column(children: [
-        
-              Container(
-                width: Dimensions.webMaxWidth,
-                decoration: BoxDecoration(
-                  color: Get.find<ThemeController>().darkTheme ? Colors.black12 : Theme.of(context).cardColor,
-                  boxShadow: Get.find<ThemeController>().darkTheme ? null : [BoxShadow(color: Theme.of(context).disabledColor.withValues(alpha: 0.2), blurRadius: 3, offset: const Offset(0, 5))]
-                ),
-                child: Row(children: [
-        
-                  IconButton(
-                    onPressed: (){
-                      Get.find<ItemController>().resetFilters(isPopular: widget.isPopular, isSpecial: widget.isSpecial);
-                      Get.find<ItemController>().clearSearch();
-                      Get.back();
-                    },
-                    icon: const Icon(Icons.arrow_back_ios_new),
-                  ),
-        
-                  Expanded(child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeExtraSmall + 2),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Theme.of(context).disabledColor.withValues(alpha: 0.2)),
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                    child: SearchFieldWidget(
-                      controller: itemController.searchController,
-                      isFocused: false,
-                      radius: 50,
-                      hint: 'search_your_desired_item'.tr,
-                      prefixIcon: CupertinoIcons.search,
-                      suffixIcon: itemController.isSearching ? CupertinoIcons.clear_thick : null,
-                      iconPressed: () {
-                        if (!itemController.isSearching) {
-                          if (itemController.searchController.text.trim().isNotEmpty) {
-                            if (widget.isPopular) {
-                              itemController.getPopularItemList(notify: true, offset: '1');
-                            } else if (widget.isSpecial) {
-                              itemController.getDiscountedItemList(notify: true, offset: '1');
-                            } else {
-                              itemController.getReviewedItemList(notify: true, offset: '1');
-                            }
-                          } else {
-                            showCustomSnackBar('write_item_name_for_search'.tr);
-                          }
-                        } else {
-                          itemController.clearSearch();
-                          if (widget.isPopular) {
-                            itemController.getPopularItemList(notify: true, offset: '1');
-                          } else if (widget.isSpecial) {
-                            itemController.getDiscountedItemList(notify: true, offset: '1');
-                          } else {
-                            itemController.getReviewedItemList(notify: true, offset: '1');
-                          }
-                        }
-                      },
-                      onSubmit: (String text) {
-                        if (itemController.searchController.text.trim().isNotEmpty) {
-                          if (widget.isPopular) {
-                            itemController.getPopularItemList(notify: true, offset: '1');
-                          } else if (widget.isSpecial) {
-                            itemController.getDiscountedItemList(notify: true, offset: '1');
-                          } else {
-                            itemController.getReviewedItemList(notify: true, offset: '1');
-                          }
-                        } else {
-                          showCustomSnackBar('write_item_name_for_search'.tr);
-                        }
-                      },
-                    ),
-                  )),
-        
-                  IconButton(
-                    onPressed: () => Get.toNamed(RouteHelper.getCartRoute()),
-                    icon: CartWidget(color: Theme.of(context).textTheme.bodyLarge!.color, size: 25),
-                  ),
-        
-                ]),
-              ),
-        
-              Padding(
-                padding: const EdgeInsets.only(left: Dimensions.paddingSizeDefault, right: Dimensions.paddingSizeDefault, top: Dimensions.paddingSizeDefault),
-                child: Row(children: [
-
-                  Text(widget.isPopular ? isShop ? 'most_popular_products'.tr : 'most_popular_items'.tr : widget.isSpecial ? 'special_offer'.tr : 'best_reviewed_item'.tr, style: robotoBold),
-                  Text(' (${itemController.pageSize ?? 0})', style: robotoBold),
-                  const Spacer(),
-
-                  InkWell(
-                    onTap: () {
-                      showCustomBottomSheet(child: ItemViewAllSortBottomSheet(isPopular: widget.isPopular, isSpecial: widget.isSpecial));
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                        border: Border.all(color: Theme.of(context).hintColor),
-                      ),
-                      child: Icon(CupertinoIcons.sort_down, color: Theme.of(context).hintColor, size: 18),
-                    ),
-                  ),
-                  const SizedBox(width: Dimensions.paddingSizeSmall),
-
-                  InkWell(
-                    onTap: () {
-
-                      List<double?> prices = [];
-                      for (var product in itemController.discountedItemList!) {
-                        prices.add(product.price);
-                      }
-                      prices.sort();
-                      double? maxValue = prices.isNotEmpty ? prices[prices.length-1] : 99999999;
-
-                      showCustomBottomSheet(child: ItemViewAllFilterBottomSheet1(maxValue: maxValue, isPopular: widget.isPopular, isSpecial: widget.isSpecial));
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                        border: Border.all(color: Theme.of(context).primaryColor),
-                      ),
-                      child: Icon(Icons.filter_list, color: Theme.of(context).primaryColor, size: 18),
-                    ),
-                  ),
-
-                ]),
-              ),
-        
-              Expanded(
-                child: items != null ? items.isNotEmpty ? GridView.builder(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: Dimensions.paddingSizeSmall,
-                    crossAxisSpacing: Dimensions.paddingSizeSmall,
-                    childAspectRatio: 0.66,
-                  ),
-                  itemCount: items.length,
-                  itemBuilder: (context, index) {
-                    return ItemCard(item: items![index]!, isShop: isShop, isFood: false,);
-                 /*   ItemCardWidget(
-                      item: items![index]!,
-                    );*/
-                  },
-                ) : Center(
-                  child: Text(
-                    'no_items_found'.tr,
-                    style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeLarge, color: Theme.of(context).disabledColor),
-                  ),
-                ) : GridView.builder(
-                  padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: Dimensions.paddingSizeSmall,
-                    crossAxisSpacing: Dimensions.paddingSizeSmall,
-                    childAspectRatio: 0.66,
-                  ),
-                  itemCount: 14,
-                  itemBuilder: (context, index) {
-                    return const ItemShimmerView();
-                  },
-                ),
-              ),
-
-              itemController.isLoading ? Center(child: Padding(
-                padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-                child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor)),
-              )) : const SizedBox(),
-        
-            ]),
+          appBar: CustomAppBar(
+            title: widget.isPopular ? (isShop ? 'most_popular_products'.tr : 'most_popular_items'.tr) : widget.isSpecial ? 'special_offer'.tr : widget.isSubscription ? 'Subscribe and save'.tr : widget.isFresh ? 'Fresh and Daily'.tr : 'best_reviewed_item'.tr,
+            onBackPressed: () {
+              Get.find<ItemController>().resetFilters(isPopular: widget.isPopular, isSpecial: widget.isSpecial, isSubscription: widget.isSubscription, isFresh: widget.isFresh);
+              Get.find<ItemController>().clearSearch();
+              Get.back();
+            },
+            showCart: true,
           ),
+          body: Column(children: [
+
+            Container(
+              width: Dimensions.webMaxWidth,
+              padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeExtraSmall),
+              decoration: BoxDecoration(
+                color: Get.find<ThemeController>().darkTheme ? Colors.black12 : Theme.of(context).cardColor,
+                boxShadow: Get.find<ThemeController>().darkTheme ? null : [BoxShadow(color: Theme.of(context).disabledColor.withValues(alpha: 0.2), blurRadius: 3, offset: const Offset(0, 5))]
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Theme.of(context).disabledColor.withValues(alpha: 0.2)),
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                child: SearchFieldWidget(
+                  controller: itemController.searchController,
+                  isFocused: false,
+                  radius: 50,
+                  hint: 'search_your_desired_item'.tr,
+                  prefixIcon: CupertinoIcons.search,
+                  suffixIcon: itemController.isSearching ? CupertinoIcons.clear_thick : null,
+                  iconPressed: () {
+                    if (!itemController.isSearching) {
+                      if (itemController.searchController.text.trim().isNotEmpty) {
+                        if (widget.isPopular) {
+                          itemController.getPopularItemList(notify: true, offset: '1');
+                        } else if (widget.isSpecial) {
+                          itemController.getDiscountedItemList(notify: true, offset: '1');
+                        } else if (widget.isSubscription) {
+                          itemController.getSubscriptionItemList(notify: true, offset: 1);
+                        } else if (widget.isFresh) {
+                          itemController.getFreshItemList(notify: true, offset: 1);
+                        } else {
+                          itemController.getReviewedItemList(notify: true, offset: '1');
+                        }
+                      } else {
+                        showCustomSnackBar('write_item_name_for_search'.tr);
+                      }
+                    } else {
+                      itemController.clearSearch();
+                      if (widget.isPopular) {
+                        itemController.getPopularItemList(notify: true, offset: '1');
+                      } else if (widget.isSpecial) {
+                        itemController.getDiscountedItemList(notify: true, offset: '1');
+                      } else if (widget.isSubscription) {
+                        itemController.getSubscriptionItemList(notify: true, offset: 1);
+                      } else if (widget.isFresh) {
+                        itemController.getFreshItemList(notify: true, offset: 1);
+                      } else {
+                        itemController.getReviewedItemList(notify: true, offset: '1');
+                      }
+                    }
+                  },
+                  onSubmit: (String text) {
+                    if (itemController.searchController.text.trim().isNotEmpty) {
+                      if (widget.isPopular) {
+                        itemController.getPopularItemList(notify: true, offset: '1');
+                      } else if (widget.isSpecial) {
+                        itemController.getDiscountedItemList(notify: true, offset: '1');
+                      } else if (widget.isSubscription) {
+                        itemController.getSubscriptionItemList(notify: true, offset: 1);
+                      } else if (widget.isFresh) {
+                        itemController.getFreshItemList(notify: true, offset: 1);
+                      } else {
+                        itemController.getReviewedItemList(notify: true, offset: '1');
+                      }
+                    } else {
+                      showCustomSnackBar('write_item_name_for_search'.tr);
+                    }
+                  },
+                ),
+              ),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.only(left: Dimensions.paddingSizeDefault, right: Dimensions.paddingSizeDefault, top: Dimensions.paddingSizeDefault),
+              child: Row(children: [
+
+                Text('${'Total items'.tr} (${itemController.pageSize ?? 0})', style: robotoBold),
+                const Spacer(),
+
+              ]),
+            ),
+
+            Expanded(
+              child: items != null ? items.isNotEmpty ? GridView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: Dimensions.paddingSizeSmall,
+                  crossAxisSpacing: Dimensions.paddingSizeSmall,
+                  childAspectRatio: 0.66,
+                ),
+                itemCount: items.length,
+                itemBuilder: (context, index) {
+                  return ItemCard(item: items![index]!, isShop: isShop, isFood: false,);
+                },
+              ) : Center(
+                child: Text(
+                  'no_items_found'.tr,
+                  style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeLarge, color: Theme.of(context).disabledColor),
+                ),
+              ) : GridView.builder(
+                padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: Dimensions.paddingSizeSmall,
+                  crossAxisSpacing: Dimensions.paddingSizeSmall,
+                  childAspectRatio: 0.66,
+                ),
+                itemCount: 14,
+                itemBuilder: (context, index) {
+                  return const ItemShimmerView();
+                },
+              ),
+            ),
+
+            itemController.isLoading ? Center(child: Padding(
+              padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+              child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor)),
+            )) : const SizedBox(),
+
+          ]),
         ),
       );
     });

@@ -68,7 +68,6 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
   Timer? bookingTimer;
   String? _pickupAddress;
   String? _dropoffAddress;
-  final selectedTime = Rxn<TimeOfDay>();
   late GoogleMapController _mapController;
   final ValueNotifier<Set<Marker>> markers = ValueNotifier<Set<Marker>>({});
   late String googleMapsApiKey = controller.googleMapsApiKey ?? "";
@@ -77,7 +76,6 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
   final Map<String, double> markerRotations = {};
   Timer? _pickupRotationTimer;
   Timer? _driverFetchTimer;
-  final scheduletime = false.obs;
   final RxBool showDraggableSheet = true.obs;
   final showVehiclelist = true.obs;
   int selectedRideIndex1 = 0;
@@ -129,11 +127,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
     }
   }
 
-  String _formatTime(TimeOfDay time) {
-    final now = DateTime.now();
-    final dt = DateTime(now.year, now.month, now.day, time.hour, time.minute);
-    return DateFormat('hh:mm a').format(dt);
-  }
+
 
   Future<void> _getCurrentLocation() async {
     _startAllMarkersAnimation();
@@ -365,11 +359,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                               print("dfsggfvs $success");
                               if (success) {
                                 bookingTimer?.cancel();
-                                showBookingCancelledBottomSheet(
-                                  ctx,
-                                  null,
-                                  "driver unavailable",
-                                );
+                                // showBookingCancelledBottomSheet handles the feedback globally via background listener
                               }
                             },
                       style: ElevatedButton.styleFrom(
@@ -516,77 +506,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
     }
   }
 
-  void _showTimePickerSheet() {
-    final initial = selectedTime.value ?? TimeOfDay.now();
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) {
-        var temp = initial;
-        return Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Schedule a ride', style: TextStyle(fontSize: 20)),
-              const SizedBox(height: 10),
 
-              Text(
-                DateFormat('yyyy-MM-dd HH:mm:ss').format(
-                  DateTime.now().copyWith(hour: temp.hour, minute: temp.minute),
-                ),
-                style: const TextStyle(fontSize: 16),
-              ),
-
-              const SizedBox(height: 20),
-
-              SizedBox(
-                height: 150,
-                child: CupertinoTimerPicker(
-                  mode: CupertinoTimerPickerMode.hm,
-                  initialTimerDuration: Duration(
-                    hours: initial.hour,
-                    minutes: initial.minute,
-                  ),
-                  onTimerDurationChanged: (d) {
-                    temp = TimeOfDay(hour: d.inHours, minute: d.inMinutes % 60);
-                  },
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey.shade900,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                onPressed: () {
-                  scheduletime.value = true;
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    selectedTime.value = temp;
-                  });
-                  print(
-                    "✅ Scheduled Time: ${DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now().copyWith(hour: temp.hour, minute: temp.minute))}",
-                  );
-                  Navigator.pop(context);
-                },
-                child: const Text(
-                  'Confirm',
-                  style: TextStyle(color: Colors.yellowAccent),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
 
   double _calculateDistanceKm() {
     final dx = _pickupLatLng!.latitude - _dropoffLatLng!.latitude;
@@ -594,13 +514,18 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
     return sqrt(dx * dx + dy * dy) * 111;
   }
 
-  String _calculateEstimatedFare(String base, String perKm, String perMin) {
+  double _calculateEstimatedFare(String base, String perKm, String perMin) {
     final baseFare = double.tryParse(base) ?? 0;
     final pricePerKm = double.tryParse(perKm) ?? 0;
     final distanceKm = _calculateDistanceKm();
     final fare = distanceKm * pricePerKm;
     final total = fare < baseFare ? baseFare : fare;
-    return '₹${total.round()}';
+    return total;
+  }
+
+  double _calculateDiscountedFare(double fare, int? discount) {
+    if (discount == null || discount <= 0) return fare;
+    return fare * (1 - (discount / 100));
   }
 
   Future<void> _processSelectedLocation({
@@ -769,16 +694,41 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
     required TextEditingController controller,
     required VoidCallback onTap,
   }) {
-    return ListTile(
-      leading: Icon(Icons.location_on, color: iconColor),
-      title: TextField(
-        controller: controller,
-        enabled: false,
-        decoration: const InputDecoration(border: InputBorder.none),
-      ),
-      trailing: IconButton(
-        icon: Icon(Icons.edit, color: Theme.of(context).primaryColor),
-        onPressed: onTap,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade100),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: iconColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.location_on, color: iconColor, size: 18),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                controller.text.isEmpty ? "Select Location" : controller.text,
+                style: robotoRegular.copyWith(
+                  fontSize: 14,
+                  color: controller.text.isEmpty ? Colors.grey : Colors.black87,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios, color: Colors.grey.shade400, size: 14),
+          ],
+        ),
       ),
     );
   }
@@ -811,8 +761,12 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
     String imageUrl, {
     required bool isSelected,
     required VoidCallback onTap,
+    String? originalPrice,
+    int? discountPercent,
   }) {
     bool isSelected = selectedRideIndex1 == idx;
+    bool hasDiscount = originalPrice != null && originalPrice != price;
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -821,94 +775,172 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
         });
       },
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
-        padding: const EdgeInsets.all(12),
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOut,
+        margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: isSelected
-              ? Theme.of(context).primaryColor.withOpacity(0.05)
-              : Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          color: isSelected ? Colors.white : Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
                 ? Theme.of(context).primaryColor
-                : Colors.transparent,
-            width: 1.5,
+                : Colors.grey.shade200,
+            width: isSelected ? 2 : 1,
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: Theme.of(context).primaryColor.withOpacity(0.2),
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : [],
-        ),
-        child: Row(
-          children: [
-            Image.network(
-              imageUrl,
-              width: 40,
-              height: 40,
-              fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) =>
-                  const Icon(Icons.image_not_supported),
-              loadingBuilder: (_, child, loadingProgress) {
-                if (loadingProgress == null) return child;
-                return const SizedBox(
-                  width: 40,
-                  height: 40,
-                  child: Center(
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(width: 25),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: robotoBold.copyWith(
-                      fontSize: Dimensions.fontSizeExtraLarge,
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        subtitle,
-                        style: robotoRegular.copyWith(
-                          fontSize: Dimensions.fontSizeDefault,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      const Icon(Icons.person, size: 16, color: Colors.grey),
-                    ],
-                  ),
-                ],
+          boxShadow: [
+            if (isSelected)
+              BoxShadow(
+                color: Theme.of(context).primaryColor.withOpacity(0.12),
+                blurRadius: 12,
+                spreadRadius: 2,
+                offset: const Offset(0, 4),
+              )
+            else
+              BoxShadow(
+                color: Colors.black.withOpacity(0.03),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
               ),
-            ),
-            Column(
+          ],
+        ),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Row(
               children: [
-                Text(
-                  price,
-                  style: robotoRegular.copyWith(
-                    fontSize: Dimensions.fontSizeExtraLarge,
+                // Vehicle Image with background
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade100),
+                  ),
+                  child: Image.network(
+                    imageUrl,
+                    width: 48,
+                    height: 48,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) =>
+                        const Icon(Icons.directions_car, size: 32, color: Colors.grey),
+                    loadingBuilder: (_, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return const SizedBox(
+                        width: 48,
+                        height: 48,
+                        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                      );
+                    },
                   ),
                 ),
-                Text(
-                  eta,
-                  style: robotoMedium.copyWith(
-                    fontSize: Dimensions.fontSizeDefault,
-                    color: Colors.grey,
+                const SizedBox(width: 16),
+
+                // Title and Seats
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: robotoBold.copyWith(
+                          fontSize: 17,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(Icons.person, size: 14, color: Colors.grey.shade600),
+                          const SizedBox(width: 4),
+                          Text(
+                            subtitle,
+                            style: robotoRegular.copyWith(
+                              fontSize: 13,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          if (eta.isNotEmpty) ...[
+                            Icon(Icons.access_time_filled, size: 14, color: Theme.of(context).primaryColor.withOpacity(0.7)),
+                            const SizedBox(width: 4),
+                            Text(
+                              eta,
+                              style: robotoMedium.copyWith(
+                                fontSize: 13,
+                                color: Theme.of(context).primaryColor,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
                   ),
+                ),
+
+                // Price Section
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      price,
+                      style: robotoBold.copyWith(
+                        fontSize: 19,
+                        color: hasDiscount ? const Color(0xFF2E7D32) : Colors.black, // Dark green for discount
+                      ),
+                    ),
+                    if (hasDiscount)
+                      IntrinsicWidth(
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Text(
+                              originalPrice!,
+                              style: robotoRegular.copyWith(
+                                fontSize: 12,
+                                color: Colors.grey.shade500,
+                              ),
+                            ),
+                            Container(
+                              height: 1,
+                              color: Colors.grey.shade500,
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
                 ),
               ],
             ),
+
+            // Discount Badge
+            if (hasDiscount && discountPercent != null && discountPercent > 0)
+              Positioned(
+                top: -24,
+                right: -10,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.shade700,
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.orange.withOpacity(0.3),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    "SAVE $discountPercent%",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -1082,11 +1114,13 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                         final selectedVehicle =
                             vehicleController.vehicleList[selectedRideIndex1];
 
-                        final fare = _calculateEstimatedFare(
+                        final originalFare = _calculateEstimatedFare(
                           selectedVehicle.baseFare,
                           selectedVehicle.pricePerKm,
                           selectedVehicle.pricePerMin,
                         );
+                        final discountedFare = _calculateDiscountedFare(
+                            originalFare, selectedVehicle.discount);
 
                         return Padding(
                           padding: const EdgeInsets.only(
@@ -1112,17 +1146,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                                       final phone = _phoneController.text;
 
                                       DateTime now = DateTime.now();
-                                      TimeOfDay selected =
-                                          selectedTime.value ??
-                                          TimeOfDay.fromDateTime(now);
-
-                                      DateTime scheduledDateTime = DateTime(
-                                        now.year,
-                                        now.month,
-                                        now.day,
-                                        selected.hour,
-                                        selected.minute,
-                                      );
+                                      DateTime scheduledDateTime = DateTime.now();
 
                                       Map<String, dynamic> bookingData = {
                                         "pickup_location": _pickupAddress,
@@ -1134,7 +1158,8 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                                             _dropoffLatLng!.longitude,
                                         "distance_km": _calculateDistanceKm()
                                             .toStringAsFixed(2),
-                                        "fare_amount": fare.replaceAll('₹', ''),
+                                        "fare_amount":
+                                            discountedFare.round().toString(),
                                         "vehicle_price_type_id":
                                             selectedVehicle.id,
                                         "passenger_name": name,
@@ -1169,7 +1194,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                                         ),
                                         const SizedBox(width: 8),
                                         Text(
-                                          'Book ${_getRideTitle(selectedRideIndex1)} • ₹${fare.replaceAll('₹', '')}',
+                                          'Book ${_getRideTitle(selectedRideIndex1)} • ₹${discountedFare.round()}',
                                           style: robotoBlack.copyWith(
                                             color: Theme.of(context).cardColor,
                                             fontSize: Dimensions.fontSizeLarge,
@@ -1226,11 +1251,13 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
               final selectedVehicle =
                   vehicleController.vehicleList[selectedRideIndex1];
 
-              final fare = _calculateEstimatedFare(
+              final originalFare = _calculateEstimatedFare(
                 selectedVehicle.baseFare,
                 selectedVehicle.pricePerKm,
                 selectedVehicle.pricePerMin,
               );
+              final discountedFare = _calculateDiscountedFare(
+                  originalFare, selectedVehicle.discount);
 
               return Padding(
                 padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
@@ -1252,17 +1279,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                             final phone = _phoneController.text;
 
                             DateTime now = DateTime.now();
-                            TimeOfDay selected =
-                                selectedTime.value ??
-                                TimeOfDay.fromDateTime(now);
-
-                            DateTime scheduledDateTime = DateTime(
-                              now.year,
-                              now.month,
-                              now.day,
-                              selected.hour,
-                              selected.minute,
-                            );
+                            DateTime scheduledDateTime = DateTime.now();
 
                             Map<String, dynamic> bookingData = {
                               "pickup_location": _pickupAddress,
@@ -1273,7 +1290,8 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                               "dropoff_lng": _dropoffLatLng!.longitude,
                               "distance_km": _calculateDistanceKm()
                                   .toStringAsFixed(2),
-                              "fare_amount": fare.replaceAll('₹', ''),
+                              "fare_amount":
+                                  discountedFare.round().toString(),
                               "vehicle_price_type_id": selectedVehicle.id,
                               "passenger_name": name,
                               "passenger_phone": phone,
@@ -1300,7 +1318,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                               const Icon(Icons.local_taxi, color: Colors.white),
                               const SizedBox(width: 8),
                               Text(
-                                'Book ${_getRideTitle(selectedRideIndex1)} • ₹${fare.replaceAll('₹', '')}',
+                                'Book ${_getRideTitle(selectedRideIndex1)} • ₹${discountedFare.round()}',
                                 style: robotoBlack.copyWith(
                                   color: Theme.of(context).cardColor,
                                   fontSize: Dimensions.fontSizeLarge,
@@ -1359,117 +1377,158 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
   }
 
   Widget _buildSearchDestination() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          InkWell(
-            onTap: () {
-              _openLocationPicker("Dropoff");
-            },
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-              child: Row(
-                children: [
-                  Icon(Icons.search, color: Theme.of(context).primaryColor),
-                  SizedBox(width: 8),
-                  Text(
-                    "Search Destination",
-                    style: robotoMedium.copyWith(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Handle for Draggable Sheet
+        Center(
+          child: Container(
+            margin: const EdgeInsets.only(top: 8, bottom: 16),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade300,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+        ),
+
+        // Search Bar
+        InkWell(
+          onTap: () => _openLocationPicker("Dropoff"),
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.search, color: Theme.of(context).primaryColor, size: 22),
+                const SizedBox(width: 12),
+                Text(
+                  "Where to?",
+                  style: robotoBold.copyWith(
+                    fontSize: 16,
+                    color: Colors.grey.shade700,
                   ),
-                ],
+                ),
+                const Spacer(),
+                Container(
+                  height: 24,
+                  width: 1,
+                  color: Colors.grey.shade300,
+                  margin: const EdgeInsets.symmetric(horizontal: 12),
+                ),
+                Icon(Icons.map, color: Theme.of(context).primaryColor.withOpacity(0.7), size: 20),
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 20),
+
+        if (recentLocations.isNotEmpty) ...[
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: 12),
+            child: Text(
+              "Recent Places",
+              style: robotoBold.copyWith(
+                fontSize: 14,
+                color: Colors.black54,
               ),
             ),
           ),
-
-          if (recentLocations.isNotEmpty)
-            Divider(height: 1, color: Colors.grey[300]),
-          if (recentLocations.isNotEmpty) ...[
-            ...recentLocations.take(4).map((loc) {
-              return ListTile(
-                dense: true,
-                leading: Icon(Icons.history, color: Colors.grey),
-                title: Text(
-                  loc.address,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 14),
-                ),
-                onTap: () {
-                  if (_currentPosition != null) {
-                    _processSelectedLocation(
-                      status: "Dropoff",
-                      latLng: LatLng(loc.latitude, loc.longitude),
-                      address: loc.address,
-                    );
-                  } else {
-                    Get.snackbar(
-                      "Error",
-                      "Please Wait...",
-                      snackPosition: SnackPosition.BOTTOM,
-                    );
-                  }
-                  // _processSelectedLocation(
-                  //   status: "Dropoff",
-                  //   latLng: LatLng(loc.latitude, loc.longitude),
-                  //   address: loc.address,
-                  // );
-                },
-              );
-            }).toList(),
-          ] else ...[
-            Align(
-              alignment: Alignment.topCenter,
-              child: Column(
-                children: [
-                  Lottie.asset(
-                    'assets/animation/new_user_explore_animation.json',
-                    height: 100,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Center(
-                      child: RichText(
-                        textAlign: TextAlign.center,
-                        text: TextSpan(
-                          style: TextStyle(
-                            fontSize: 15,
-                            color: Colors.grey[800],
-                            height: 1.4,
+          ...recentLocations.take(3).map((loc) {
+            return InkWell(
+              onTap: () {
+                if (_currentPosition != null) {
+                  _processSelectedLocation(
+                    status: "Dropoff",
+                    latLng: LatLng(loc.latitude, loc.longitude),
+                    address: loc.address,
+                  );
+                } else {
+                  Get.snackbar("Error", "Please Wait...", snackPosition: SnackPosition.BOTTOM);
+                }
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.history, color: Colors.grey, size: 18),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            loc.address,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: robotoMedium.copyWith(fontSize: 15),
                           ),
-                          children: [
-                            TextSpan(
-                              text: "Welcome aboard! ",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                            TextSpan(
-                              text:
-                                  "Wishing you a smooth and joyful journey ahead 🚖✨",
-                              style: TextStyle(fontWeight: FontWeight.w400),
-                            ),
-                          ],
+                        ],
+                      ),
+                    ),
+                    Icon(Icons.chevron_right, color: Colors.grey.shade300, size: 20),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ] else ...[
+          Align(
+            alignment: Alignment.topCenter,
+            child: Column(
+              children: [
+                Lottie.asset(
+                  'assets/animation/new_user_explore_animation.json',
+                  height: 100,
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Center(
+                    child: RichText(
+                      textAlign: TextAlign.center,
+                      text: TextSpan(
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: Colors.grey[800],
+                          height: 1.4,
                         ),
+                        children: [
+                          const TextSpan(
+                            text: "Welcome aboard! ",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const TextSpan(
+                            text: "Wishing you a smooth and joyful journey ahead 🚖✨",
+                            style: TextStyle(fontWeight: FontWeight.w400),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
+          ),
         ],
-      ),
+      ],
     );
   }
 
@@ -1477,96 +1536,113 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Stack(
-          children: [
-            Column(
-              children: [
-                _buildLocationTile(
-                  iconColor: Colors.green,
-                  controller: pickupController,
-                  onTap: () async {
-                    await _openLocationPicker("Pickup");
-                  },
-                ),
-
-                // _buildLocationTile(
-                //   iconColor: Colors.green,
-                //   controller: pickupController,
-                //   onIconTap: () async {
-                //     await _openLocationPicker("Pickup");
-                //   },
-                //   onTextChanged: (value) {
-                //     _pickupAddress = value;
-                //   },
-                // ),
-                const Divider(),
-                _buildLocationTile(
-                  iconColor: Colors.red,
-                  controller: destinationController,
-                  onTap: () async {
-                    await _openLocationPicker("Dropoff");
-                  },
-                ),
-
-                // _buildLocationTile(
-                //   iconColor: Colors.red,
-                //   controller: destinationController,
-                //   onIconTap: () async {
-                //     await _openLocationPicker("Dropoff");
-                //   },
-                //   onTextChanged: (value) {
-                //     _dropoffAddress = value;
-                //   },
-                // ),
-              ],
+        // Handle
+        Center(
+          child: Container(
+            margin: const EdgeInsets.only(top: 8, bottom: 16),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade300,
+              borderRadius: BorderRadius.circular(2),
             ),
-            // Positioned(
-            //   right: 10,
-            //   bottom: 50,
-            //   child: Container(
-            //     decoration: BoxDecoration(
-            //       border: Border.all(width: 1),
-            //       borderRadius: BorderRadius.circular(10),
-            //       color: Colors.white,
-            //     ),
-            //     child: TextButton(
-            //       onPressed: () {
-            //         _showTimePickerSheet();
-            //         print(selectedTime.value);
-            //         print("gddfg");
-            //       },
-            //       style: TextButton.styleFrom(foregroundColor: Colors.black),
-            //       child: Obx(() => selectedTime.value == null
-            //           ? const Icon(Icons.access_time)
-            //           : Text(_formatTime(selectedTime.value!))),
-            //     ),
-            //   ),
-            // ),
-          ],
+          ),
         ),
-        Padding(
-          padding: const EdgeInsets.only(left: 20.0, right: 25.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Total Distance:",
-                style: robotoBold.copyWith(
-                  fontSize: Dimensions.fontSizeExtraLarge,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
+
+        // Location Inputs Group
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
-              Text(
-                "${_calculateDistanceKm().toStringAsFixed(2)} KM",
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+            ],
+          ),
+          child: Stack(
+            children: [
+              Column(
+                children: [
+                  _buildLocationTile(
+                    iconColor: Colors.green,
+                    controller: pickupController,
+                    onTap: () async {
+                      await _openLocationPicker("Pickup");
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  _buildLocationTile(
+                    iconColor: Colors.red,
+                    controller: destinationController,
+                    onTap: () async {
+                      await _openLocationPicker("Dropoff");
+                    },
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.straighten_rounded,
+                          size: 20,
+                          color: Colors.grey.shade600,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          "Total Journey Distance",
+                          style: robotoRegular.copyWith(
+                            fontSize: 14,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          "${_calculateDistanceKm().toStringAsFixed(1)} km",
+                          style: robotoBold.copyWith(
+                            fontSize: 16,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+  
+                ],
+              ),
+              // Connecting line - Refined Dashed Line
+              Positioned(
+                left: 31,
+                top: 40,
+                bottom: 84, // Adjust to stop at the second pin
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: List.generate(
+                    12,
+                    (index) => Container(
+                      width: 1,
+                      height: 3,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(0.5),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ],
+          ),
+        ),
+
+        const SizedBox(height: 8),
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Text(
+            "Select Vehicle",
+            style: robotoBold.copyWith(fontSize: 18, color: Colors.black87),
           ),
         ),
 
@@ -1593,11 +1669,13 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                 final v = vehicleController.vehicleList[i];
                 final isSel = selectedRideIndex.value == i;
 
-                final price = _calculateEstimatedFare(
+                final originalFare = _calculateEstimatedFare(
                   v.baseFare,
                   v.pricePerKm,
                   v.pricePerMin,
                 );
+                final discountedFare =
+                    _calculateDiscountedFare(originalFare, v.discount);
 
                 final matchingDrivers = controller.driverList
                     .where(
@@ -1640,10 +1718,12 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                         i,
                         v.name,
                         '${v.seats}',
-                        price,
+                        '₹${discountedFare.round()}',
                         etaText,
                         '${AppConstants.baseUrl}${AppConstants.Vehicleimage}${v.image}',
                         isSelected: isSel,
+                        originalPrice: '₹${originalFare.round()}',
+                        discountPercent: v.discount,
                         onTap: () {
                           selectedRideIndex.value = i;
                         },
@@ -1811,15 +1891,16 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
       Get.back();
     }
 
-    if (showConfirmation) {
+    bool isHomepage = Get.currentRoute.contains('DashboardScreen') || Get.currentRoute == '/';
+    if (showConfirmation && !isHomepage) {
       showBookingCancelledBottomSheet(
-        parentContext,
+        Get.context!,
         null,
-        "cancelled",
+        "user request",
       ).then((_) {
         Get.find<SplashController>().showBottomNavBar();
         Get.offAll(() => const DashboardScreen(
-              pageIndex: 1,
+              pageIndex: 0,
               fromSplash: false,
             ));
       });
@@ -1836,6 +1917,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
 
     if (bookingId == null || userId == null || otp == null) {
       print("❌ Missing bookingId, userId, or otp.");
+      Get.offAll(() => const DashboardScreen(pageIndex: 0, fromSplash: false));
       return;
     }
 
@@ -2119,7 +2201,9 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
 
                             if (success) {
                               print("✅ Cancellation confirmed by user — clearing search UI");
-                              _handleRideCancellation(bottomSheetContext, safeContext, bookingListener, countdownTimer, false);
+                              bookingTimer?.cancel();
+                              bookingListener.cancel();
+                              countdownTimer?.cancel();
                             }
                           },
                           child: Text(
@@ -2714,40 +2798,52 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
   //   );
   // }
   Widget buildRideSkeletonTile() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade100),
+      ),
       child: Shimmer.fromColors(
-        baseColor: Colors.grey[300]!,
-        highlightColor: Colors.grey[100]!,
+        baseColor: Colors.grey[200]!,
+        highlightColor: Colors.grey[50]!,
         child: Row(
           children: [
             Container(
-              width: 60,
-              height: 60,
+              width: 64,
+              height: 64,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(12),
               ),
             ),
-            const SizedBox(width: 12),
-            // Text placeholders
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    height: 14,
-                    width: double.infinity,
-                    color: Colors.white,
-                  ),
+                  Container(height: 16, width: 100, color: Colors.white),
                   const SizedBox(height: 8),
-                  Container(height: 12, width: 100, color: Colors.white),
+                  Row(
+                    children: [
+                      Container(height: 12, width: 40, color: Colors.white),
+                      const SizedBox(width: 8),
+                      Container(height: 12, width: 60, color: Colors.white),
+                    ],
+                  ),
                 ],
               ),
             ),
-            const SizedBox(width: 12),
-            // Price placeholder
-            Container(width: 50, height: 14, color: Colors.white),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Container(height: 18, width: 60, color: Colors.white),
+                const SizedBox(height: 4),
+                Container(height: 12, width: 40, color: Colors.white),
+              ],
+            ),
           ],
         ),
       ),

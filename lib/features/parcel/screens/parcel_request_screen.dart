@@ -1267,7 +1267,7 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                       setState(() {});
                     }),
             ))
-        : GetPlatform.isDesktop? ParcelNewRequestScreen(): ParcelNewRequestScreen1(
+        : ParcelNewRequestScreen(
       parcelCategory: widget.parcelCategory,
       pickedUpAddress: widget.pickedUpAddress,
       destinationAddress: widget.destinationAddress,
