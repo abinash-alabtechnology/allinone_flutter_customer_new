@@ -158,10 +158,11 @@ class OrderTrackingScreenState extends State<OrderTrackingScreen> with WidgetsBi
   @override
   Widget build(BuildContext context) {
     bool isPharmacy = Get.find<SplashController>().module?.moduleType == 'pharmacy';
+    bool isParcel = Get.find<SplashController>().module?.moduleType == 'parcel';
 
     return Scaffold(
-      appBar: isPharmacy ? null : CustomAppBar3(title: 'order_tracking'.tr),
-      backgroundColor: isPharmacy ? Colors.white : null,
+      appBar: (isPharmacy || isParcel) ? null : CustomAppBar3(title: 'order_tracking'.tr),
+      backgroundColor: (isPharmacy || isParcel) ? Colors.white : null,
       endDrawer: const MenuDrawer(),
       endDrawerEnableOpenDragGesture: false,
       body: GetBuilder<OrderController>(builder: (orderController) {
@@ -184,6 +185,11 @@ class OrderTrackingScreenState extends State<OrderTrackingScreen> with WidgetsBi
 
         if (track == null) {
           return const Center(child: CircularProgressIndicator());
+        }
+
+        // ── Parcel module: 50% map + 50% order details ──
+        if (isParcel || track.orderType == 'parcel') {
+          return _buildParcelTrackingView(track, orderController);
         }
 
         return isPharmacy 
@@ -835,3 +841,363 @@ class OrderTrackingScreenState extends State<OrderTrackingScreen> with WidgetsBi
   }
 
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PARCEL MODULE ── 50 % Live Map  +  50 % Order Details
+// ═══════════════════════════════════════════════════════════════════════════════
+extension _ParcelTracking on OrderTrackingScreenState {
+
+  Widget _buildParcelTrackingView(OrderModel track, OrderController orderController) {
+    const primaryOrange = Color(0xFFF97316);
+    const bgColor       = Color(0xFFF8F9FB);
+
+    int stepState = 0;
+    if (track.orderStatus == 'confirmed')                                          stepState = 1;
+    else if (track.orderStatus == 'processing' || track.orderStatus == 'handover') stepState = 2;
+    else if (track.orderStatus == 'picked_up')                                     stepState = 3;
+    else if (track.orderStatus == 'delivered')                                     stepState = 4;
+    else if (track.orderStatus == 'failed' || track.orderStatus == 'canceled')     stepState = -1;
+
+    final double screenH = MediaQuery.of(context).size.height;
+
+    return Column(
+      children: [
+        // ── Custom Header ───────────────────────────────────────────────────
+        Container(
+          padding: EdgeInsets.only(
+            top: MediaQuery.of(context).padding.top + 8,
+            bottom: 12, left: 8, right: 16,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 3))],
+          ),
+          child: Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black87, size: 20),
+                onPressed: () => Get.back(),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text('Order Tracking', style: robotoBold.copyWith(fontSize: 17, color: const Color(0xFF1A1A1A))),
+                    Text('Parcel  #${track.id}', style: robotoRegular.copyWith(fontSize: 12, color: Colors.grey.shade500)),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: stepState == 4  ? const Color(0xFFDCFCE7)
+                       : stepState == -1 ? const Color(0xFFFEE2E2)
+                       :                   const Color(0xFFFFF7ED),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  stepState == 4  ? 'Delivered'
+                  : stepState == -1 ? 'Cancelled'
+                  : stepState == 3  ? 'On The Way'
+                  : stepState == 2  ? 'Preparing'
+                  : stepState == 1  ? 'Confirmed'
+                  : 'Placed',
+                  style: robotoMedium.copyWith(
+                    fontSize: 11,
+                    color: stepState == 4  ? const Color(0xFF16A34A)
+                         : stepState == -1 ? const Color(0xFFDC2626)
+                         : primaryOrange,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // ── Top 50 %: Live Map ──────────────────────────────────────────────
+        SizedBox(
+          height: screenH * 0.44,
+          child: Stack(
+            children: [
+              GoogleMap(
+                mapType: MapType.normal,
+                trafficEnabled: true,
+                initialCameraPosition: CameraPosition(
+                  target: LatLng(
+                    double.tryParse(track.deliveryAddress?.latitude  ?? '0') ?? 0,
+                    double.tryParse(track.deliveryAddress?.longitude ?? '0') ?? 0,
+                  ),
+                  zoom: 15,
+                ),
+                zoomControlsEnabled: false,
+                markers:   _markers,
+                polylines: _polylines,
+                onMapCreated: (GoogleMapController controller) {
+                  _controller = controller;
+                  _isLoading  = false;
+                  setMarker(
+                    Store(
+                      latitude:  track.receiverDetails?.latitude,
+                      longitude: track.receiverDetails?.longitude,
+                      address:   track.receiverDetails?.address,
+                      name:      track.receiverDetails?.contactPersonName,
+                    ),
+                    track.deliveryMan,
+                    track.deliveryAddress,
+                    false, true, false,
+                  );
+                },
+                style: Get.isDarkMode
+                    ? Get.find<ThemeController>().darkMap
+                    : Get.find<ThemeController>().lightMap,
+              ),
+              if (_isLoading) const Center(child: CircularProgressIndicator()),
+              // Location button
+              Positioned(
+                right: 14, bottom: 14,
+                child: InkWell(
+                  onTap: () => _checkPermission(() async {
+                    AddressModel address = await Get.find<LocationController>()
+                        .getCurrentLocation(false, mapController: _controller);
+                    setMarker(
+                      Store(
+                        latitude:  track.receiverDetails?.latitude,
+                        longitude: track.receiverDetails?.longitude,
+                        address:   track.receiverDetails?.address,
+                        name:      track.receiverDetails?.contactPersonName,
+                      ),
+                      track.deliveryMan, track.deliveryAddress,
+                      false, true, false,
+                      currentAddress: address, fromCurrentLocation: true,
+                    );
+                  }),
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: const BoxDecoration(
+                      color: Colors.white, shape: BoxShape.circle,
+                      boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)],
+                    ),
+                    child: const Icon(Icons.my_location_rounded, color: primaryOrange, size: 22),
+                  ),
+                ),
+              ),
+              // Stepper overlay
+              Positioned(
+                top: 10, left: 12, right: 12,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.95),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 12, offset: const Offset(0, 4))],
+                  ),
+                  child: _buildParcelStepper(stepState, primaryOrange),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // ── Bottom 50 %: Order Details ──────────────────────────────────────
+        Expanded(
+          child: Container(
+            color: bgColor,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 80),
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Delivery partner
+                  if (track.deliveryMan != null) ...[
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4))],
+                      ),
+                      child: Row(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: CustomImage(image: track.deliveryMan!.imageFullUrl ?? '', height: 52, width: 52, fit: BoxFit.cover),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Delivery Partner', style: robotoRegular.copyWith(fontSize: 11, color: Colors.grey)),
+                              Text('${track.deliveryMan!.fName ?? ''} ${track.deliveryMan!.lName ?? ''}',
+                                style: robotoBold.copyWith(fontSize: 15, color: const Color(0xFF1A1A1A))),
+                            ],
+                          )),
+                          _parcelIconBtn(icon: Icons.call_rounded, color: primaryOrange, bg: const Color(0xFFFFF7ED),
+                            onTap: () => launchUrlString('tel:${track.deliveryMan!.phone}', mode: LaunchMode.externalApplication)),
+                          if (showChatPermission) ...[
+                            const SizedBox(width: 8),
+                            _parcelIconBtn(icon: Icons.chat_bubble_rounded, color: primaryOrange, bg: const Color(0xFFFFF7ED),
+                              onTap: () async {
+                                _timer?.cancel();
+                                await Get.toNamed(RouteHelper.getChatRoute(
+                                  notificationBody: NotificationBodyModel(deliverymanId: track.deliveryMan!.id, orderId: track.id),
+                                  user: User(id: track.deliveryMan!.id, fName: track.deliveryMan!.fName, lName: track.deliveryMan!.lName, imageFullUrl: track.deliveryMan!.imageFullUrl),
+                                ));
+                                _timerTrackOrder();
+                              }),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ] else ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16),
+                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10)]),
+                      child: Row(children: [
+                        const Icon(Icons.delivery_dining_rounded, color: Colors.grey, size: 28),
+                        const SizedBox(width: 12),
+                        Text('Delivery man not assigned yet', style: robotoRegular.copyWith(fontSize: 13, color: Colors.grey.shade600)),
+                      ]),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+
+                  // Sender → Receiver card
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4))],
+                    ),
+                    child: Column(children: [
+                      Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Container(padding: const EdgeInsets.all(8),
+                          decoration: const BoxDecoration(color: Color(0xFFFFF7ED), shape: BoxShape.circle),
+                          child: const Icon(Icons.radio_button_checked_rounded, color: primaryOrange, size: 16)),
+                        const SizedBox(width: 12),
+                        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Text('Sender', style: robotoRegular.copyWith(fontSize: 11, color: Colors.grey)),
+                          const SizedBox(height: 2),
+                          Text(track.deliveryAddress?.contactPersonName ?? 'N/A', style: robotoBold.copyWith(fontSize: 14, color: const Color(0xFF1A1A1A))),
+                          Text(track.deliveryAddress?.address ?? '', style: robotoRegular.copyWith(fontSize: 12, color: Colors.grey.shade600), maxLines: 2, overflow: TextOverflow.ellipsis),
+                        ])),
+                        if (track.deliveryAddress?.contactPersonNumber != null)
+                          _parcelIconBtn(icon: Icons.call_outlined, color: primaryOrange, bg: const Color(0xFFFFF7ED), size: 18,
+                            onTap: () => launchUrlString('tel:${track.deliveryAddress!.contactPersonNumber}', mode: LaunchMode.externalApplication)),
+                      ]),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 19, top: 4, bottom: 4),
+                        child: Column(children: List.generate(3, (_) => Container(height: 6, width: 2, margin: const EdgeInsets.symmetric(vertical: 2), color: Colors.grey.shade300))),
+                      ),
+                      Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Container(padding: const EdgeInsets.all(8),
+                          decoration: const BoxDecoration(color: Color(0xFFEFF6FF), shape: BoxShape.circle),
+                          child: const Icon(Icons.location_on_rounded, color: Color(0xFF3B82F6), size: 16)),
+                        const SizedBox(width: 12),
+                        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Text('Receiver', style: robotoRegular.copyWith(fontSize: 11, color: Colors.grey)),
+                          const SizedBox(height: 2),
+                          Text(track.receiverDetails?.contactPersonName ?? 'N/A', style: robotoBold.copyWith(fontSize: 14, color: const Color(0xFF1A1A1A))),
+                          Text(track.receiverDetails?.address ?? '', style: robotoRegular.copyWith(fontSize: 12, color: Colors.grey.shade600), maxLines: 2, overflow: TextOverflow.ellipsis),
+                        ])),
+                        if (track.receiverDetails?.contactPersonNumber != null)
+                          _parcelIconBtn(icon: Icons.call_outlined, color: const Color(0xFF3B82F6), bg: const Color(0xFFEFF6FF), size: 18,
+                            onTap: () => launchUrlString('tel:${track.receiverDetails!.contactPersonNumber}', mode: LaunchMode.externalApplication)),
+                      ]),
+                    ]),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Order info card
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4))],
+                    ),
+                    child: Column(children: [
+                      _parcelInfoRow('Order ID', '#${track.id}', primaryOrange),
+                      if (track.parcelCategory != null) ...[
+                        const Divider(height: 20, thickness: 0.5),
+                        _parcelInfoRow('Parcel Type', track.parcelCategory!.name ?? 'General', Colors.blueGrey),
+                      ],
+                      const Divider(height: 20, thickness: 0.5),
+                      _parcelInfoRow('Payment', (track.paymentMethod ?? 'N/A').replaceAll('_', ' '), Colors.blueGrey),
+                      const Divider(height: 20, thickness: 0.5),
+                      _parcelInfoRow('Delivery Charge', '\$${(track.deliveryCharge ?? 0).toStringAsFixed(2)}', primaryOrange),
+                      if (track.orderNote != null && track.orderNote!.isNotEmpty) ...[
+                        const Divider(height: 20, thickness: 0.5),
+                        _parcelInfoRow('Note', track.orderNote!, Colors.blueGrey),
+                      ],
+                    ]),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _parcelIconBtn({required IconData icon, required Color color, required Color bg, double size = 20, required VoidCallback onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(50),
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
+        child: Icon(icon, color: color, size: size),
+      ),
+    );
+  }
+
+  Widget _parcelInfoRow(String label, String value, Color valueColor) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: robotoRegular.copyWith(fontSize: 13, color: Colors.grey.shade600)),
+        Text(value,  style: robotoBold.copyWith(fontSize: 13, color: valueColor)),
+      ],
+    );
+  }
+
+  Widget _buildParcelStepper(int state, Color activeColor) {
+    const labels = ['Placed', 'Confirmed', 'Preparing', 'On the way', 'Delivered'];
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: List.generate(labels.length, (index) {
+        final isActive = state >= 0 && index <= state;
+        final isLast   = index == labels.length - 1;
+        return Expanded(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(children: [
+                Expanded(child: Container(height: 2, color: index == 0 ? Colors.transparent : (isActive ? activeColor : Colors.grey.shade200))),
+                Container(
+                  height: 22, width: 22,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isActive ? activeColor : Colors.white,
+                    border: Border.all(color: isActive ? activeColor : Colors.grey.shade300, width: 2),
+                  ),
+                  child: isActive ? const Icon(Icons.check, color: Colors.white, size: 13) : null,
+                ),
+                Expanded(child: Container(height: 2, color: isLast ? Colors.transparent : (index < state ? activeColor : Colors.grey.shade200))),
+              ]),
+              const SizedBox(height: 5),
+              Text(labels[index], textAlign: TextAlign.center,
+                style: robotoRegular.copyWith(fontSize: 9, color: isActive ? activeColor : Colors.grey.shade400)),
+            ],
+          ),
+        );
+      }),
+    );
+  }
+}
+

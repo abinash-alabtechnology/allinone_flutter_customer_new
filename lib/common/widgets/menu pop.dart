@@ -141,8 +141,9 @@ import 'package:handy_allinone/util/styles.dart';
 void showCategoryPopup(
   BuildContext context,
   StoreController storeController,
-  GlobalKey key,
-) {
+  GlobalKey key, {
+  void Function(int categoryIndex)? onCategorySelected,
+}) {
   final RenderBox buttonBox =
       key.currentContext!.findRenderObject() as RenderBox;
   final Offset buttonPosition = buttonBox.localToGlobal(Offset.zero);
@@ -251,9 +252,12 @@ void showCategoryPopup(
                                     return InkWell(
                                       onTap: () {
                                         controller.setSearching(false);
-                                        controller.setCategoryIndex(index);
                                         overlayEntry?.remove();
+                                        if (onCategorySelected != null) {
+                                          onCategorySelected(index);
+                                        }
                                       },
+
                                       child: Container(
                                         padding: const EdgeInsets.symmetric(
                                           horizontal:

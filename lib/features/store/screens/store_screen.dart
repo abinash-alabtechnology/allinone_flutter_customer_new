@@ -76,6 +76,13 @@ class _StoreScreenState extends State<StoreScreen> {
   final ScrollController scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
   final GlobalKey _menuKey = GlobalKey();
+  /// Stores GlobalKeys for each category header — populated by ItemsViewStore
+  /// after each build so we can scroll to the exact pixel position.
+  final Map<String, GlobalKey> _categoryHeaderKeys = {};
+  /// Filter chip state — null = no filter, true = active
+  bool _vegFilter = false;
+  bool _nonVegFilter = false;
+  bool _discountFilter = false;
 
   @override
   void initState() {
@@ -96,6 +103,49 @@ class _StoreScreenState extends State<StoreScreen> {
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeOut,
     );
+  }
+
+  void scrollToMenu() {
+    if (!scrollController.hasClients) return;
+    scrollController.animateTo(
+      420,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  /// Scrolls to a specific category header in the "All" grouped view.
+  /// When index == 0 (All), scrolls to top of menu area.
+  /// When index > 0, calculates the cumulative offset of that category.
+  void scrollToCategoryByIndex(int categoryIndex) {
+    // Index 0 = "All" — scroll to top of menu area
+    if (categoryIndex == 0) {
+      scrollToMenu();
+      return;
+    }
+
+    final categories = Get.find<StoreController>().categoryList;
+    if (categories == null || categoryIndex >= categories.length) {
+      scrollToMenu();
+      return;
+    }
+
+    final targetName = categories[categoryIndex].name ?? '';
+    final headerKey = _categoryHeaderKeys[targetName];
+
+    if (headerKey?.currentContext != null) {
+      // Use Flutter's built-in ensureVisible to scroll the header
+      // to the very top of the viewport — pixel-perfect, no math needed.
+      Scrollable.ensureVisible(
+        headerKey!.currentContext!,
+        alignment: 0.0,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    } else {
+      // Fallback if key not yet registered
+      scrollToMenu();
+    }
   }
 
   Future<void> initDataCall() async {
@@ -887,7 +937,7 @@ class _StoreScreenState extends State<StoreScreen> {
                         //   child: SizedBox(height: Dimensions.paddingSizeSmall),
                         // ),
                         SliverPersistentHeader(
-                          pinned: true,
+                          pinned: false,
                           delegate: SliverDelegate(
                             height: 15,
                             child: Container(
@@ -1068,350 +1118,83 @@ class _StoreScreenState extends State<StoreScreen> {
                                   ),
                                 ),
                               ),
-                        SliverPersistentHeader(
-                          pinned: true,
-                          delegate: SliverDelegate(
-                            height: 15,
+                        if (!ResponsiveHelper.isDesktop(context))
+                          SliverToBoxAdapter(
                             child: Container(
-                              color: Theme.of(context).cardColor,
+                              padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeSmall),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Discover Our Menu',
+                                    style: robotoBold.copyWith(fontSize: 22, color: Theme.of(context).textTheme.bodyLarge!.color),
+                                  ),
+                                  Text(
+                                    'Explore our delicious offerings',
+                                    style: robotoRegular.copyWith(fontSize: 14, color: Theme.of(context).disabledColor),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
 
-                        ResponsiveHelper.isDesktop(context)
-                            ? const SliverToBoxAdapter(child: SizedBox())
-                            : (storeController.categoryList!.isNotEmpty)
-                            ? SliverPersistentHeader(
-                                pinned: true,
-                                delegate: SliverDelegate(
-                                  height: 180,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context).cardColor,
-                                      borderRadius: BorderRadius.only(
-                                        bottomLeft: Radius.circular(15),
-                                        bottomRight: Radius.circular(15),
+                        // ── Sticky search bar + filter chips ──────────────
+                        if (!ResponsiveHelper.isDesktop(context) && storeController.categoryList != null && storeController.categoryList!.isNotEmpty)
+                          SliverPersistentHeader(
+                            pinned: true,
+                            delegate: _StoreStickyHeaderDelegate(
+                              vegFilter: _vegFilter,
+                              nonVegFilter: _nonVegFilter,
+                              discountFilter: _discountFilter,
+                              primaryColor: Theme.of(context).primaryColor,
+                              cardColor: Theme.of(context).cardColor,
+                              disabledColor: Theme.of(context).disabledColor,
+                              storeId: store?.id ?? 0,
+                              onVegTap: () {
+                                setState(() { _vegFilter = !_vegFilter; if (_vegFilter) _nonVegFilter = false; });
+                                Get.find<StoreController>().update();
+                              },
+                              onNonVegTap: () {
+                                setState(() { _nonVegFilter = !_nonVegFilter; if (_nonVegFilter) _vegFilter = false; });
+                                Get.find<StoreController>().update();
+                              },
+                              onDiscountTap: () {
+                                setState(() => _discountFilter = !_discountFilter);
+                                Get.find<StoreController>().update();
+                              },
+                            ),
+                          ),
+
+                        if (!ResponsiveHelper.isDesktop(context) && storeController.categoryList != null && storeController.categoryList!.length > storeController.categoryIndex && storeController.categoryList![storeController.categoryIndex].name != 'All')
+                          SliverToBoxAdapter(
+                                child: Container(
+                                  width: Dimensions.webMaxWidth,
+                                  padding: const EdgeInsets.fromLTRB(Dimensions.paddingSizeDefault, Dimensions.paddingSizeSmall, Dimensions.paddingSizeDefault, 0),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        height: 20,
+                                        width: 3.5,
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context).primaryColor,
+                                          borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                                        ),
                                       ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.grey.withValues(
-                                            alpha: 0.5,
-                                          ),
-                                          offset: Offset(
-                                            0,
-                                            4,
-                                          ), // horizontal: 0, vertical: 4
-                                          blurRadius: 6,
-                                          spreadRadius: 0,
+                                      const SizedBox(width: Dimensions.paddingSizeSmall),
+                                      Text(
+                                        storeController.categoryList!.isNotEmpty 
+                                          ? "${storeController.categoryList![storeController.categoryIndex].name!} (${storeController.storeItemModel?.totalSize ?? 0} Items)"
+                                          : 'All Categories',
+                                        style: robotoBold.copyWith(
+                                          fontSize: 18,
+                                          color: Theme.of(context).textTheme.bodyLarge!.color,
+                                          letterSpacing: -0.2,
                                         ),
-                                      ],
-                                    ),
-
-                                    child: Column(
-                                      children: [
-                                        Container(
-                                          height: 55,
-                                          width: Dimensions.webMaxWidth,
-                                          color: Colors.transparent,
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 5,
-                                          ),
-                                          child: InkWell(
-                                            onTap: () => Get.toNamed(
-                                              RouteHelper.getSearchStoreItemRoute(
-                                                store!.id,
-                                              ),
-                                            ),
-                                            child: Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: Dimensions
-                                                        .paddingSizeSmall,
-                                                  ),
-                                              margin:
-                                                  const EdgeInsets.symmetric(
-                                                    vertical: 3,
-                                                  ),
-                                              decoration: BoxDecoration(
-                                                color: Theme.of(
-                                                  context,
-                                                ).cardColor,
-                                                // border: Border.all(
-                                                //   color: Theme.of(context)
-                                                //       .primaryColor
-                                                //       .withOpacity(0.2),
-                                                //   width: 1,
-                                                // ),
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                                boxShadow: const [
-                                                  BoxShadow(
-                                                    color: Colors.black12,
-                                                    blurRadius: 5,
-                                                    spreadRadius: 1,
-                                                  ),
-                                                ],
-                                              ),
-                                              child: Row(
-                                                children: [
-                                                  Expanded(
-                                                    child: Row(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: <Widget>[
-                                                        const SizedBox(
-                                                          width: 10.0,
-                                                          height: 100.0,
-                                                        ),
-                                                        Text(
-                                                          'search_item_in_store'
-                                                              .tr,
-                                                          style: robotoRegular
-                                                              .copyWith(
-                                                                fontSize: Dimensions
-                                                                    .fontSizeLarge,
-                                                              ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  const SizedBox(
-                                                    width: Dimensions
-                                                        .paddingSizeExtraSmall,
-                                                  ),
-                                                  Icon(
-                                                    CupertinoIcons.search,
-                                                    size: 25,
-                                                    color: Theme.of(
-                                                      context,
-                                                    ).disabledColor,
-                                                  ),
-                                                  const SizedBox(
-                                                    width: Dimensions
-                                                        .paddingSizeExtraSmall,
-                                                  ),
-                                                  const SizedBox(
-                                                    width: Dimensions
-                                                        .paddingSizeExtraSmall,
-                                                    child: Padding(
-                                                      padding:
-                                                          EdgeInsets.symmetric(
-                                                            vertical: 6.0,
-                                                          ),
-                                                      child: VerticalDivider(
-                                                        color: Colors.grey,
-                                                        width: 2,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  const SizedBox(
-                                                    width: Dimensions
-                                                        .paddingSizeExtraSmall,
-                                                  ),
-                                                  Icon(
-                                                    CupertinoIcons.mic,
-                                                    size: 25,
-                                                    color: Theme.of(
-                                                      context,
-                                                    ).primaryColor,
-                                                  ),
-                                                  const SizedBox(
-                                                    width: Dimensions
-                                                        .paddingSizeExtraSmall,
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-
-                                        /* SizedBox(height: 5),
-                                        Container(
-                                          height: 115,
-                                          child: ListView.builder(
-                                            scrollDirection: Axis.horizontal,
-                                            itemCount: storeController
-                                                .categoryList!
-                                                .length,
-                                            padding: const EdgeInsets.only(
-                                              left: Dimensions.paddingSizeSmall,
-                                            ),
-                                            physics:
-                                                const BouncingScrollPhysics(),
-                                            itemBuilder: (context, index) {
-                                              return InkWell(
-                                                onTap: () => storeController
-                                                    .setCategoryIndex(index),
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                        right: 12.0,
-                                                      ),
-                                                  child: Column(
-                                                    children: [
-                                                      index == 0
-                                                          ? SizedBox.shrink()
-                                                          // Container(
-                                                          //     height: 86,
-                                                          //     width: 66,
-                                                          //     decoration: BoxDecoration(
-                                                          //       color:
-                                                          //           index ==
-                                                          //               storeController
-                                                          //                   .categoryIndex
-                                                          //           ? Colors
-                                                          //                 .black
-                                                          //           : Colors
-                                                          //                 .white,
-                                                          //       borderRadius:
-                                                          //           BorderRadius.circular(
-                                                          //             15,
-                                                          //           ),
-                                                          //       border: Border.all(
-                                                          //         color:
-                                                          //             index ==
-                                                          //                 storeController
-                                                          //                     .categoryIndex
-                                                          //             ? Colors
-                                                          //                   .black
-                                                          //             : Colors
-                                                          //                   .grey
-                                                          //                   .shade300,
-                                                          //         width: 1.5,
-                                                          //       ),
-                                                          //     ),
-                                                          //     child: Icon(
-                                                          //       BoxIcons
-                                                          //           .bxs_dashboard,
-                                                          //       color:
-                                                          //           index ==
-                                                          //               storeController
-                                                          //                   .categoryIndex
-                                                          //           ? Colors
-                                                          //                 .white
-                                                          //           : Colors
-                                                          //                 .black,
-                                                          //     ),
-                                                          //   )
-                                                        
-                                                         
-                                                           : Container(
-                                                              decoration: BoxDecoration(
-                                                                borderRadius:
-                                                                    BorderRadius.circular(
-                                                                      Dimensions
-                                                                          .radiusDefault,
-                                                                    ),
-                                                                color:
-                                                                    index ==
-                                                                        storeController
-                                                                            .categoryIndex
-                                                                    ? Theme.of(
-                                                                        context,
-                                                                      ).primaryColor
-                                                                    : Colors
-                                                                          .transparent,
-                                                              ),
-                                                              child: Padding(
-                                                                padding:
-                                                                    const EdgeInsets.all(
-                                                                      3.0,
-                                                                    ),
-                                                                child: Container(
-                                                                  decoration: BoxDecoration(
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                          Dimensions
-                                                                              .radiusDefault,
-                                                                        ),
-                                                                  ),
-                                                                  child: Container(
-                                                                    height:
-                                                                        index ==
-                                                                            storeController.categoryIndex
-                                                                        ? 82
-                                                                        : 80,
-                                                                    width:
-                                                                        index ==
-                                                                            storeController.categoryIndex
-                                                                        ? 82
-                                                                        : 80,
-                                                                    decoration: BoxDecoration(
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                            10,
-                                                                          ),
-                                                                    ),
-                                                                    child: ClipRRect(
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                            10,
-                                                                          ),
-                                                                      child: CustomImage(
-                                                                        image:
-                                                                            storeController.categoryList![index].imageFullUrl ??
-                                                                            "",
-                                                                        height:
-                                                                            index ==
-                                                                                storeController.categoryIndex
-                                                                            ? 82
-                                                                            : 80,
-                                                                        width:
-                                                                            index ==
-                                                                                storeController.categoryIndex
-                                                                            ? 82
-                                                                            : 80,
-                                                                        fit: BoxFit
-                                                                            .cover,
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            ),
-                                                      SizedBox(height: 8),
-                                                      Text(
-                                                              index == 0
-                                                          ? "": storeController
-                                                            .categoryList![index]
-                                                            .name!,
-                                                        style:
-                                                            index ==
-                                                                storeController
-                                                                    .categoryIndex
-                                                            ? robotoBold.copyWith(
-                                                                fontSize: Dimensions
-                                                                    .fontSizeSmall,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w600,
-                                                                color: Theme.of(
-                                                                  context,
-                                                                ).primaryColor,
-                                                              )
-                                                            : robotoBold.copyWith(
-                                                                fontSize:
-                                                                    Dimensions
-                                                                        .fontSizeSmall *
-                                                                    1.02,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w600,
-                                                              ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                        ), */
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              )
-                            : const SliverToBoxAdapter(child: SizedBox()),
+                              ),
 
                         ResponsiveHelper.isDesktop(context)
                             ? const SliverToBoxAdapter(child: SizedBox())
@@ -1438,33 +1221,58 @@ class _StoreScreenState extends State<StoreScreen> {
                                         ?.totalSize,
                                     offset:
                                         storeController.storeItemModel?.offset,
-                                    itemView: ItemsViewStore(
-                                      isStore: false,
-                                      stores: null,
-                                      isScrollable: false,
-                                      isGridView: false,
-                                      backButton: scrollToTop,
-                                      categoryname: storeController
-                                          .categoryList![storeController.categoryIndex].name!,
-                                      items:
-                                          (storeController
-                                                  .categoryList!
-                                                  .isNotEmpty &&
-                                              storeController.storeItemModel !=
-                                                  null)
-                                          ? storeController
-                                                .storeItemModel!
-                                                .items
-                                          : null,
-                                      inStorePage: true,
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: Dimensions.paddingSizeSmall,
-                                        vertical: Dimensions.paddingSizeSmall,
-                                      ),
-                                    ),
+                                    itemView: Builder(builder: (ctx) {
+                                       final rawItems = (storeController.categoryList!.isNotEmpty &&
+                                               storeController.storeItemModel != null)
+                                           ? storeController.storeItemModel!.items
+                                           : null;
+
+                                       final filteredItems = rawItems == null
+                                           ? null
+                                           : rawItems.where((item) {
+                                               if (_vegFilter && (item.veg ?? 0) != 1) return false;
+                                               if (_nonVegFilter && (item.veg ?? 0) != 0) return false;
+                                               if (_discountFilter && (item.discount == null || item.discount! <= 0)) return false;
+                                               return true;
+                                             }).toList();
+
+                                       return ItemsViewStore(
+                                         isStore: false,
+                                         stores: null,
+                                         isScrollable: false,
+                                         isGridView: false,
+                                         backButton: scrollToTop,
+                                         categoryname: storeController
+                                             .categoryList![storeController.categoryIndex].name!,
+                                         items: filteredItems,
+                                         inStorePage: true,
+                                         groupByCategory: true,
+                                         onCategoryHeaderKey: (name, key) {
+                                           _categoryHeaderKeys[name] = key;
+                                         },
+                                         padding: const EdgeInsets.symmetric(
+                                           horizontal: Dimensions.paddingSizeSmall,
+                                           vertical: 0,
+                                         ),
+                                       );
+                                     }),
+
                                   ),
                                 ),
                               ),
+                        // ── scroll-to-top animated button (inline, after all items) ──
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 24),
+                            child: Center(
+                              child: _StoreBackToTopButton(onTap: scrollToTop),
+                            ),
+                          ),
+                        ),
+                        // ── bottom scroll padding ──────────────────────────
+                        const SliverToBoxAdapter(
+                          child: SizedBox(height: 80),
+                        ),
                       ],
                     )
                   : QuoteScreen();
@@ -1545,7 +1353,7 @@ class _StoreScreenState extends State<StoreScreen> {
                       BoxShadow(
                         color: Theme.of(
                           context,
-                        ).primaryColor.withValues(alpha: 0.5),
+                        ).primaryColor.withOpacity(0.5),
                         blurRadius: 10,
                         offset: const Offset(2, 2),
                       ),
@@ -1618,7 +1426,16 @@ class _StoreScreenState extends State<StoreScreen> {
                 visible: storeController.showFavButton,
                 child: GestureDetector(
                   key: _menuKey,
-                  onTap: () => showCategoryPopup(context, storeController, _menuKey),
+                  onTap: () => showCategoryPopup(
+                    context,
+                    storeController,
+                    _menuKey,
+                    onCategorySelected: (int categoryIndex) {
+                      // Always scroll to the category in the grouped "All" view
+                      scrollToCategoryByIndex(categoryIndex);
+                    },
+                  ),
+
                   child: Container(
                     height: 65,
                     width: 65,
@@ -2159,4 +1976,328 @@ class QuoteScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+/// Swiggy-style toggle switch filter chip.
+/// Layout: [icon]  [label]  [toggle nub]
+// ─────────────────────────────────────────────────────────────────────────────
+class _FilterChip extends StatelessWidget {
+  final String label;
+  final Widget icon;
+  final bool isActive;
+  final Color activeColor;
+  final VoidCallback onTap;
+
+  const _FilterChip({
+    required this.label,
+    required this.icon,
+    required this.isActive,
+    required this.activeColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: isActive ? activeColor.withOpacity(0.06) : Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(
+            color: isActive ? activeColor : Colors.grey.shade300,
+            width: 1.5,
+          ),
+          boxShadow: isActive
+              ? []
+              : [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 4, offset: const Offset(0, 1))],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // indicator icon
+            icon,
+            const SizedBox(width: 6),
+            // label text
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                color: isActive ? activeColor : Colors.grey.shade700,
+              ),
+            ),
+            const SizedBox(width: 6),
+            // mini toggle switch
+            _MiniToggleSwitch(isActive: isActive, activeColor: activeColor),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A compact animated toggle track + thumb (22×13 px).
+class _MiniToggleSwitch extends StatelessWidget {
+  final bool isActive;
+  final Color activeColor;
+  const _MiniToggleSwitch({required this.isActive, required this.activeColor});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeInOut,
+      width: 30,
+      height: 16,
+      decoration: BoxDecoration(
+        color: isActive ? activeColor : Colors.grey.shade300,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: AnimatedAlign(
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeInOut,
+        alignment: isActive ? Alignment.centerRight : Alignment.centerLeft,
+        child: Container(
+          width: 12,
+          height: 12,
+          margin: const EdgeInsets.symmetric(horizontal: 2),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Paints a filled upward triangle (non-veg indicator).
+class _TrianglePainter extends CustomPainter {
+  final Color color;
+  const _TrianglePainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = color;
+    final path = Path()
+      ..moveTo(size.width / 2, 0)
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
+      ..close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(_TrianglePainter old) => old.color != color;
+}
+
+// ── Animated back-to-top pill button ─────────────────────────────────────────
+class _StoreBackToTopButton extends StatefulWidget {
+  final VoidCallback onTap;
+  const _StoreBackToTopButton({required this.onTap});
+
+  @override
+  State<_StoreBackToTopButton> createState() => _StoreBackToTopButtonState();
+}
+
+class _StoreBackToTopButtonState extends State<_StoreBackToTopButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _bounce;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    )..repeat(reverse: true);
+
+    _bounce = Tween<double>(begin: 0, end: -10)
+        .chain(CurveTween(curve: Curves.easeInOut))
+        .animate(_controller);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _bounce,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, _bounce.value),
+          child: child,
+        );
+      },
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(30),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 10,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.arrow_upward_rounded,
+                  color: Colors.white, size: 18),
+              const SizedBox(width: 6),
+              Text(
+                'Back to Top',
+                style: robotoRegular.copyWith(color: Colors.white),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Sticky header delegate (primitives + callbacks — no AppBar context) ──────
+class _StoreStickyHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final bool vegFilter;
+  final bool nonVegFilter;
+  final bool discountFilter;
+  final Color primaryColor;
+  final Color cardColor;
+  final Color disabledColor;
+  final int? storeId;
+  final VoidCallback onVegTap;
+  final VoidCallback onNonVegTap;
+  final VoidCallback onDiscountTap;
+
+  const _StoreStickyHeaderDelegate({
+    required this.vegFilter,
+    required this.nonVegFilter,
+    required this.discountFilter,
+    required this.primaryColor,
+    required this.cardColor,
+    required this.disabledColor,
+    required this.storeId,
+    required this.onVegTap,
+    required this.onNonVegTap,
+    required this.onDiscountTap,
+  });
+
+  static const double _height = 95;
+
+  @override double get minExtent => 0;
+  @override double get maxExtent => _height;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Material(
+      color: cardColor,
+      elevation: shrinkOffset > 0 ? 2 : 0,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Search bar
+          InkWell(
+            onTap: () => Get.toNamed(RouteHelper.getSearchStoreItemRoute(storeId)),
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: 5),
+              padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
+              height: 42,
+              decoration: BoxDecoration(
+                color: cardColor,
+                borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+                border: Border.all(color: (disabledColor ?? Colors.grey).withOpacity(0.15)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.search_rounded, size: 22, color: primaryColor),
+                  const SizedBox(width: Dimensions.paddingSizeSmall),
+                  Expanded(
+                    child: Text(
+                      'search_item_in_store'.tr,
+                      style: robotoRegular.copyWith(
+                        fontSize: Dimensions.fontSizeLarge,
+                        color: disabledColor,
+                      ),
+                    ),
+                  ),
+                  Icon(Icons.mic_none_rounded, size: 20, color: primaryColor),
+                ],
+              ),
+            ),
+          ),
+          // Filter chips row
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
+            child: Row(
+              children: [
+                _FilterChip(
+                  label: 'Veg',
+                  icon: Container(
+                    width: 14, height: 14,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: const Color(0xFF00A550), width: 1.5),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                    child: Center(
+                      child: Container(
+                        width: 6, height: 6,
+                        decoration: const BoxDecoration(color: Color(0xFF00A550), shape: BoxShape.circle),
+                      ),
+                    ),
+                  ),
+                  isActive: vegFilter,
+                  activeColor: const Color(0xFF00A550),
+                  onTap: onVegTap,
+                ),
+                const SizedBox(width: 8),
+                _FilterChip(
+                  label: 'Non-veg',
+                  icon: CustomPaint(size: const Size(14, 14), painter: _TrianglePainter(color: const Color(0xFFE43B3B))),
+                  isActive: nonVegFilter,
+                  activeColor: const Color(0xFFE43B3B),
+                  onTap: onNonVegTap,
+                ),
+                const SizedBox(width: 8),
+                _FilterChip(
+                  label: 'Offers',
+                  icon: Icon(Icons.local_offer_rounded, size: 14, color: discountFilter ? primaryColor : disabledColor),
+                  isActive: discountFilter,
+                  activeColor: primaryColor,
+                  onTap: onDiscountTap,
+                ),
+              ],
+            ),
+          ),
+          Container(height: 1, color: Colors.grey.withOpacity(0.1)),
+        ],
+      ),
+    );
+  }
+
+  @override
+  bool shouldRebuild(_StoreStickyHeaderDelegate old) =>
+      old.vegFilter != vegFilter ||
+      old.nonVegFilter != nonVegFilter ||
+      old.discountFilter != discountFilter ||
+      old.primaryColor != primaryColor ||
+      old.cardColor != cardColor ||
+      old.storeId != storeId;
 }
