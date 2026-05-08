@@ -61,7 +61,10 @@ class AuthRepository implements AuthRepositoryInterface{
     if(verified.isNotEmpty) {
       data.addAll({"verified": verified});
     }
-    return await apiClient.postData(AppConstants.loginUri, data, handleError: false);
+    print("OTP Login Payload: $data");
+    Response response = await apiClient.postData(AppConstants.loginUri, data, handleError: false);
+    print("OTP Login Response: ${response.body}");
+    return response;
   }
 
   @override

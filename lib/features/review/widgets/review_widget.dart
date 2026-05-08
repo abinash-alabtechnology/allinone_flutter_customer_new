@@ -14,7 +14,8 @@ class ReviewWidget extends StatelessWidget {
   final ReviewModel review;
   final bool hasDivider;
   final String? storeName;
-  const ReviewWidget({super.key, required this.review, required this.hasDivider, this.storeName});
+  final bool showItem;
+  const ReviewWidget({super.key, required this.review, required this.hasDivider, this.storeName, this.showItem = true});
 
   @override
   Widget build(BuildContext context) {
@@ -51,9 +52,9 @@ class ReviewWidget extends StatelessWidget {
 
           ]),
         ),
-        SizedBox(width: isDesktop ? Dimensions.paddingSizeLarge : 0),
+        SizedBox(width: (isDesktop && showItem) ? Dimensions.paddingSizeLarge : 0),
 
-        isDesktop ? InkWell(
+        (isDesktop && showItem) ? InkWell(
           onTap: () {
             Get.find<ItemController>().navigateToItemPage(review.item, context);
           },
@@ -80,7 +81,7 @@ class ReviewWidget extends StatelessWidget {
             Container(width: 120, alignment: Alignment.center, child: Text(review.itemName ?? '', style: robotoRegular.copyWith(color: Theme.of(context).disabledColor), overflow: TextOverflow.ellipsis, maxLines: 1)),
 
           ]),
-        ) : InkWell(
+        ) : (showItem ? InkWell(
           onTap: () {
             Get.find<ItemController>().navigateToItemPage(review.item, context);
           },
@@ -110,7 +111,7 @@ class ReviewWidget extends StatelessWidget {
 
             ]),
           ),
-        ),
+        ) : const SizedBox()),
 
       ]),
       const SizedBox(height: Dimensions.paddingSizeDefault),

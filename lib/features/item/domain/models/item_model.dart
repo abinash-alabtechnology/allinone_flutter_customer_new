@@ -107,6 +107,9 @@ class Item {
   List<String>? allergiesName;
   List<String>? genericName;
   bool? isSubscription;
+  String? manufactureDate;
+  String? packageDate;
+  String? expiryDate;
 
   Item({
     this.id,
@@ -147,6 +150,9 @@ class Item {
     this.allergiesName,
     this.genericName,
     this.isSubscription,
+    this.manufactureDate,
+    this.packageDate,
+    this.expiryDate,
   });
 
   Item.fromJson(Map<String, dynamic> json) {
@@ -227,6 +233,9 @@ class Item {
     allergiesName = json['allergies_name']?.cast<String>();
     genericName = json['generic_name']?.cast<String>();
     isSubscription = (json['is_subscription'] == 1 || json['is_subscription'] == true);
+    manufactureDate = json['manufacture_date'];
+    packageDate = json['package_date'];
+    expiryDate = json['expiry_date'] ?? json['expery_date'];
   }
 
   Map<String, dynamic> toJson() {
@@ -280,6 +289,9 @@ class Item {
     data['allergies_name'] = allergiesName;
     data['generic_name'] = genericName;
     data['is_subscription'] = isSubscription;
+    data['manufacture_date'] = manufactureDate;
+    data['package_date'] = packageDate;
+    data['expiry_date'] = expiryDate;
     return data;
   }
 }

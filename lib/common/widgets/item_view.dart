@@ -628,10 +628,10 @@ class _ItemsViewStoreState extends State<ItemsViewStore> {
                                         ? widget.stores != null &&
                                                   widget.isStore
                                               ? 200
-                                              : 280
+                                              : 240
                                         : ResponsiveHelper.isDesktop(context)
                                         ? 300
-                                        : 280,
+                                        : 240,
                                     crossAxisCount:
                                         ResponsiveHelper.isMobile(context)
                                         ? 3
@@ -770,10 +770,10 @@ class _ItemsViewStoreState extends State<ItemsViewStore> {
                       : ResponsiveHelper.isMobile(context)
                       ? widget.stores != null && widget.isStore
                             ? 200
-                            : 280
+                            : 240
                       : ResponsiveHelper.isDesktop(context)
                       ? 300
-                      : 280,
+                      : 240,
                   crossAxisCount: ResponsiveHelper.isMobile(context)
                       ? 3
                       : ResponsiveHelper.isDesktop(context) &&

@@ -6,6 +6,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:handy_allinone/features/cart/controllers/cart_controller.dart';
 import 'package:handy_allinone/features/item/controllers/item_controller.dart';
+import 'package:handy_allinone/features/review/controllers/review_controller.dart';
+import 'package:handy_allinone/features/review/widgets/review_widget.dart';
 import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
 import 'package:handy_allinone/features/checkout/domain/models/place_order_body_model.dart';
 import 'package:handy_allinone/features/cart/domain/models/cart_model.dart';
@@ -54,6 +56,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
     super.initState();
 
     Get.find<ItemController>().getItemDetails(itemId: widget.itemId);
+    Get.find<ReviewController>().getItemReviewList(widget.itemId);
     Get.find<ItemController>().setSelect(0, false);
   }
 
@@ -656,6 +659,8 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                               height:
                                               Dimensions.paddingSizeDefault,
                                             ),
+                                          const SizedBox(),
+
                                           (item.description != null &&
                                                     item
                                                         .description!
@@ -684,6 +689,111 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                                     ],
                                                   )
                                                 : const SizedBox(),
+
+                                            if ((item.manufactureDate != null && item.manufactureDate!.isNotEmpty) || (item.expiryDate != null && item.expiryDate!.isNotEmpty) || (item.packageDate != null && item.packageDate!.isNotEmpty))
+                                              Container(
+                                                width: double.infinity,
+                                                padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+                                                margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeLarge),
+                                                decoration: BoxDecoration(
+                                                  color: Theme.of(context).cardColor,
+                                                  borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+                                                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))],
+                                                  border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.1)),
+                                                ),
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text('product_details'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault)),
+                                                    const SizedBox(height: Dimensions.paddingSizeSmall),
+                                                    Row(
+                                                      children: [
+                                                        if (item.manufactureDate != null && item.manufactureDate!.isNotEmpty)
+                                                          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                                            Text('manufacture_date'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor)),
+                                                            const SizedBox(height: 4),
+                                                            Row(children: [
+                                                              Icon(Icons.date_range, size: 16, color: Theme.of(context).primaryColor),
+                                                              const SizedBox(width: 4),
+                                                              Text(item.manufactureDate!, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeSmall)),
+                                                            ]),
+                                                          ])),
+                                                        if (item.expiryDate != null && item.expiryDate!.isNotEmpty)
+                                                          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                                            Text('Expiry Date'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor)),
+                                                            const SizedBox(height: 4),
+                                                            Row(children: [
+                                                              Icon(Icons.event_available, size: 16, color: Colors.redAccent),
+                                                              const SizedBox(width: 4),
+                                                              Text(item.expiryDate!, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeSmall)),
+                                                            ]),
+                                                          ])),
+                                                      ],
+                                                    ),
+                                                    if (item.packageDate != null && item.packageDate!.isNotEmpty) ...[
+                                                      const Divider(height: 20),
+                                                      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                                        Text('package_date'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor)),
+                                                        const SizedBox(height: 4),
+                                                        Row(children: [
+                                                          Icon(Icons.inventory_2_outlined, size: 16, color: Colors.orangeAccent),
+                                                          const SizedBox(width: 4),
+                                                          Text(item.packageDate!, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeSmall)),
+                                                        ]),
+                                                      ]),
+                                                    ],
+                                                  ],
+                                                ),
+                                              ),
+
+                                              GetBuilder<ReviewController>(builder: (reviewController) {
+                                                return (reviewController.itemReviewList != null && reviewController.itemReviewList!.isNotEmpty) ? Container(
+                                                  width: double.infinity,
+                                                  margin: const EdgeInsets.only(top: Dimensions.paddingSizeDefault),
+                                                  padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+                                                  decoration: BoxDecoration(
+                                                    color: Theme.of(context).cardColor,
+                                                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                                                    boxShadow: [BoxShadow(color: Colors.grey[Get.isDarkMode ? 800 : 200]!, spreadRadius: 1, blurRadius: 5)],
+                                                  ),
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Row(
+                                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                        children: [
+                                                          Text('reviews'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault)),
+                                                          if (item.avgRating != null && item.avgRating! > 0)
+                                                            Row(
+                                                              children: [
+                                                                const Icon(Icons.star, color: Colors.orange, size: 16),
+                                                                const SizedBox(width: 4),
+                                                                Text(item.avgRating!.toStringAsFixed(1), style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall)),
+                                                                const SizedBox(width: 4),
+                                                                Text('(${item.ratingCount})', style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor)),
+                                                              ],
+                                                            ),
+                                                        ],
+                                                      ),
+                                                      const SizedBox(height: Dimensions.paddingSizeSmall),
+                                                      ListView.builder(
+                                                        itemCount: reviewController.itemReviewList!.length,
+                                                        physics: const NeverScrollableScrollPhysics(),
+                                                        shrinkWrap: true,
+                                                        padding: EdgeInsets.zero,
+                                                        itemBuilder: (context, index) {
+                                                          return ReviewWidget(
+                                                            review: reviewController.itemReviewList![index],
+                                                            hasDivider: index != reviewController.itemReviewList!.length - 1,
+                                                            storeName: item.storeName,
+                                                            showItem: false,
+                                                          );
+                                                        },
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ) : const SizedBox();
+                                              }),
 
                                             (item.nutritionsName != null &&
                                                     item

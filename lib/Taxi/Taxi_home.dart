@@ -28,6 +28,9 @@ import 'Locationpicker.dart';
 import 'TripDetails.dart';
 import 'ridesummary.dart';
 import 'sharedservice.dart';
+import 'package:handy_allinone/features/banner/controllers/banner_controller.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:handy_allinone/common/widgets/custom_image.dart';
 
 class Taxihome extends StatefulWidget {
   final bool showBottomSheet;
@@ -88,6 +91,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
     _getCurrentLocation();
     _loadRecentLocations();
     controller..loadGoogleMapKey();
+    Get.find<BannerController>().getTaxiBannerList(true);
     WidgetsBinding.instance.addObserver(this);
     _startDriverStream();
     if (widget.showBottomSheet && widget.bookingId != null) {
@@ -1528,6 +1532,81 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
             ),
           ),
         ],
+
+        const SizedBox(height: 10),
+        const SizedBox(height: 16),
+        GetBuilder<BannerController>(builder: (bannerController) {
+          if (bannerController.taxiBannerImageList == null) {
+            return Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                height: 140,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            );
+          }
+          return (bannerController.taxiBannerImageList!.isNotEmpty) ? Column(
+            children: [
+              CarouselSlider.builder(
+                itemCount: bannerController.taxiBannerImageList!.length,
+                options: CarouselOptions(
+                  aspectRatio: 2.5,
+                  enlargeCenterPage: true,
+                  autoPlay: true,
+                  viewportFraction: 0.85,
+                  onPageChanged: (index, reason) {
+                    bannerController.setCurrentIndex(index, true);
+                  },
+                ),
+                itemBuilder: (context, index, realIndex) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                      child: CustomImage(
+                        image: bannerController.taxiBannerImageList![index]!,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: bannerController.taxiBannerImageList!.map((url) {
+                  int index = bannerController.taxiBannerImageList!.indexOf(url);
+                  return Container(
+                    width: 8.0,
+                    height: 8.0,
+                    margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: bannerController.currentIndex == index
+                          ? Theme.of(context).primaryColor
+                          : Colors.grey.withOpacity(0.3),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
+          ) : const SizedBox();
+        }),
       ],
     );
   }
@@ -1736,9 +1815,83 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
           );
         }),
 
+        const SizedBox(height: 16),
+        GetBuilder<BannerController>(builder: (bannerController) {
+          if (bannerController.taxiBannerImageList == null) {
+            return Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                height: 140,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            );
+          }
+          return (bannerController.taxiBannerImageList!.isNotEmpty) ? Column(
+            children: [
+              CarouselSlider.builder(
+                itemCount: bannerController.taxiBannerImageList!.length,
+                options: CarouselOptions(
+                  aspectRatio: 2.5,
+                  enlargeCenterPage: true,
+                  autoPlay: true,
+                  viewportFraction: 0.85,
+                  onPageChanged: (index, reason) {
+                    bannerController.setCurrentIndex(index, true);
+                  },
+                ),
+                itemBuilder: (context, index, realIndex) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                      child: CustomImage(
+                        image: bannerController.taxiBannerImageList![index]!,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: bannerController.taxiBannerImageList!.map((url) {
+                  int index = bannerController.taxiBannerImageList!.indexOf(url);
+                  return Container(
+                    width: 8.0,
+                    height: 8.0,
+                    margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: bannerController.currentIndex == index
+                          ? Theme.of(context).primaryColor
+                          : Colors.grey.withOpacity(0.3),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
+          ) : const SizedBox();
+        }),
+
         const Divider(height: 1),
 
-        const SizedBox(height: 50),
+        const SizedBox(height: 120),
       ],
     );
   }

@@ -369,14 +369,15 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     bool isPharmacy = Get.find<SplashController>().module?.moduleType == 'pharmacy';
 
     return Scaffold(
-      backgroundColor: isPharmacy ? const Color(0xFFFFFBF7) : Theme.of(context).primaryColor.withOpacity(0.01),
-      appBar: CustomAppBar3(
-        title: isPharmacy ? 'Address & Payment' : 'checkout'.tr,
-        bgcolor: isPharmacy ? const Color(0xFFFFFBF7) : Theme.of(context).primaryColor,
-        textcolor: isPharmacy ? Colors.black : Colors.white,
-        iconcolor: isPharmacy ? Colors.black : Colors.white,
+      backgroundColor: Colors.white,
+      appBar: CustomAppBar(
+        title: 'Your Cart',
+        bgcolor: Colors.white,
+        textcolor: Colors.black,
+        iconcolor: Colors.black,
       ),
-      endDrawer: const MenuDrawer(), endDrawerEnableOpenDragGesture: false,
+      endDrawer: const MenuDrawer(), 
+      endDrawerEnableOpenDragGesture: false,
       body: guestCheckoutPermission || AuthHelper.isLoggedIn() ?
       GetBuilder<
           CheckoutController>(builder: (checkoutController) {
@@ -724,6 +725,36 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                   physics: const BouncingScrollPhysics(),
                   child: Column(
                     children: [
+                      // Delivering to Section
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.location_on, color: Colors.red, size: 20),
+                                const SizedBox(width: 8),
+                                Text('Delivering to', style: robotoBold.copyWith(fontSize: 14)),
+                                const Icon(Icons.keyboard_arrow_down, size: 20),
+                                const Spacer(),
+                                const Icon(Icons.shopping_cart_outlined, size: 22),
+                              ],
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 28),
+                              child: Text(
+                                AddressHelper.getUserAddressFromSharedPref()?.address ?? 'Select Address',
+                                style: robotoRegular.copyWith(fontSize: 13, color: Colors.grey),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Divider(height: 24, thickness: 1, color: Color(0xFFF1F5F9)),
+
                       GetBuilder<StoreController>(builder: (storeController) {
                         return GetBuilder<CartController>(
                             builder: (cartController) {
@@ -749,10 +780,8 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                                 .start, children: [
                                           Container(
                                             margin:EdgeInsets.all(8),
-                                            decoration: BoxDecoration(
-                                                color:Theme.of(context).primaryColor.withOpacity(0.05),
-                                                borderRadius: BorderRadius.circular(15),
-                                                border: Border.all(color:Colors.grey.shade300)
+                                            decoration: const BoxDecoration(
+                                                color: Colors.white,
                                             ),
                                             child: Column(
                                               mainAxisAlignment: MainAxisAlignment.center,
@@ -827,54 +856,29 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                                   width: double.infinity,
                                                   height: 0.5,
                                                 ),
-                                                Center(
+                                                const Padding(
+                                                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                                  child: Divider(height: 1, color: Color(0xFFF1F5F9)),
+                                                ),
+                                                Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                                   child: Row(
                                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                    crossAxisAlignment: CrossAxisAlignment.center,
                                                     children: [
-                                                      Expanded(
-                                                        child: Text("Missing Something!",
-                                                            textAlign: TextAlign.center,
-                                                            style: robotoBold
-                                                            .copyWith(
-                                                            fontSize: Dimensions
-                                                                .fontSizeDefault)),
+                                                      Text(
+                                                        "Missing something?",
+                                                        style: robotoBold.copyWith(fontSize: 16),
                                                       ),
-                                                      Container(
-                                                        decoration: BoxDecoration(
-                                                            color: Color(0xff8bc24a),
-                                                            borderRadius: BorderRadius.only(bottomRight: Radius.circular(15))),
-                                                        child: Padding(
-                                                          padding: const EdgeInsets.symmetric(horizontal: 12.0,vertical: 4),
-                                                          child: TextButton.icon(
-                                                            onPressed: () {
-                                                              cartController
-                                                                  .forcefullySetModule(
-                                                                  _cartList![0]!
-                                                                      .item!.moduleId!);
-                                                              Get.toNamed(
-                                                                RouteHelper.getStoreRoute(
-                                                                    id: cartController
-                                                                        .cartList[0].item!
-                                                                        .storeId,
-                                                                    page: 'item'),
-                                                                arguments: StoreScreen(
-                                                                    store: Store(
-                                                                        id: cartController
-                                                                            .cartList[0]
-                                                                            .item!.storeId),
-                                                                    fromModule: false),
-                                                              );
-                                                            },
-                                                            icon: Icon(Icons
-                                                                .add_circle_outline_sharp,color:Colors.black),
-                                                            label: Text('add_more_items'.tr,
-                                                                style: robotoBold
-                                                                    .copyWith(
-                                                                    fontSize: Dimensions
-                                                                        .fontSizeDefault,color:Colors.black)),
-                                                          ),
-                                                        ),
+                                                      TextButton.icon(
+                                                        onPressed: () {
+                                                          cartController.forcefullySetModule(_cartList![0]!.item!.moduleId!);
+                                                          Get.toNamed(
+                                                            RouteHelper.getStoreRoute(id: cartController.cartList[0].item!.storeId, page: 'item'),
+                                                            arguments: StoreScreen(store: Store(id: cartController.cartList[0].item!.storeId), fromModule: false),
+                                                          );
+                                                        },
+                                                        icon: const Icon(Icons.add, color: Color(0xFF16A34A), size: 18),
+                                                        label: Text('Add', style: robotoBold.copyWith(color: const Color(0xFF16A34A))),
                                                       ),
                                                     ],
                                                   ),
@@ -884,10 +888,32 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                           ),
 
 
-                                          Container(
-                                            child: ExtraPackagingWidget(
-                                                cartController: cartController),
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                            child: InkWell(
+                                              onTap: () {
+                                                // Instructions logic
+                                              },
+                                              child: Container(
+                                                padding: const EdgeInsets.all(12),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius: BorderRadius.circular(12),
+                                                  border: Border.all(color: Colors.grey.shade100),
+                                                ),
+                                                child: Row(
+                                                  children: [
+                                                    const Icon(Icons.note_add_outlined, color: Color(0xFF16A34A), size: 20),
+                                                    const SizedBox(width: 8),
+                                                    Text('Add cooking instructions', style: robotoMedium.copyWith(fontSize: 14, color: Colors.grey.shade700)),
+                                                    const Spacer(),
+                                                    const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
                                           ),
+                                          ExtraPackagingWidget(cartController: cartController),
                                           !ResponsiveHelper.isDesktop(context)
                                               ? suggestedItemView(
                                               _cartList!.cast<CartModel>())

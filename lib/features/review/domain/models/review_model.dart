@@ -28,10 +28,14 @@ class ReviewModel {
   ReviewModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     comment = json['comment'];
-    rating = json['rating'];
+    rating = json['rating'] != null ? int.parse(json['rating'].toString()) : null;
     itemName = json['item_name'];
     itemImageFullUrl = json['item_image_full_url'];
-    customerName = json['customer_name'];
+    if (json['customer'] != null) {
+      customerName = '${json['customer']['f_name']} ${json['customer']['l_name']}';
+    } else {
+      customerName = json['customer_name'];
+    }
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
     reply = json['reply'];

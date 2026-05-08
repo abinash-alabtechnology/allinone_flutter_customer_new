@@ -40,7 +40,7 @@ class AppConstants {
   static const bool useReactWebsite = false;
   // static const String baseUrl = 'http://192.168.0.9:8000';
   //static const String baseUrl = 'https://admin.allinonego.in';
-   static const String baseUrl = 'http://admin.gograbx.com';
+   static const String baseUrl = 'https://admin.gograbx.com';
   // static const String baseUrl = 'https://zesteat.alabproject.in';
   static const String polylinemap = '/api/v1/get-google-map-key';
   static const String configUri = '/api/v1/config';
@@ -95,6 +95,7 @@ class AppConstants {
   static const String searchUri = '/api/v1/';
   static const String reviewUri = '/api/v1/items/reviews/submit';
   static const String itemDetailsUri = '/api/v1/items/details/';
+  static const String itemReviewUri = '/api/v1/items/reviews/';
   static const String lastLocationUri = '/api/v1/delivery-man/last-location?order_id=';
   static const String deliveryManReviewUri = '/api/v1/delivery-man/reviews/submit';
   static const String storeUri = '/api/v1/stores/get-stores';
@@ -139,7 +140,7 @@ class AppConstants {
   static const String directionUri = '/api/v1/config/direction-api';
   static const String vehicleListUri = '/api/v1/vehicles/list';
   static const String taxiCouponUri = '/api/v1/coupon/list/taxi';
-  static const String taxiBannerUri = '/api/v1/banners/taxi';
+  static const String taxiBannerUri = '/api/v1/banners/taxi-banner?app_type=customer_app';
   static const String topRatedVehiclesListUri = '/api/v1/vehicles/top-rated/list';
   static const String bandListUri = '/api/v1/vehicles/brand/list';
   static const String tripPlaceUri = '/api/v1/trip/place';

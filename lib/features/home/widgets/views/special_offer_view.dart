@@ -134,12 +134,12 @@ class SpecialOfferView extends StatelessWidget {
                                                   scrollDirection: Axis.horizontal,
                                                   padding: const EdgeInsets.only(left: Dimensions.paddingSizeDefault),
                                                   physics: const ClampingScrollPhysics(),
-                                                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                                    crossAxisCount: 2,
-                                                    mainAxisSpacing: 12,
-                                                    mainAxisExtent: 150.w,
-                                                    crossAxisSpacing: 12,
-                                                  ),
+                                                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                                      crossAxisCount: 2,
+                                                      mainAxisSpacing: 12,
+                                                      mainAxisExtent: 120.w,
+                                                      crossAxisSpacing: 12,
+                                                    ),
                                                   itemCount:
                                                       discountedItemList
                                                           .length,

@@ -59,7 +59,27 @@ class BannerRepository implements BannerRepositoryInterface {
     BannerModel? bannerModel;
     Response response = await apiClient.getData(AppConstants.taxiBannerUri);
     if (response.statusCode == 200) {
-      bannerModel = BannerModel.fromJson(response.body);
+      dynamic body = response.body;
+      if (body is String) {
+        try {
+          body = jsonDecode(body);
+        } catch (e) {
+          print("Error decoding taxi banner JSON: $e");
+        }
+      }
+
+      if (body is List) {
+        bannerModel = BannerModel(banners: []);
+        for (var v in body) {
+          try {
+            bannerModel.banners!.add(Banner.fromJson(v));
+          } catch (e) {
+            print("Error parsing individual taxi banner: $e");
+          }
+        }
+      } else if (body is Map<String, dynamic>) {
+        bannerModel = BannerModel.fromJson(body);
+      }
     }
     return bannerModel;
   }

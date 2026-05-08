@@ -43,8 +43,9 @@ import '../../../Taxi/ridesummary.dart';
 import '../../../Taxi/sharedservice.dart';
 import '../../../helper/address_helper.dart';
 import '../../cart/controllers/cart_controller.dart';
-import 'package:handy_allinone/features/cart/screens/cart_screen.dart';
-import 'package:handy_allinone/features/category/screens/category_screen.dart';
+import '../../cart/screens/cart_screen.dart';
+import '../../category/screens/category_screen.dart';
+import '../../../common/widgets/booking_status_banner.dart';
 
 import '../../store/widgets/bottom_cart_widget.dart';
 
@@ -69,6 +70,8 @@ class DashboardScreenState extends State<DashboardScreen> {
   int _driverId = 0;
   int _userId = 0;
   String _otp = '';
+  bool _showFloatingIcon = false;
+  Offset _floatingIconOffset = const Offset(0, 0);
   late List<Widget> _screens;
   final GlobalKey<ScaffoldMessengerState> _scaffoldKey = GlobalKey();
   bool _canExit = GetPlatform.isWeb ? true : false;
@@ -132,6 +135,7 @@ class DashboardScreenState extends State<DashboardScreen> {
           if (!mounted) return;
           setState(() {
             _showRideBanner = false;
+            _showFloatingIcon = false;
           });
         }
         else if (['pending', 'accepted', 'arrived', 'in_progress', 'dropped']
@@ -145,6 +149,45 @@ class DashboardScreenState extends State<DashboardScreen> {
         }
       }
     });
+  }
+
+  void _handleBannerTap() {
+    if (['accepted', 'arrived', 'in_progress', 'dropped'].contains(_rideStatus)) {
+      Get.to(() => RideConfirmedScreen(
+        Bookingid: _bookingId,
+        driverid: _driverId,
+        userId: _userId,
+        otp: _otp,
+      ));
+    } else if (_rideStatus == 'pending') {
+      Get.to(() => Taxihome(
+        showBottomSheet: true,
+        bookingId: _bookingId,
+        userId: _userId,
+        otp: _otp,
+      ));
+    } else {
+      print("❌ Ride status $_rideStatus not actionable.");
+    }
+  }
+
+  Widget _buildFloatingIcon() {
+    return Container(
+      width: 60,
+      height: 60,
+      decoration: BoxDecoration(
+        color: Colors.green,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 6,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: const Icon(Icons.directions_car, color: Colors.white),
+    );
   }
 
   @override
@@ -601,6 +644,52 @@ class DashboardScreenState extends State<DashboardScreen> {
                               ],
                             );
                           }),
+                        ),
+                      if (_showRideBanner)
+                        Positioned(
+                          bottom: 90,
+                          left: 5,
+                          right: 5,
+                          child: Dismissible(
+                            key: const Key("banner"),
+                            direction: DismissDirection.startToEnd,
+                            onDismissed: (_) {
+                              setState(() {
+                                _showRideBanner = false;
+                                _showFloatingIcon = true;
+                              });
+                            },
+                            child: GestureDetector(
+                              onTap: _handleBannerTap,
+                              child: BookingStatusBanner(
+                                rideStatus: _rideStatus,
+                                bookingId: _bookingId,
+                              ),
+                            ),
+                          ),
+                        ),
+                      if (_showFloatingIcon)
+                        Positioned(
+                          left: _floatingIconOffset == Offset(0, 0) ? null : _floatingIconOffset.dx,
+                          top: _floatingIconOffset == Offset(0, 0) ? null : _floatingIconOffset.dy,
+                          right: _floatingIconOffset == Offset(0, 0) ? 10 : null,
+                          bottom: _floatingIconOffset == Offset(0, 0) ? 90 : null,
+                          child: Draggable(
+                            feedback: _buildFloatingIcon(),
+                            childWhenDragging: Container(),
+                            onDragEnd: (details) {
+                              setState(() {
+                                _floatingIconOffset = Offset(
+                                  details.offset.dx,
+                                  details.offset.dy - AppBar().preferredSize.height - MediaQuery.of(context).padding.top,
+                                );
+                              });
+                            },
+                            child: GestureDetector(
+                              onTap: _handleBannerTap,
+                              child: _buildFloatingIcon(),
+                            ),
+                          ),
                         ),
                     ],
                   ),

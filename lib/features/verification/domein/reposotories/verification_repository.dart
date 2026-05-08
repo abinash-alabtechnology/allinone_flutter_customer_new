@@ -43,7 +43,10 @@ class VerificationRepository implements VerificationRepositoryInterface{
 
   @override
   Future<Response> verifyPhone(VerificationDataModel data) async {
-    return await apiClient.postData(AppConstants.verifyPhoneUri, data.toJson(), handleError: false);
+    print("Verification Payload: ${data.toJson()}");
+    Response response = await apiClient.postData(AppConstants.verifyPhoneUri, data.toJson(), handleError: false);
+    print("Verification Response: ${response.body}");
+    return response;
   }
 
   @override
@@ -58,7 +61,9 @@ class VerificationRepository implements VerificationRepositoryInterface{
     if(guestId.isNotEmpty) {
       data.addAll({"guest_id": guestId});
     }
+    print("Verification Firebase OTP Payload: $data");
     Response response = await apiClient.postData(AppConstants.firebaseAuthVerify, data);
+    print("Verification Firebase OTP Response: ${response.body}");
     if (response.statusCode == 200) {
       AuthResponseModel authResponse = AuthResponseModel.fromJson(response.body);
       return ResponseModel(true, response.body["message"], authResponseModel: authResponse);
@@ -69,14 +74,16 @@ class VerificationRepository implements VerificationRepositoryInterface{
 
   @override
   Future<ResponseModel> verifyForgetPassFirebaseOtp({required String phoneNumber, required String session, required String otp}) async {
-    Response response = await apiClient.postData(AppConstants.firebaseResetPassword,
-      {'sessionInfo' : session,
-        'phoneNumber' : phoneNumber,
-        'code' : otp,
-        'is_reset_token' : 1,
-        '_method': 'PUT'
-      },
-    );
+    Map<String, dynamic> data = {
+      'sessionInfo' : session,
+      'phoneNumber' : phoneNumber,
+      'code' : otp,
+      'is_reset_token' : 1,
+      '_method': 'PUT'
+    };
+    print("Verification Forget Pass Firebase OTP Payload: $data");
+    Response response = await apiClient.postData(AppConstants.firebaseResetPassword, data);
+    print("Verification Forget Pass Firebase OTP Response: ${response.body}");
     if (response.statusCode == 200) {
       return ResponseModel(true, response.body["message"]);
     } else {
@@ -86,8 +93,10 @@ class VerificationRepository implements VerificationRepositoryInterface{
 
   @override
   Future<ResponseModel> verifyToken({String? phone, String? email, required String token}) async {
-    Response response = await apiClient.postData(AppConstants.  verifyTokenUri,
-      {"phone": phone, "email" : email, "verification_method" : phone != null && phone.isNotEmpty ? 'phone' : 'email', "reset_token": token});
+    Map<String, dynamic> data = {"phone": phone, "email" : email, "verification_method" : phone != null && phone.isNotEmpty ? 'phone' : 'email', "reset_token": token};
+    print("Verification Token Payload: $data");
+    Response response = await apiClient.postData(AppConstants.verifyTokenUri, data);
+    print("Verification Token Response: ${response.body}");
     if (response.statusCode == 200) {
       return ResponseModel(true, response.body["message"]);
     } else {

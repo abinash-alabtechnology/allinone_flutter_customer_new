@@ -22,6 +22,21 @@ class ReviewRepository implements ReviewRepositoryInterface {
   }
 
   @override
+  Future<List<ReviewModel>?> getItemReviewList(int? itemID) async {
+    List<ReviewModel>? itemReviewList;
+    Response response = await apiClient.getData('${AppConstants.itemReviewUri}$itemID');
+    if (response.statusCode == 200) {
+      itemReviewList = [];
+      if (response.body is List) {
+        response.body.forEach((review) => itemReviewList!.add(ReviewModel.fromJson(review)));
+      } else if (response.body['reviews'] != null) {
+        response.body['reviews'].forEach((review) => itemReviewList!.add(ReviewModel.fromJson(review)));
+      }
+    }
+    return itemReviewList;
+  }
+
+  @override
   Future<ResponseModel> submitReview(ReviewBodyModel reviewBody) async {
     ResponseModel responseModel;
     Response response = await apiClient.postData(AppConstants.reviewUri, reviewBody.toJson(), handleError: false);

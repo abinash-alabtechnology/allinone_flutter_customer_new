@@ -511,16 +511,20 @@ class MostSellItemCard extends StatelessWidget {
             child: Stack(
               children: [
                 Container(
-                  width: 150.w,
+                  width: 120.w,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
                     color: isFood
                         ? Colors.transparent
                         : Theme.of(context).cardColor,
                   ),
-                  child: TextHover(
-                    builder: (isHovered) {
-                      return Column(
+                  child: CustomInkWell(
+                    onTap: () => Get.find<ItemController>()
+                        .navigateToItemPage(item, context),
+                    radius: Dimensions.radiusLarge,
+                    child: TextHover(
+                      builder: (isHovered) {
+                        return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
@@ -636,11 +640,7 @@ class MostSellItemCard extends StatelessWidget {
                               ],
                             ),
                           ),
-                          CustomInkWell(
-                            onTap: () => Get.find<ItemController>()
-                                .navigateToItemPage(item, context),
-                            radius: Dimensions.radiusLarge,
-                            child: Padding(
+                          Padding(
                               padding: EdgeInsets.only(
                                 left: Dimensions.paddingSizeSmall,
                                 right: isShop ? 0 : Dimensions.paddingSizeSmall,
@@ -855,17 +855,17 @@ class MostSellItemCard extends StatelessWidget {
                                 ],
                               ),
                             ),
-                          ),
                         ],
                       );
                     },
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 }

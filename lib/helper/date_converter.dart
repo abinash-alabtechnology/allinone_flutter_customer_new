@@ -79,7 +79,13 @@ class DateConverter {
   }
 
   static String stringToLocalDateOnly(String dateTime) {
-    return DateFormat('dd MMM yyyy').format(DateFormat('yyyy-MM-dd').parse(dateTime));
+    DateTime d;
+    try {
+      d = DateFormat('yyyy-MM-dd').parse(dateTime);
+    } catch (_) {
+      d = DateTime.parse(dateTime);
+    }
+    return DateFormat('dd MMM yyyy').format(d);
   }
 
   static String localDateToIsoString(DateTime dateTime) {

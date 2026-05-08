@@ -13,6 +13,9 @@ class ReviewController extends GetxController implements GetxService {
   List<ReviewModel>? _storeReviewList;
   List<ReviewModel>? get storeReviewList => _storeReviewList;
 
+  List<ReviewModel>? _itemReviewList;
+  List<ReviewModel>? get itemReviewList => _itemReviewList;
+
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
@@ -37,6 +40,16 @@ class ReviewController extends GetxController implements GetxService {
     if (storeReviewList != null) {
       _storeReviewList = [];
       _storeReviewList!.addAll(storeReviewList);
+    }
+    update();
+  }
+
+  Future<void> getItemReviewList(int? itemID) async {
+    _itemReviewList = null;
+    List<ReviewModel>? itemReviewList = await reviewServiceInterface.getItemReviewList(itemID);
+    if (itemReviewList != null) {
+      _itemReviewList = [];
+      _itemReviewList!.addAll(itemReviewList);
     }
     update();
   }

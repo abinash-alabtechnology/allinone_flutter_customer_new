@@ -845,7 +845,7 @@ class ItemWidgetStore extends StatelessWidget {
           child: Stack(
             children: [
               Container(
-                height: 280,
+                // height: 280,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
                   color: Theme.of(context).cardColor,
