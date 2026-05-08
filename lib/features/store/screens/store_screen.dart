@@ -220,10 +220,13 @@ class _StoreScreenState extends State<StoreScreen> {
               return (storeController.store != null &&
                       storeController.store!.name != null &&
                       categoryController.categoryList != null)
-                  ? CustomScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      controller: scrollController,
-                      slivers: [
+                  ? SafeArea(
+                      top: true,
+                      bottom: false,
+                      child: CustomScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        controller: scrollController,
+                        slivers: [
                         ResponsiveHelper.isDesktop(context)
                             ? SliverToBoxAdapter(
                                 child: Container(
@@ -1183,7 +1186,7 @@ class _StoreScreenState extends State<StoreScreen> {
                                       const SizedBox(width: Dimensions.paddingSizeSmall),
                                       Text(
                                         storeController.categoryList!.isNotEmpty 
-                                          ? "${storeController.categoryList![storeController.categoryIndex].name!} (${storeController.storeItemModel?.totalSize ?? 0} Items)"
+                                          ? "${storeController.categoryList![storeController.categoryIndex].name ?? ''} (${storeController.storeItemModel?.totalSize ?? 0} Items)"
                                           : 'All Categories',
                                         style: robotoBold.copyWith(
                                           fontSize: 18,
@@ -1274,8 +1277,9 @@ class _StoreScreenState extends State<StoreScreen> {
                           child: SizedBox(height: 80),
                         ),
                       ],
-                    )
-                  : QuoteScreen();
+                    ),
+                  )
+                : QuoteScreen();
             },
           );
         },
@@ -2200,94 +2204,97 @@ class _StoreStickyHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   static const double _height = 95;
 
-  @override double get minExtent => 0;
+  @override double get minExtent => _height;
   @override double get maxExtent => _height;
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Material(
-      color: cardColor,
-      elevation: shrinkOffset > 0 ? 2 : 0,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Search bar
-          InkWell(
-            onTap: () => Get.toNamed(RouteHelper.getSearchStoreItemRoute(storeId)),
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: 5),
-              padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
-              height: 42,
-              decoration: BoxDecoration(
-                color: cardColor,
-                borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-                border: Border.all(color: (disabledColor ?? Colors.grey).withOpacity(0.15)),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.search_rounded, size: 22, color: primaryColor),
-                  const SizedBox(width: Dimensions.paddingSizeSmall),
-                  Expanded(
-                    child: Text(
-                      'search_item_in_store'.tr,
-                      style: robotoRegular.copyWith(
-                        fontSize: Dimensions.fontSizeLarge,
-                        color: disabledColor,
+    return SizedBox(
+      height: _height,
+      child: Material(
+        color: cardColor,
+        elevation: shrinkOffset > 0 ? 2 : 0,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Search bar
+            InkWell(
+              onTap: () => Get.toNamed(RouteHelper.getSearchStoreItemRoute(storeId)),
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: 5),
+                padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
+                height: 42,
+                decoration: BoxDecoration(
+                  color: cardColor,
+                  borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+                  border: Border.all(color: (disabledColor).withOpacity(0.15)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.search_rounded, size: 22, color: primaryColor),
+                    const SizedBox(width: Dimensions.paddingSizeSmall),
+                    Expanded(
+                      child: Text(
+                        'search_item_in_store'.tr,
+                        style: robotoRegular.copyWith(
+                          fontSize: Dimensions.fontSizeLarge,
+                          color: disabledColor,
+                        ),
                       ),
                     ),
+                    Icon(Icons.mic_none_rounded, size: 20, color: primaryColor),
+                  ],
+                ),
+              ),
+            ),
+            // Filter chips row
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
+              child: Row(
+                children: [
+                  _FilterChip(
+                    label: 'Veg',
+                    icon: Container(
+                      width: 14, height: 14,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: const Color(0xFF00A550), width: 1.5),
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                      child: Center(
+                        child: Container(
+                          width: 6, height: 6,
+                          decoration: const BoxDecoration(color: Color(0xFF00A550), shape: BoxShape.circle),
+                        ),
+                      ),
+                    ),
+                    isActive: vegFilter,
+                    activeColor: const Color(0xFF00A550),
+                    onTap: onVegTap,
                   ),
-                  Icon(Icons.mic_none_rounded, size: 20, color: primaryColor),
+                  const SizedBox(width: 8),
+                  _FilterChip(
+                    label: 'Non-veg',
+                    icon: CustomPaint(size: const Size(14, 14), painter: _TrianglePainter(color: const Color(0xFFE43B3B))),
+                    isActive: nonVegFilter,
+                    activeColor: const Color(0xFFE43B3B),
+                    onTap: onNonVegTap,
+                  ),
+                  const SizedBox(width: 8),
+                  _FilterChip(
+                    label: 'Offers',
+                    icon: Icon(Icons.local_offer_rounded, size: 14, color: discountFilter ? primaryColor : disabledColor),
+                    isActive: discountFilter,
+                    activeColor: primaryColor,
+                    onTap: onDiscountTap,
+                  ),
                 ],
               ),
             ),
-          ),
-          // Filter chips row
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
-            child: Row(
-              children: [
-                _FilterChip(
-                  label: 'Veg',
-                  icon: Container(
-                    width: 14, height: 14,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: const Color(0xFF00A550), width: 1.5),
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                    child: Center(
-                      child: Container(
-                        width: 6, height: 6,
-                        decoration: const BoxDecoration(color: Color(0xFF00A550), shape: BoxShape.circle),
-                      ),
-                    ),
-                  ),
-                  isActive: vegFilter,
-                  activeColor: const Color(0xFF00A550),
-                  onTap: onVegTap,
-                ),
-                const SizedBox(width: 8),
-                _FilterChip(
-                  label: 'Non-veg',
-                  icon: CustomPaint(size: const Size(14, 14), painter: _TrianglePainter(color: const Color(0xFFE43B3B))),
-                  isActive: nonVegFilter,
-                  activeColor: const Color(0xFFE43B3B),
-                  onTap: onNonVegTap,
-                ),
-                const SizedBox(width: 8),
-                _FilterChip(
-                  label: 'Offers',
-                  icon: Icon(Icons.local_offer_rounded, size: 14, color: discountFilter ? primaryColor : disabledColor),
-                  isActive: discountFilter,
-                  activeColor: primaryColor,
-                  onTap: onDiscountTap,
-                ),
-              ],
-            ),
-          ),
-          Container(height: 1, color: Colors.grey.withOpacity(0.1)),
-        ],
+            Container(height: 1, color: Colors.grey.withOpacity(0.1)),
+          ],
+        ),
       ),
     );
   }
