@@ -23,6 +23,7 @@ class AppConstants {
   static const String retrybooking = '/api/v1/assign-driver';
   static const String bookingcancel = '/api/v1/booking/cancel';
   static const String Vehicleimage = '/storage/app/public/vehicle_type_image/';
+  static const String sosAlert = '/api/v1/sos/store';
   ///
   static const Color backgroundColor = Color(0xFFFF8110); // Vibrant Pink/Magenta
 

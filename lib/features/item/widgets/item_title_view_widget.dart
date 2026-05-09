@@ -305,6 +305,7 @@ class ItemTitleViewWidget extends StatelessWidget {
                                 style: robotoRegular.copyWith(
                                   color: Theme.of(context).disabledColor,
                                   decoration: TextDecoration.lineThrough,
+                                  height: 1.0,
                                   fontSize: Dimensions.fontSizeExtraSmall,
                                 ),
                               ),
@@ -431,6 +432,7 @@ class ItemTitleViewWidget extends StatelessWidget {
                                       style: robotoRegular.copyWith(
                                         color: Colors.grey,
                                         decoration: TextDecoration.lineThrough,
+                                        height: 1.0,
                                         fontSize: 14.sp,
                                       ),
                                     ),

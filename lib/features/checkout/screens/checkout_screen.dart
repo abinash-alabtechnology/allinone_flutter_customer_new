@@ -45,6 +45,7 @@ import 'package:handy_allinone/features/checkout/widgets/payment_method_bottom_s
 import 'package:get/get.dart';
 import 'package:handy_allinone/features/checkout/widgets/bottom_section.dart';
 import 'package:handy_allinone/features/checkout/widgets/top_section.dart';
+import 'package:handy_allinone/features/checkout/widgets/delivery_section.dart';
 import 'package:handy_allinone/features/checkout/widgets/prescription_image_picker_widget.dart';
 import 'package:handy_allinone/features/checkout/widgets/note_prescription_section.dart';
 import 'package:flutter/material.dart';
@@ -725,35 +726,95 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                   physics: const BouncingScrollPhysics(),
                   child: Column(
                     children: [
-                      // Delivering to Section
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                      // Exact UI for Delivering to and Cart
+                      Container(
+                        color: Colors.white,
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                        child: Row(
                           children: [
-                            Row(
-                              children: [
-                                const Icon(Icons.location_on, color: Colors.red, size: 20),
-                                const SizedBox(width: 8),
-                                Text('Delivering to', style: robotoBold.copyWith(fontSize: 14)),
-                                const Icon(Icons.keyboard_arrow_down, size: 20),
-                                const Spacer(),
-                                const Icon(Icons.shopping_cart_outlined, size: 22),
-                              ],
+                            // Location Icon
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF16A34A).withOpacity(0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.location_on, color: Color(0xFF16A34A), size: 20),
                             ),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 28),
-                              child: Text(
-                                AddressHelper.getUserAddressFromSharedPref()?.address ?? 'Select Address',
-                                style: robotoRegular.copyWith(fontSize: 13, color: Colors.grey),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                            const SizedBox(width: 12),
+
+                            // Delivering to Text and Address
+                            Expanded(
+                              child: InkWell(
+                                onTap: () async {
+                                  var result = await Get.toNamed(RouteHelper.getAddAddressRoute(true, false, checkoutController.store!.zoneId));
+                                  if (result != null && result is AddressModel) {
+                                    // Handle address update if needed, though initCall usually handles refreshes
+                                  }
+                                },
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Delivering to', style: robotoRegular.copyWith(fontSize: 12, color: Colors.grey.shade600)),
+                                    const SizedBox(height: 2),
+                                    Row(
+                                      children: [
+                                        Flexible(
+                                          child: Text(
+                                            address.isNotEmpty 
+                                                ? '${address[checkoutController.addressIndex!].addressType?.tr} - ${address[checkoutController.addressIndex!].address}'
+                                                : AddressHelper.getUserAddressFromSharedPref()?.address ?? 'Select Address',
+                                            style: robotoBold.copyWith(fontSize: 14, color: Colors.black),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        const Icon(Icons.keyboard_arrow_down, size: 16, color: Colors.grey),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
+
+                            // Cart Icon with Badge
+                            GetBuilder<CartController>(builder: (cartController) {
+                              return InkWell(
+                                onTap: () => Get.toNamed(RouteHelper.getCartRoute()),
+                                child: Column(
+                                  children: [
+                                    Stack(
+                                      clipBehavior: Clip.none,
+                                      children: [
+                                        const Icon(Icons.shopping_cart_outlined, size: 28, color: Colors.deepOrange),
+                                        if (cartController.cartList.isNotEmpty)
+                                          Positioned(
+                                            top: -5,
+                                            right: -5,
+                                            child: Container(
+                                              padding: const EdgeInsets.all(4),
+                                              decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                                              child: Text(
+                                                cartController.cartList.length.toString(),
+                                                style: robotoBold.copyWith(fontSize: 10, color: Colors.white),
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text('Cart', style: robotoRegular.copyWith(fontSize: 12, color: Colors.black)),
+                                  ],
+                                ),
+                              );
+                            }),
                           ],
                         ),
                       ),
-                      const Divider(height: 24, thickness: 1, color: Color(0xFFF1F5F9)),
+                      const Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9)),
+                      const SizedBox(height: Dimensions.paddingSizeDefault),
+
+
 
                       GetBuilder<StoreController>(builder: (storeController) {
                         return GetBuilder<CartController>(

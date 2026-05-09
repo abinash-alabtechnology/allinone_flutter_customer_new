@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 import 'package:get/get.dart';
 import 'package:handy_allinone/api/api_client.dart';
@@ -7,6 +8,7 @@ import 'package:handy_allinone/common/enums/data_source_enum.dart';
 import 'package:handy_allinone/features/banner/domain/models/banner_model.dart';
 import 'package:handy_allinone/features/banner/domain/models/others_banner_model.dart';
 import 'package:handy_allinone/features/banner/domain/models/promotional_banner_model.dart';
+import 'package:handy_allinone/features/banner/domain/models/taxi_banner_model.dart';
 import 'package:handy_allinone/features/banner/domain/repositories/banner_repository_interface.dart';
 import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
 import 'package:handy_allinone/helper/header_helper.dart';
@@ -57,22 +59,26 @@ class BannerRepository implements BannerRepositoryInterface {
 
   Future<BannerModel?> _getTaxiBannerList() async {
     BannerModel? bannerModel;
-    Response response = await apiClient.getData(AppConstants.taxiBannerUri);
+    int? moduleId = Get.find<SplashController>().module?.id;
+    var response = await http.get(
+      Uri.parse('${AppConstants.baseUrl}${AppConstants.taxiBannerUri}'),
+    );
+    print("Taxi Banner API Response: ${response.body}");
     if (response.statusCode == 200) {
-      dynamic body = response.body;
-      if (body is String) {
-        try {
-          body = jsonDecode(body);
-        } catch (e) {
-          print("Error decoding taxi banner JSON: $e");
-        }
-      }
+      dynamic body = jsonDecode(response.body);
 
       if (body is List) {
-        bannerModel = BannerModel(banners: []);
+        bannerModel = BannerModel(banners: [], campaigns: []);
         for (var v in body) {
           try {
-            bannerModel.banners!.add(Banner.fromJson(v));
+            TaxiBannerModel taxiBanner = TaxiBannerModel.fromJson(v);
+            bannerModel.banners!.add(Banner(
+              id: taxiBanner.id,
+              title: taxiBanner.title,
+              type: taxiBanner.type,
+              imageFullUrl: taxiBanner.imageFullUrl,
+              link: taxiBanner.defaultLink,
+            ));
           } catch (e) {
             print("Error parsing individual taxi banner: $e");
           }

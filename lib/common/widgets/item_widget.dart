@@ -695,6 +695,7 @@ class ItemWidget extends StatelessWidget {
                                                             decoration:
                                                                 TextDecoration
                                                                     .lineThrough,
+                                                            height: 1.0,
                                                           ),
                                                           textDirection:
                                                               TextDirection.ltr,
@@ -1167,6 +1168,7 @@ class ItemWidgetStore extends StatelessWidget {
                                                 fontSize: Dimensions.fontSizeExtraSmall,
                                                 color: Theme.of(context).disabledColor,
                                                 decoration: TextDecoration.lineThrough,
+                                                height: 1.0,
                                               ),
                                               textDirection: TextDirection.ltr,
                                             ),

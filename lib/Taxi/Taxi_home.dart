@@ -767,6 +767,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
     required VoidCallback onTap,
     String? originalPrice,
     int? discountPercent,
+    String? description,
   }) {
     bool isSelected = selectedRideIndex1 == idx;
     bool hasDiscount = originalPrice != null && originalPrice != price;
@@ -878,6 +879,18 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                           ],
                         ],
                       ),
+                      if (description != null && description.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          description,
+                          style: robotoRegular.copyWith(
+                            fontSize: 11,
+                            color: isSelected ? Colors.grey.shade700 : Colors.grey.shade500,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -1739,7 +1752,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
             return Center(child: Text(vehicleController.errorMessage.value));
           }
 
-          return AnimationLimiter(
+          final vehicleListWidget = AnimationLimiter(
             child: ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -1803,6 +1816,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                         isSelected: isSel,
                         originalPrice: '₹${originalFare.round()}',
                         discountPercent: v.discount,
+                        description: v.description,
                         onTap: () {
                           selectedRideIndex.value = i;
                         },
@@ -1813,9 +1827,12 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
               },
             ),
           );
+
+          return vehicleListWidget;
         }),
 
         const SizedBox(height: 16),
+
         GetBuilder<BannerController>(builder: (bannerController) {
           if (bannerController.taxiBannerImageList == null) {
             return Shimmer.fromColors(
@@ -1831,61 +1848,42 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
               ),
             );
           }
-          return (bannerController.taxiBannerImageList!.isNotEmpty) ? Column(
-            children: [
-              CarouselSlider.builder(
-                itemCount: bannerController.taxiBannerImageList!.length,
-                options: CarouselOptions(
-                  aspectRatio: 2.5,
-                  enlargeCenterPage: true,
-                  autoPlay: true,
-                  viewportFraction: 0.85,
-                  onPageChanged: (index, reason) {
-                    bannerController.setCurrentIndex(index, true);
-                  },
-                ),
-                itemBuilder: (context, index, realIndex) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                      child: CustomImage(
-                        image: bannerController.taxiBannerImageList![index]!,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                      ),
-                    ),
-                  );
+          return (bannerController.taxiBannerImageList!.isNotEmpty) ? Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: CarouselSlider.builder(
+              itemCount: bannerController.taxiBannerImageList!.length,
+              options: CarouselOptions(
+                aspectRatio: 2.5,
+                enlargeCenterPage: true,
+                autoPlay: true,
+                viewportFraction: 0.85,
+                onPageChanged: (index, reason) {
+                  bannerController.setCurrentIndex(index, true);
                 },
               ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: bannerController.taxiBannerImageList!.map((url) {
-                  int index = bannerController.taxiBannerImageList!.indexOf(url);
-                  return Container(
-                    width: 8.0,
-                    height: 8.0,
-                    margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: bannerController.currentIndex == index
-                          ? Theme.of(context).primaryColor
-                          : Colors.grey.withOpacity(0.3),
+              itemBuilder: (context, index, realIndex) {
+                return Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                    child: CustomImage(
+                      image: bannerController.taxiBannerImageList![index]!,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
                     ),
-                  );
-                }).toList(),
-              ),
-            ],
+                  ),
+                );
+              },
+            ),
           ) : const SizedBox();
         }),
 
@@ -2983,7 +2981,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                     children: [
                       Container(height: 12, width: 40, color: Colors.white),
                       const SizedBox(width: 8),
-                      Container(height: 12, width: 60, color: Colors.white),
+                      Expanded(child: Container(height: 12, color: Colors.white)),
                     ],
                   ),
                 ],

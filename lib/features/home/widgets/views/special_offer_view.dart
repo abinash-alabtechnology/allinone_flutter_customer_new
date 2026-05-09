@@ -473,6 +473,7 @@ class SpecialOfferView extends StatelessWidget {
                                                                                               context,
                                                                                             ).disabledColor,
                                                                                             decoration: TextDecoration.lineThrough,
+                                                                                            height: 1.0,
                                                                                           ),
                                                                                           textDirection: TextDirection.ltr,
                                                                                         ),
@@ -974,6 +975,7 @@ class SpecialOfferViewGrocery extends StatelessWidget {
                                                                                 context,
                                                                               ).disabledColor,
                                                                               decoration: TextDecoration.lineThrough,
+                                                                              height: 1.0,
                                                                             ),
                                                                             textDirection:
                                                                                 TextDirection.ltr,

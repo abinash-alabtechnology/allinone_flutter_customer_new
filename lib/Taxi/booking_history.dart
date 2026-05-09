@@ -384,7 +384,7 @@ Widget buildBookingHistoryShimmer() {
                           backgroundColor: Colors.grey,
                         ),
                         const SizedBox(width: 8),
-                        _shimmerBox(width: 120, height: 14),
+                        Expanded(child: _shimmerBox(height: 14)),
                       ],
                     ),
                     const SizedBox(height: 8),

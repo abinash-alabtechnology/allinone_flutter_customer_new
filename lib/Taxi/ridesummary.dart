@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:handy_allinone/features/dashboard/screens/dashboard_screen.dart';
+import 'package:handy_allinone/features/location/controllers/location_controller.dart';
 import 'package:handy_allinone/util/app_constants.dart';
 import 'package:handy_allinone/util/dimensions.dart';
 import 'package:handy_allinone/util/styles.dart';
@@ -39,18 +40,26 @@ class RideConfirmedScreen extends StatefulWidget {
   State<RideConfirmedScreen> createState() => _RideConfirmedScreenState();
 }
 
-class _RideConfirmedScreenState extends State<RideConfirmedScreen> {
+class _RideConfirmedScreenState extends State<RideConfirmedScreen> with SingleTickerProviderStateMixin {
   final DriverController controller = Get.put(
     DriverController(apiClient: Get.find()),
   );
+  final LocationController _locationController = Get.find<LocationController>();
   CaptainDetailsData? _captainDetails;
   String? rideStatus;
   String? fareAmount;
   StreamSubscription<DatabaseEvent>? _rideStatusSubscription;
 
+  late AnimationController _rippleController;
+
   @override
   void initState() {
     super.initState();
+
+    _rippleController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    )..repeat();
 
     Get.put(DriverController(apiClient: Get.find()));
     _loadCaptainDetails();
@@ -122,6 +131,7 @@ class _RideConfirmedScreenState extends State<RideConfirmedScreen> {
 
   @override
   void dispose() {
+    _rippleController.dispose();
     _rideStatusSubscription?.cancel();
     super.dispose();
   }
@@ -249,7 +259,7 @@ class _RideConfirmedScreenState extends State<RideConfirmedScreen> {
           } else if (_captainDetails == null) {
             return const Center(child: Text("No details available"));
           } else {
-            return Padding(
+            return SingleChildScrollView(
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -507,6 +517,74 @@ class _RideConfirmedScreenState extends State<RideConfirmedScreen> {
           ],
           ),
           ),
+          const SizedBox(height: 20),
+
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Center(
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  for (int i = 0; i < 3; i++)
+                    AnimatedBuilder(
+                      animation: _rippleController,
+                      builder: (context, child) {
+                        return Transform.scale(
+                          scale: 1 + (_rippleController.value * (i + 1) * 0.3),
+                          child: Container(
+                            width: double.infinity,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              color: Colors.red.withOpacity(0.3 * (1 - _rippleController.value)),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton.icon(
+                      onPressed: () async {
+                        if(_locationController.position.latitude != 0) {
+                           controller.sendSosAlert(
+                            bookingId: widget.Bookingid,
+                            captainId: widget.driverid,
+                            customerId: widget.userId,
+                            lat: _locationController.position.latitude,
+                            lng: _locationController.position.longitude,
+                          );
+                        } else {
+                          await _locationController.getCurrentLocation(true);
+                          controller.sendSosAlert(
+                            bookingId: widget.Bookingid,
+                            captainId: widget.driverid,
+                            customerId: widget.userId,
+                            lat: _locationController.position.latitude,
+                            lng: _locationController.position.longitude,
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.emergency, color: Colors.white),
+                      label: Text(
+                        "SOS",
+                        style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge, color: Colors.white),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 5,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
                 ],
               ),
             );

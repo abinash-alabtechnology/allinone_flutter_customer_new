@@ -157,6 +157,7 @@ class BannerController extends GetxController implements GetxService {
       update(); // Show shimmer
       BannerModel? bannerModel = await bannerServiceInterface
           .getTaxiBannerList();
+      print("Taxi Banner Response: ${bannerModel?.toJson()}");
       _taxiBannerImageList = [];
       _taxiBannerDataList = [];
       if (bannerModel != null) {
@@ -173,7 +174,7 @@ class BannerController extends GetxController implements GetxService {
               _taxiBannerDataList!.add(banner.item);
             } else if (banner.store != null) {
               _taxiBannerDataList!.add(banner.store);
-            } else if (banner.type == 'default') {
+            } else if (banner.type == 'default' || banner.link != null) {
               _taxiBannerDataList!.add(banner.link);
             } else {
               _taxiBannerDataList!.add(null);
@@ -187,6 +188,11 @@ class BannerController extends GetxController implements GetxService {
           _taxiBannerDataList!.add(_taxiBannerDataList![0]);
         }
       }
+      // if (_taxiBannerImageList!.isEmpty) {
+      //   _taxiBannerImageList!.add("https://admin.gograbx.com/storage/app/public/banner/2026-05-07-69fc3534da4f8.png");
+      //   _taxiBannerDataList!.add(null);
+      // }
+      print("Taxi Banner Image List: $_taxiBannerImageList");
       update();
     }
   }

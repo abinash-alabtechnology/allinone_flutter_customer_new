@@ -978,8 +978,7 @@ class _StoreDescriptionViewWidgetState
                         // const SizedBox(width: Dimensions.paddingSizeSmall),
                         GetBuilder<FavouriteController>(
                           builder: (favouriteController) {
-                            bool isWished = favouriteController
-                                .wishStoreIdList
+                            bool isWished = favouriteController.wishStoreIdList
                                 .contains(widget.store!.id);
                             return InkWell(
                               onTap: () {
@@ -990,12 +989,11 @@ class _StoreDescriptionViewWidgetState
                                               widget.store!.id,
                                               true,
                                             )
-                                      : favouriteController
-                                            .addToFavouriteList(
-                                              null,
-                                              widget.store?.id,
-                                              true,
-                                            );
+                                      : favouriteController.addToFavouriteList(
+                                          null,
+                                          widget.store?.id,
+                                          true,
+                                        );
                                 } else {
                                   showCustomSnackBar(
                                     'you_are_not_logged_in'.tr,
@@ -1011,9 +1009,7 @@ class _StoreDescriptionViewWidgetState
                                         borderRadius: BorderRadius.circular(
                                           Dimensions.radiusSmall,
                                         ),
-                                        border: Border.all(
-                                          color: Colors.white,
-                                        ),
+                                        border: Border.all(color: Colors.white),
                                       ),
                                       child: Center(
                                         child: Row(
@@ -1113,9 +1109,7 @@ class _StoreDescriptionViewWidgetState
                             color: Theme.of(context).disabledColor,
                           ),
                         ),
-                        const SizedBox(
-                          width: Dimensions.paddingSizeExtraSmall,
-                        ),
+                        const SizedBox(width: Dimensions.paddingSizeExtraSmall),
                         Expanded(
                           child: Text(
                             PriceConverter.convertPrice(
@@ -1134,8 +1128,7 @@ class _StoreDescriptionViewWidgetState
               ),
             ],
           ),
-        if (ResponsiveHelper.isDesktop(context))
-          SizedBox(height:30),
+        if (ResponsiveHelper.isDesktop(context)) SizedBox(height: 30),
         ResponsiveHelper.isDesktop(context)
             ? IntrinsicHeight(
                 child: Row(
@@ -1293,15 +1286,25 @@ class _StoreDescriptionViewWidgetState
               )
             : Container(
                 height: 75,
-                margin: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
+                margin: const EdgeInsets.symmetric(
+                  vertical: Dimensions.paddingSizeSmall,
+                ),
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraSmall),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: Dimensions.paddingSizeExtraSmall,
+                  ),
                   child: Row(
                     children: [
                       InkWell(
-                        onTap: () => Get.toNamed(RouteHelper.getStoreReviewRoute(widget.store!.id, widget.store!.name, widget.store!)),
+                        onTap: () => Get.toNamed(
+                          RouteHelper.getStoreReviewRoute(
+                            widget.store!.id,
+                            widget.store!.name,
+                            widget.store!,
+                          ),
+                        ),
                         child: _buildInfoCard(
                           context,
                           const Color(0xFFFFF9F5),
@@ -1311,8 +1314,17 @@ class _StoreDescriptionViewWidgetState
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(widget.store!.avgRating!.toStringAsFixed(1), style: robotoBold.copyWith(fontSize: 16)),
-                              Text('${widget.store!.ratingCount}+ ratings', style: robotoRegular.copyWith(fontSize: 10, color: Colors.grey.shade600)),
+                              Text(
+                                widget.store!.avgRating!.toStringAsFixed(1),
+                                style: robotoBold.copyWith(fontSize: 16),
+                              ),
+                              Text(
+                                '${widget.store!.ratingCount}+ ratings',
+                                style: robotoRegular.copyWith(
+                                  fontSize: 10,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -1320,16 +1332,40 @@ class _StoreDescriptionViewWidgetState
                       const SizedBox(width: 10),
 
                       InkWell(
-                        onTap: () => Get.toNamed(RouteHelper.getMapRoute(
-                          AddressModel(id: widget.store!.id, address: widget.store!.address, latitude: widget.store!.latitude, longitude: widget.store!.longitude, contactPersonNumber: '', contactPersonName: '', addressType: ''),
-                          'store', Get.find<SplashController>().getModuleConfig(Get.find<SplashController>().module!.moduleType!).newVariation!, storeName: widget.store!.name,
-                        )),
+                        onTap: () => Get.toNamed(
+                          RouteHelper.getMapRoute(
+                            AddressModel(
+                              id: widget.store!.id,
+                              address: widget.store!.address,
+                              latitude: widget.store!.latitude,
+                              longitude: widget.store!.longitude,
+                              contactPersonNumber: '',
+                              contactPersonName: '',
+                              addressType: '',
+                            ),
+                            'store',
+                            Get.find<SplashController>()
+                                .getModuleConfig(
+                                  Get.find<SplashController>()
+                                      .module!
+                                      .moduleType!,
+                                )
+                                .newVariation!,
+                            storeName: widget.store!.name,
+                          ),
+                        ),
                         child: _buildInfoCard(
                           context,
                           const Color(0xFFF7FAF2),
                           Colors.green,
                           Images.drivethru,
-                          Text('Drive Thru', style: robotoMedium.copyWith(fontSize: 12, color: Colors.green.shade700)),
+                          Text(
+                            'Drive Thru',
+                            style: robotoMedium.copyWith(
+                              fontSize: 12,
+                              color: Colors.green.shade700,
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -1343,27 +1379,43 @@ class _StoreDescriptionViewWidgetState
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(widget.store!.deliveryTime!, style: robotoBold.copyWith(fontSize: 16)),
-                            Text('Delivery', style: robotoRegular.copyWith(fontSize: 10, color: Colors.pink.shade700)),
+                            Text(
+                              widget.store!.deliveryTime!,
+                              style: robotoBold.copyWith(fontSize: 16),
+                            ),
+                            Text(
+                              'Delivery',
+                              style: robotoRegular.copyWith(
+                                fontSize: 10,
+                                color: Colors.pink.shade700,
+                              ),
+                            ),
                           ],
                         ),
                       ),
-                      
-                      if (widget.store!.delivery! && widget.store!.freeDelivery!) ...[
+
+                      if (widget.store!.delivery! &&
+                          widget.store!.freeDelivery!) ...[
                         const SizedBox(width: 10),
                         _buildInfoCard(
                           context,
                           const Color(0xFFF2F6FF),
                           Colors.blue,
                           Images.money,
-                          Text('Free Delivery', style: robotoMedium.copyWith(fontSize: 12, color: Colors.blue.shade700)),
+                          Text(
+                            'Free Delivery',
+                            style: robotoMedium.copyWith(
+                              fontSize: 12,
+                              color: Colors.blue.shade700,
+                            ),
+                          ),
                         ),
                       ],
                     ],
                   ),
                 ),
               ),
-        SizedBox(height: 10,),
+        SizedBox(height: 10),
         if (couponController.couponRestList != null &&
             couponController.couponRestList!.isNotEmpty)
           Container(
@@ -1386,7 +1438,8 @@ class _StoreDescriptionViewWidgetState
                         },
                         child: Scrollbar(
                           child: CarouselSlider.builder(
-                            itemCount: couponController.couponRestList?.length ?? 0,
+                            itemCount:
+                                couponController.couponRestList?.length ?? 0,
                             itemBuilder: (context, index, realIndex) {
                               return InkWell(
                                 onTap: () {
@@ -1432,18 +1485,20 @@ class _StoreDescriptionViewWidgetState
                                                     ),
                                                   ),
                                                 ),
-                                                SizedBox(width: 15,),
+                                                SizedBox(width: 15),
                                                 FittedBox(
                                                   child: Column(
                                                     mainAxisAlignment:
-                                                    MainAxisAlignment.center,
+                                                        MainAxisAlignment
+                                                            .center,
                                                     crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
+                                                        CrossAxisAlignment
+                                                            .start,
                                                     children: [
                                                       Row(
                                                         mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
+                                                            MainAxisAlignment
+                                                                .center,
                                                         children: [
                                                           Text(
                                                             '${couponController.couponRestList![index].discountType == 'percent'
@@ -1451,24 +1506,28 @@ class _StoreDescriptionViewWidgetState
                                                                 : couponController.couponRestList![index].couponType == 'free_delivery'
                                                                 ? 'free_delivery'.tr
                                                                 : Get.find<SplashController>().configModel!.currencySymbol}'
-                                                                '${couponController.couponRestList![index].couponType == 'free_delivery' ? '' : (couponController.couponRestList![index].discount)?.toStringAsFixed(0)} '
-                                                                '${couponController.couponRestList![index].couponType == 'free_delivery' ? '' : 'off'.tr}',
-                                                            style: robotoBold.copyWith(
-                                                              fontSize: Dimensions
-                                                                  .fontSizeLarge,
-                                                            ),
+                                                            '${couponController.couponRestList![index].couponType == 'free_delivery' ? '' : (couponController.couponRestList![index].discount)?.toStringAsFixed(0)} '
+                                                            '${couponController.couponRestList![index].couponType == 'free_delivery' ? '' : 'off'.tr}',
+                                                            style: robotoBold
+                                                                .copyWith(
+                                                                  fontSize:
+                                                                      Dimensions
+                                                                          .fontSizeLarge,
+                                                                ),
                                                           ),
                                                           Text(
                                                             couponController
-                                                                .couponRestList![index]
-                                                                .maxDiscount !=
-                                                                null
+                                                                        .couponRestList![index]
+                                                                        .maxDiscount !=
+                                                                    null
                                                                 ? ' | UPTO ₹${(couponController.couponRestList![index].maxDiscount)?.toStringAsFixed(0)}'
                                                                 : "",
-                                                            style: robotoBold.copyWith(
-                                                              fontSize: Dimensions
-                                                                  .fontSizeLarge,
-                                                            ),
+                                                            style: robotoBold
+                                                                .copyWith(
+                                                                  fontSize:
+                                                                      Dimensions
+                                                                          .fontSizeLarge,
+                                                                ),
                                                           ),
                                                         ],
                                                       ),
@@ -1490,10 +1549,10 @@ class _StoreDescriptionViewWidgetState
                                         Text(
                                           "${index + 1}/${couponController.couponRestList?.length}",
                                           style: TextStyle(
-                                              color: Theme.of(
-                                                context,
-                                              ).primaryColor,
-                                              fontWeight: FontWeight.bold
+                                            color: Theme.of(
+                                              context,
+                                            ).primaryColor,
+                                            fontWeight: FontWeight.bold,
                                           ).copyWith(fontSize: 10),
                                         ),
                                       ],
@@ -1537,14 +1596,23 @@ class _StoreDescriptionViewWidgetState
     );
   }
 
-  Widget _buildInfoCard(BuildContext context, Color bgColor, Color accentColor, String iconPath, Widget content) {
+  Widget _buildInfoCard(
+    BuildContext context,
+    Color bgColor,
+    Color accentColor,
+    String iconPath,
+    Widget content,
+  ) {
     return Container(
       height: 70,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-        border: Border.all(color: accentColor.withValues(alpha: 0.15), width: 1.5),
+        border: Border.all(
+          color: accentColor.withValues(alpha: 0.15),
+          width: 1.5,
+        ),
         boxShadow: [
           BoxShadow(
             color: accentColor.withValues(alpha: 0.05),
@@ -1558,10 +1626,7 @@ class _StoreDescriptionViewWidgetState
         children: [
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: bgColor,
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
             child: CustomAssetImageWidget(iconPath, width: 24, height: 24),
           ),
           const SizedBox(width: 12),
@@ -1900,15 +1965,25 @@ class _StoreDescriptionViewWidgetFoodState
               )
             : Container(
                 height: 75,
-                margin: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
+                margin: const EdgeInsets.symmetric(
+                  vertical: Dimensions.paddingSizeSmall,
+                ),
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraSmall),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: Dimensions.paddingSizeExtraSmall,
+                  ),
                   child: Row(
                     children: [
                       InkWell(
-                        onTap: () => Get.toNamed(RouteHelper.getStoreReviewRoute(widget.store!.id, widget.store!.name, widget.store!)),
+                        onTap: () => Get.toNamed(
+                          RouteHelper.getStoreReviewRoute(
+                            widget.store!.id,
+                            widget.store!.name,
+                            widget.store!,
+                          ),
+                        ),
                         child: _buildInfoCard(
                           context,
                           const Color(0xFFFFF9F5),
@@ -1918,8 +1993,17 @@ class _StoreDescriptionViewWidgetFoodState
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(widget.store!.avgRating!.toStringAsFixed(1), style: robotoBold.copyWith(fontSize: 16)),
-                              Text('${widget.store!.ratingCount}+ ratings', style: robotoRegular.copyWith(fontSize: 10, color: Colors.grey.shade600)),
+                              Text(
+                                widget.store!.avgRating!.toStringAsFixed(1),
+                                style: robotoBold.copyWith(fontSize: 16),
+                              ),
+                              Text(
+                                '${widget.store!.ratingCount}+ ratings',
+                                style: robotoRegular.copyWith(
+                                  fontSize: 10,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -1927,16 +2011,40 @@ class _StoreDescriptionViewWidgetFoodState
                       const SizedBox(width: 10),
 
                       InkWell(
-                        onTap: () => Get.toNamed(RouteHelper.getMapRoute(
-                          AddressModel(id: widget.store!.id, address: widget.store!.address, latitude: widget.store!.latitude, longitude: widget.store!.longitude, contactPersonNumber: '', contactPersonName: '', addressType: ''),
-                          'store', Get.find<SplashController>().getModuleConfig(Get.find<SplashController>().module!.moduleType!).newVariation!, storeName: widget.store!.name,
-                        )),
+                        onTap: () => Get.toNamed(
+                          RouteHelper.getMapRoute(
+                            AddressModel(
+                              id: widget.store!.id,
+                              address: widget.store!.address,
+                              latitude: widget.store!.latitude,
+                              longitude: widget.store!.longitude,
+                              contactPersonNumber: '',
+                              contactPersonName: '',
+                              addressType: '',
+                            ),
+                            'store',
+                            Get.find<SplashController>()
+                                .getModuleConfig(
+                                  Get.find<SplashController>()
+                                      .module!
+                                      .moduleType!,
+                                )
+                                .newVariation!,
+                            storeName: widget.store!.name,
+                          ),
+                        ),
                         child: _buildInfoCard(
                           context,
                           const Color(0xFFF7FAF2),
                           Colors.green,
                           Images.drivethru,
-                          Text('Drive Thru', style: robotoMedium.copyWith(fontSize: 12, color: Colors.green.shade700)),
+                          Text(
+                            'Drive Thru',
+                            style: robotoMedium.copyWith(
+                              fontSize: 12,
+                              color: Colors.green.shade700,
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -1950,28 +2058,46 @@ class _StoreDescriptionViewWidgetFoodState
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(widget.store!.deliveryTime!, style: robotoBold.copyWith(fontSize: 16)),
-                            Text('Delivery', style: robotoRegular.copyWith(fontSize: 10, color: Colors.pink.shade700)),
+                            Text(
+                              widget.store!.deliveryTime!,
+                              style: robotoBold.copyWith(fontSize: 16),
+                            ),
+                            Text(
+                              'Delivery',
+                              style: robotoRegular.copyWith(
+                                fontSize: 10,
+                                color: Colors.pink.shade700,
+                              ),
+                            ),
                           ],
                         ),
                       ),
-                      
-                      if (widget.store!.delivery! && widget.store!.freeDelivery!) ...[
+
+                      if (widget.store!.delivery! &&
+                          widget.store!.freeDelivery!) ...[
                         const SizedBox(width: 10),
                         _buildInfoCard(
                           context,
                           const Color(0xFFF2F6FF),
                           Colors.blue,
                           Images.money,
-                          Text('Free Delivery', style: robotoMedium.copyWith(fontSize: 12, color: Colors.blue.shade700)),
+                          Text(
+                            'Free Delivery',
+                            style: robotoMedium.copyWith(
+                              fontSize: 12,
+                              color: Colors.blue.shade700,
+                            ),
+                          ),
                         ),
                       ],
                     ],
                   ),
                 ),
               ),
-        
-        if (!ResponsiveHelper.isDesktop(context) && couponController.couponRestList != null && couponController.couponRestList!.isNotEmpty)
+
+        if (!ResponsiveHelper.isDesktop(context) &&
+            couponController.couponRestList != null &&
+            couponController.couponRestList!.isNotEmpty)
           Container(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: GetBuilder<CouponController>(
@@ -1983,46 +2109,85 @@ class _StoreDescriptionViewWidgetFoodState
                       itemBuilder: (context, index, realIndex) {
                         return InkWell(
                           onTap: () {
-                            Clipboard.setData(ClipboardData(text: couponController.couponRestList![index].code!));
-                            showCustomSnackBar('coupon_code_copied'.tr, isError: false);
+                            Clipboard.setData(
+                              ClipboardData(
+                                text: couponController
+                                    .couponRestList![index]
+                                    .code!,
+                              ),
+                            );
+                            showCustomSnackBar(
+                              'coupon_code_copied'.tr,
+                              isError: false,
+                            );
                           },
                           child: Container(
                             margin: const EdgeInsets.symmetric(horizontal: 5),
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).primaryColor.withValues(alpha: 0.05),
-                              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                              border: Border.all(color: Theme.of(context).primaryColor.withValues(alpha: 0.1)),
+                              color: Theme.of(
+                                context,
+                              ).primaryColor.withValues(alpha: 0.05),
+                              borderRadius: BorderRadius.circular(
+                                Dimensions.radiusDefault,
+                              ),
+                              border: Border.all(
+                                color: Theme.of(
+                                  context,
+                                ).primaryColor.withValues(alpha: 0.1),
+                              ),
                             ),
                             child: Row(
                               children: [
-                                SvgPicture.asset(Images.subtract, width: 30, height: 30, color: Theme.of(context).primaryColor),
+                                SvgPicture.asset(
+                                  Images.subtract,
+                                  width: 30,
+                                  height: 30,
+                                  color: Theme.of(context).primaryColor,
+                                ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         '${couponController.couponRestList![index].discountType == 'percent' ? '%' : (couponController.couponRestList![index].couponType == 'free_delivery' ? 'free_delivery'.tr : Get.find<SplashController>().configModel!.currencySymbol)}'
                                         '${couponController.couponRestList![index].couponType == 'free_delivery' ? '' : (couponController.couponRestList![index].discount)?.toStringAsFixed(0)} '
                                         '${couponController.couponRestList![index].couponType == 'free_delivery' ? '' : 'off'.tr}',
-                                        style: robotoBold.copyWith(fontSize: 14),
+                                        style: robotoBold.copyWith(
+                                          fontSize: 14,
+                                        ),
                                       ),
                                       Text(
                                         "Code: ${couponController.couponRestList![index].code}",
-                                        style: robotoRegular.copyWith(fontSize: 11, color: Theme.of(context).disabledColor),
+                                        style: robotoRegular.copyWith(
+                                          fontSize: 11,
+                                          color: Theme.of(
+                                            context,
+                                          ).disabledColor,
+                                        ),
                                       ),
                                     ],
                                   ),
                                 ),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: Theme.of(context).primaryColor,
                                     borderRadius: BorderRadius.circular(15),
                                   ),
-                                  child: Text('COPY', style: robotoBold.copyWith(color: Colors.white, fontSize: 10)),
+                                  child: Text(
+                                    'COPY',
+                                    style: robotoBold.copyWith(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -2035,7 +2200,9 @@ class _StoreDescriptionViewWidgetFoodState
                         enlargeCenterPage: false,
                         viewportFraction: 0.85,
                         autoPlayCurve: Curves.fastOutSlowIn,
-                        autoPlayAnimationDuration: const Duration(milliseconds: 700),
+                        autoPlayAnimationDuration: const Duration(
+                          milliseconds: 700,
+                        ),
                       ),
                     );
                   } else {
@@ -2051,14 +2218,23 @@ class _StoreDescriptionViewWidgetFoodState
     );
   }
 
-  Widget _buildInfoCard(BuildContext context, Color bgColor, Color accentColor, String iconPath, Widget content) {
+  Widget _buildInfoCard(
+    BuildContext context,
+    Color bgColor,
+    Color accentColor,
+    String iconPath,
+    Widget content,
+  ) {
     return Container(
       height: 70,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-        border: Border.all(color: accentColor.withValues(alpha: 0.15), width: 1.5),
+        border: Border.all(
+          color: accentColor.withValues(alpha: 0.15),
+          width: 1.5,
+        ),
         boxShadow: [
           BoxShadow(
             color: accentColor.withValues(alpha: 0.05),
@@ -2072,10 +2248,7 @@ class _StoreDescriptionViewWidgetFoodState
         children: [
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: bgColor,
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
             child: CustomAssetImageWidget(iconPath, width: 24, height: 24),
           ),
           const SizedBox(width: 12),
@@ -2085,5 +2258,3 @@ class _StoreDescriptionViewWidgetFoodState
     );
   }
 }
-
-

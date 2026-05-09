@@ -97,85 +97,56 @@ class _CartItemWidgetState extends State<CartItemWidget>
     }
     bool isPharmacy = Get.find<SplashController>().module?.moduleType == 'pharmacy';
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-        border: Border.all(color: Colors.grey.shade100),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(8),
                 child: CustomImage(
                   image: '${widget.cart.item!.imageFullUrl}',
-                  height: 80,
-                  width: 80,
+                  height: 65,
+                  width: 65,
                   fit: BoxFit.cover,
                 ),
               ),
               const SizedBox(width: 12),
+              
               Expanded(
+                flex: 4,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            widget.cart.item!.name!,
-                            style: robotoBold.copyWith(fontSize: 15),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        InkWell(
-                          onTap: () {
-                            Get.find<CartController>().removeFromCart(
-                              widget.cartIndex,
-                              item: widget.cart.item,
-                            );
-                          },
-                          child: const Icon(Icons.close, size: 20, color: Colors.grey),
-                        ),
-                      ],
+                    Text(
+                      widget.cart.item!.name!,
+                      style: robotoBold.copyWith(fontSize: 14, color: Colors.black87),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
                     Text(
                       PriceConverter.convertPrice(startingPrice, discount: discount, discountType: discountType),
-                      style: robotoRegular.copyWith(fontSize: 14, color: Colors.black87),
+                      style: robotoRegular.copyWith(fontSize: 13, color: Colors.grey.shade600),
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              const Spacer(),
+
+              const SizedBox(width: 8),
+
+              // Quantity Selector
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: Colors.grey.shade200),
                 ),
                 child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     QuantityButtonPharmacy(
                       onTap: () {
@@ -187,12 +158,9 @@ class _CartItemWidgetState extends State<CartItemWidget>
                       },
                       isIncrement: false,
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Text(
-                        widget.cart.quantity.toString(),
-                        style: robotoBold.copyWith(fontSize: 14),
-                      ),
+                    Text(
+                      widget.cart.quantity.toString(),
+                      style: robotoBold.copyWith(fontSize: 13),
                     ),
                     QuantityButtonPharmacy(
                       onTap: () {
@@ -203,44 +171,41 @@ class _CartItemWidgetState extends State<CartItemWidget>
                   ],
                 ),
               ),
-              const SizedBox(width: 32),
-              Text(
-                PriceConverter.convertPrice((startingPrice ?? 0) * widget.cart.quantity!, discount: discount, discountType: discountType),
-                style: robotoBold.copyWith(fontSize: 16),
+
+              const SizedBox(width: 12),
+
+              // Total Price and Remove
+              Expanded(
+                flex: 3,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        Get.find<CartController>().removeFromCart(
+                          widget.cartIndex,
+                          item: widget.cart.item,
+                        );
+                      },
+                      child: Icon(Icons.close, size: 18, color: Colors.grey.shade400),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      PriceConverter.convertPrice((startingPrice ?? 0) * widget.cart.quantity!, discount: discount, discountType: discountType),
+                      style: robotoBold.copyWith(fontSize: 15, color: Colors.black87),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
-          if (addOnText.isNotEmpty || variationText!.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            InkWell(
-              onTap: () {
-                setState(() {
-                  showAddonsVariations = !showAddonsVariations;
-                });
-              },
-              child: Row(
-                children: [
-                  Text(
-                    '${variationCount > 0 ? '$variationCount ${'variations'.tr} ' : ''}${addonCount > 0 ? '$addonCount ${'addons'.tr}' : ''}',
-                    style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor),
-                  ),
-                  Icon(
-                    showAddonsVariations ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                    size: 16, color: Theme.of(context).disabledColor,
-                  ),
-                ],
-              ),
-            ),
-          ],
-          if (showAddonsVariations) ...[
-            const SizedBox(height: 4),
-            if (addOnText.isNotEmpty)
-              Text('${'addons'.tr}: $addOnText', style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).disabledColor)),
-            if (variationText!.isNotEmpty)
-              Text('${'variations'.tr}: $variationText', style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).disabledColor)),
-          ],
-        ],
-      ),
+        ),
+        if (widget.showDivider)
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9)),
+          ),
+      ],
     );
   }
 

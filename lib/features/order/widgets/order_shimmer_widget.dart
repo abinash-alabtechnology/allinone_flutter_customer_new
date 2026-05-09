@@ -50,7 +50,7 @@ class OrderShimmerWidget extends StatelessWidget {
                         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                           Container(height: 15, width: 100, color: Colors.grey[300]),
                           const SizedBox(height: Dimensions.paddingSizeSmall),
-                          Container(height: 15, width: 150, color: Colors.grey[300]),
+                          Container(height: 15, width: double.infinity, color: Colors.grey[300]),
                         ])),
                         Column(children: [
                           !ResponsiveHelper.isDesktop(context) ? Container(

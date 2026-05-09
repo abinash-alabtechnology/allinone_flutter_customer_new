@@ -39,10 +39,6 @@ class ManualLoginWidget extends StatelessWidget {
       }
       
       return Column(mainAxisSize: MainAxisSize.min, children: [
-        Align(
-          alignment: Alignment.topLeft,
-          child: Text('login'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge)),
-        ),
         const SizedBox(height: Dimensions.paddingSizeDefault),
 
         CustomTextField(

@@ -30,10 +30,6 @@ class OtpLoginWidget extends StatelessWidget {
       return Padding(
         padding: EdgeInsets.symmetric(horizontal: isDesktop ? Dimensions.paddingSizeLarge : 0),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Align(
-            alignment: Alignment.topLeft,
-            child: Text('login'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge)),
-          ),
           const SizedBox(height: Dimensions.paddingSizeLarge),
 
           CustomTextField(
@@ -144,10 +140,6 @@ class OtpLoginWidgetApp extends StatelessWidget {
           child: Column(mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: Text('login'.tr, style: robotoBold.copyWith(color:Theme.of(context).cardColor,fontSize: Dimensions.fontSizeExtraLarge)),
-                ),
                 const SizedBox(height: Dimensions.paddingSizeLarge),
                 CustomTextField(
                   titleText: 'Enter you Phone Number'.tr,

@@ -56,15 +56,28 @@ class _CouponSectionState extends State<CouponSection> with SingleTickerProvider
 
     return widget.storeId == null ? GetBuilder<CouponController>(
       builder: (couponController) {
-        return Container(
-          margin: EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-            color: Colors.black12.withValues(alpha: 0.08),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge),
-          child: Column(children: [
-            const SizedBox(height: Dimensions.paddingSizeLarge),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Row(children: [
+                Image.asset(Images.percentTag, height: 20, width: 20),
+                const SizedBox(width: Dimensions.paddingSizeSmall),
+                Text('Coupons & Offers', style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
+              ]),
+            ),
+
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                color: Colors.black12.withValues(alpha: 0.08),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge),
+              child: Column(children: [
+                const SizedBox(height: Dimensions.paddingSizeLarge),
+
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -284,9 +297,13 @@ class _CouponSectionState extends State<CouponSection> with SingleTickerProvider
             ),
             const SizedBox(height: Dimensions.paddingSizeLarge),
 
-          ]),
+              ]),
+            ),
+          ],
         );
       },
+
+
     ) : const SizedBox();
   }
   void showCouponAppliedDialog(

@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:get/get.dart';
 import 'package:handy_allinone/api/api_client.dart';
+import 'package:handy_allinone/common/widgets/custom_snackbar.dart';
 import 'package:handy_allinone/util/app_constants.dart';
 import '../model/bookinghistorymodel.dart';
 import '../model/captionmodel.dart';
@@ -176,4 +177,34 @@ class DriverController extends GetxController {
 
     return captainDetails;
   }
+
+  Future<void> sendSosAlert({
+    required int bookingId,
+    required int captainId,
+    required int customerId,
+    required double lat,
+    required double lng,
+  }) async {
+    isLoading.value = true;
+    try {
+      final response = await apiClient.postData(AppConstants.sosAlert, {
+        "booking_id": bookingId,
+        "captain_id": captainId,
+        "customer_id": customerId,
+        "lat": lat,
+        "long": lng,
+      });
+
+      if (response.statusCode == 200) {
+        showCustomSnackBar("SOS alert sent successfully!", isError: false);
+      } else {
+        showCustomSnackBar("Failed to send SOS alert: ${response.statusText}", isError: true);
+      }
+    } catch (e) {
+      showCustomSnackBar("Error sending SOS alert: $e", isError: true);
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }
+

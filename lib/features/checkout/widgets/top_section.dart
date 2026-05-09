@@ -226,11 +226,7 @@ class TopSection extends StatelessWidget {
           return hasSubscription ? SubscriptionSection(checkoutController: checkoutController) : const SizedBox();
         }),
 
-        DeliverySection(checkoutController: checkoutController, address: address, addressList: addressList,
-          guestNameTextEditingController: guestNameTextEditingController, guestNumberTextEditingController: guestNumberTextEditingController,
-          guestNumberNode: guestNumberNode, guestEmailController: guestEmailController, guestEmailNode: guestEmailNode,
-        ),
-        const SizedBox(height: Dimensions.paddingSizeDefault),
+
 
         !isDesktop?Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0,),
@@ -329,10 +325,7 @@ class TopSection extends StatelessWidget {
               ),
             ),
             const SizedBox(height: Dimensions.paddingSizeLarge),
-            DeliverySection(checkoutController: checkoutController, address: address, addressList: addressList,
-              guestNameTextEditingController: guestNameTextEditingController, guestNumberTextEditingController: guestNumberTextEditingController,
-              guestNumberNode: guestNumberNode, guestEmailController: guestEmailController, guestEmailNode: guestEmailNode,
-            ),
+
             SizedBox(height: !takeAway ? isDesktop ? Dimensions.paddingSizeLarge : Dimensions.paddingSizeSmall : 0),
 
           ],

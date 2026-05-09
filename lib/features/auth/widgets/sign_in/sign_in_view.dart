@@ -22,6 +22,11 @@ import 'package:handy_allinone/helper/custom_validator.dart';
 import 'package:handy_allinone/helper/responsive_helper.dart';
 import 'package:handy_allinone/helper/route_helper.dart';
 import 'package:handy_allinone/helper/validate_check.dart';
+import 'package:handy_allinone/common/widgets/custom_button.dart';
+import 'package:handy_allinone/common/widgets/custom_text_field.dart';
+import 'package:handy_allinone/features/auth/widgets/condition_check_box_widget.dart';
+import 'package:handy_allinone/util/dimensions.dart';
+import 'package:handy_allinone/util/styles.dart';
 
 class SignInView extends StatefulWidget {
   final bool exitFromApp;
@@ -41,6 +46,9 @@ class _SignInViewState extends State<SignInView> {
   final TextEditingController _passwordController = TextEditingController();
   String? _countryDialCode;
   GlobalKey<FormState>? _formKeyLogin;
+  bool _isOtp = true;
+  final TextEditingController _emailController = TextEditingController();
+  final FocusNode _emailFocus = FocusNode();
 
   @override
   void initState() {
@@ -80,10 +88,181 @@ class _SignInViewState extends State<SignInView> {
     return GetBuilder<AuthController>(builder: (authController) {
       return Form(
         key: _formKeyLogin,
-        child: activeCentralizeLogin(Get.find<SplashController>().configModel!.centralizeLoginSetup!, authController),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeLarge : 0),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Align(
+              alignment: Alignment.topLeft,
+              child: Text('login'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge)),
+            ),
+            SizedBox(height: Dimensions.paddingSizeLarge),
+
+            Container(
+              height: 45,
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.1)),
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: InkWell(
+                      onTap: () => setState(() => _isOtp = true),
+                      child: Container(
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: _isOtp ? Theme.of(context).primaryColor : Colors.transparent,
+                          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                        ),
+                        child: Text('OTP', style: robotoMedium.copyWith(color: _isOtp ? Colors.white : Theme.of(context).disabledColor)),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: InkWell(
+                      onTap: () => setState(() => _isOtp = false),
+                      child: Container(
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: !_isOtp ? Theme.of(context).primaryColor : Colors.transparent,
+                          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                        ),
+                        child: Text('EMAIL', style: robotoMedium.copyWith(color: !_isOtp ? Colors.white : Theme.of(context).disabledColor)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: Dimensions.paddingSizeLarge),
+
+            if(_isOtp)
+              activeCentralizeLogin(Get.find<SplashController>().configModel!.centralizeLoginSetup!, authController)
+            else
+              _emailLoginWidget(authController),
+
+          ]),
+        ),
       );
     });
   }
+
+  Widget _emailLoginWidget(AuthController authController) {
+    return Column(children: [
+      CustomTextField(
+        titleText: 'enter_email_address'.tr,
+        controller: _emailController,
+        focusNode: _emailFocus,
+        nextFocus: _passwordFocus,
+        inputType: TextInputType.emailAddress,
+        prefixIcon: Icons.email_outlined,
+        labelText: 'email'.tr,
+        required: true,
+        validator: (value) => ValidateCheck.validateEmail(value),
+      ),
+      SizedBox(height: Dimensions.paddingSizeExtraLarge),
+
+      CustomTextField(
+        titleText: '8_character'.tr,
+        controller: _passwordController,
+        focusNode: _passwordFocus,
+        inputAction: TextInputAction.done,
+        inputType: TextInputType.visiblePassword,
+        prefixIcon: Icons.lock_outline,
+        isPassword: true,
+        labelText: 'password'.tr,
+        required: true,
+        validator: (value) => ValidateCheck.validateEmptyText(value, "please_enter_password".tr),
+      ),
+      SizedBox(height: Dimensions.paddingSizeDefault),
+
+      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        InkWell(
+          onTap: () => authController.toggleRememberMe(),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                height: 24, width: 24,
+                child: Checkbox(
+                  side: BorderSide(color: Theme.of(context).hintColor),
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  activeColor: Theme.of(context).primaryColor,
+                  value: authController.isActiveRememberMe,
+                  onChanged: (bool? isChecked) => authController.toggleRememberMe(),
+                ),
+              ),
+              const SizedBox(width: Dimensions.paddingSizeSmall),
+              Text('remember_me'.tr, style: robotoRegular),
+            ],
+          ),
+        ),
+        TextButton(
+          onPressed: () => Get.toNamed(RouteHelper.getForgotPassRoute()),
+          child: Text('${'forgot_password'.tr}?', style: robotoRegular.copyWith(color: Theme.of(context).primaryColor)),
+        ),
+      ]),
+      SizedBox(height: Dimensions.paddingSizeLarge),
+
+      const ConditionCheckBoxWidget(forSignUp: true),
+      SizedBox(height: Dimensions.paddingSizeLarge),
+
+      CustomButton(
+        buttonText: 'login'.tr,
+        radius: Dimensions.radiusDefault,
+        isLoading: authController.isLoading,
+        onPressed: () => _emailLogin(authController),
+      ),
+      SizedBox(height: Dimensions.paddingSizeLarge),
+
+      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Text('do_not_have_account'.tr, style: robotoRegular.copyWith(color: Theme.of(context).hintColor)),
+        InkWell(
+          onTap: () => Get.toNamed(RouteHelper.getSignUpRoute()),
+          child: Padding(
+            padding: EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
+            child: Text('sign_up'.tr, style: robotoMedium.copyWith(color: Theme.of(context).primaryColor)),
+          ),
+        ),
+      ]),
+      const SizedBox(height: Dimensions.paddingSizeLarge),
+      const SocialLoginWidget(onlySocialLogin: false),
+    ]);
+  }
+
+  void _emailLogin(AuthController authController) {
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
+
+    if(_formKeyLogin!.currentState!.validate()) {
+      if(!authController.acceptTerms) {
+        showCustomSnackBar("Accept Terms & Conditions!", isError: true);
+        return;
+      }
+      
+      authController.login(
+        emailOrPhone: email,
+        password: password,
+        loginType: 'email',
+        fieldType: VerificationTypeEnum.email.name,
+        alreadyInApp: widget.backFromThis,
+      ).then((status) {
+        if (status.isSuccess) {
+          if(!status.authResponseModel!.isPersonalInfo!) {
+            Get.toNamed(RouteHelper.getNewUserSetupScreen(name: '', loginType: 'email', phone: '', email: email));
+          } else {
+            _processSuccessSetup(authController, email, email, password, status);
+          }
+        } else {
+          showCustomSnackBar(status.message);
+        }
+      });
+    }
+  }
+
 
   Widget activeCentralizeLogin(CentralizeLoginSetup centralizeLoginSetup, AuthController authController) {
     CentralizeLoginType centralizeLogin = CentralizeLoginHelper.getPreferredLoginMethod(centralizeLoginSetup, authController.isOtpViewEnable).type;
@@ -165,8 +344,9 @@ class _SignInViewState extends State<SignInView> {
             });
           },
         );
-
-      }
+      default:
+        return const SizedBox();
+    }
   }
   
   void _otpLogin(AuthController authController, String countryDialCode, CentralizeLoginType loginType) async {
