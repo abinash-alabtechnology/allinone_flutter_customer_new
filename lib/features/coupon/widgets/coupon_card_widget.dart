@@ -38,276 +38,187 @@ class CouponCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-    return Stack(
-      children: [
-        TicketShapeContainer(
-          height: ResponsiveHelper.isMobilePhone() ? 120 : 150,
-          borderRadius: 8,
-          notchRadius: 10,
-          borderColor: Colors.grey.shade300,
-          borderWidth: 1,
-          backgroundColor: Colors.white,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            height: ResponsiveHelper.isMobilePhone() ? 120 : 150,
-            alignment: Alignment.center,
-            child: Row(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: SizedBox(
-                    width: 50,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              width: 1,
-                              color: Colors.grey.shade300,
-                            ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: Image.asset(
-                              coupon.discountType == 'percent'
-                                  ? Images.percentCouponOffer
-                                  : coupon.couponType == 'free_delivery'
-                                  ? Images.freeDelivery
-                                  : Images.money,
-                              height: 18,
-                              width: 18,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 10.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${coupon.title}',
-                          style: robotoBold,
-                          textDirection: TextDirection.ltr,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+    String discountText = "";
+    if (coupon.couponType == 'free_delivery') {
+      discountText = "FREE";
+    } else {
+      discountText = coupon.discountType == 'percent'
+          ? "${coupon.discount?.toInt()}%"
+          : PriceConverter.convertPrice(coupon.discount);
+    }
 
-                        Row(
-                          children: [
-                            Text(
-                              'Expiry Date :',
-                              style: robotoRegular.copyWith(
-                                color: Theme.of(context).disabledColor,
-                                fontSize: Dimensions.fontSizeExtraSmall,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(
-                              width: Dimensions.paddingSizeExtraSmall,
-                            ),
-                            Text(
-                              coupon.expireDate ?? "N/A",
-                              style: robotoMedium.copyWith(
-                                color: Theme.of(context).disabledColor,
-                                fontSize: Dimensions.fontSizeExtraSmall,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textDirection: TextDirection.ltr,
-                            ),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              '${'min_purchase'.tr} :',
-                              style: robotoRegular.copyWith(
-                                color: Theme.of(context).disabledColor,
-                                fontSize: Dimensions.fontSizeExtraSmall,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(
-                              width: Dimensions.paddingSizeExtraSmall,
-                            ),
-                            Text(
-                              PriceConverter.convertPrice(coupon.minPurchase),
-                              style: robotoMedium.copyWith(
-                                color: Theme.of(context).disabledColor,
-                                fontSize: Dimensions.fontSizeExtraSmall,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textDirection: TextDirection.ltr,
-                            ),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              'Maximum Discount :',
-                              style: robotoRegular.copyWith(
-                                color: Theme.of(context).disabledColor,
-                                fontSize: Dimensions.fontSizeExtraSmall,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(
-                              width: Dimensions.paddingSizeExtraSmall,
-                            ),
-                            Text(
-                              PriceConverter.convertPrice(coupon.maxDiscount),
-                              style: robotoMedium.copyWith(
-                                color: Theme.of(context).disabledColor,
-                                fontSize: Dimensions.fontSizeExtraSmall,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textDirection: TextDirection.ltr,
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            DottedBorder(
-                              options: RoundedRectDottedBorderOptions(
-                                borderPadding: const EdgeInsets.symmetric(
-                                  horizontal: 1,
-                                ),
-                                color: Colors.green.shade800,
-                                radius: const Radius.circular(5),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10.0,
-                                  vertical: 3,
-                                ),
-                                child: Center(
-                                  child: Row(
-                                    children: [
-                                      CustomAssetImageWidget(
-                                        Images.discountOfferIcon,
-                                        color: Colors.green.shade500,
-                                        height: 15,
-                                        width: 15,
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Text(
-                                        coupon.code ?? "N/A",
-                                        style: robotoBold.copyWith(
-                                          fontSize: Dimensions.fontSizeSmall,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                              height: Dimensions.paddingSizeDefault,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(right: 18.0),
-                              child: Align(
-                                alignment: Alignment.centerRight,
-                                child: Container(
-                                  height: 30,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20),
-                                    color: Colors.blue.shade900,
-                                  ),
-                                  child: IntrinsicWidth(
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 15.0,
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                          fromdialog == true ? "Apply" : "Copy",
-                                          style: robotoBold.copyWith(
-                                            color: Theme.of(context).cardColor,
-                                            fontSize: Dimensions.fontSizeSmall,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeExtraSmall),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
-        ),
-
-        ResponsiveHelper.isDesktop(context)
-            ? Positioned(
-                top: Dimensions.paddingSizeSmall,
-                right: Dimensions.paddingSizeSmall,
-                child: JustTheTooltip(
-                  backgroundColor: Theme.of(context).cardColor,
-                  controller: coupon.toolTip,
-                  preferredDirection: AxisDirection.up,
-                  tailLength: 14,
-                  tailBaseWidth: 20,
-                  triggerMode: TooltipTriggerMode.manual,
-                  content: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      'code_copied'.tr,
-                      style: robotoRegular.copyWith(
-                        color: Theme.of(context).primaryColor,
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(15),
+        child: SizedBox(
+          height: 130,
+          child: Row(
+            children: [
+              // Left Section - Reward Info
+              Container(
+                width: 100,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.8)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      top: -20,
+                      left: -20,
+                      child: Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withValues(alpha: 0.1),
+                        ),
                       ),
                     ),
-                  ),
-                  child: InkWell(
-                    onTap: () async {
-                        coupon.toolTip?.showTooltip();
-                        Clipboard.setData(ClipboardData(text: coupon.code!));
-                        Future.delayed(const Duration(milliseconds: 750), () {
-                          coupon.toolTip?.hideTooltip();
-                        });
-                      },
-                    child: Image.asset(
-                      Images.copyCoupon,
-                      height: 20,
-                      width: 20,
+                    Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            discountText,
+                            style: robotoBlack.copyWith(
+                              color: Colors.white,
+                              fontSize: 24,
+                            ),
+                          ),
+                          Text(
+                            coupon.couponType == 'free_delivery' ? "DELIVERY" : "OFF",
+                            style: robotoMedium.copyWith(
+                              color: Colors.white.withValues(alpha: 0.8),
+                              fontSize: 10,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+                  ],
+                ),
+              ),
+
+              // Divider with Notches
+              CustomPaint(
+                size: const Size(20, 130),
+                painter: TicketDividerPainter(color: Colors.white),
+              ),
+
+              // Right Section - Details
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            coupon.title ?? "",
+                            style: robotoBold.copyWith(
+                              fontSize: Dimensions.fontSizeLarge,
+                              color: Colors.black87,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${'min_purchase'.tr}: ${PriceConverter.convertPrice(coupon.minPurchase)}',
+                            style: robotoRegular.copyWith(
+                              fontSize: Dimensions.fontSizeExtraSmall,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).primaryColor.withValues(alpha: 0.05),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              coupon.code ?? "",
+                              style: robotoBlack.copyWith(
+                                fontSize: Dimensions.fontSizeSmall,
+                                color: Theme.of(context).primaryColor,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () {
+                              // Action logic is handled by parent InkWell in CouponBottomSheet
+                              // but we keep the visual button here.
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).primaryColor,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Text(
+                                fromdialog ? "Apply" : "Copy",
+                                style: robotoBold.copyWith(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-              )
-            : const SizedBox(),
-      ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
+
   void showCouponAppliedDialog(
-      String code,
-      String savedAmount,
-      BuildContext parentContext,
-      ) {
+    String code,
+    String savedAmount,
+    BuildContext parentContext,
+  ) {
     bool scratchCompleted = false;
 
     showDialog(
@@ -323,93 +234,93 @@ class CouponCardWidget extends StatelessWidget {
                 clipBehavior: Clip.antiAlias,
                 child: scratchCompleted
                     ? Center(
-                  child: Container(
-                    width: 320,
-                    height: 300,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: Colors.white,
-                    ),
-                    child: Stack(
-                      children: [
-                        Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
+                        child: Container(
+                          width: 320,
+                          height: 300,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            color: Colors.white,
+                          ),
+                          child: Stack(
                             children: [
-                              Lottie.asset(
-                                'assets/animation/done.json',
-                                width: 110,
-                                height: 110,
-                                repeat: false,
+                              Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Lottie.asset(
+                                      'assets/animation/done.json',
+                                      width: 110,
+                                      height: 110,
+                                      repeat: false,
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Text('$code applied', style: robotoMedium),
+                                    const SizedBox(height: 6),
+                                    Text('You saved $savedAmount', style: robotoBold),
+                                    const SizedBox(height: 6),
+                                    const Text('Enjoy your savings 🎉'),
+                                  ],
+                                ),
                               ),
-                              const SizedBox(height: 10),
-                              Text('$code applied', style: robotoMedium),
-                              const SizedBox(height: 6),
-                              Text('You saved $savedAmount', style: robotoBold),
-                              const SizedBox(height: 6),
-                              const Text('Enjoy your savings 🎉'),
+                              Positioned.fill(
+                                child: IgnorePointer(
+                                  child: Lottie.asset(
+                                    'assets/animation/coupon.json',
+                                    fit: BoxFit.cover,
+                                    repeat: true,
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         ),
-                        Positioned.fill(
-                          child: IgnorePointer(
-                            child: Lottie.asset(
-                              'assets/animation/coupon.json',
-                              fit: BoxFit.cover,
-                              repeat: true,
+                      )
+                    : Scratcher(
+                        brushSize: 50,
+                        threshold: 35,
+                        image: Image.asset(
+                          'assets/image/scratch_card.jpg',
+                          fit: BoxFit.cover,
+                        ),
+                        onThreshold: () {
+                          setDialogState(() {
+                            scratchCompleted = true;
+                          });
+
+                          Future.delayed(const Duration(seconds: 3), () {
+                            if (Navigator.of(dialogContext).canPop()) {
+                              Navigator.of(dialogContext).pop();
+                            }
+                          });
+                        },
+                        child: Container(
+                          width: 320,
+                          height: 300,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            color: Colors.white,
+                          ),
+                          child: Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Lottie.asset(
+                                  'assets/animation/done.json',
+                                  width: 110,
+                                  height: 110,
+                                  repeat: false,
+                                ),
+                                const SizedBox(height: 10),
+                                Text('$code applied', style: robotoMedium),
+                                const SizedBox(height: 6),
+                                Text('You saved $savedAmount', style: robotoBold),
+                                const SizedBox(height: 6),
+                                const Text('Enjoy your savings 🎉'),
+                              ],
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                )
-                    : Scratcher(
-                  brushSize: 50,
-                  threshold: 35,
-                  image: Image.asset(
-                    'assets/image/scratch_card.jpg',
-                    fit: BoxFit.cover,
-                  ),
-                  onThreshold: () {
-                    setDialogState(() {
-                      scratchCompleted = true;
-                    });
-
-                    Future.delayed(const Duration(seconds: 3), () {
-                      if (Navigator.of(dialogContext).canPop()) {
-                        Navigator.of(dialogContext).pop();
-                      }
-                    });
-                  },
-                  child:Container(
-                    width: 320,
-                    height: 300,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: Colors.white,
-                    ),
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Lottie.asset(
-                            'assets/animation/done.json',
-                            width: 110,
-                            height: 110,
-                            repeat: false,
-                          ),
-                          const SizedBox(height: 10),
-                          Text('$code applied', style: robotoMedium),
-                          const SizedBox(height: 6),
-                          Text('You saved $savedAmount', style: robotoBold),
-                          const SizedBox(height: 6),
-                          const Text('Enjoy your savings 🎉'),
-                        ],
                       ),
-                    ),
-                  ),
-                ),
               ),
             );
           },
@@ -417,6 +328,45 @@ class CouponCardWidget extends StatelessWidget {
       },
     );
   }
+}
+
+class TicketDividerPainter extends CustomPainter {
+  final Color color;
+  TicketDividerPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = color;
+    final path = Path();
+
+    // Draw the notches
+    path.moveTo(0, 0);
+    path.lineTo(size.width, 0);
+    path.lineTo(size.width, size.height);
+    path.lineTo(0, size.height);
+    
+    // Bottom notch
+    path.addOval(Rect.fromCircle(center: Offset(size.width / 2, size.height), radius: 10));
+    // Top notch
+    path.addOval(Rect.fromCircle(center: Offset(size.width / 2, 0), radius: 10));
+
+    canvas.drawPath(path, paint);
+
+    // Draw dotted line
+    final dashPaint = Paint()
+      ..color = Colors.grey.shade300
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
+
+    double startY = 15;
+    while (startY < size.height - 15) {
+      canvas.drawLine(Offset(size.width / 2, startY), Offset(size.width / 2, startY + 5), dashPaint);
+      startY += 10;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class TicketShapeContainer extends StatelessWidget {

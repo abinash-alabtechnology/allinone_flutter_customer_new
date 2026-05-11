@@ -363,6 +363,19 @@ class TopSection extends StatelessWidget {
           totalPrice: total, onTotalChange: (double price) => total + price, storeId: storeId,
         ),
 
+        /// Special Instructions..
+        Container(
+          decoration: isDesktop ? const BoxDecoration() : BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+            boxShadow: [BoxShadow(color: Theme.of(context).primaryColor.withValues(alpha: 0.05), blurRadius: 10)],
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge, vertical: Dimensions.paddingSizeSmall),
+          margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
+          child: NoteAndPrescriptionSection(checkoutController: checkoutController, storeId: storeId),
+        ),
+        const SizedBox(height: Dimensions.paddingSizeDefault),
+
         ///Payment..
         Container(
           decoration: isDesktop ? const BoxDecoration() : BoxDecoration(

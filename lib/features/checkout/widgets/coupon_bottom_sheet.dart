@@ -56,44 +56,56 @@ class _CouponBottomSheetState extends State<CouponBottomSheet> {
 
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
-                flex: 4,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       "All Offers",
-                      style: robotoBold.copyWith(
-                        fontSize: Dimensions.fontSizeExtraLarge,
+                      style: robotoBlack.copyWith(
+                        fontSize: 32,
+                        color: Theme.of(context).primaryColor,
+                        letterSpacing: -1.5,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "Offer selected will be automatically applied (subject to T&C)",
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: robotoRegular.copyWith(
-                        fontSize: Dimensions.fontSizeDefault,
-                      ),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        Container(
+                          width: 25,
+                          height: 3,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          "Exclusive rewards for your order",
+                          style: robotoMedium.copyWith(
+                            fontSize: Dimensions.fontSizeSmall,
+                            color: Theme.of(context).disabledColor,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-              IconButton(
-                onPressed: () => Get.back(),
-                splashRadius: 20,
-                icon: Container(
+              InkWell(
+                onTap: () => Get.back(),
+                child: Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.grey.shade800,
+                    color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
                   ),
-                  padding: const EdgeInsets.all(4),
+                  padding: const EdgeInsets.all(8),
                   child: Icon(
-                    Icons.clear,
-                    size: 14,
-                    color: Theme.of(context).cardColor,
+                    Icons.close,
+                    size: 24,
+                    color: Theme.of(context).primaryColor,
                   ),
                 ),
               ),

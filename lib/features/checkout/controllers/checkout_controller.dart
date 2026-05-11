@@ -164,6 +164,14 @@ class CheckoutController extends GetxController implements GetxService {
   bool _isExpanded = false;
   bool get isExpanded => _isExpanded;
 
+  bool _isAmountExpanded = false;
+  bool get isAmountExpanded => _isAmountExpanded;
+
+  void toggleAmountExpanded() {
+    _isAmountExpanded = !_isAmountExpanded;
+    update();
+  }
+
   bool _isExpand = false;
   bool get isExpand => _isExpand;
 

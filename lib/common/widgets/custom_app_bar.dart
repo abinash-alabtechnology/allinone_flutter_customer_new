@@ -55,7 +55,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => Size(Get.width, GetPlatform.isDesktop ? 100 : 50);
+  Size get preferredSize => Size(Get.width, 50);
 }
 
 class CustomAppBar2 extends StatelessWidget implements PreferredSizeWidget {
@@ -129,7 +129,7 @@ class CustomAppBar2 extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => Size(Get.width, GetPlatform.isDesktop ? 100 : 50);
+  Size get preferredSize => Size(Get.width, 50);
 }
 class CustomAppBar3 extends StatelessWidget implements PreferredSizeWidget {
   final String title;
