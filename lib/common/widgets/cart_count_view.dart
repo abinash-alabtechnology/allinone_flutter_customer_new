@@ -363,33 +363,19 @@ class CartCountViewStore extends StatelessWidget {
           Get.find<ItemController>().itemDirectlyAddToCart(item, context);
         },
         child: child ?? Container(
-          height: 32,
+          height: 30,
           padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
-            gradient: LinearGradient(
-              colors: [
-                Theme.of(context).primaryColor,
-                Theme.of(context).primaryColor.withOpacity(0.8),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Theme.of(context).primaryColor.withOpacity(0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 3),
-              ),
-            ],
+            borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+            color: Theme.of(context).cardColor,
+            border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.3)),
           ),
           child: Center(
             child: Text(
-              "ADD ITEM",
+              "Add",
               style: robotoBold.copyWith(
-                fontSize: 10,
-                color: Colors.white,
-                letterSpacing: 0.5,
+                fontSize: Dimensions.fontSizeSmall,
+                color: Theme.of(context).primaryColor,
               ),
             ),
           ),

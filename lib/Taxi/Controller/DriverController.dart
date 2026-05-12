@@ -6,6 +6,7 @@ import 'package:handy_allinone/common/widgets/custom_snackbar.dart';
 import 'package:handy_allinone/util/app_constants.dart';
 import '../model/bookinghistorymodel.dart';
 import '../model/captionmodel.dart';
+import 'package:handy_allinone/features/review/domain/models/captain_rating_model.dart';
 
 class DriverController extends GetxController {
   final ApiClient apiClient;
@@ -15,6 +16,7 @@ class DriverController extends GetxController {
   var isLoading = false.obs;
   String? googleMapsApiKey;
   CaptainDetailsData? captainDetails;
+  CaptainRatingModel? captainRating;
   Future<void> fetchRealtimeDrivers() async {
     try {
       final dbRef = FirebaseDatabase.instanceFor(
@@ -178,6 +180,21 @@ class DriverController extends GetxController {
     return captainDetails;
   }
 
+  Future<CaptainRatingModel?> fetchCaptainRating(int captainId) async {
+    print("🔄 Fetching captain rating for ID: $captainId");
+    try {
+      final response = await apiClient.getData("${AppConstants.captainReviewRatingUri}$captainId");
+      if (response.statusCode == 200) {
+        captainRating = CaptainRatingModel.fromJson(response.body);
+        print("✅ Captain Rating: ${captainRating!.averageRating} (${captainRating!.totalReviews} reviews)");
+        update();
+      }
+    } catch (e) {
+      print("❗ Exception while fetching rating: $e");
+    }
+    return captainRating;
+  }
+
   Future<void> sendSosAlert({
     required int bookingId,
     required int captainId,
@@ -191,6 +208,7 @@ class DriverController extends GetxController {
         "booking_id": bookingId,
         "captain_id": captainId,
         "customer_id": customerId,
+        "triggered_by": "customer",
         "lat": lat,
         "long": lng,
       });

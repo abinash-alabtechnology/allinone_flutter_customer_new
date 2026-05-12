@@ -208,6 +208,8 @@ class Images {
   static const String termsIcon = 'assets/image/terms_icon.png';
   static const String privacyIcon = 'assets/image/privacy_icon.png';
   static const String refundIcon = 'assets/image/refund_icon.png';
+  static const String meatRaw = 'assets/image/meat_raw.png';
+  static const String meatModule = 'assets/image/meat_module.png';
   static const String cancelationIcon = 'assets/image/cancelation_icon.png';
   static const String shippingIcon = 'assets/image/shipping_icon.png';
   static const String passwordIcon = 'assets/image/password_icon.png';

@@ -91,6 +91,8 @@ class _CartScreenState extends State<CartScreen> {
         }
 
 
+        bool isPharmacy = Get.find<SplashController>().module?.moduleType == 'pharmacy';
+
         return Column(
           children: [
             Expanded(
@@ -103,39 +105,41 @@ class _CartScreenState extends State<CartScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Deliver to Section
-                        Container(
-                          color: Colors.white,
-                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  const Icon(Icons.location_on, color: Color(0xFF16A34A), size: 20),
-                                  const SizedBox(width: 8),
-                                  Text('Delivering to', style: robotoMedium.copyWith(fontSize: 13, color: Colors.grey.shade600)),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  const SizedBox(width: 28),
-                                  Expanded(
-                                    child: Text(
-                                      AddressHelper.getUserAddressFromSharedPref()?.address ?? 'Select Address',
-                                      style: robotoBold.copyWith(fontSize: 14, color: Colors.black),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                        if (!isPharmacy) ...[
+                          Container(
+                            color: Colors.white,
+                            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Icon(Icons.location_on, color: Color(0xFF16A34A), size: 20),
+                                    const SizedBox(width: 8),
+                                    Text('Delivering to', style: robotoMedium.copyWith(fontSize: 13, color: Colors.grey.shade600)),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    const SizedBox(width: 28),
+                                    Expanded(
+                                      child: Text(
+                                        AddressHelper.getUserAddressFromSharedPref()?.address ?? 'Select Address',
+                                        style: robotoBold.copyWith(fontSize: 14, color: Colors.black),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  const Icon(Icons.keyboard_arrow_down, size: 18),
-                                ],
-                              ),
-                            ],
+                                    const SizedBox(width: 8),
+                                    const Icon(Icons.keyboard_arrow_down, size: 18),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        const Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9)),
+                          const Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9)),
+                        ],
 
                         // Items List Section
                         Container(

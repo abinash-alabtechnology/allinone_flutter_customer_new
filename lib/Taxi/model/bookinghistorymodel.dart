@@ -60,6 +60,7 @@ class RideData {
   final DateTime createdAt;
   final DateTime updatedAt;
   final int zoneId;
+  final bool isReviewed;
 
   RideData({
     required this.id,
@@ -88,6 +89,7 @@ class RideData {
     required this.createdAt,
     required this.updatedAt,
     required this.zoneId,
+    required this.isReviewed,
   });
 
   factory RideData.fromJson(Map<String, dynamic> json) => RideData(
@@ -117,6 +119,7 @@ class RideData {
     createdAt: DateTime.parse(json["created_at"]),
     updatedAt: DateTime.parse(json["updated_at"]),
     zoneId: json["zone_id"],
+    isReviewed: json["is_reviewed"] == 1 || json["is_reviewed"] == true,
   );
 
   Map<String, dynamic> toJson() => {
@@ -146,6 +149,7 @@ class RideData {
     "created_at": createdAt.toIso8601String(),
     "updated_at": updatedAt.toIso8601String(),
     "zone_id": zoneId,
+    "is_reviewed": isReviewed,
   };
 }
 class Driver {

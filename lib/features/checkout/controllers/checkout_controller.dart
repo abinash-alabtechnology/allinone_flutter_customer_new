@@ -200,6 +200,30 @@ class CheckoutController extends GetxController implements GetxService {
   String? _dropTime;
   String? get dropTime => _dropTime;
 
+  bool _isDeliveryAvailable = true;
+  bool get isDeliveryAvailable => _isDeliveryAvailable;
+
+  String? _deliveryMessage;
+  String? get deliveryMessage => _deliveryMessage;
+
+  double _deliveryCharge = -1;
+  double get deliveryCharge => _deliveryCharge;
+
+  bool _codAvailable = true;
+  bool get codAvailable => _codAvailable;
+
+  bool _walletAvailable = true;
+  bool get walletAvailable => _walletAvailable;
+
+  bool _digitalPaymentAvailable = true;
+  bool get digitalPaymentAvailable => _digitalPaymentAvailable;
+
+  bool _isThirdParty = false;
+  bool get isThirdParty => _isThirdParty;
+
+  String? _deliveryType;
+  String? get deliveryType => _deliveryType;
+
   void updateFirstTime() {
     _isFirstTime = true;
     update();
@@ -208,6 +232,45 @@ class CheckoutController extends GetxController implements GetxService {
   void resetOrderTax() {
     _orderTax = 0.0;
     _taxIncluded = null;
+  }
+
+  Future<void> checkAddressDelivery(int addressId, int storeId, {bool notify = true}) async {
+    _isLoading = true;
+    if(notify) update();
+    Response response = await checkoutServiceInterface.checkAddressDelivery(addressId, storeId);
+    if (response.statusCode == 200 && response.body != null && response.body is Map && response.body['status'] == true) {
+      _isDeliveryAvailable = true;
+      _deliveryMessage = null;
+      _codAvailable = response.body['cod'] ?? true;
+      _walletAvailable = response.body['wallet'] ?? true;
+      _digitalPaymentAvailable = response.body['digital_payment'] ?? true;
+      _isThirdParty = response.body['is_third_party'] ?? false;
+      _deliveryType = response.body['delivery_type'];
+      double? charge;
+      if (response.body['delivery_charge'] != null) {
+        charge = double.tryParse(response.body['delivery_charge'].toString());
+      } else if (response.body['delivery_fee'] != null) {
+        charge = double.tryParse(response.body['delivery_fee'].toString());
+      } else if (response.body['delivar_data'] != null && response.body['delivar_data']['best_rider'] != null) {
+        charge = double.tryParse(response.body['delivar_data']['best_rider']['total_amount'].toString());
+      }
+      
+      _deliveryCharge = charge ?? 0.0;
+      if (kDebugMode) {
+        print('-------- Delivery Response Body: ${response.body} ----------');
+        print('-------- Parsed Delivery Charge: $_deliveryCharge ----------');
+      }
+    } else {
+      _isDeliveryAvailable = false;
+      _deliveryMessage = (response.body != null && response.body is Map && response.body['message'] != null)
+          ? response.body['message'] : 'delivery_is_not_available_in_this_area'.tr;
+      _deliveryCharge = 0.0;
+      if(notify) {
+        showCustomSnackBar(_deliveryMessage, isError: true);
+      }
+    }
+    _isLoading = false;
+    update();
   }
 
   void setExchangeAmount(double value) {
@@ -356,6 +419,14 @@ class CheckoutController extends GetxController implements GetxService {
     _startDate = null;
     _endDate = null;
     _dropTime = null;
+    _isDeliveryAvailable = true;
+    _deliveryMessage = null;
+    _deliveryCharge = -1;
+    _codAvailable = true;
+    _walletAvailable = true;
+    _digitalPaymentAvailable = true;
+    _isThirdParty = false;
+    _deliveryType = null;
   }
 
   Future<void> initializeTimeSlot(Store store) async {

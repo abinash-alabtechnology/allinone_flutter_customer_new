@@ -198,12 +198,10 @@ class DeliverySection extends StatelessWidget {
                                     horizontal:
                                         Dimensions.paddingSizeExtraSmall,
                                   ),
-                                  child: AddressWidget(
+                                  child: AddressWidgetCustom(
                                     address:
                                         address[checkoutController
                                             .addressIndex!],
-                                    fromAddress: false,
-                                    fromCheckout: true,
                                   ),
                                 ),
                               ),
@@ -468,12 +466,10 @@ class DeliverySection extends StatelessWidget {
                                       Dimensions.radiusDefault,
                                     ),
                                   ),
-                                  child: AddressWidget(
+                                  child: AddressWidgetCustom(
                                     address:
                                         address[checkoutController
                                             .addressIndex!],
-                                    fromAddress: false,
-                                    fromCheckout: true,
                                   ),
                                 ),
                               ),

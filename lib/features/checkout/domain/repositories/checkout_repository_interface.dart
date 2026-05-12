@@ -15,4 +15,5 @@ abstract class CheckoutRepositoryInterface extends RepositoryInterface {
   Future<Response> placePrescriptionOrder(int? storeId, double? distance, String address, String longitude, String latitude, String note, List<MultipartBody> orderAttachment, String dmTips, String deliveryInstruction);
   Future<Response> getOrderTax(PlaceOrderBodyModel placeOrderBody);
   Future<SurgePriceModel?> getSurgePrice({required String zoneId, required String moduleId, required String dateTime, String? guestId});
+  Future<Response> checkAddressDelivery(int addressId, int storeId);
 }

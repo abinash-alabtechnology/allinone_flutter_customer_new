@@ -82,4 +82,35 @@ import '../model/vehicle_listmodel.dart';
       isMoreLoading.value = false;
     }
   }
+
+  Future<bool> submitCaptainReview(int captainId, int bookingId, double rating, String comment) async {
+    isLoading.value = true;
+    update();
+    try {
+      final response = await apiClient.postData(AppConstants.submitCaptainReviewUri, {
+        'captain_id': captainId,
+        'booking_id': bookingId,
+        'rating': rating,
+        'comment': comment,
+      });
+
+      if (response.statusCode == 200) {
+        Get.snackbar("Success", "Review submitted successfully");
+        return true;
+      } else if (response.statusCode == 403) {
+        Get.snackbar("Error", response.body['message'] ?? "Forbidden");
+        return false;
+      } else {
+        Get.snackbar("Error", response.body['message'] ?? "Failed to submit review");
+        return false;
+      }
+    } catch (e) {
+      print("🚨 Exception: $e");
+      Get.snackbar("Exception", e.toString());
+      return false;
+    } finally {
+      isLoading.value = false;
+      update();
+    }
+  }
 }

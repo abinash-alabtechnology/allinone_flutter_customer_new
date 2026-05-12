@@ -1,4 +1,6 @@
+import 'package:get/get.dart';
 import 'package:handy_allinone/common/models/response_model.dart';
+import 'package:handy_allinone/features/review/domain/models/captain_rating_model.dart';
 import 'package:handy_allinone/features/review/domain/models/review_body_model.dart';
 import 'package:handy_allinone/features/review/domain/models/review_model.dart';
 import 'package:handy_allinone/features/review/domain/repositories/review_repository_interface.dart';
@@ -29,5 +31,13 @@ class ReviewService implements ReviewServiceInterface {
     return await reviewRepositoryInterface.submitDeliveryManReview(reviewBody);
   }
 
+  @override
+  Future<CaptainRatingModel?> getCaptainRating(int captainId) async {
+    Response response = await reviewRepositoryInterface.getCaptainRating(captainId);
+    if (response.statusCode == 200) {
+      return CaptainRatingModel.fromJson(response.body);
+    }
+    return null;
+  }
 
 }

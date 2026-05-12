@@ -6,6 +6,8 @@ import 'package:handy_allinone/features/review/domain/models/review_model.dart';
 import 'package:handy_allinone/features/order/domain/models/order_details_model.dart';
 import 'package:handy_allinone/features/review/domain/services/review_service_interface.dart';
 
+import 'package:handy_allinone/features/review/domain/models/captain_rating_model.dart';
+
 class ReviewController extends GetxController implements GetxService {
   final ReviewServiceInterface reviewServiceInterface;
   ReviewController({required this.reviewServiceInterface});
@@ -18,6 +20,9 @@ class ReviewController extends GetxController implements GetxService {
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
+
+  CaptainRatingModel? _captainRatingModel;
+  CaptainRatingModel? get captainRatingModel => _captainRatingModel;
 
   List<int> _ratingList = [];
   List<int> get ratingList => _ratingList;
@@ -51,6 +56,18 @@ class ReviewController extends GetxController implements GetxService {
       _itemReviewList = [];
       _itemReviewList!.addAll(itemReviewList);
     }
+    update();
+  }
+
+  Future<void> getCaptainRating(int captainId) async {
+    _captainRatingModel = null;
+    _isLoading = true;
+    update();
+    CaptainRatingModel? captainRatingModel = await reviewServiceInterface.getCaptainRating(captainId);
+    if (captainRatingModel != null) {
+      _captainRatingModel = captainRatingModel;
+    }
+    _isLoading = false;
     update();
   }
 

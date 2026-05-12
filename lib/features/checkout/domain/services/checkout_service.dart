@@ -131,4 +131,9 @@ class CheckoutService implements CheckoutServiceInterface {
     return await checkoutRepositoryInterface.getSurgePrice(zoneId: zoneId, moduleId: moduleId, dateTime: dateTime, guestId: guestId);
   }
 
+  @override
+  Future<Response> checkAddressDelivery(int addressId, int storeId) async {
+    return await checkoutRepositoryInterface.checkAddressDelivery(addressId, storeId);
+  }
+
 }

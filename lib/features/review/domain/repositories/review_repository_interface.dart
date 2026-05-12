@@ -8,4 +8,5 @@ abstract class ReviewRepositoryInterface extends RepositoryInterface {
   Future<List<ReviewModel>?> getItemReviewList(int? itemID);
   Future<dynamic> submitReview(ReviewBodyModel reviewBody);
   Future<dynamic> submitDeliveryManReview(ReviewBodyModel reviewBody);
+  Future<dynamic> getCaptainRating(int captainId);
 }

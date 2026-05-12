@@ -162,9 +162,9 @@ class CheckoutScreenState extends State<CheckoutScreen> {
         Get.find<CartController>().toggleExtraPackage(willUpdate: false);
       }
       Get.find<CartController>().setAvailableIndex(-1, willUpdate: false);
-      Get.find<StoreController>().getCartStoreSuggestedItemList(Get
-          .find<CartController>()
-          .cartList[0].item!.storeId);
+      if (Get.find<CartController>().cartList[0].item != null && Get.find<CartController>().cartList[0].item!.storeId != null) {
+        await Get.find<StoreController>().getCartStoreSuggestedItemList(Get.find<CartController>().cartList[0].item!.storeId);
+      }
       await Get.find<StoreController>().getStoreDetails(Store(id: Get
           .find<CartController>()
           .cartList[0].item!.storeId, name: null), false, fromCart: true);
@@ -304,10 +304,12 @@ class CheckoutScreenState extends State<CheckoutScreen> {
       if (_cartList != null && _cartList!.isNotEmpty) {
         Get.find<CheckoutController>().initCheckoutData(
             _cartList![0]!.item!.storeId);
+        Get.find<StoreController>().getCartStoreSuggestedItemList(_cartList![0]!.item!.storeId);
       }
     }
     if (widget.storeId != null) {
       Get.find<CheckoutController>().initCheckoutData(widget.storeId);
+      Get.find<StoreController>().getCartStoreSuggestedItemList(widget.storeId);
       Get.find<CouponController>().removeCouponData(false);
     }
     Get.find<CheckoutController>().pickPrescriptionImage(
@@ -368,6 +370,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     bool isLoggedIn = AuthHelper.isLoggedIn();
     bool isGuestLogIn = AuthHelper.isGuestLoggedIn();
     bool isPharmacy = Get.find<SplashController>().module?.moduleType == 'pharmacy';
+    bool isFood = Get.find<SplashController>().module != null && Get.find<SplashController>().module!.moduleType.toString() == AppConstants.food;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -395,6 +398,17 @@ class CheckoutScreenState extends State<CheckoutScreen> {
           address = _getAddressList(addressList: Get
               .find<AddressController>()
               .addressList, store: checkoutController.store);
+
+          if (address.isNotEmpty && (checkoutController.addressIndex == null || checkoutController.addressIndex! >= address.length)) {
+            checkoutController.setAddressIndex(0);
+            if (address[0].id != null) {
+              checkoutController.checkAddressDelivery(address[0].id!, checkoutController.store!.id!, notify: false);
+            }
+          } else if (address.isNotEmpty && checkoutController.deliveryCharge == -1 && !checkoutController.isLoading) {
+            if (address[checkoutController.addressIndex!].id != null) {
+              checkoutController.checkAddressDelivery(address[checkoutController.addressIndex!].id!, checkoutController.store!.id!, notify: false);
+            }
+          }
 
           bool todayClosed = false;
           bool tomorrowClosed = false;
@@ -649,7 +663,9 @@ class CheckoutScreenState extends State<CheckoutScreen> {
             );
 
 
-            double deliveryCharge = _calculateDeliveryCharge(
+            double deliveryCharge = checkoutController.deliveryCharge != -1
+                ? checkoutController.deliveryCharge
+                : _calculateDeliveryCharge(
               store: checkoutController.store,
               address: AddressHelper.getUserAddressFromSharedPref()!,
               distance: checkoutController.distance,
@@ -663,10 +679,9 @@ class CheckoutScreenState extends State<CheckoutScreen> {
             if (checkoutController.orderType != 'take_away' &&
                 checkoutController.store != null) {
               _deliveryChargeForView =
-              (checkoutController.orderType == 'delivery' ? checkoutController
-                  .store!.freeDelivery! : true) ? 'free'.tr
-                  : deliveryCharge != -1 ? PriceConverter.convertPrice(
-                  deliveryCharge) : 'calculating'.tr;
+              ((checkoutController.orderType == 'delivery' ? checkoutController
+                  .store!.freeDelivery! : true) && checkoutController.deliveryCharge == -1) ? 'free'.tr
+                  : PriceConverter.convertPrice(deliveryCharge);
             }
 
             double extraPackagingCharge = widget.storeId != null
@@ -731,93 +746,113 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                   physics: const BouncingScrollPhysics(),
                   child: Column(
                     children: [
-                      // Exact UI for Delivering to and Cart
-                      Container(
-                        color: Colors.white,
-                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-                        child: Row(
-                          children: [
-                            // Location Icon
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF16A34A).withOpacity(0.1),
-                                shape: BoxShape.circle,
+                      if (!isPharmacy) ...[
+                        // Exact UI for Delivering to and Cart
+                        Container(
+                          color: Colors.white,
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                          child: Row(
+                            children: [
+                              // Location Icon
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.deepOrange.withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(Icons.location_on, color: Colors.deepOrange.shade600, size: 20),
                               ),
-                              child: const Icon(Icons.location_on, color: Color(0xFF16A34A), size: 20),
-                            ),
-                            const SizedBox(width: 12),
+                              const SizedBox(width: 12),
 
-                            // Delivering to Text and Address
-                            Expanded(
-                              child: InkWell(
-                                onTap: () async {
-                                  var result = await Get.toNamed(RouteHelper.getAddAddressRoute(true, false, checkoutController.store!.zoneId));
-                                  if (result != null && result is AddressModel) {
-                                    // Handle address update if needed, though initCall usually handles refreshes
-                                  }
-                                },
+                              // Delivering to Text and Address Dropdown
+                              Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Text('Delivering to', style: robotoRegular.copyWith(fontSize: 12, color: Colors.grey.shade600)),
-                                    const SizedBox(height: 2),
-                                    Row(
-                                      children: [
-                                        Flexible(
-                                          child: Text(
-                                            address.isNotEmpty 
-                                                ? '${address[checkoutController.addressIndex!].addressType?.tr} - ${address[checkoutController.addressIndex!].address}'
-                                                : AddressHelper.getUserAddressFromSharedPref()?.address ?? 'Select Address',
-                                            style: robotoBold.copyWith(fontSize: 14, color: Colors.black),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
+                                    Text('Delivering to', style: robotoMedium.copyWith(fontSize: 10, color: Colors.grey.shade500)),
+                                    const SizedBox(height: 1),
+                                    (address.isNotEmpty && checkoutController.addressIndex != null) ? CustomDropdown<int>(
+                                      onChange: (int? value, int index) {
+                                        checkoutController.getDistanceInKM(
+                                          LatLng(
+                                            double.parse(address[index].latitude!),
+                                            double.parse(address[index].longitude!),
                                           ),
-                                        ),
-                                        const Icon(Icons.keyboard_arrow_down, size: 16, color: Colors.grey),
-                                      ],
+                                          LatLng(
+                                            double.parse(checkoutController.store!.latitude!),
+                                            double.parse(checkoutController.store!.longitude!),
+                                          ),
+                                        );
+                                        checkoutController.setAddressIndex(index);
+                                        if (address[index].id != null) {
+                                          checkoutController.checkAddressDelivery(address[index].id!, checkoutController.store!.id!);
+                                        }
+                                      },
+                                      dropdownButtonStyle: DropdownButtonStyle(
+                                        padding: EdgeInsets.zero,
+                                        primaryColor: Colors.black,
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                      ),
+                                      dropdownStyle: DropdownStyle(
+                                        elevation: 10,
+                                        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                                        padding: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
+                                      ),
+                                      items: addressList,
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Flexible(
+                                            child: Text(
+                                              address[checkoutController.addressIndex!].address ?? 'Select Address',
+                                              style: robotoBold.copyWith(fontSize: 14, color: Colors.black),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                          const Icon(Icons.keyboard_arrow_down, size: 18, color: Colors.black),
+                                        ],
+                                      ),
+                                    ) : InkWell(
+                                      onTap: () => Get.toNamed(RouteHelper.getAddAddressRoute(true, false, checkoutController.store!.zoneId)),
+                                      child: Row(
+                                        children: [
+                                          Flexible(
+                                            child: Text(
+                                              AddressHelper.getUserAddressFromSharedPref()?.address ?? 'Select Address',
+                                              style: robotoBold.copyWith(fontSize: 14, color: Colors.black),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                          const Icon(Icons.keyboard_arrow_down, size: 18, color: Colors.black),
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),
                               ),
-                            ),
+                              const SizedBox(width: 12),
 
-                            // Cart Icon with Badge
-                            GetBuilder<CartController>(builder: (cartController) {
-                              return InkWell(
-                                onTap: () => Get.toNamed(RouteHelper.getCartRoute()),
+                              // Add New Address Icon
+                              InkWell(
+                                onTap: () => Get.toNamed(RouteHelper.getAddAddressRoute(true, false, checkoutController.store!.zoneId)),
                                 child: Column(
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Stack(
-                                      clipBehavior: Clip.none,
-                                      children: [
-                                        const Icon(Icons.shopping_cart_outlined, size: 28, color: Colors.deepOrange),
-                                        if (cartController.cartList.isNotEmpty)
-                                          Positioned(
-                                            top: -5,
-                                            right: -5,
-                                            child: Container(
-                                              padding: const EdgeInsets.all(4),
-                                              decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-                                              child: Text(
-                                                cartController.cartList.length.toString(),
-                                                style: robotoBold.copyWith(fontSize: 10, color: Colors.white),
-                                              ),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
+                                    const Icon(Icons.add_location_alt_outlined, size: 24, color: Colors.black),
                                     const SizedBox(height: 2),
-                                    Text('Cart', style: robotoRegular.copyWith(fontSize: 12, color: Colors.black)),
+                                    Text('Add New', style: robotoRegular.copyWith(fontSize: 12, color: Colors.black)),
                                   ],
                                 ),
-                              );
-                            }),
-                          ],
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      const Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9)),
-                      const SizedBox(height: Dimensions.paddingSizeDefault),
+                        const Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9)),
+                        const SizedBox(height: Dimensions.paddingSizeDefault),
+                      ],
 
 
 
@@ -926,29 +961,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                                   child: Divider(height: 1, color: Color(0xFFF1F5F9)),
                                                 ),
-                                                Padding(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                                  child: Row(
-                                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                    children: [
-                                                      Text(
-                                                        "Missing something?",
-                                                        style: robotoBold.copyWith(fontSize: 16),
-                                                      ),
-                                                      TextButton.icon(
-                                                        onPressed: () {
-                                                          cartController.forcefullySetModule(_cartList![0]!.item!.moduleId!);
-                                                          Get.toNamed(
-                                                            RouteHelper.getStoreRoute(id: cartController.cartList[0].item!.storeId, page: 'item'),
-                                                            arguments: StoreScreen(store: Store(id: cartController.cartList[0].item!.storeId), fromModule: false),
-                                                          );
-                                                        },
-                                                        icon: const Icon(Icons.add, color: Color(0xFF16A34A), size: 18),
-                                                        label: Text('Add', style: robotoBold.copyWith(color: const Color(0xFF16A34A))),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
+                                                if (isFood) suggestedItemView(_cartList!.cast<CartModel>()),
                                               ],
                                             ),
                                           ),
@@ -980,10 +993,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                             ),
                                           ),
                                           ExtraPackagingWidget(cartController: cartController),
-                                          !ResponsiveHelper.isDesktop(context)
-                                              ? suggestedItemView(
-                                              _cartList!.cast<CartModel>())
-                                              : const SizedBox(),
+                                          const SizedBox(),
                                         ]),
                                       ),
 
@@ -1370,7 +1380,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                         if (discount > 0) _priceRow('Discount', discount, isDiscount: true),
                                         if (couponController.discount! > 0) _priceRow('Coupon Discount', couponController.discount!, isDiscount: true),
                                         if (referralDiscount > 0) _priceRow('Referral Discount', referralDiscount, isDiscount: true),
-                                        _priceRow('Delivery Fee', deliveryCharge),
+                                        _priceRow( 'Delivery Fee', deliveryCharge),
                                         if (widget.storeId == null && checkoutController.store!.extraPackagingStatus! && Get.find<CartController>().needExtraPackage)
                                           _priceRow('Packaging Fee', checkoutController.store!.extraPackagingAmount!),
                                         if (widget.storeId == null && checkoutController.store!.otherchargeenabled == true)
@@ -1425,41 +1435,44 @@ class CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   Widget suggestedItemView(List<CartModel> cartList) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 8),
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(12),
-        color: Theme.of(context).cardColor,
-      ),
-      width: double.infinity,
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-
-        GetBuilder<StoreController>(builder: (storeController) {
-          List<Item>? suggestedItems;
-          if (storeController.cartSuggestItemModel != null) {
-            suggestedItems = [];
-            List<int> cartIds = [];
-            for (CartModel cartItem in cartList) {
-              cartIds.add(cartItem.item!.id!);
-            }
-            for (Item item in storeController.cartSuggestItemModel!.items!) {
-              if (!cartIds.contains(item.id)) {
-                suggestedItems.add(item);
-              }
-            }
+    return GetBuilder<StoreController>(builder: (storeController) {
+      List<Item>? suggestedItems;
+      if (storeController.cartSuggestItemModel != null && storeController.cartSuggestItemModel!.items != null) {
+        suggestedItems = [];
+        List<int> cartIds = [];
+        for (CartModel cartItem in cartList) {
+          cartIds.add(cartItem.item!.id!);
+        }
+        for (Item item in storeController.cartSuggestItemModel!.items!) {
+          if (!cartIds.contains(item.id)) {
+            suggestedItems.add(item);
           }
-          return storeController.cartSuggestItemModel != null &&
-              suggestedItems!.isNotEmpty ? Container(
-                          child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+        }
+      }
+      return storeController.cartSuggestItemModel != null &&
+          suggestedItems != null && suggestedItems.isNotEmpty ? Padding(
+            padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
+            child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
                 const SizedBox(height: Dimensions.paddingSizeSmall),
                 Padding(
                   padding: const EdgeInsets.symmetric(
                       horizontal: Dimensions.paddingSizeDefault,
                       vertical: Dimensions.paddingSizeExtraSmall),
-                  child: Text(
-                      'you_may_also_like'.tr, style: robotoBold.copyWith(
-                      fontSize: Dimensions.fontSizeDefault)),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'You might also like',
+                        style: robotoBold.copyWith(fontSize: 16),
+                      ),
+                      Text(
+                        'See more',
+                        style: robotoMedium.copyWith(color: Colors.blue, fontSize: 12),
+                      ),
+                    ],
+                  ),
                 ),
 
                 SizedBox(
@@ -1490,7 +1503,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                           child: ItemWidgetStore(
                             isStore: false,
                             item: suggestedItems![index],
-                            fromCartSuggestion: false,
+                            fromCartSuggestion: true,
                             store: null,
                             index: index,
                             length: null,
@@ -1502,12 +1515,9 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                     },
                   ),
                 ),
-              ],
-                          ),
-                        ) : const SizedBox();
-        }),
-      ]),
-    );
+        ],
+      )) : const SizedBox();
+    });
   }
 
   Widget _pharmacyCheckoutBody(CheckoutController checkoutController, double total, bool isCashOnDeliveryActive, bool isDigitalPaymentActive, bool isWalletActive, bool isOfflinePaymentActive, bool isPrescriptionRequired) {
@@ -1748,6 +1758,9 @@ class CheckoutScreenState extends State<CheckoutScreen> {
         checkoutController.orderType != 'take_away') {
       showCustomSnackBar('Please enter valid address');
     }
+    else if (!checkoutController.isDeliveryAvailable && checkoutController.orderType != 'take_away') {
+      showCustomSnackBar(checkoutController.deliveryMessage ?? 'delivery_is_not_available_in_this_area'.tr);
+    }
     else if(isPrescriptionRequired && checkoutController.pickedPrescriptions.isEmpty) {
       showCustomSnackBar('you_must_upload_prescription_for_this_order'.tr);
     } else if(!_isCashOnDeliveryActive! && !_isDigitalPaymentActive! && !_isWalletActive) {
@@ -1797,6 +1810,8 @@ class CheckoutScreenState extends State<CheckoutScreen> {
       showCustomSnackBar('delivery_fee_not_set_yet'.tr);
     }else if (widget.storeId != null && checkoutController.pickedPrescriptions.isEmpty) {
       showCustomSnackBar('please_upload_your_prescription_images'.tr);
+    }else if (checkoutController.orderType != 'take_away' && !checkoutController.isDeliveryAvailable) {
+      showCustomSnackBar(checkoutController.deliveryMessage ?? 'delivery_is_not_available_in_this_area'.tr);
     }else if (!checkoutController.acceptTerms) {
       showCustomSnackBar('please_accept_privacy_policy_trams_conditions_refund_policy_first'.tr);
     }
@@ -1926,25 +1941,15 @@ class CheckoutScreenState extends State<CheckoutScreen> {
           AddressModel>? addressList, required Store? store}) {
     List<DropdownItem<int>> dropDownAddressList = [];
 
-    // dropDownAddressList.add(DropdownItem<int>(value: 0, child: SizedBox(
-    //   width: context.width > Dimensions.webMaxWidth ? Dimensions.webMaxWidth -
-    //       50 : context.width - 50,
-    //   child: AddressWidget(
-    //     address: AddressHelper.getUserAddressFromSharedPref(),
-    //     fromAddress: false, fromCheckout: true,
-    //   ),
-    // )));
-
     if (addressList != null && store != null) {
       for (int index = 0; index < addressList.length; index++) {
         if (addressList[index].zoneIds!.contains(store.zoneId)) {
           dropDownAddressList.add(
-              DropdownItem<int>(value: index + 1, child: SizedBox(
-                width: context.width > Dimensions.webMaxWidth ? Dimensions
-                    .webMaxWidth - 50 : context.width - 50,
-                child: AddressWidget(
+              DropdownItem<int>(value: index, child: Container(
+                width: context.width > Dimensions.webMaxWidth ? Dimensions.webMaxWidth - 50 : context.width - 50,
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                child: AddressWidgetCustom(
                   address: addressList[index],
-                  fromAddress: false, fromCheckout: true,
                 ),
               )));
         }

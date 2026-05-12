@@ -11,6 +11,7 @@ import 'package:handy_allinone/features/support/widgets/support_button_widget.da
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'package:handy_allinone/features/menu/screens/faq_screen.dart';
 
 class SupportScreen extends StatefulWidget {
   const SupportScreen({super.key});
@@ -66,6 +67,11 @@ class _SupportScreenState extends State<SupportScreen> {
                 );
                 launchUrlString(emailLaunchUri.toString());
               },
+            ),
+            SupportButtonWidget(
+              icon: Icons.question_answer, title: 'faq'.tr, color: Colors.purple,
+              info: 'frequently_asked_questions'.tr,
+              onTap: () => Get.to(() => const FaqScreen()),
             ),
             const SizedBox(height: 30),
 

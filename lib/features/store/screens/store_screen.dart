@@ -1463,10 +1463,22 @@ class _StoreScreenState extends State<StoreScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.restaurant_menu_rounded, color: Colors.white, size: 26),
+                        Icon(
+                          ((Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('meat') ?? false) || (Get.find<SplashController>().module?.moduleType?.toLowerCase() == 'meat'))
+                              ? Icons.kebab_dining
+                              : (Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('fish') ?? false)
+                                  ? Icons.set_meal
+                                  : Icons.restaurant_menu_rounded,
+                          color: Colors.white,
+                          size: 26,
+                        ),
                         const SizedBox(height: 2),
                         Text(
-                          "MENU",
+                          ((Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('meat') ?? false) || (Get.find<SplashController>().module?.moduleType?.toLowerCase() == 'meat'))
+                              ? "CUTS"
+                              : (Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('fish') ?? false)
+                                  ? "FRESH"
+                                  : "MENU",
                           style: robotoBold.copyWith(
                             color: Colors.white,
                             fontSize: 10,
@@ -2249,6 +2261,9 @@ class _StoreStickyHeaderDelegate extends SliverPersistentHeaderDelegate {
               ),
             ),
             // Filter chips row
+            if (!((Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('meat') ?? false) ||
+                (Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('fish') ?? false) ||
+                (Get.find<SplashController>().module?.moduleType?.toLowerCase() == 'meat')))
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),

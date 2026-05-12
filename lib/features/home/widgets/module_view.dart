@@ -157,37 +157,51 @@ class ModuleView extends StatelessWidget {
                     IconData iconData = Icons.shopping_basket;
                     String? localAsset;
 
-                    if (title.toLowerCase().contains('grocery')) {
+                    String mType = module.moduleType ?? '';
+
+                    if (title.toLowerCase().contains('grocery') || mType == 'grocery') {
                       subtitle = 'Essentials & Daily Needs';
                       bgColor = const Color(0xFF22C55E); // Green 500
                       iconColor = const Color(0xFF16A34A);
                       iconData = Icons.shopping_cart_outlined;
                       localAsset = 'assets/image/groceryicon.png';
-                    } else if (title.toLowerCase().contains('food')) {
+                    } else if (title.toLowerCase().contains('meat') || title.toLowerCase().contains('fish') || mType == 'meat') {
+                      subtitle = 'Premium Fresh Cuts & Seafood';
+                      bgColor = const Color(0xFFEF4444);
+                      iconColor = const Color(0xFFB91C1C);
+                      iconData = Icons.kebab_dining;
+                      localAsset = Images.meatModule;
+                    } else if (title.toLowerCase().contains('food') || mType == 'food') {
                       subtitle = 'Restaurants & Meals';
                       bgColor = const Color(0xFFF97316); // Orange 500
                       iconColor = const Color(0xFFEA580C);
                       iconData = Icons.restaurant_outlined;
                       localAsset = 'assets/image/foodicon.png';
-                    } else if (title.toLowerCase().contains('taxi') || title.toLowerCase().contains('ride')) {
+                    } else if (title.toLowerCase().contains('taxi') || title.toLowerCase().contains('ride') || title.toLowerCase().contains('cab') || title.toLowerCase().contains('auto') || mType == 'taxi') {
                       subtitle = 'Book Rides Instantly';
                       bgColor = const Color(0xFF14B8A6); // Teal 500
                       iconColor = const Color(0xFF0D9488);
                       iconData = Icons.local_taxi_outlined;
-                    } else if (title.toLowerCase().contains('parcel')) {
+                      localAsset = 'assets/image/taxiicon1.png';
+                    } else if (title.toLowerCase().contains('parcel') || mType == 'parcel') {
                       subtitle = 'Send & Track';
                       bgColor = const Color(0xFFEF4444); // Red 500
                       iconColor = const Color(0xFFDC2626);
                       iconData = Icons.inventory_2_outlined;
                       localAsset = 'assets/image/parcelicon.png';
-                    } else if (title.toLowerCase().contains('pharmacy')) {
+                    } else if (title.toLowerCase().contains('pharmacy') || mType == 'pharmacy') {
                       subtitle = 'Medicines & Health';
                       bgColor = const Color(0xFF0EA5E9); // Sky 500
                       iconColor = const Color(0xFF0284C7);
                       iconData = Icons.medical_services_outlined;
                       localAsset = 'assets/image/pharmacyicon.png';
+                    } else if (title.toLowerCase().contains('shop') || title.toLowerCase().contains('ecommerce') || title.toLowerCase().contains('market') || mType == 'ecommerce') {
+                      subtitle = 'Shop Your Favorites';
+                      bgColor = const Color(0xFF8B5CF6); // Violet 500
+                      iconColor = const Color(0xFF7C3AED);
+                      iconData = Icons.shopping_bag_outlined;
                     } else {
-                      subtitle = 'Quality Services';
+                      subtitle = module.description ?? 'Quality Services';
                       bgColor = Colors.blueGrey;
                       iconColor = Colors.grey;
                     }

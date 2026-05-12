@@ -137,7 +137,6 @@ class PopularItemView extends StatelessWidget {
                                           style: robotoMedium.copyWith(
                                             fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor,
                                             decoration: TextDecoration.lineThrough,
-                                            height: 1.0,
                                           ), textDirection: TextDirection.ltr,
                                         )) : const SizedBox(),
                                       ]),

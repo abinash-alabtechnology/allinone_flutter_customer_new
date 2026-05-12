@@ -97,7 +97,7 @@ class _SignInViewState extends State<SignInView> {
             ),
             SizedBox(height: Dimensions.paddingSizeLarge),
 
-            Container(
+/*            Container(
               height: 45,
               padding: const EdgeInsets.all(2),
               decoration: BoxDecoration(
@@ -121,7 +121,7 @@ class _SignInViewState extends State<SignInView> {
                       ),
                     ),
                   ),
-                  Expanded(
+                  /*Expanded(
                     child: InkWell(
                       onTap: () => setState(() => _isOtp = false),
                       child: Container(
@@ -133,16 +133,16 @@ class _SignInViewState extends State<SignInView> {
                         child: Text('EMAIL', style: robotoMedium.copyWith(color: !_isOtp ? Colors.white : Theme.of(context).disabledColor)),
                       ),
                     ),
-                  ),
+                  ),*/
                 ],
               ),
             ),
-            SizedBox(height: Dimensions.paddingSizeLarge),
+            SizedBox(height: Dimensions.paddingSizeLarge),*/
 
             if(_isOtp)
               activeCentralizeLogin(Get.find<SplashController>().configModel!.centralizeLoginSetup!, authController)
-            else
-              _emailLoginWidget(authController),
+            /*else
+              _emailLoginWidget(authController)*/,
 
           ]),
         ),
@@ -150,7 +150,7 @@ class _SignInViewState extends State<SignInView> {
     });
   }
 
-  Widget _emailLoginWidget(AuthController authController) {
+/*  Widget _emailLoginWidget(AuthController authController) {
     return Column(children: [
       CustomTextField(
         titleText: 'enter_email_address'.tr,
@@ -261,7 +261,7 @@ class _SignInViewState extends State<SignInView> {
         }
       });
     }
-  }
+  } */
 
 
   Widget activeCentralizeLogin(CentralizeLoginSetup centralizeLoginSetup, AuthController authController) {

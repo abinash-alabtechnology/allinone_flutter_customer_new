@@ -24,6 +24,8 @@ class AppConstants {
   static const String bookingcancel = '/api/v1/booking/cancel';
   static const String Vehicleimage = '/storage/app/public/vehicle_type_image/';
   static const String sosAlert = '/api/v1/sos/store';
+  static const String submitCaptainReviewUri = '/api/v1/customer/captain-review/submit';
+  static const String captainReviewRatingUri = '/api/v1/captain-review/rating/';
   ///
   static const Color backgroundColor = Color(0xFFFF8110); // Vibrant Pink/Magenta
 
@@ -86,6 +88,7 @@ class AppConstants {
   static const String runningOrderListUri = '/api/v1/customer/order/running-orders';
   static const String historyOrderListUri = '/api/v1/customer/order/list';
   static const String orderCancelUri = '/api/v1/customer/order/cancel';
+  static const String checkAddressDeliveryUri = '/api/v1/customer/address/check-address-delivery';
   static const String codSwitchUri = '/api/v1/customer/order/payment-method';
   static const String orderDetailsUri = '/api/v1/customer/order/details?order_id=';
   static const String wishListGetUri = '/api/v1/customer/wish-list';

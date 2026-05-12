@@ -165,5 +165,10 @@ class CheckoutRepository implements CheckoutRepositoryInterface {
     }
     return surgePrice;
   }
+
+  @override
+  Future<Response> checkAddressDelivery(int addressId, int storeId) async {
+    return await apiClient.postData(AppConstants.checkAddressDeliveryUri, {'address_id': addressId, 'store_id': storeId});
+  }
   
 }

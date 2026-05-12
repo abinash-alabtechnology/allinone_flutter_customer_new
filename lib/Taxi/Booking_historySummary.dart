@@ -35,6 +35,7 @@ class RideSummaryScreen extends StatefulWidget {
   final double fromlong;
   final double tolat;
   final double tolong;
+  final bool isReviewed;
 
   RideSummaryScreen({
     required this.date,
@@ -51,6 +52,7 @@ class RideSummaryScreen extends StatefulWidget {
     required this.drivenkm,
     required this.tolat,
     required this.tolong,
+    required this.isReviewed,
   });
 
   @override
@@ -58,7 +60,7 @@ class RideSummaryScreen extends StatefulWidget {
 }
 
 class _RideSummaryScreenState extends State<RideSummaryScreen> {
-  final BookingController controller = BookingController(apiClient: Get.find());
+  final BookingController controller = Get.find<BookingController>();
   final DriverController mapcontroller = Get.put(
     DriverController(apiClient: Get.find()),
   );
@@ -71,6 +73,9 @@ class _RideSummaryScreenState extends State<RideSummaryScreen> {
   String googleMapsApiKey = "";
   bool routeDrawn = false;
   CaptainDetailsData? _captainDetails;
+  int _rating = 0;
+  final TextEditingController _commentController = TextEditingController();
+  bool _isReviewSubmitted = false;
 
   @override
   void initState() {
@@ -160,6 +165,12 @@ class _RideSummaryScreenState extends State<RideSummaryScreen> {
     } else {
       debugPrint('❌ Polyline fetch failed: ${result.errorMessage}');
     }
+  }
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
   }
 
   @override
@@ -405,13 +416,132 @@ class _RideSummaryScreenState extends State<RideSummaryScreen> {
                     ),
                   ),
                 ),
+
+                if (widget.type == 'completed' && !_isReviewSubmitted && widget.captionid != 0 && !widget.isReviewed)
+                  _buildReviewSection(),
+
+                const SizedBox(height: 20),
               ],
             ),
           ),
         ),
       ),
     );
+  }
 
+  Widget _buildReviewSection() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Text(
+              "Rate your Captain",
+              style: robotoBold.copyWith(
+                fontSize: Dimensions.fontSizeExtraLarge,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            elevation: 2,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(5, (index) {
+                      return IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _rating = index + 1;
+                          });
+                        },
+                        icon: Icon(
+                          index < _rating ? Icons.star : Icons.star_border,
+                          color: index < _rating ? Colors.amber : Colors.grey,
+                          size: 36,
+                        ),
+                      );
+                    }),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _commentController,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      hintText: "Write your review here...",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Obx(() => SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: controller.isLoading.value ? null : () async {
+                        if (_rating == 0) {
+                          Get.snackbar("Required", "Please provide a rating");
+                          return;
+                        }
+                        if (_commentController.text.isEmpty) {
+                          Get.snackbar("Required", "Please provide a comment");
+                          return;
+                        }
+
+                        bool success = await controller.submitCaptainReview(
+                          widget.captionid,
+                          widget.bookingid,
+                          _rating.toDouble(),
+                          _commentController.text,
+                        );
+
+                        if (success) {
+                          setState(() {
+                            _isReviewSubmitted = true;
+                          });
+                          controller.fetchBookingHistory(isInitial: true);
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).primaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: controller.isLoading.value
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : Text(
+                        "Submit Review",
+                        style: robotoBold.copyWith(color: Colors.white),
+                      ),
+                    ),
+                  )),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildFareRow(

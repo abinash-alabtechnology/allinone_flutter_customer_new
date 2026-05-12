@@ -79,5 +79,9 @@ class ReviewRepository implements ReviewRepositoryInterface {
   Future update(Map<String, dynamic> body, int? id) {
     throw UnimplementedError();
   }
-  
+  @override
+  Future<Response> getCaptainRating(int captainId) async {
+    return await apiClient.getData('${AppConstants.captainReviewRatingUri}$captainId');
+  }
+
 }

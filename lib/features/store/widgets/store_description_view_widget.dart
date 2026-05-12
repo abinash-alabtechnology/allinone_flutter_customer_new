@@ -1284,314 +1284,126 @@ class _StoreDescriptionViewWidgetState
                   ],
                 ),
               )
-            : Container(
-                height: 75,
-                margin: const EdgeInsets.symmetric(
-                  vertical: Dimensions.paddingSizeSmall,
-                ),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: Dimensions.paddingSizeExtraSmall,
-                  ),
-                  child: Row(
-                    children: [
-                      InkWell(
-                        onTap: () => Get.toNamed(
-                          RouteHelper.getStoreReviewRoute(
-                            widget.store!.id,
-                            widget.store!.name,
-                            widget.store!,
-                          ),
-                        ),
-                        child: _buildInfoCard(
-                          context,
-                          const Color(0xFFFFF9F5),
-                          Colors.orange,
-                          Images.storestar,
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
+            : Padding(
+                padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
                             children: [
-                              Text(
-                                widget.store!.avgRating!.toStringAsFixed(1),
-                                style: robotoBold.copyWith(fontSize: 16),
+                              Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(color: Colors.orange.withOpacity(0.1), shape: BoxShape.circle),
+                                child: const Icon(Icons.star, color: Colors.orange, size: 12),
                               ),
+                              const SizedBox(width: 6),
                               Text(
-                                '${widget.store!.ratingCount}+ ratings',
-                                style: robotoRegular.copyWith(
-                                  fontSize: 10,
-                                  color: Colors.grey.shade600,
+                                (widget.store!.avgRating ?? 0.0).toStringAsFixed(1),
+                                style: robotoBold.copyWith(fontSize: 15),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(color: Colors.pink.withOpacity(0.1), shape: BoxShape.circle),
+                                child: const Icon(Icons.access_time_outlined, color: Colors.pink, size: 12),
+                              ),
+                              const SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  widget.store!.deliveryTime!,
+                                  style: robotoMedium.copyWith(fontSize: 12, color: Theme.of(context).textTheme.bodyLarge!.color!.withOpacity(0.7)),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ],
                           ),
-                        ),
+                        ],
                       ),
-                      const SizedBox(width: 10),
+                    ),
+                    const SizedBox(width: 8),
 
-                      InkWell(
-                        onTap: () => Get.toNamed(
-                          RouteHelper.getMapRoute(
-                            AddressModel(
-                              id: widget.store!.id,
-                              address: widget.store!.address,
-                              latitude: widget.store!.latitude,
-                              longitude: widget.store!.longitude,
-                              contactPersonNumber: '',
-                              contactPersonName: '',
-                              addressType: '',
-                            ),
-                            'store',
-                            Get.find<SplashController>()
-                                .getModuleConfig(
-                                  Get.find<SplashController>()
-                                      .module!
-                                      .moduleType!,
-                                )
-                                .newVariation!,
-                            storeName: widget.store!.name,
+                    if (couponController.couponRestList != null && couponController.couponRestList!.isNotEmpty)
+                      Expanded(
+                        flex: 7,
+                        child: Container(
+                          height: 70,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor.withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                            border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.1), width: 1),
                           ),
-                        ),
-                        child: _buildInfoCard(
-                          context,
-                          const Color(0xFFF7FAF2),
-                          Colors.green,
-                          Images.drivethru,
-                          Text(
-                            'Drive Thru',
-                            style: robotoMedium.copyWith(
-                              fontSize: 12,
-                              color: Colors.green.shade700,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-
-                      _buildInfoCard(
-                        context,
-                        const Color(0xFFFFF7F9),
-                        Colors.pink,
-                        Images.splashstore,
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget.store!.deliveryTime!,
-                              style: robotoBold.copyWith(fontSize: 16),
-                            ),
-                            Text(
-                              'Delivery',
-                              style: robotoRegular.copyWith(
-                                fontSize: 10,
-                                color: Colors.pink.shade700,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      if (widget.store!.delivery! &&
-                          widget.store!.freeDelivery!) ...[
-                        const SizedBox(width: 10),
-                        _buildInfoCard(
-                          context,
-                          const Color(0xFFF2F6FF),
-                          Colors.blue,
-                          Images.money,
-                          Text(
-                            'Free Delivery',
-                            style: robotoMedium.copyWith(
-                              fontSize: 12,
-                              color: Colors.blue.shade700,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-        SizedBox(height: 10),
-        if (couponController.couponRestList != null &&
-            couponController.couponRestList!.isNotEmpty)
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(width: 1, color: Colors.black12),
-              borderRadius: const BorderRadius.all(Radius.circular(8)),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: GetBuilder<CouponController>(
-                builder: (couponController) {
-                  if (couponController.couponRestList != null) {
-                    if (couponController.couponRestList!.isNotEmpty) {
-                      return RefreshIndicator(
-                        color: Theme.of(context).primaryColor,
-                        onRefresh: () async {
-                          await couponController.getCouponRestList(
-                            widget.store!.id,
-                          );
-                        },
-                        child: Scrollbar(
-                          child: CarouselSlider.builder(
-                            itemCount:
-                                couponController.couponRestList?.length ?? 0,
-                            itemBuilder: (context, index, realIndex) {
-                              return InkWell(
-                                onTap: () {
-                                  Clipboard.setData(
-                                    ClipboardData(
-                                      text: couponController
-                                          .couponRestList![index]
-                                          .code!,
-                                    ),
-                                  );
-                                  showCustomSnackBar(
-                                    'coupon_code_copied'.tr,
-                                    isError: false,
-                                  );
-                                },
-                                child: Container(
-                                  margin: const EdgeInsets.only(right: 5),
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.8,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    color: Colors.transparent,
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 2.0,
-                                    ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                            child: CarouselSlider.builder(
+                              itemCount: couponController.couponRestList?.length ?? 0,
+                              itemBuilder: (context, index, realIndex) {
+                                return InkWell(
+                                  onTap: () {
+                                    Clipboard.setData(ClipboardData(text: couponController.couponRestList![index].code!));
+                                    showCustomSnackBar('coupon_code_copied'.tr, isError: false);
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10),
                                     child: Row(
                                       children: [
-                                        Expanded(
-                                          child: Container(
-                                            child: Row(
-                                              mainAxisAlignment: .start,
-                                              children: [
-                                                Container(
-                                                  height: double.infinity,
-                                                  child: FittedBox(
-                                                    child: SvgPicture.asset(
-                                                      Images.subtract,
-                                                      color: Theme.of(
-                                                        context,
-                                                      ).primaryColor,
-                                                    ),
-                                                  ),
-                                                ),
-                                                SizedBox(width: 15),
-                                                FittedBox(
-                                                  child: Column(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .center,
-                                                        children: [
-                                                          Text(
-                                                            '${couponController.couponRestList![index].discountType == 'percent'
-                                                                ? '%'
-                                                                : couponController.couponRestList![index].couponType == 'free_delivery'
-                                                                ? 'free_delivery'.tr
-                                                                : Get.find<SplashController>().configModel!.currencySymbol}'
-                                                            '${couponController.couponRestList![index].couponType == 'free_delivery' ? '' : (couponController.couponRestList![index].discount)?.toStringAsFixed(0)} '
-                                                            '${couponController.couponRestList![index].couponType == 'free_delivery' ? '' : 'off'.tr}',
-                                                            style: robotoBold
-                                                                .copyWith(
-                                                                  fontSize:
-                                                                      Dimensions
-                                                                          .fontSizeLarge,
-                                                                ),
-                                                          ),
-                                                          Text(
-                                                            couponController
-                                                                        .couponRestList![index]
-                                                                        .maxDiscount !=
-                                                                    null
-                                                                ? ' | UPTO ₹${(couponController.couponRestList![index].maxDiscount)?.toStringAsFixed(0)}'
-                                                                : "",
-                                                            style: robotoBold
-                                                                .copyWith(
-                                                                  fontSize:
-                                                                      Dimensions
-                                                                          .fontSizeLarge,
-                                                                ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      SizedBox(
-                                                        width: 180,
-                                                        child: FittedBox(
-                                                          child: Text(
-                                                            "Use : ${couponController.couponRestList![index].code} | Valid Till : ${couponController.couponRestList![index].expireDate != null ? DateFormat('dd-MMMM-yyyy').format(DateTime.parse(couponController.couponRestList![index].expireDate!)) : 'N/A'}",
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
+                                        Container(
+                                          padding: const EdgeInsets.all(6),
+                                          decoration: BoxDecoration(color: Theme.of(context).primaryColor.withOpacity(0.1), shape: BoxShape.circle),
+                                          child: Icon(Icons.local_offer_outlined, color: Theme.of(context).primaryColor, size: 18),
                                         ),
-                                        Text(
-                                          "${index + 1}/${couponController.couponRestList?.length}",
-                                          style: TextStyle(
-                                            color: Theme.of(
-                                              context,
-                                            ).primaryColor,
-                                            fontWeight: FontWeight.bold,
-                                          ).copyWith(fontSize: 10),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                '${couponController.couponRestList![index].discount?.toStringAsFixed(0)}'
+                                                '${couponController.couponRestList![index].discountType == 'percent' ? '%' : Get.find<SplashController>().configModel!.currencySymbol} OFF',
+                                                style: robotoBold.copyWith(fontSize: 15, color: Theme.of(context).primaryColor),
+                                              ),
+                                              Row(
+                                                children: [
+                                                  Text(
+                                                    "Code: ",
+                                                    style: robotoRegular.copyWith(fontSize: 10, color: Theme.of(context).disabledColor),
+                                                  ),
+                                                  Text(
+                                                    "${couponController.couponRestList![index].code}",
+                                                    style: robotoMedium.copyWith(fontSize: 10, color: Theme.of(context).textTheme.bodyLarge!.color),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ],
                                     ),
                                   ),
-                                ),
-                              );
-                            },
-                            options: CarouselOptions(
-                              enlargeCenterPage: true,
-                              autoPlay: true,
-                              aspectRatio: 10,
-                              scrollDirection: Axis.horizontal,
-                              autoPlayCurve: Curves.fastOutSlowIn,
-                              enableInfiniteScroll: true,
-                              autoPlayAnimationDuration: Duration(
-                                milliseconds: 700,
+                                );
+                              },
+                              options: CarouselOptions(
+                                autoPlay: true,
+                                viewportFraction: 1,
+                                aspectRatio: 5,
+                                autoPlayInterval: const Duration(seconds: 4),
                               ),
-                              viewportFraction: 1,
                             ),
                           ),
                         ),
-                      );
-                    } else {
-                      return SizedBox(height: 0);
-                    }
-                  } else {
-                    return Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Theme.of(context).primaryColor,
-                        ),
                       ),
-                    );
-                  }
-                },
+                  ],
+                ),
               ),
-            ),
-          ),
       ],
     );
   }
@@ -1963,257 +1775,126 @@ class _StoreDescriptionViewWidgetFoodState
                   ],
                 ),
               )
-            : Container(
-                height: 75,
-                margin: const EdgeInsets.symmetric(
-                  vertical: Dimensions.paddingSizeSmall,
-                ),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: Dimensions.paddingSizeExtraSmall,
-                  ),
-                  child: Row(
-                    children: [
-                      InkWell(
-                        onTap: () => Get.toNamed(
-                          RouteHelper.getStoreReviewRoute(
-                            widget.store!.id,
-                            widget.store!.name,
-                            widget.store!,
-                          ),
-                        ),
-                        child: _buildInfoCard(
-                          context,
-                          const Color(0xFFFFF9F5),
-                          Colors.orange,
-                          Images.storestar,
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
+            : Padding(
+                padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
                             children: [
-                              Text(
-                                widget.store!.avgRating!.toStringAsFixed(1),
-                                style: robotoBold.copyWith(fontSize: 16),
+                              Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(color: Colors.orange.withOpacity(0.1), shape: BoxShape.circle),
+                                child: const Icon(Icons.star, color: Colors.orange, size: 12),
                               ),
+                              const SizedBox(width: 6),
                               Text(
-                                '${widget.store!.ratingCount}+ ratings',
-                                style: robotoRegular.copyWith(
-                                  fontSize: 10,
-                                  color: Colors.grey.shade600,
+                                (widget.store!.avgRating ?? 0.0).toStringAsFixed(1),
+                                style: robotoBold.copyWith(fontSize: 15),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(color: Colors.pink.withOpacity(0.1), shape: BoxShape.circle),
+                                child: const Icon(Icons.access_time_outlined, color: Colors.pink, size: 12),
+                              ),
+                              const SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  widget.store!.deliveryTime!,
+                                  style: robotoMedium.copyWith(fontSize: 12, color: Theme.of(context).textTheme.bodyLarge!.color!.withOpacity(0.7)),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ],
                           ),
-                        ),
+                        ],
                       ),
-                      const SizedBox(width: 10),
+                    ),
+                    const SizedBox(width: 8),
 
-                      InkWell(
-                        onTap: () => Get.toNamed(
-                          RouteHelper.getMapRoute(
-                            AddressModel(
-                              id: widget.store!.id,
-                              address: widget.store!.address,
-                              latitude: widget.store!.latitude,
-                              longitude: widget.store!.longitude,
-                              contactPersonNumber: '',
-                              contactPersonName: '',
-                              addressType: '',
-                            ),
-                            'store',
-                            Get.find<SplashController>()
-                                .getModuleConfig(
-                                  Get.find<SplashController>()
-                                      .module!
-                                      .moduleType!,
-                                )
-                                .newVariation!,
-                            storeName: widget.store!.name,
+                    if (couponController.couponRestList != null && couponController.couponRestList!.isNotEmpty)
+                      Expanded(
+                        flex: 7,
+                        child: Container(
+                          height: 70,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor.withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                            border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.1), width: 1),
                           ),
-                        ),
-                        child: _buildInfoCard(
-                          context,
-                          const Color(0xFFF7FAF2),
-                          Colors.green,
-                          Images.drivethru,
-                          Text(
-                            'Drive Thru',
-                            style: robotoMedium.copyWith(
-                              fontSize: 12,
-                              color: Colors.green.shade700,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-
-                      _buildInfoCard(
-                        context,
-                        const Color(0xFFFFF7F9),
-                        Colors.pink,
-                        Images.splashstore,
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget.store!.deliveryTime!,
-                              style: robotoBold.copyWith(fontSize: 16),
-                            ),
-                            Text(
-                              'Delivery',
-                              style: robotoRegular.copyWith(
-                                fontSize: 10,
-                                color: Colors.pink.shade700,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      if (widget.store!.delivery! &&
-                          widget.store!.freeDelivery!) ...[
-                        const SizedBox(width: 10),
-                        _buildInfoCard(
-                          context,
-                          const Color(0xFFF2F6FF),
-                          Colors.blue,
-                          Images.money,
-                          Text(
-                            'Free Delivery',
-                            style: robotoMedium.copyWith(
-                              fontSize: 12,
-                              color: Colors.blue.shade700,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-
-        if (!ResponsiveHelper.isDesktop(context) &&
-            couponController.couponRestList != null &&
-            couponController.couponRestList!.isNotEmpty)
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: GetBuilder<CouponController>(
-              builder: (couponController) {
-                if (couponController.couponRestList != null) {
-                  if (couponController.couponRestList!.isNotEmpty) {
-                    return CarouselSlider.builder(
-                      itemCount: couponController.couponRestList?.length ?? 0,
-                      itemBuilder: (context, index, realIndex) {
-                        return InkWell(
-                          onTap: () {
-                            Clipboard.setData(
-                              ClipboardData(
-                                text: couponController
-                                    .couponRestList![index]
-                                    .code!,
-                              ),
-                            );
-                            showCustomSnackBar(
-                              'coupon_code_copied'.tr,
-                              isError: false,
-                            );
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 5),
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Theme.of(
-                                context,
-                              ).primaryColor.withValues(alpha: 0.05),
-                              borderRadius: BorderRadius.circular(
-                                Dimensions.radiusDefault,
-                              ),
-                              border: Border.all(
-                                color: Theme.of(
-                                  context,
-                                ).primaryColor.withValues(alpha: 0.1),
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                SvgPicture.asset(
-                                  Images.subtract,
-                                  width: 30,
-                                  height: 30,
-                                  color: Theme.of(context).primaryColor,
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        '${couponController.couponRestList![index].discountType == 'percent' ? '%' : (couponController.couponRestList![index].couponType == 'free_delivery' ? 'free_delivery'.tr : Get.find<SplashController>().configModel!.currencySymbol)}'
-                                        '${couponController.couponRestList![index].couponType == 'free_delivery' ? '' : (couponController.couponRestList![index].discount)?.toStringAsFixed(0)} '
-                                        '${couponController.couponRestList![index].couponType == 'free_delivery' ? '' : 'off'.tr}',
-                                        style: robotoBold.copyWith(
-                                          fontSize: 14,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                            child: CarouselSlider.builder(
+                              itemCount: couponController.couponRestList?.length ?? 0,
+                              itemBuilder: (context, index, realIndex) {
+                                return InkWell(
+                                  onTap: () {
+                                    Clipboard.setData(ClipboardData(text: couponController.couponRestList![index].code!));
+                                    showCustomSnackBar('coupon_code_copied'.tr, isError: false);
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(6),
+                                          decoration: BoxDecoration(color: Theme.of(context).primaryColor.withOpacity(0.1), shape: BoxShape.circle),
+                                          child: Icon(Icons.local_offer_outlined, color: Theme.of(context).primaryColor, size: 18),
                                         ),
-                                      ),
-                                      Text(
-                                        "Code: ${couponController.couponRestList![index].code}",
-                                        style: robotoRegular.copyWith(
-                                          fontSize: 11,
-                                          color: Theme.of(
-                                            context,
-                                          ).disabledColor,
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                '${couponController.couponRestList![index].discount?.toStringAsFixed(0)}'
+                                                '${couponController.couponRestList![index].discountType == 'percent' ? '%' : Get.find<SplashController>().configModel!.currencySymbol} OFF',
+                                                style: robotoBold.copyWith(fontSize: 15, color: Theme.of(context).primaryColor),
+                                              ),
+                                              Row(
+                                                children: [
+                                                  Text(
+                                                    "Code: ",
+                                                    style: robotoRegular.copyWith(fontSize: 10, color: Theme.of(context).disabledColor),
+                                                  ),
+                                                  Text(
+                                                    "${couponController.couponRestList![index].code}",
+                                                    style: robotoMedium.copyWith(fontSize: 10, color: Theme.of(context).textTheme.bodyLarge!.color),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).primaryColor,
-                                    borderRadius: BorderRadius.circular(15),
-                                  ),
-                                  child: Text(
-                                    'COPY',
-                                    style: robotoBold.copyWith(
-                                      color: Colors.white,
-                                      fontSize: 10,
+                                      ],
                                     ),
                                   ),
-                                ),
-                              ],
+                                );
+                              },
+                              options: CarouselOptions(
+                                autoPlay: true,
+                                viewportFraction: 1,
+                                aspectRatio: 5,
+                                autoPlayInterval: const Duration(seconds: 4),
+                              ),
                             ),
                           ),
-                        );
-                      },
-                      options: CarouselOptions(
-                        height: 65,
-                        autoPlay: true,
-                        enlargeCenterPage: false,
-                        viewportFraction: 0.85,
-                        autoPlayCurve: Curves.fastOutSlowIn,
-                        autoPlayAnimationDuration: const Duration(
-                          milliseconds: 700,
                         ),
                       ),
-                    );
-                  } else {
-                    return const SizedBox();
-                  }
-                } else {
-                  return const SizedBox();
-                }
-              },
-            ),
-          ),
+                  ],
+                ),
+              ),
       ],
     );
   }

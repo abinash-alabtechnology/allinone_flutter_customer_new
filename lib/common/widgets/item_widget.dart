@@ -447,7 +447,10 @@ class ItemWidget extends StatelessWidget {
                                                         .vegNonVeg! &&
                                                     Get.find<SplashController>()
                                                         .configModel!
-                                                        .toggleVegNonVeg!)
+                                                        .toggleVegNonVeg! &&
+                                                    !((Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('meat') ?? false) ||
+                                                        (Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('fish') ?? false) ||
+                                                        (Get.find<SplashController>().module?.moduleType?.toLowerCase() == 'meat')))
                                                 ? CustomAssetImageWidget(
                                                     item != null &&
                                                             item!.veg == 0
@@ -695,7 +698,6 @@ class ItemWidget extends StatelessWidget {
                                                             decoration:
                                                                 TextDecoration
                                                                     .lineThrough,
-                                                            height: 1.0,
                                                           ),
                                                           textDirection:
                                                               TextDirection.ltr,
@@ -965,50 +967,30 @@ class ItemWidgetStore extends StatelessWidget {
                                         radius: 15,
                                       ),
 
-                                Positioned(
-                                  top: 5,
-                                  left: 5,
-                                  child: GetBuilder<FavouriteController>(
-                                    builder: (favouriteController) {
-                                      bool isWished = isStore
-                                          ? favouriteController.wishStoreIdList
-                                                .contains(store!.id)
-                                          : favouriteController.wishItemIdList
-                                                .contains(item!.id);
-                                      return Container(
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey.withValues(
-                                            alpha: 0.6,
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                          border: Border.all(
-                                            color: Colors.grey.shade300,
-                                            width: 0.5,
-                                          ),
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(4.0),
-                                          child: CustomFavouriteWidget(
-                                            isWished: isWished,
-                                            isStore: isStore,
-                                            store: store,
-                                            item: item,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                                Positioned(
-                                  bottom: 20,
-                                  right: 4.w,
-                                  child: CartCountViewStore(
-                                    item: item!,
-                                    index: index,
-                                  ),
-                                ),
+                                 if (item!.avgRating! > 0)
+                                 Positioned(
+                                   bottom: 8,
+                                   left: 8,
+                                   child: Container(
+                                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                     decoration: BoxDecoration(
+                                       color: Colors.white,
+                                       borderRadius: BorderRadius.circular(6),
+                                       boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2))],
+                                     ),
+                                     child: Row(
+                                       mainAxisSize: MainAxisSize.min,
+                                       children: [
+                                         Icon(Icons.star, size: 12, color: Theme.of(context).primaryColor),
+                                         const SizedBox(width: 2),
+                                         Text(
+                                           item!.avgRating!.toStringAsFixed(1),
+                                           style: robotoBold.copyWith(fontSize: 10, color: Colors.black87),
+                                         ),
+                                       ],
+                                     ),
+                                   ),
+                                 ),
                               ],
                             ),
                             const SizedBox(width: Dimensions.paddingSizeSmall),
@@ -1022,67 +1004,6 @@ class ItemWidgetStore extends StatelessWidget {
                                 ),
 
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                  child: Row(
-                                    children: [
-                                      (!isStore &&
-                                              Get.find<SplashController>()
-                                                  .configModel!
-                                                  .moduleConfig!
-                                                  .module!
-                                                  .vegNonVeg! &&
-                                              Get.find<SplashController>()
-                                                  .configModel!
-                                                  .toggleVegNonVeg!)
-                                          ? CustomAssetImageWidget(
-                                              item != null && item!.veg == 0
-                                                  ? Images.nonVegImage
-                                                  : Images.vegImage,
-                                              height: 12,
-                                              width: 12,
-                                              fit: BoxFit.contain,
-                                            )
-                                          : const SizedBox(),
-
-                                      SizedBox(
-                                        width:
-                                            item!.isStoreHalalActive! &&
-                                                item!.isHalalItem!
-                                            ? 4
-                                            : 0,
-                                      ),
-
-                                      !isStore &&
-                                              item!.isStoreHalalActive! &&
-                                              item!.isHalalItem!
-                                          ? const CustomAssetImageWidget(
-                                              Images.halalTag,
-                                              height: 12,
-                                              width: 12,
-                                            )
-                                          : const SizedBox(),
-                                      const SizedBox(width: 5),
-
-                                      (Get.find<SplashController>()
-                                                  .configModel!
-                                                  .moduleConfig!
-                                                  .module!
-                                                  .unit! &&
-                                              item != null &&
-                                              item!.unitType != null)
-                                          ? Text(
-                                              '${item!.unitType ?? ''}',
-                                              style: robotoRegular.copyWith(
-                                                fontSize: Dimensions.fontSizeExtraSmall,
-                                                color: Theme.of(context).disabledColor,
-                                              ),
-                                            )
-                                          : const SizedBox(),
-                                    ],
-                                  ),
-                                ),
-
-                                Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                                   child: Row(
                                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -1090,9 +1011,9 @@ class ItemWidgetStore extends StatelessWidget {
                                       Flexible(
                                         child: Text(
                                           isStore ? store!.name! : item!.name!,
-                                          style: robotoMedium.copyWith(
-                                            fontSize: Dimensions.fontSizeSmall,
-                                            fontWeight: FontWeight.w600,
+                                          style: robotoBold.copyWith(
+                                            fontSize: Dimensions.fontSizeDefault,
+                                            color: Colors.black,
                                           ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
@@ -1103,25 +1024,13 @@ class ItemWidgetStore extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 3),
 
-                                // (item!.storeName != null)
-                                //     ? Text(
-                                //         item!.storeName ?? '',
-                                //         style: robotoBold.copyWith(
-                                //           fontSize:
-                                //               Dimensions.fontSizeExtraSmall,
-                                //           fontWeight: FontWeight.w500,
-                                //           color: Theme.of(context).primaryColor,
-                                //         ),
-                                //         maxLines: 1,
-                                //         overflow: TextOverflow.ellipsis,
-                                //       )
-                                //     : const SizedBox(),
-
                                 (genericName.isNotEmpty)
                                     ? Flexible(
                                         child: Padding(
                                           padding: const EdgeInsets.only(
                                             top: 5.0,
+                                            left: 8.0,
+                                            right: 8.0,
                                           ),
                                           child: Text(
                                             genericName,
@@ -1153,53 +1062,61 @@ class ItemWidgetStore extends StatelessWidget {
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Row(
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             PriceConverter.convertPrice(item!.price, discount: discount, discountType: discountType),
-                                            style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).primaryColor),
+                                            style: robotoBold.copyWith(fontSize: 16, color: Colors.black),
                                             textDirection: TextDirection.ltr,
                                           ),
-                                          if (discount! > 0) ...[
-                                            const SizedBox(width: 4),
+                                          if (discount! > 0)
                                             Text(
                                               PriceConverter.convertPrice(item!.price),
                                               style: robotoRegular.copyWith(
                                                 fontSize: Dimensions.fontSizeExtraSmall,
                                                 color: Theme.of(context).disabledColor,
                                                 decoration: TextDecoration.lineThrough,
-                                                height: 1.0,
                                               ),
                                               textDirection: TextDirection.ltr,
                                             ),
-                                          ],
                                         ],
                                       ),
                                       
-                                      !isStore && (item!.ratingCount! > 0)
-                                          ? Row(
-                                              children: [
-                                                Icon(Icons.star, size: 14, color: Theme.of(context).primaryColor),
-                                                const SizedBox(width: 2),
-                                                Text(
-                                                  item!.avgRating!.toStringAsFixed(1),
-                                                  style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeExtraSmall),
-                                                ),
-                                              ],
-                                            )
-                                          : const SizedBox(),
+                                      if (!isStore && !fromCartSuggestion)
+                                      CartCountViewStore(
+                                        item: item!,
+                                        index: index,
+                                      ),
                                     ],
                                   ),
                                 ),
                               ],
                             ),
 
-                            Column(
-                              mainAxisAlignment: isStore
-                                  ? MainAxisAlignment.center
-                                  : MainAxisAlignment.spaceBetween,
-                              children: [const SizedBox()],
-                            ),
+                            if (fromCartSuggestion)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+                                child: Center(
+                                  child: CartCountView(
+                                    item: item!,
+                                    index: index,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                                        border: Border.all(color: Colors.deepOrange.withOpacity(0.3)),
+                                      ),
+                                      child: Text(
+                                        'Add',
+                                        style: robotoBold.copyWith(color: Colors.deepOrange, fontSize: Dimensions.fontSizeSmall),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            const SizedBox(height: Dimensions.paddingSizeExtraSmall),
                           ],
                         ),
                       );

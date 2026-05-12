@@ -23,7 +23,7 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-  final BookingController controller = BookingController(apiClient: Get.find());
+  final BookingController controller = Get.put(BookingController(apiClient: Get.find()));
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -168,6 +168,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             tolat: ride.dropoffLat,
                             tolong: ride.dropoffLng,
                             captionid: ride.captainId ?? 0,
+                            isReviewed: ride.isReviewed,
                           ));
                         },
                         child: Padding(

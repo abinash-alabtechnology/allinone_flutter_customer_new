@@ -368,7 +368,6 @@ class ItemCard extends StatelessWidget {
                                               ).disabledColor,
                                               decoration:
                                                   TextDecoration.lineThrough,
-                                              height: 1.0,
                                             ),
                                             textDirection: TextDirection.ltr,
                                           )

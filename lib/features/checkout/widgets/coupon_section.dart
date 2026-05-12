@@ -13,6 +13,7 @@ import 'package:handy_allinone/common/widgets/custom_snackbar.dart';
 import 'package:handy_allinone/features/checkout/widgets/coupon_bottom_sheet.dart';
 import 'package:lottie/lottie.dart';
 import 'package:scratcher/widgets.dart';
+import 'package:handy_allinone/features/coupon/domain/models/coupon_model.dart';
 
 class CouponSection extends StatefulWidget {
   final int? storeId;
@@ -50,262 +51,250 @@ class _CouponSectionState extends State<CouponSection> with SingleTickerProvider
     super.dispose();
     _animationController.dispose();
   }
+
+  void _applyCoupon(String couponCode, CouponController couponController) {
+    if (couponCode.isNotEmpty && !couponController.isLoading) {
+      couponController.applyCoupon(
+        couponCode,
+        (widget.price - widget.discount) + widget.addOns + widget.variationPrice,
+        widget.deliveryCharge,
+        widget.storeId ?? Get.find<StoreController>().store?.id,
+      ).then((discount) {
+        if (discount != null && discount > 0) {
+          widget.checkoutController.couponController.text = couponCode;
+          showCouponAppliedDialog('Coupon', PriceConverter.convertPrice(discount), context);
+          if (widget.checkoutController.isPartialPay || widget.checkoutController.paymentMethodIndex == 1) {
+            double total = widget.total - discount;
+            widget.checkoutController.checkBalanceStatus(total, discount);
+          }
+        }
+      });
+    } else if (couponCode.isEmpty) {
+      showCustomSnackBar('enter_a_coupon_code'.tr);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double totalPrice = widget.total;
 
-    return widget.storeId == null ? GetBuilder<CouponController>(
+    return GetBuilder<CouponController>(
       builder: (couponController) {
+        List<CouponModel>? coupons = widget.storeId != null ? couponController.couponRestList : couponController.couponList;
+        bool hasCoupons = coupons != null && coupons.isNotEmpty;
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              child: Row(children: [
-                Image.asset(Images.percentTag, height: 20, width: 20),
-                const SizedBox(width: Dimensions.paddingSizeSmall),
-                Text('Coupons & Offers', style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
-              ]),
-            ),
-
             Container(
-              margin: const EdgeInsets.symmetric(horizontal: 12),
+              margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeExtraSmall),
               decoration: BoxDecoration(
+                color: const Color(0xFFF1F9F3),
                 borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                color: Colors.black12.withValues(alpha: 0.08),
+                border: Border.all(color: const Color(0xFFD1EADC), width: 1),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge),
-              child: Column(children: [
-                const SizedBox(height: Dimensions.paddingSizeLarge),
-
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                border: Border.all(color: Theme.of(context).disabledColor.withValues(alpha: 0.7), width: 1),
-              ),
-              padding: const EdgeInsets.only(left: 5),
-              child: Row(children: [
-                Expanded(
-                  child: SizedBox(
-                    height: 45,
-                    child: TextField(
-                      controller: widget.checkoutController.couponController,
-                      style: robotoRegular.copyWith(height: ResponsiveHelper.isMobile(context) ? null : 2),
-                      decoration: InputDecoration(
-                        hintText: 'enter_promo_code'.tr,
-                        hintStyle: robotoRegular.copyWith(color: Theme.of(context).hintColor),
-                        isDense: true,
-                        filled: true,
-                        enabled: couponController.discount == 0,
-                        fillColor: Theme.of(context).cardColor,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.horizontal(
-                            left: Radius.circular(Get.find<LocalizationController>().isLtr ? 10 : 0),
-                            right: Radius.circular(Get.find<LocalizationController>().isLtr ? 0 : 10),
-                          ),
-                          borderSide: BorderSide.none,
+              padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF00853E),
+                          shape: BoxShape.circle,
                         ),
-                        prefixIcon: Padding(
-                          padding: const EdgeInsets.all( 15),
-                          child: Icon(Icons.discount,color: Colors.black87,)
+                        child: const Icon(Icons.percent, color: Colors.white, size: 16),
+                      ),
+                      const SizedBox(width: Dimensions.paddingSizeSmall),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              hasCoupons ? 'Best offers for you' : 'Save more with coupons!',
+                              style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge, color: hasCoupons ? const Color(0xFF00853E) : Colors.black),
+                            ),
+                            if (!hasCoupons)
+                              Text(
+                                'Use coupons & save on this order',
+                                style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Colors.grey),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  if (hasCoupons) ...[
+                    const SizedBox(height: Dimensions.paddingSizeDefault),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: coupons!.length > 3 ? 3 : coupons.length,
+                      itemBuilder: (context, index) {
+                        CouponModel coupon = coupons[index];
+                        bool isSelected = widget.checkoutController.couponController.text == coupon.code;
+                        
+                        return InkWell(
+                          onTap: () {
+                            if (!isSelected) {
+                              widget.checkoutController.couponController.text = coupon.code!;
+                              _applyCoupon(coupon.code!, couponController);
+                            } else {
+                              widget.checkoutController.couponController.text = '';
+                              couponController.removeCouponData(true);
+                            }
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeSmall),
+                            padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                              border: Border.all(color: isSelected ? const Color(0xFFFF7A5C) : Colors.grey.withOpacity(0.2)),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFE8F5E9),
+                                    borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                                  ),
+                                  child: Text(
+                                    coupon.code ?? '',
+                                    style: robotoMedium.copyWith(color: const Color(0xFF00853E), fontSize: Dimensions.fontSizeSmall),
+                                  ),
+                                ),
+                                const SizedBox(width: Dimensions.paddingSizeSmall),
+                                Expanded(
+                                  child: Text(
+                                    '${'Save'.tr} ${PriceConverter.convertPrice(coupon.discount)} ${coupon.discountType == 'percent' ? '%' : ''} ${'on orders above'.tr} ${PriceConverter.convertPrice(coupon.minPurchase)}',
+                                    style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Container(
+                                  height: 20, width: 20,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: isSelected ? const Color(0xFFFF7A5C) : Colors.grey, width: 1.5),
+                                  ),
+                                  child: isSelected ? Center(
+                                    child: Container(
+                                      height: 10, width: 10,
+                                      decoration: const BoxDecoration(color: Color(0xFFFF7A5C), shape: BoxShape.circle),
+                                    ),
+                                  ) : null,
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+
+                  const SizedBox(height: Dimensions.paddingSizeSmall),
+                  Align(
+                    alignment: hasCoupons ? Alignment.center : Alignment.centerRight,
+                    child: InkWell(
+                      onTap: () {
+                        if (ResponsiveHelper.isDesktop(context)) {
+                          Get.dialog(Dialog(child: CouponBottomSheet(
+                            storeId: widget.storeId ?? Get.find<StoreController>().store?.id,
+                            checkoutController: widget.checkoutController,
+                            total: widget.total, price: widget.price, discount: widget.discount,
+                            addOns: widget.addOns, variationPrice: widget.variationPrice, deliveryCharge: widget.deliveryCharge,
+                          )));
+                        } else {
+                          showModalBottomSheet(
+                            context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
+                            builder: (con) => CouponBottomSheet(
+                              storeId: widget.storeId ?? Get.find<StoreController>().store?.id,
+                              checkoutController: widget.checkoutController,
+                              total: widget.total, price: widget.price, discount: widget.discount,
+                              addOns: widget.addOns, variationPrice: widget.variationPrice, deliveryCharge: widget.deliveryCharge,
+                            ),
+                          );
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'View all coupons',
+                              style: robotoBold.copyWith(fontSize: Dimensions.fontSizeSmall, color: const Color(0xFFFF7A5C)),
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(hasCoupons ? Icons.arrow_forward : Icons.arrow_forward_ios, size: 14, color: const Color(0xFFFF7A5C)),
+                          ],
                         ),
                       ),
                     ),
                   ),
-                ),
-                InkWell(
-                  // onTap: () {
-                  //   if (ResponsiveHelper.isDesktop(context)) {
-                  //     Get.dialog(Dialog(
-                  //         child: CouponBottomSheet(
-                  //             storeId: Get.find<StoreController>()
-                  //                 .store!
-                  //                 .id,
-                  //             checkoutController:
-                  //             widget.checkoutController)))
-                  //         .then((value) {
-                  //       if (value != null) {
-                  //         widget.checkoutController.couponController
-                  //             .text = value.toString();
-                  //       }
-                  //     });
-                  //   } else {
-                  //     showModalBottomSheet(
-                  //       context: context,
-                  //       isScrollControlled: true,
-                  //       backgroundColor: Colors.transparent,
-                  //       builder: (con) => CouponBottomSheet(
-                  //           storeId:
-                  //           Get.find<StoreController>().store!.id,
-                  //           checkoutController: widget.checkoutController),
-                  //     ).then((value) async {
-                  //       debugPrint("jshjhs${value}");
-                  //       if (value != null) {
-                  //         if (value != null) {
-                  //           widget.checkoutController.couponController
-                  //               .text = value.toString();
-                  //         }
-                  //         if (widget.checkoutController.couponController
-                  //             .text.isNotEmpty) {
-                  //           if (Get.find<CouponController>().discount! <
-                  //               1 &&
-                  //               !Get.find<CouponController>()
-                  //                   .freeDelivery) {
-                  //             if (widget.checkoutController
-                  //                 .couponController
-                  //                 .text
-                  //                 .isNotEmpty &&
-                  //                 !Get.find<CouponController>()
-                  //                     .isLoading) {
-                  //               Get.find<CouponController>()
-                  //                   .applyCoupon(
-                  //                   widget.checkoutController
-                  //                       .couponController.text,
-                  //                   (widget.price -
-                  //                       widget.discount) +
-                  //                       widget.addOns,
-                  //                   widget.deliveryCharge,
-                  //                   Get.find<StoreController>()
-                  //                       .store!
-                  //                       .id)
-                  //                   .then((discount) {
-                  //                 debugPrint("skjss$discount");
-                  //
-                  //                 if (discount! > 0) {
-                  //                   widget.checkoutController
-                  //                       .couponController
-                  //                       .text = 'coupon_applied'.tr;
-                  //                   debugPrint("skjss");
-                  //                   showCouponAppliedDialog(
-                  //                       'Coupon',
-                  //                       PriceConverter.convertPrice(
-                  //                           discount));
-                  //
-                  //                   /* showCustomSnackBar(
-                  //                   '${'you_got_discount_of'.tr} ${PriceConverter.convertPrice(discount)}',
-                  //                   isError: false,
-                  //                 );*/
-                  //                   if (widget.checkoutController
-                  //                       .isPartialPay ||
-                  //                       widget.checkoutController
-                  //                           .paymentMethodIndex ==
-                  //                           1) {
-                  //                     totalPrice =
-                  //                         totalPrice - discount;
-                  //                     widget.checkoutController
-                  //                         .checkBalanceStatus(
-                  //                         totalPrice, 0);
-                  //                   }
-                  //                 }
-                  //               });
-                  //             } else if (widget.checkoutController
-                  //                 .couponController.text.isEmpty) {
-                  //               showCustomSnackBar(
-                  //                   'enter_a_coupon_code'.tr);
-                  //             }
-                  //           } else {
-                  //             Get.find<CouponController>()
-                  //                 .removeCouponData(true);
-                  //             widget.checkoutController.couponController
-                  //                 .text = '';
-                  //           }
-                  //         }
-                  //       }
-                  //     });
-                  //   }
-                  // },
-///
-                  onTap: () async {
-                    if(widget.checkoutController.couponController.text.isNotEmpty){
-                      if(Get.find<CouponController>().discount! < 1 && !Get.find<CouponController>().freeDelivery) {
-                        if(widget.checkoutController.couponController.text.isNotEmpty && !Get.find<CouponController>().isLoading) {
-                          Get.find<CouponController>().applyCoupon(widget.checkoutController.couponController.text, (widget.price-widget.discount)+widget.addOns + widget.variationPrice, widget.deliveryCharge,
-                              Get.find<StoreController>().store!.id).then((discount) {
-                            //checkoutController.couponController.text = 'coupon_applied'.tr;
-                            if (discount! > 0) {
-
-                              showCouponAppliedDialog(
-                                                      'Coupon',
-                                                      PriceConverter.convertPrice(
-                                                          discount,),context);
-                              // showCustomSnackBar(
-                              //   '${'you_got_discount_of'.tr} ${PriceConverter.convertPrice(discount)}',
-                              //   isError: false,
-                              // );
-                              if(widget.checkoutController.isPartialPay || widget.checkoutController.paymentMethodIndex == 1) {
-                                totalPrice = totalPrice - discount;
-                                widget.checkoutController.checkBalanceStatus(totalPrice, discount);
-                              }
-                            }
-                          });
-                        } else if(widget.checkoutController.couponController.text.isEmpty) {
-                          showCustomSnackBar('enter_a_coupon_code'.tr);
-                        }
-                      } else {
-                        totalPrice = totalPrice + couponController.discount!;
-                        Get.find<CouponController>().removeCouponData(true);
-                        widget.checkoutController.couponController.text = '';
-                        if(widget.checkoutController.isPartialPay || widget.checkoutController.paymentMethodIndex == 1){
-                          widget.checkoutController.checkBalanceStatus(totalPrice, 0);
-                        }
-                      }
-                    }else {
-                      showCustomSnackBar('enter_a_coupon_code'.tr);
-                    }
-                  },
-                  child: Container(
-                    height: 45, width: (couponController.discount! <= 0 && !couponController.freeDelivery) ? 100 : 50,
-                    alignment: Alignment.center,
-                    margin: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
-                    decoration: BoxDecoration(
-                      color: (couponController.discount! <= 0 && !couponController.freeDelivery) ? Theme.of(context).primaryColor : Colors.transparent,
-                      borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                    ),
-                    child: (couponController.discount! <= 0 && !couponController.freeDelivery) ? !couponController.isLoading ? Text(
-                      'apply'.tr,
-                      style: robotoMedium.copyWith(color: Theme.of(context).cardColor),
-                    ) : const SizedBox(
-                      height: 30, width: 30,
-                      child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
-                    )
-                        : Icon(Icons.clear, color: Theme.of(context).colorScheme.error),
-                  ),
-                ),
-              ]),
-            ),
-            const SizedBox(height: Dimensions.paddingSizeLarge),
-            InkWell(
-              onTap: () {
-                if(ResponsiveHelper.isDesktop(context)){
-                  Get.dialog(Dialog(child: CouponBottomSheet(storeId: Get.find<StoreController>().store!.id, checkoutController: widget.checkoutController,total: widget.total,price: widget.price,discount: widget.discount,addOns: widget.addOns,variationPrice: widget.variationPrice,deliveryCharge: widget.deliveryCharge,)));
-                }else{
-                  showModalBottomSheet(
-                    context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
-                    builder: (con) => CouponBottomSheet(storeId: Get.find<StoreController>().store!.id,  checkoutController: widget.checkoutController,total: widget.total,price: widget.price,discount: widget.discount,addOns: widget.addOns,variationPrice: widget.variationPrice,deliveryCharge: widget.deliveryCharge,),
-                  );
-                }
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Row(children: [
-                  Icon(Icons.list_alt, size: 15, color: Colors.black54),
-                  const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-                  Text("View Available Coupons", style: robotoBold.copyWith(fontSize: Dimensions.fontSizeSmall, color: Colors.black54)),
-                ]),
+                ],
               ),
             ),
-            const SizedBox(height: Dimensions.paddingSizeLarge),
 
-              ]),
-            ),
+            if (couponController.discount! <= 0 && !couponController.freeDelivery)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeExtraSmall),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                    border: Border.all(color: Theme.of(context).disabledColor.withValues(alpha: 0.3)),
+                  ),
+                  child: Row(children: [
+                    Expanded(
+                      child: TextField(
+                        controller: widget.checkoutController.couponController,
+                        style: robotoRegular,
+                        decoration: InputDecoration(
+                          hintText: 'enter_promo_code'.tr,
+                          hintStyle: robotoRegular.copyWith(color: Theme.of(context).hintColor),
+                          isDense: true,
+                          filled: true,
+                          fillColor: Theme.of(context).cardColor,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(Dimensions.radiusDefault), borderSide: BorderSide.none),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
+                        ),
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () => _applyCoupon(widget.checkoutController.couponController.text, couponController),
+                      child: Container(
+                        height: 40, width: 80,
+                        alignment: Alignment.center,
+                        margin: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor,
+                          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                        ),
+                        child: !couponController.isLoading ? Text(
+                          'apply'.tr,
+                          style: robotoMedium.copyWith(color: Colors.white),
+                        ) : const SizedBox(
+                          height: 20, width: 20,
+                          child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.white), strokeWidth: 2),
+                        ),
+                      ),
+                    ),
+                  ]),
+                ),
+              ),
+            const SizedBox(height: Dimensions.paddingSizeDefault),
           ],
         );
       },
-
-
-    ) : const SizedBox();
+    );
   }
+
   void showCouponAppliedDialog(
       String code,
       String savedAmount,

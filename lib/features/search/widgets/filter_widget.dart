@@ -96,14 +96,20 @@ class FilterWidget extends StatelessWidget {
               const SizedBox(height: Dimensions.paddingSizeSmall),
 
               (Get.find<SplashController>().configModel!.toggleVegNonVeg!
-              && Get.find<SplashController>().configModel!.moduleConfig!.module!.vegNonVeg!) ? CustomCheckBoxWidget(
+              && Get.find<SplashController>().configModel!.moduleConfig!.module!.vegNonVeg!
+              && !((Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('meat') ?? false) ||
+                  (Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('fish') ?? false) ||
+                  (Get.find<SplashController>().module?.moduleType?.toLowerCase() == 'meat'))) ? CustomCheckBoxWidget(
                 title: 'veg'.tr,
                 value: isStore ? searchController.storeVeg : searchController.veg,
                 onClick: () => isStore ? searchController.toggleStoreVeg() : searchController.toggleVeg(),
               ) : const SizedBox(),
 
               (Get.find<SplashController>().configModel!.toggleVegNonVeg!
-              && Get.find<SplashController>().configModel!.moduleConfig!.module!.vegNonVeg!) ? CustomCheckBoxWidget(
+              && Get.find<SplashController>().configModel!.moduleConfig!.module!.vegNonVeg!
+              && !((Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('meat') ?? false) ||
+                  (Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('fish') ?? false) ||
+                  (Get.find<SplashController>().module?.moduleType?.toLowerCase() == 'meat'))) ? CustomCheckBoxWidget(
                 title: 'non_veg'.tr,
                 value: isStore ? searchController.storeNonVeg : searchController.nonVeg,
                 onClick: () => isStore ? searchController.toggleStoreNonVeg() : searchController.toggleNonVeg(),

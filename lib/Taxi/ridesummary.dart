@@ -69,6 +69,7 @@ class _RideConfirmedScreenState extends State<RideConfirmedScreen> with SingleTi
   Future<void> _loadCaptainDetails() async {
     print("🚀 Loading captain details in screen...");
     final details = await controller.fetchCaptainDetails(widget.driverid);
+    await controller.fetchCaptainRating(widget.driverid);
     if (mounted) {
       setState(() {
         _captainDetails = details;
@@ -296,11 +297,48 @@ class _RideConfirmedScreenState extends State<RideConfirmedScreen> with SingleTi
                         children: [
                           Text(
                             "Caption Name : ${_captainDetails!.captain.name}",
-
                             style: robotoBold.copyWith(
                               fontSize: Dimensions.fontSizeDefault,
                             ),
                           ),
+                          const SizedBox(height: 5),
+                          if (controller.captainRating != null)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [Colors.amber.shade400, Colors.orange.shade400],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.amber.withOpacity(0.3),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.star_rounded, color: Colors.white, size: 18),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    "${controller.captainRating!.averageRating?.toStringAsFixed(1) ?? '0.0'}",
+                                    style: robotoBold.copyWith(fontSize: 14, color: Colors.white),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Container(width: 1, height: 12, color: Colors.white.withOpacity(0.5)),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    "${controller.captainRating!.totalReviews} reviews",
+                                    style: robotoMedium.copyWith(fontSize: 12, color: Colors.white),
+                                  ),
+                                ],
+                              ),
+                            ),
                           const SizedBox(height: 5),
                           Text(
                             _captainDetails!.vehicleTypeDetails.name,

@@ -226,7 +226,7 @@ class _PaymentSectionState extends State<PaymentSection> {
       ),
       SizedBox(height: notHideCod ? Dimensions.paddingSizeExtraSmall : 0),
       Row(children: [
-        if (widget.isCashOnDeliveryActive && notHideCod)
+        if (widget.isCashOnDeliveryActive && notHideCod && widget.checkoutController.codAvailable)
           Expanded(
             child: PaymentButtonNew(
               icon: Images.codIcon,
@@ -246,10 +246,10 @@ class _PaymentSectionState extends State<PaymentSection> {
         SizedBox(
             width: widget.storeId == null &&
                 widget.isDigitalPaymentActive &&
-                notHideDigital
+                notHideDigital && widget.checkoutController.digitalPaymentAvailable
                 ? Dimensions.paddingSizeLarge
                 : 0),
-        widget.isDigitalPaymentActive && notHideDigital
+        widget.isDigitalPaymentActive && notHideDigital && widget.checkoutController.digitalPaymentAvailable
             ? Expanded(
           child: PaymentButtonNew(
             icon: Images.digitalPay,
@@ -282,10 +282,10 @@ class _PaymentSectionState extends State<PaymentSection> {
             : const SizedBox(),
         SizedBox(
             width:
-            widget.storeId == null && widget.isWalletActive && notHideWallet
+            widget.storeId == null && widget.isWalletActive && notHideWallet && widget.checkoutController.walletAvailable
                 ? Dimensions.paddingSizeLarge
                 : 0),
-        widget.storeId == null && widget.isWalletActive && notHideWallet
+        widget.storeId == null && widget.isWalletActive && notHideWallet && widget.checkoutController.walletAvailable
             ? Expanded(
           child: PaymentButtonNew(
             icon: Images.partialWallet,

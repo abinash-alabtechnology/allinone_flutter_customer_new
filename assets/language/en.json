@@ -1592,5 +1592,8 @@
   "select_start_date": "Select Start Date",
   "select_end_date": "Select End Date",
   "preferred_timing": "Preferred Timing",
-  "please_select_subscription_date_and_time": "Please select subscription date and time"
+  "please_select_subscription_date_and_time": "Please select subscription date and time",
+  "faq": "FAQ",
+  "frequently_asked_questions": "Frequently Asked Questions",
+  "no_faq_found": "No FAQ found"
 }
