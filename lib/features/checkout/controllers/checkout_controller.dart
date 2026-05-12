@@ -256,10 +256,6 @@ class CheckoutController extends GetxController implements GetxService {
       }
       
       _deliveryCharge = charge ?? 0.0;
-      if (kDebugMode) {
-        print('-------- Delivery Response Body: ${response.body} ----------');
-        print('-------- Parsed Delivery Charge: $_deliveryCharge ----------');
-      }
     } else {
       _isDeliveryAvailable = false;
       _deliveryMessage = (response.body != null && response.body is Map && response.body['message'] != null)
