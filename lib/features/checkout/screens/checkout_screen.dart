@@ -212,6 +212,9 @@ class CheckoutScreenState extends State<CheckoutScreen> {
           LatLng(double.parse(store.latitude!), double.parse(store.longitude!)),
         );
       }
+      if (store != null && neaddress[0].id != null) {
+        checkoutController.checkAddressDelivery(neaddress[0].id!, store.id!, notify: false);
+      }
     }
 
 
@@ -401,13 +404,6 @@ class CheckoutScreenState extends State<CheckoutScreen> {
 
           if (address.isNotEmpty && (checkoutController.addressIndex == null || checkoutController.addressIndex! >= address.length)) {
             checkoutController.setAddressIndex(0);
-            if (address[0].id != null) {
-              checkoutController.checkAddressDelivery(address[0].id!, checkoutController.store!.id!, notify: false);
-            }
-          } else if (address.isNotEmpty && checkoutController.deliveryCharge == -1 && !checkoutController.isLoading) {
-            if (address[checkoutController.addressIndex!].id != null) {
-              checkoutController.checkAddressDelivery(address[checkoutController.addressIndex!].id!, checkoutController.store!.id!, notify: false);
-            }
           }
 
           bool todayClosed = false;
@@ -1494,7 +1490,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                         child: Container(
                           width: ResponsiveHelper.isDesktop(context)
                               ? 900
-                              : 180,
+                              : 220,
                           padding: const EdgeInsets.only(
                               right: Dimensions.paddingSizeSmall,
                               left: Dimensions.paddingSizeExtraSmall),
@@ -1644,7 +1640,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
       ),
       child: SafeArea(
         child: InkWell(
-          onTap: checkoutController.isLoading ? null : () => _onPlaceOrderPressed(
+          onTap: (checkoutController.isLoading || !checkoutController.isDeliveryAvailable) ? null : () => _onPlaceOrderPressed(
             checkoutController, todayClosed, tomorrowClosed, orderAmount, deliveryCharge, tax, discount, total, maxCodOrderAmount, isPrescriptionRequired,
           ),
           child: Container(
@@ -1676,8 +1672,8 @@ class CheckoutScreenState extends State<CheckoutScreen> {
       child: SafeArea(
         child: CustomButton(
             isLoading: checkoutController.isLoading,
-            buttonText: 'place_order'.tr,
-            onPressed: checkoutController.acceptTerms ? () => _onPlaceOrderPressed(
+            buttonText: checkoutController.isDeliveryAvailable ? 'place_order'.tr : 'Delivery is unavailable',
+            onPressed: (checkoutController.acceptTerms && checkoutController.isDeliveryAvailable) ? () => _onPlaceOrderPressed(
               checkoutController, todayClosed, tomorrowClosed, orderAmount, deliveryCharge, tax, discount, total, maxCodOrderAmount, isPrescriptionRequired,
             ) : null),
       ),
@@ -1766,20 +1762,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     } else if(!_isCashOnDeliveryActive! && !_isDigitalPaymentActive! && !_isWalletActive) {
       showCustomSnackBar('no_payment_method_is_enabled'.tr);
     }else if(checkoutController.paymentMethodIndex == -1) {
-      if(ResponsiveHelper.isDesktop(context)){
-        Get.dialog(Dialog(backgroundColor: Colors.transparent, child: PaymentMethodBottomSheet(
-          isCashOnDeliveryActive: _isCashOnDeliveryActive!, isDigitalPaymentActive: _isDigitalPaymentActive!,
-          isWalletActive: _isWalletActive, storeId: widget.storeId, totalPrice: total, isOfflinePaymentActive: _isOfflinePaymentActive,
-        )));
-      }else{
-        showModalBottomSheet(
-          context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
-          builder: (con) => PaymentMethodBottomSheet(
-            isCashOnDeliveryActive: _isCashOnDeliveryActive!, isDigitalPaymentActive: _isDigitalPaymentActive!,
-            isWalletActive: _isWalletActive, storeId: widget.storeId, totalPrice: total, isOfflinePaymentActive: _isOfflinePaymentActive,
-          ),
-        );
-      }
+      showCustomSnackBar('payment_is_not_selected'.tr);
     } else if(orderAmount < checkoutController.store!.minimumOrder! && widget.storeId == null) {
       showCustomSnackBar('${'minimum_order_amount_is'.tr} ${checkoutController.store!.minimumOrder}');
     }else if(checkoutController.tipController.text.isNotEmpty && checkoutController.tipController.text != 'not_now' && double.parse(checkoutController.tipController.text.trim()) < 0) {
@@ -1914,6 +1897,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
           startDate: checkoutController.startDate,
           endDate: checkoutController.endDate,
           dropTime: checkoutController.dropTime,
+          deliveryCharge: checkoutController.deliveryCharge,
         );
         if(checkoutController.paymentMethodIndex == 3){
           Get.toNamed(RouteHelper.getOfflinePaymentScreen(
@@ -2736,7 +2720,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                               Text('Payment Method', style: robotoBold.copyWith(fontSize: 16)),
                               if (checkoutController.paymentMethodIndex != -1)
                                 TextButton(
-                                  onPressed: () => _onPlaceOrderPressed(checkoutController, todayClosed, tomorrowClosed, orderAmount, deliveryCharge, checkoutController.orderTax!, discount, total, maxCodOrderAmount, isPrescriptionRequired),
+                                  onPressed: !checkoutController.isDeliveryAvailable ? null : () => _onPlaceOrderPressed(checkoutController, todayClosed, tomorrowClosed, orderAmount, deliveryCharge, checkoutController.orderTax!, discount, total, maxCodOrderAmount, isPrescriptionRequired),
                                   child: Text('Change', style: robotoMedium.copyWith(color: const Color(0xFF16A34A))),
                                 ),
                             ],
@@ -2744,7 +2728,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                           const SizedBox(height: 12),
                           if (checkoutController.paymentMethodIndex == -1)
                             InkWell(
-                              onTap: () => _onPlaceOrderPressed(checkoutController, todayClosed, tomorrowClosed, orderAmount, deliveryCharge, checkoutController.orderTax!, discount, total, maxCodOrderAmount, isPrescriptionRequired),
+                              onTap: !checkoutController.isDeliveryAvailable ? null : () => _onPlaceOrderPressed(checkoutController, todayClosed, tomorrowClosed, orderAmount, deliveryCharge, checkoutController.orderTax!, discount, total, maxCodOrderAmount, isPrescriptionRequired),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                                 decoration: BoxDecoration(
@@ -2824,7 +2808,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                 Expanded(
                   child: CustomButton(
                     buttonText: widget.fromCart ? 'Proceed to Payment' : 'Place Order',
-                    onPressed: checkoutController.acceptTerms ? () => _onPlaceOrderPressed(
+                    onPressed: (checkoutController.acceptTerms && checkoutController.isDeliveryAvailable) ? () => _onPlaceOrderPressed(
                       checkoutController, todayClosed, tomorrowClosed, orderAmount, deliveryCharge,
                       checkoutController.orderTax!, discount, total, maxCodOrderAmount, isPrescriptionRequired,
                     ) : null,

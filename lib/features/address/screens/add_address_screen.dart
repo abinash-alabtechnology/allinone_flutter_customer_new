@@ -93,6 +93,15 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
       : CountryCode.fromCountryCode(
           Get.find<SplashController>().configModel!.country!,
         ).dialCode;
+  bool _profilePopulated = false;
+
+  void _populateFromProfile() {
+    if (Get.find<ProfileController>().userInfoModel != null) {
+      _contactPersonNameController.text =
+          '${Get.find<ProfileController>().userInfoModel!.fName} ${Get.find<ProfileController>().userInfoModel!.lName}';
+      splitPhoneNumber(Get.find<ProfileController>().userInfoModel!.phone!);
+    }
+  }
 
   @override
   void initState() {
@@ -111,11 +120,11 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
       _stateController.text = widget.address!.state ?? '';
       _countryController.text = widget.address!.country ?? '';
       _pincodeController.text = widget.address!.pincode ?? '';
-    } else if (Get.find<ProfileController>().userInfoModel != null &&
-        _contactPersonNameController.text.isEmpty &&  widget.address != null) {
-      _contactPersonNameController.text =
-          '${Get.find<ProfileController>().userInfoModel!.fName} ${Get.find<ProfileController>().userInfoModel!.lName}';
-      splitPhoneNumber(Get.find<ProfileController>().userInfoModel!.phone!);
+      _profilePopulated = true;
+    } else if (AuthHelper.isLoggedIn() && Get.find<ProfileController>().userInfoModel != null &&
+        _contactPersonNameController.text.isEmpty) {
+      _populateFromProfile();
+      _profilePopulated = true;
     }
   }
 
@@ -193,6 +202,10 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
       body: SafeArea(
         child: GetBuilder<ProfileController>(
           builder: (profileController) {
+            if (!_profilePopulated && AuthHelper.isLoggedIn() && profileController.userInfoModel != null && widget.address == null) {
+              _populateFromProfile();
+              _profilePopulated = true;
+            }
             return GetBuilder<LocationController>(
               builder: (locationController) {
                 _addressController.text = locationController.address!;

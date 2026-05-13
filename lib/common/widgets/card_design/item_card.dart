@@ -220,17 +220,32 @@ class ItemCard extends StatelessWidget {
                                             overflow: TextOverflow.ellipsis,
                                           ),
 
-                                    item.isSubscription! ? Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: Theme.of(context).primaryColor.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                                      ),
-                                      child: Text(
-                                        'subscription'.tr,
-                                        style: robotoMedium.copyWith(color: Theme.of(context).primaryColor, fontSize: 10),
-                                      ),
-                                    ) : const SizedBox(),
+                                    item.isSubscription!
+                                        ? Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 5,
+                                              vertical: 2,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Theme.of(
+                                                context,
+                                              ).primaryColor.withOpacity(0.1),
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                    Dimensions.radiusSmall,
+                                                  ),
+                                            ),
+                                            child: Text(
+                                              'subscription'.tr,
+                                              style: robotoMedium.copyWith(
+                                                color: Theme.of(
+                                                  context,
+                                                ).primaryColor,
+                                                fontSize: 10,
+                                              ),
+                                            ),
+                                          )
+                                        : const SizedBox(),
 
                                     (isFood || isShop)
                                         ? Flexible(
@@ -519,128 +534,131 @@ class MostSellItemCard extends StatelessWidget {
                         : Theme.of(context).cardColor,
                   ),
                   child: CustomInkWell(
-                    onTap: () => Get.find<ItemController>()
-                        .navigateToItemPage(item, context),
+                    onTap: () => Get.find<ItemController>().navigateToItemPage(
+                      item,
+                      context,
+                    ),
                     radius: Dimensions.radiusLarge,
                     child: TextHover(
                       builder: (isHovered) {
                         return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Stack(
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.only(
-                                    top: isPopularItem
-                                        ? Dimensions.paddingSizeExtraSmall
-                                        : 0,
-                                    left: isPopularItem
-                                        ? Dimensions.paddingSizeExtraSmall
-                                        : 0,
-                                    right: isPopularItem
-                                        ? Dimensions.paddingSizeExtraSmall
-                                        : 0,
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: const Radius.circular(
-                                        Dimensions.radiusLarge,
-                                      ),
-                                      topRight: const Radius.circular(
-                                        Dimensions.radiusLarge,
-                                      ),
-                                      bottomLeft: Radius.circular(
-                                        isPopularItem
-                                            ? Dimensions.radiusLarge
-                                            : 0,
-                                      ),
-                                      bottomRight: Radius.circular(
-                                        isPopularItem
-                                            ? Dimensions.radiusLarge
-                                            : 0,
-                                      ),
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Stack(
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.only(
+                                      top: isPopularItem
+                                          ? Dimensions.paddingSizeExtraSmall
+                                          : 0,
+                                      left: isPopularItem
+                                          ? Dimensions.paddingSizeExtraSmall
+                                          : 0,
+                                      right: isPopularItem
+                                          ? Dimensions.paddingSizeExtraSmall
+                                          : 0,
                                     ),
-                                    child: CustomImage(
-                                      isHovered: isHovered,
-                                      placeholder: Images.placeholder,
-                                      image: '${item.imageFullUrl}',
-                                      fit: BoxFit.cover,
-                                      width: double.infinity,
-                                      height: double.infinity,
-                                    ),
-                                  ),
-                                ),
-
-                                AddFavouriteView(item: item),
-
-                                item.isStoreHalalActive! && item.isHalalItem!
-                                    ? const Positioned(
-                                        top: 40,
-                                        right: 15,
-                                        child: CustomAssetImageWidget(
-                                          Images.halalTag,
-                                          height: 20,
-                                          width: 20,
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: const Radius.circular(
+                                          Dimensions.radiusLarge,
                                         ),
-                                      )
-                                    : const SizedBox(),
-
-                                // DiscountTag(
-                                //   discount: discount,
-                                //   discountType: discountType,
-                                //   freeDelivery: false,
-                                // ),
-
-                                // OrganicTag(item: item, placeInImage: false),
-                                isShop
-                                    ? const SizedBox()
-                                    : Positioned(
-                                        bottom: 10.h,
-                                        right: 10.w,
-                                        child: CartCountViewGrocery(
-                                          item: item,
-                                          index: index,
+                                        topRight: const Radius.circular(
+                                          Dimensions.radiusLarge,
+                                        ),
+                                        bottomLeft: Radius.circular(
+                                          isPopularItem
+                                              ? Dimensions.radiusLarge
+                                              : 0,
+                                        ),
+                                        bottomRight: Radius.circular(
+                                          isPopularItem
+                                              ? Dimensions.radiusLarge
+                                              : 0,
                                         ),
                                       ),
-                                (item.stock != null && item.stock! < 0)
-                                    ? Positioned.fill(
-                                        bottom: 0,
-                                        left: 0,
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.black54.withValues(
-                                              alpha: 0.5,
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              Dimensions.radiusLarge,
-                                            ),
+                                      child: CustomImage(
+                                        isHovered: isHovered,
+                                        placeholder: Images.placeholder,
+                                        image: '${item.imageFullUrl}',
+                                        fit: BoxFit.cover,
+                                        width: double.infinity,
+                                        height: double.infinity,
+                                      ),
+                                    ),
+                                  ),
+
+                                  AddFavouriteView(item: item),
+
+                                  item.isStoreHalalActive! && item.isHalalItem!
+                                      ? const Positioned(
+                                          top: 40,
+                                          right: 15,
+                                          child: CustomAssetImageWidget(
+                                            Images.halalTag,
+                                            height: 20,
+                                            width: 20,
                                           ),
-                                          child: Center(
-                                            child: Text(
-                                              'out_of_stock'.tr,
-                                              style: robotoRegular.copyWith(
-                                                color: Theme.of(
-                                                  context,
-                                                ).cardColor,
-                                                fontSize:
-                                                    Dimensions.fontSizeSmall,
+                                        )
+                                      : const SizedBox(),
+
+                                  // DiscountTag(
+                                  //   discount: discount,
+                                  //   discountType: discountType,
+                                  //   freeDelivery: false,
+                                  // ),
+
+                                  // OrganicTag(item: item, placeInImage: false),
+                                  isShop
+                                      ? const SizedBox()
+                                      : Positioned(
+                                          bottom: 10.h,
+                                          right: 10.w,
+                                          child: CartCountViewGrocery(
+                                            item: item,
+                                            index: index,
+                                          ),
+                                        ),
+                                  (item.stock != null && item.stock! < 0)
+                                      ? Positioned.fill(
+                                          bottom: 0,
+                                          left: 0,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: Colors.black54.withValues(
+                                                alpha: 0.5,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                    Dimensions.radiusLarge,
+                                                  ),
+                                            ),
+                                            child: Center(
+                                              child: Text(
+                                                'out_of_stock'.tr,
+                                                style: robotoRegular.copyWith(
+                                                  color: Theme.of(
+                                                    context,
+                                                  ).cardColor,
+                                                  fontSize:
+                                                      Dimensions.fontSizeSmall,
+                                                ),
                                               ),
                                             ),
                                           ),
+                                        )
+                                      : const SizedBox(),
+                                  Get.find<ItemController>().isAvailable(item)
+                                      ? const SizedBox()
+                                      : NotAvailableWidget(
+                                          radius: Dimensions.radiusLarge,
+                                          isAllSideRound: isPopularItem,
                                         ),
-                                      )
-                                    : const SizedBox(),
-                                Get.find<ItemController>().isAvailable(item)
-                                    ? const SizedBox()
-                                    : NotAvailableWidget(
-                                        radius: Dimensions.radiusLarge,
-                                        isAllSideRound: isPopularItem,
-                                      ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                          Padding(
+                            Padding(
                               padding: EdgeInsets.only(
                                 left: Dimensions.paddingSizeSmall,
                                 right: isShop ? 0 : Dimensions.paddingSizeSmall,
@@ -675,31 +693,33 @@ class MostSellItemCard extends StatelessWidget {
                                                 ? Flexible(
                                                     child: Container(
                                                       decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            6.r,
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              6.r,
+                                                            ),
+                                                        color: Colors
+                                                            .grey
+                                                            .shade300,
+                                                      ),
+                                                      child: Padding(
+                                                        padding:
+                                                            EdgeInsets.symmetric(
+                                                              horizontal: 8.0,
+                                                              vertical: 4,
+                                                            ),
+                                                        child: Text(
+                                                          '${item.unitType ?? ''}',
+                                                          style: robotoRegular.copyWith(
+                                                            fontSize: Dimensions
+                                                                .fontSizeExtraSmall,
                                                           ),
-                                                      color:
-                                                          Colors.grey.shade300,
-                                                    ),
-                                                    child: Padding(
-                                                      padding:
-                                                          EdgeInsets.symmetric(
-                                                            horizontal: 8.0,
-                                                            vertical: 4,
-                                                          ),
-                                                      child: Text(
-                                                        '${item.unitType ?? ''}',
-                                                        style: robotoRegular.copyWith(
-                                                          fontSize: Dimensions
-                                                              .fontSizeExtraSmall,
+                                                          maxLines: 1,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
                                                         ),
-                                                        maxLines: 1,
-                                                        overflow: TextOverflow.ellipsis,
                                                       ),
                                                     ),
-                                                  ),
-                                                )
+                                                  )
                                                 : const SizedBox(),
                                             if (!isFood) SizedBox(width: 10.w),
                                             Container(
@@ -747,18 +767,36 @@ class MostSellItemCard extends StatelessWidget {
                                           overflow: TextOverflow.ellipsis,
                                         ),
 
-                                        item.isSubscription! ? Container(
-                                          margin: const EdgeInsets.only(top: 5),
-                                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(context).primaryColor.withOpacity(0.1),
-                                            borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                                          ),
-                                          child: Text(
-                                            'subscription'.tr,
-                                            style: robotoMedium.copyWith(color: Theme.of(context).primaryColor, fontSize: 10),
-                                          ),
-                                        ) : const SizedBox(),
+                                        item.isSubscription!
+                                            ? Container(
+                                                margin: const EdgeInsets.only(
+                                                  top: 5,
+                                                ),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 5,
+                                                      vertical: 2,
+                                                    ),
+                                                decoration: BoxDecoration(
+                                                  color: Theme.of(context)
+                                                      .primaryColor
+                                                      .withOpacity(0.1),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                        Dimensions.radiusSmall,
+                                                      ),
+                                                ),
+                                                child: Text(
+                                                  'subscription'.tr,
+                                                  style: robotoMedium.copyWith(
+                                                    color: Theme.of(
+                                                      context,
+                                                    ).primaryColor,
+                                                    fontSize: 10,
+                                                  ),
+                                                ),
+                                              )
+                                            : const SizedBox(),
                                         SizedBox(height: 8.h),
 
                                         // (isFood || isShop) ? Flexible(
@@ -855,17 +893,17 @@ class MostSellItemCard extends StatelessWidget {
                                 ],
                               ),
                             ),
-                        ],
-                      );
-                    },
+                          ],
+                        );
+                      },
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
-    ),
-  );
+    );
   }
 }

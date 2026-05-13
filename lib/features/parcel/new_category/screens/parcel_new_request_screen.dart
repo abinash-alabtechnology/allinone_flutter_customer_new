@@ -1300,15 +1300,22 @@ class DeliveryType extends StatelessWidget {
                       color: Theme.of(context).primaryColor, size: 20),
               ],
             ),
-            Text(subTitle,
-                style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall)),
-            if (charge > 0)
-              Text(
-                "+ ${PriceConverter.convertPrice(charge)}",
-                style: robotoBold.copyWith(
-                    color: Theme.of(context).primaryColor,
-                    fontSize: Dimensions.fontSizeSmall),
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(subTitle,
+                      style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall)),
+                ),
+                if (charge > 0)
+                  Text(
+                    "+ ${PriceConverter.convertPrice(charge)}",
+                    style: robotoBold.copyWith(
+                        color: Theme.of(context).primaryColor,
+                        fontSize: Dimensions.fontSizeSmall),
+                  ),
+              ],
+            ),
           ],
         ),
       );
@@ -1353,114 +1360,176 @@ class SelectPaymentMethod extends StatelessWidget {
                 Row(
                   spacing: 10,
                   children: [
-                    Icon(Icons.payment, color: Theme.of(context).primaryColor),
                     Text(
-                      "Payment method",
+                      "Choose Payment Method",
                       style: robotoBold.copyWith(
                         fontSize: Dimensions.fontSizeLarge,
                       ),
                     ),
                   ],
                 ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        isCashOnDeliveryActive
-                            ? Expanded(
-                                child: PaymentButtonNewCustom(
-                                  icon: Images.codIcon,
-                                  title: 'COD'.tr,
-                                  subTitle:
-                                      "Pay cash when your parcel is deliverd",
-                                  isSelected:
-                                      parcelController.paymentIndex == 0,
-                                  onTap: () =>
-                                      parcelController.setPaymentIndex(0, true),
-                                  paymentMethod: PaymentMethod.cod,
-                                ),
-                              )
-                            : const SizedBox(),
-                        SizedBox(width: 10),
-                        (Get.find<SplashController>()
-                                        .configModel!
-                                        .customerWalletStatus ==
-                                    1 &&
-                                parcelController.payerIndex == 0 &&
-                                !isGuestLoggedIn)
-                            ? Expanded(
-                                child: PaymentButtonNewCustom(
-                                  paymentMethod: PaymentMethod.wallet,
-                                  icon: Images.partialWallet,
-                                  title: 'wallet'.tr,
-                                  subTitle: "pay from your wallet balance",
-                                  isSelected:
-                                      parcelController.paymentIndex == 1,
-                                  onTap: () =>
-                                      parcelController.setPaymentIndex(1, true),
-                                ),
-                              )
-                            : const SizedBox(),
-                      ],
-                    ),
-
-                    (isDigitalPaymentActive && parcelController.payerIndex == 0)
-                        ? Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 10),
-                              Text(
-                                "Online Payment Options",
-                                style: robotoBold.copyWith(),
-                              ),
-                              PaymentButtonNewCustom(
-                                paymentMethod: PaymentMethod.online,
-                                icon: Images.digitalPay,
-                                title: 'online'.tr,
-                                subTitle: "",
-                                isSelected: parcelController.paymentIndex == 2,
-                                onTap: () {
-                                  parcelController.setPaymentIndex(2, true);
-                                  parcelController.changeDigitalPaymentName(
-                                    Get.find<SplashController>()
-                                        .configModel!
-                                        .activePaymentMethodList![0]
-                                        .getWay!,
-                                  );
-                                },
-                              ),
-                            ],
-                          )
-                        : const SizedBox(),
-                    (parcelController.offlineMethodList != null &&
-                            parcelController.payerIndex == 0)
-                        ? Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 10),
-                              Text(
-                                "Offline Payment Options",
-                                style: robotoBold.copyWith(),
-                              ),
-                              PaymentButtonNewCustom(
-                                paymentMethod: PaymentMethod.offline,
-                                icon: Images.codIcon,
-                                title: 'offline'.tr,
-                                subTitle: "pay via offline methods",
-                                isSelected: parcelController.paymentIndex == 3,
-                                onTap: () =>
-                                    parcelController.setPaymentIndex(3, true),
-                              ),
-                            ],
-                          )
-                        : const SizedBox(),
-                  ],
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      if (isCashOnDeliveryActive)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 10),
+                          child: paymentButtonParcel(
+                            icon: Images.codIcon,
+                            title: 'COD'.tr,
+                            isSelected: parcelController.paymentIndex == 0,
+                            onTap: () => parcelController.setPaymentIndex(0, true),
+                            context: context,
+                          ),
+                        ),
+                      if (isDigitalPaymentActive && parcelController.payerIndex == 0)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 10),
+                          child: paymentButtonParcel(
+                            icon: Images.digitalPayment,
+                            title: 'Online'.tr,
+                            isSelected: parcelController.paymentIndex == 2,
+                            onTap: () {
+                              parcelController.setPaymentIndex(2, true);
+                              parcelController.changeDigitalPaymentName(
+                                Get.find<SplashController>()
+                                    .configModel!
+                                    .activePaymentMethodList![0]
+                                    .getWay!,
+                              );
+                            },
+                            context: context,
+                          ),
+                        ),
+                      if (Get.find<SplashController>()
+                                      .configModel!
+                                      .customerWalletStatus ==
+                                  1 &&
+                              parcelController.payerIndex == 0 &&
+                              !isGuestLoggedIn)
+                        paymentButtonParcel(
+                          icon: Images.walletIcon,
+                          title: 'Wallet'.tr,
+                          isSelected: parcelController.paymentIndex == 1,
+                          onTap: () => parcelController.setPaymentIndex(1, true),
+                          context: context,
+                        ),
+                    ],
+                  ),
                 ),
+                if (parcelController.paymentIndex == 2)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 10),
+                      Text(
+                        "Online Payment Options",
+                        style: robotoBold.copyWith(),
+                      ),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        height: 60,
+                        child: ListView.builder(
+                          itemCount: Get.find<SplashController>().configModel!.activePaymentMethodList!.length,
+                          scrollDirection: Axis.horizontal,
+                          itemBuilder: (context, index) {
+                            return InkWell(
+                              onTap: () {
+                                parcelController.changeDigitalPaymentName(
+                                  Get.find<SplashController>().configModel!.activePaymentMethodList![index].getWay!,
+                                );
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.only(right: 10),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                                  border: Border.all(
+                                    color: parcelController.digitalPaymentName == Get.find<SplashController>().configModel!.activePaymentMethodList![index].getWay
+                                        ? Theme.of(context).primaryColor
+                                        : Theme.of(context).disabledColor.withValues(alpha: 0.5),
+                                  ),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                                  child: CustomImage(
+                                    image: '${Get.find<SplashController>().configModel!.activePaymentMethodList![index].getWayImageFullUrl}',
+                                    height: 50,
+                                    width: 100,
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                // if (parcelController.offlineMethodList != null &&
+                //         parcelController.payerIndex == 0)
+                //   Column(
+                //     crossAxisAlignment: CrossAxisAlignment.start,
+                //     children: [
+                //       const SizedBox(height: 10),
+                //       Text(
+                //         "Offline Payment Options",
+                //         style: robotoBold.copyWith(),
+                //       ),
+                //       PaymentButtonNewCustom(
+                //         paymentMethod: PaymentMethod.offline,
+                //         icon: Images.codIcon,
+                //         title: 'offline'.tr,
+                //         isSelected: parcelController.paymentIndex == 3,
+                //         onTap: () =>
+                //             parcelController.setPaymentIndex(3, true),
+                //         subTitle: 'pay via offline methods',
+                //       ),
+                //     ],
+                //   ),
+             
               ],
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget paymentButtonParcel({
+    required String icon,
+    required String title,
+    required bool isSelected,
+    required Function onTap,
+    required BuildContext context,
+  }) {
+    return InkWell(
+      onTap: onTap as void Function()?,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? Theme.of(context).primaryColor : Colors.grey.shade300,
+            width: isSelected ? 1.5 : 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(icon, height: 30, width: 30),
+            const SizedBox(width: 10),
+            Text(
+              title,
+              style: robotoMedium.copyWith(
+                fontSize: 16,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected ? Colors.black : Colors.black54,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1682,10 +1751,12 @@ class ConfirmParcelRequest extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<ParcelController>(
-      builder: (parcelController) {
-        bool isInstructionSelected = parcelController.selectedIndexNote != -1;
-        bool isCustomNote = parcelController.customNote!.isNotEmpty;
+    return GetBuilder<CheckoutController>(
+      builder: (checkoutController) {
+        return GetBuilder<ParcelController>(
+          builder: (parcelController) {
+            bool isInstructionSelected = parcelController.selectedIndexNote != -1;
+            bool isCustomNote = parcelController.customNote!.isNotEmpty;
 
         return Container(
           height: 100,
@@ -1727,9 +1798,11 @@ class ConfirmParcelRequest extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               CustomButton(
-                buttonText: 'confirm_parcel_request'.tr,
+                buttonText: checkoutController.isDeliveryAvailable
+                    ? 'confirm_parcel_request'.tr
+                    : 'Delivery is unavailable',
                 isLoading: parcelController.isLoading,
-                onPressed: parcelController.acceptTerms
+                onPressed: (parcelController.acceptTerms && checkoutController.isDeliveryAvailable)
                     ? () {
                         if (parcelController.distance == -1) {
                           showCustomSnackBar('delivery_fee_not_set_yet'.tr);
@@ -1850,6 +1923,8 @@ class ConfirmParcelRequest extends StatelessWidget {
               ),
             ],
           ),
+        );
+          },
         );
       },
     );

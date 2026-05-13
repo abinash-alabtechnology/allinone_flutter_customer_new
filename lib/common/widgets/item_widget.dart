@@ -1062,25 +1062,27 @@ class ItemWidgetStore extends StatelessWidget {
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            PriceConverter.convertPrice(item!.price, discount: discount, discountType: discountType),
-                                            style: robotoBold.copyWith(fontSize: 16, color: Colors.black),
-                                            textDirection: TextDirection.ltr,
-                                          ),
-                                          if (discount! > 0)
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
                                             Text(
-                                              PriceConverter.convertPrice(item!.price),
-                                              style: robotoRegular.copyWith(
-                                                fontSize: Dimensions.fontSizeExtraSmall,
-                                                color: Theme.of(context).disabledColor,
-                                                decoration: TextDecoration.lineThrough,
-                                              ),
+                                              PriceConverter.convertPrice(item!.price, discount: discount, discountType: discountType),
+                                              style: robotoBold.copyWith(fontSize: 16, color: Colors.black),
                                               textDirection: TextDirection.ltr,
                                             ),
-                                        ],
+                                            if (discount! > 0)
+                                              Text(
+                                                PriceConverter.convertPrice(item!.price),
+                                                style: robotoRegular.copyWith(
+                                                  fontSize: Dimensions.fontSizeExtraSmall,
+                                                  color: Theme.of(context).disabledColor,
+                                                  decoration: TextDecoration.lineThrough,
+                                                ),
+                                                textDirection: TextDirection.ltr,
+                                              ),
+                                          ],
+                                        ),
                                       ),
                                       
                                       if (!isStore && !fromCartSuggestion)

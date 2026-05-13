@@ -108,6 +108,16 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
     Get.find<ParcelController>().setCustomNoteController('', notify: false);
     Get.find<ParcelController>().setSelectedIndex(-1);
     Get.find<ParcelController>().setCustomNote('');
+
+    // Check delivery availability for the parcel pickup address
+    final pickupAddress = widget.pickedUpAddress;
+    if (pickupAddress.id != null) {
+      Get.find<CheckoutController>().checkAddressDelivery(
+        pickupAddress.id!,
+        0, // No store for parcel deliveries
+        notify: false,
+      );
+    }
   }
 
   @override

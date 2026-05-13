@@ -312,7 +312,7 @@ class _PaymentMethodBottomSheetState extends State<PaymentMethodBottomSheet> {
                 padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall, horizontal: Dimensions.paddingSizeLarge),
                 child: CustomButton(
                   buttonText: 'select'.tr,
-                  onPressed: () => Get.back(),
+                  onPressed: checkoutController.isDeliveryAvailable ? () => Get.back() : null,
                 ),
               ),
             ),

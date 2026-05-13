@@ -974,6 +974,7 @@
   "add_fund_to_wallet": "Add Fund to Wallet",
   "please_provide_transfer_amount": "Please provide transfer amount",
   "please_select_payment_method": "Please select payment method",
+  "payment_is_not_selected": "Payment is not selected",
   "do_you_want_to_cancel_this_add_fund": "Do you want to cancel this add fund?",
   "cancel_add_fund": "Cancel Add Fund",
   "your_have_balance_in_your_wallet": "Your have balance in your wallet",

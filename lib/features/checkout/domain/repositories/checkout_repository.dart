@@ -55,7 +55,7 @@ class CheckoutRepository implements CheckoutRepositoryInterface {
 
   @override
   Future<Response> placeOrder(PlaceOrderBodyModel orderBody, List<MultipartBody>? orderAttachment) async {
-    print("dsgdgfd ${orderBody.paymentMethod}");
+    debugPrint("====> Place Order Request: ${orderBody.toJson()}");
     if (orderBody.paymentMethod == 'digital_payment'&&!kIsWeb) {
       print("digitalpayment api works");
       return await apiClient.postMultipartData(

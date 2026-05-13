@@ -131,18 +131,24 @@ class SpecialOfferView extends StatelessWidget {
                                                 height: 500,
                                                 width: Get.width,
                                                 child: GridView.builder(
-                                                  scrollDirection: Axis.horizontal,
-                                                  padding: const EdgeInsets.only(left: Dimensions.paddingSizeDefault),
-                                                  physics: const ClampingScrollPhysics(),
-                                                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                                      crossAxisCount: 2,
-                                                      mainAxisSpacing: 12,
-                                                      mainAxisExtent: 120.w,
-                                                      crossAxisSpacing: 12,
-                                                    ),
+                                                  scrollDirection:
+                                                      Axis.horizontal,
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                        left: Dimensions
+                                                            .paddingSizeDefault,
+                                                      ),
+                                                  physics:
+                                                      const ClampingScrollPhysics(),
+                                                  gridDelegate:
+                                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                                        crossAxisCount: 2,
+                                                        mainAxisSpacing: 12,
+                                                        mainAxisExtent: 120.w,
+                                                        crossAxisSpacing: 12,
+                                                      ),
                                                   itemCount:
-                                                      discountedItemList
-                                                          .length,
+                                                      discountedItemList.length,
                                                   itemBuilder: (context, index) {
                                                     final controller =
                                                         Get.find<
@@ -154,8 +160,7 @@ class SpecialOfferView extends StatelessWidget {
                                                         item.discount;
                                                     String? discountType =
                                                         item.discountType;
-                                                    bool isPopularItem =
-                                                        false;
+                                                    bool isPopularItem = false;
 
                                                     bool isRightSide =
                                                         Get.find<
@@ -189,8 +194,9 @@ class SpecialOfferView extends StatelessWidget {
                                                         ? '${PriceConverter.convertPrice(offAmount)} ${'off'.tr}'
                                                         : '${PriceConverter.convertPrice(discount)} ${'off'.tr}';
 
-                                                    if (!controller
-                                                        .isAvailable(item)) {
+                                                    if (!controller.isAvailable(
+                                                      item,
+                                                    )) {
                                                       return const SizedBox.shrink();
                                                     }
                                                     return OnHover(
@@ -226,9 +232,10 @@ class SpecialOfferView extends StatelessWidget {
                                                                   Stack(
                                                                     children: [
                                                                       ClipRRect(
-                                                                        borderRadius: BorderRadius.circular(
-                                                                          20.r,
-                                                                        ),
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(
+                                                                              20.r,
+                                                                            ),
                                                                         child: CustomImage(
                                                                           isHovered:
                                                                               isHovered,
@@ -236,8 +243,8 @@ class SpecialOfferView extends StatelessWidget {
                                                                               Images.placeholder,
                                                                           image:
                                                                               '${item.imageFullUrl}',
-                                                                          fit:
-                                                                              BoxFit.cover,
+                                                                          fit: BoxFit
+                                                                              .cover,
                                                                           width:
                                                                               120.w,
                                                                           height:
@@ -349,10 +356,12 @@ class SpecialOfferView extends StatelessWidget {
                                                                               ? Alignment.center
                                                                               : Alignment.centerLeft,
                                                                           child: Column(
-                                                                            crossAxisAlignment: isPopularItem
+                                                                            crossAxisAlignment:
+                                                                                isPopularItem
                                                                                 ? CrossAxisAlignment.center
                                                                                 : CrossAxisAlignment.start,
-                                                                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                                            mainAxisAlignment:
+                                                                                MainAxisAlignment.spaceAround,
                                                                             children: [
                                                                               Text(
                                                                                 item.name ??
@@ -624,8 +633,12 @@ class SpecialOfferViewGrocery extends StatelessWidget {
                           end: Alignment.bottomCenter,
                           colors: [
                             Theme.of(context).primaryColor, // left green
-                            Theme.of(context).primaryColor.withValues(alpha: 0.4),
-                            Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                            Theme.of(
+                              context,
+                            ).primaryColor.withValues(alpha: 0.4),
+                            Theme.of(
+                              context,
+                            ).primaryColor.withValues(alpha: 0.1),
                           ],
                           stops: const [0.0, 0.25, 1.0], // uplifted mid-tone
                         ),
@@ -638,436 +651,439 @@ class SpecialOfferViewGrocery extends StatelessWidget {
                               constraints.maxWidth,
                             );
                             return SizedBox(
-                                height: 480.h,
-                                width: Get.width,
-                                child: GridView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  padding: const EdgeInsets.only(left: Dimensions.paddingSizeDefault),
-                                  physics: const ClampingScrollPhysics(),
-                                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 2,
-                                    mainAxisSpacing: 12,
-                                    mainAxisExtent: 120.w,
-                                    crossAxisSpacing: 12,
-                                  ),
-                              itemCount: discountedItemList.length,
-                              itemBuilder: (context, index) {
-                                final controller = Get.find<ItemController>();
-                                final item = discountedItemList[index];
-                                double? discount = item.discount;
-                                String? discountType = item.discountType;
-                                bool isPopularItem = false;
+                              height: 480.h,
+                              width: Get.width,
+                              child: GridView.builder(
+                                scrollDirection: Axis.horizontal,
+                                padding: const EdgeInsets.only(
+                                  left: Dimensions.paddingSizeDefault,
+                                ),
+                                physics: const ClampingScrollPhysics(),
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 2,
+                                      mainAxisSpacing: 12,
+                                      mainAxisExtent: 120.w,
+                                      crossAxisSpacing: 12,
+                                    ),
+                                itemCount: discountedItemList.length,
+                                itemBuilder: (context, index) {
+                                  final controller = Get.find<ItemController>();
+                                  final item = discountedItemList[index];
+                                  double? discount = item.discount;
+                                  String? discountType = item.discountType;
+                                  bool isPopularItem = false;
 
-                                bool isRightSide =
-                                    Get.find<SplashController>()
-                                        .configModel!
-                                        .currencySymbolDirection ==
-                                    'right';
-                                String currencySymbol =
-                                    Get.find<SplashController>()
-                                        .configModel!
-                                        .currencySymbol!;
-                                double originalPrice = item.price!;
-                                double offAmount = 0;
+                                  bool isRightSide =
+                                      Get.find<SplashController>()
+                                          .configModel!
+                                          .currencySymbolDirection ==
+                                      'right';
+                                  String currencySymbol =
+                                      Get.find<SplashController>()
+                                          .configModel!
+                                          .currencySymbol!;
+                                  double originalPrice = item.price!;
+                                  double offAmount = 0;
 
-                                if (discountType == 'percent') {
-                                  offAmount = (originalPrice * discount!) / 100;
-                                } else {
-                                  offAmount = discount!;
-                                }
-                                final String badgeText =
-                                    discountType == 'percent'
-                                    ? '${PriceConverter.convertPrice(offAmount)} ${'off'.tr}'
-                                    : '${PriceConverter.convertPrice(discount)} ${'off'.tr}';
+                                  if (discountType == 'percent') {
+                                    offAmount =
+                                        (originalPrice * discount!) / 100;
+                                  } else {
+                                    offAmount = discount!;
+                                  }
+                                  final String badgeText =
+                                      discountType == 'percent'
+                                      ? '${PriceConverter.convertPrice(offAmount)} ${'off'.tr}'
+                                      : '${PriceConverter.convertPrice(discount)} ${'off'.tr}';
 
-                                bool isOutOfStock(Item item) {
-                                  return item.stock != null && item.stock! <= 0;
-                                }
+                                  bool isOutOfStock(Item item) {
+                                    return item.stock != null &&
+                                        item.stock! <= 0;
+                                  }
 
-                                bool isItemAvailable(Item item) {
-                                  return Get.find<ItemController>().isAvailable(
-                                    item,
-                                  );
-                                }
+                                  bool isItemAvailable(Item item) {
+                                    return Get.find<ItemController>()
+                                        .isAvailable(item);
+                                  }
 
-                                final bool outOfStock = isOutOfStock(item);
-                                final bool available = isItemAvailable(item);
-                                final bool isDisabled =
-                                    !available || outOfStock;
+                                  final bool outOfStock = isOutOfStock(item);
+                                  final bool available = isItemAvailable(item);
+                                  final bool isDisabled =
+                                      !available || outOfStock;
 
-                                if (!controller.isAvailable(item)) {
-                                  return const SizedBox.shrink();
-                                }
-                                return IgnorePointer(
-                                  ignoring: isDisabled,
-                                  child: Opacity(
-                                    opacity: !isDisabled ? 1.0 : 0.55,
-                                    child: ColorFiltered(
-                                      colorFilter: !isDisabled
-                                          ? const ColorFilter.mode(
-                                              Colors.transparent,
-                                              BlendMode.multiply,
-                                            )
-                                          : const ColorFilter.matrix(<double>[
-                                              0.2126,
-                                              0.7152,
-                                              0.0722,
-                                              0,
-                                              0,
-                                              0.2126,
-                                              0.7152,
-                                              0.0722,
-                                              0,
-                                              0,
-                                              0.2126,
-                                              0.7152,
-                                              0.0722,
-                                              0,
-                                              0,
-                                              0,
-                                              0,
-                                              0,
-                                              1,
-                                              0,
-                                            ]),
-                                      child: OnHover(
-                                        isItem: true,
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(
-                                              Dimensions.radiusLarge,
+                                  if (!controller.isAvailable(item)) {
+                                    return const SizedBox.shrink();
+                                  }
+                                  return IgnorePointer(
+                                    ignoring: isDisabled,
+                                    child: Opacity(
+                                      opacity: !isDisabled ? 1.0 : 0.55,
+                                      child: ColorFiltered(
+                                        colorFilter: !isDisabled
+                                            ? const ColorFilter.mode(
+                                                Colors.transparent,
+                                                BlendMode.multiply,
+                                              )
+                                            : const ColorFilter.matrix(<double>[
+                                                0.2126,
+                                                0.7152,
+                                                0.0722,
+                                                0,
+                                                0,
+                                                0.2126,
+                                                0.7152,
+                                                0.0722,
+                                                0,
+                                                0,
+                                                0.2126,
+                                                0.7152,
+                                                0.0722,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                1,
+                                                0,
+                                              ]),
+                                        child: OnHover(
+                                          isItem: true,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                    Dimensions.radiusLarge,
+                                                  ),
+                                              color: Colors.transparent,
                                             ),
-                                            color: Colors.transparent,
-                                          ),
-                                          child: CustomInkWell(
-                                            onTap: () {
-                                              Get.find<ItemController>()
-                                                  .navigateToItemPage(
-                                                    item,
-                                                    context,
-                                                  );
-                                            },
-                                            radius: Dimensions.radiusLarge,
-                                            child: TextHover(
-                                              builder: (isHovered) {
-                                                return Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Stack(
-                                                      children: [
-                                                        ClipRRect(
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                20.r,
-                                                              ),
-                                                          child: CustomImage(
-                                                            isHovered:
-                                                                isHovered,
-                                                            placeholder: Images
-                                                                .placeholder,
-                                                            image:
-                                                                '${item.imageFullUrl}',
-                                                            fit: BoxFit.cover,
-                                                            width: 120.w,
-                                                            height: 130.h,
+                                            child: CustomInkWell(
+                                              onTap: () {
+                                                Get.find<ItemController>()
+                                                    .navigateToItemPage(
+                                                      item,
+                                                      context,
+                                                    );
+                                              },
+                                              radius: Dimensions.radiusLarge,
+                                              child: TextHover(
+                                                builder: (isHovered) {
+                                                  return Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Stack(
+                                                        children: [
+                                                          ClipRRect(
+                                                            borderRadius:
+                                                                BorderRadius.circular(
+                                                                  20.r,
+                                                                ),
+                                                            child: CustomImage(
+                                                              isHovered:
+                                                                  isHovered,
+                                                              placeholder: Images
+                                                                  .placeholder,
+                                                              image:
+                                                                  '${item.imageFullUrl}',
+                                                              fit: BoxFit.cover,
+                                                              width: 120.w,
+                                                              height: 130.h,
+                                                            ),
                                                           ),
+
+                                                          item.isStoreHalalActive! &&
+                                                                  item.isHalalItem!
+                                                              ? const Positioned(
+                                                                  top: 40,
+                                                                  right: 15,
+                                                                  child: CustomAssetImageWidget(
+                                                                    Images
+                                                                        .halalTag,
+                                                                    height: 20,
+                                                                    width: 20,
+                                                                  ),
+                                                                )
+                                                              : const SizedBox(),
+                                                          (discount > 0)
+                                                              ? Positioned(
+                                                                  top: 0,
+                                                                  left: 10,
+                                                                  right: 10,
+                                                                  child: DiscountBadge(
+                                                                    badgeText:
+                                                                        badgeText,
+                                                                  ),
+                                                                )
+                                                              : const SizedBox(),
+
+                                                          // OrganicTag(
+                                                          //     item: item,
+                                                          //     placeInImage: false),
+                                                          isShop
+                                                              ? const SizedBox()
+                                                              : Positioned(
+                                                                  bottom: 10,
+                                                                  right: 10.w,
+                                                                  child: CartCountViewGrocery(
+                                                                    item: item,
+                                                                    index:
+                                                                        index,
+                                                                  ),
+                                                                ),
+                                                        ],
+                                                      ),
+                                                      Padding(
+                                                        padding: EdgeInsets.only(
+                                                          left: Dimensions
+                                                              .paddingSizeSmall,
+                                                          right: isShop
+                                                              ? 0
+                                                              : Dimensions
+                                                                    .paddingSizeSmall,
+                                                          top: Dimensions
+                                                              .paddingSizeSmall,
+                                                          bottom: isShop
+                                                              ? 0
+                                                              : Dimensions
+                                                                    .paddingSizeSmall,
                                                         ),
+                                                        child: Stack(
+                                                          clipBehavior:
+                                                              Clip.none,
+                                                          children: [
+                                                            Align(
+                                                              alignment:
+                                                                  isPopularItem
+                                                                  ? Alignment
+                                                                        .center
+                                                                  : Alignment
+                                                                        .centerLeft,
+                                                              child: Column(
+                                                                crossAxisAlignment:
+                                                                    isPopularItem
+                                                                    ? CrossAxisAlignment
+                                                                          .center
+                                                                    : CrossAxisAlignment
+                                                                          .start,
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .spaceAround,
+                                                                children: [
+                                                                  Text(
+                                                                    item.name ??
+                                                                        '',
+                                                                    style: robotoBold
+                                                                        .copyWith(
+                                                                          fontSize:
+                                                                              11.sp,
+                                                                        ),
+                                                                    maxLines: 1,
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .ellipsis,
+                                                                  ),
+                                                                  Gap(5),
+                                                                  (isFood ||
+                                                                          isShop)
+                                                                      ? item.ratingCount! >
+                                                                                0
+                                                                            ? Row(
+                                                                                mainAxisAlignment: isPopularItem
+                                                                                    ? MainAxisAlignment.center
+                                                                                    : MainAxisAlignment.start,
+                                                                                children: [
+                                                                                  Icon(
+                                                                                    Icons.star,
+                                                                                    size: 14,
+                                                                                    color: Theme.of(
+                                                                                      context,
+                                                                                    ).primaryColor,
+                                                                                  ),
+                                                                                  const SizedBox(
+                                                                                    width: Dimensions.paddingSizeExtraSmall,
+                                                                                  ),
+                                                                                  Text(
+                                                                                    item.avgRating!.toStringAsFixed(
+                                                                                      1,
+                                                                                    ),
+                                                                                    style: robotoRegular.copyWith(
+                                                                                      fontSize: Dimensions.fontSizeSmall,
+                                                                                    ),
+                                                                                  ),
+                                                                                  const SizedBox(
+                                                                                    width: Dimensions.paddingSizeExtraSmall,
+                                                                                  ),
+                                                                                  Text(
+                                                                                    "(${item.ratingCount})",
+                                                                                    style: robotoRegular.copyWith(
+                                                                                      fontSize: Dimensions.fontSizeSmall,
+                                                                                      color: Theme.of(
+                                                                                        context,
+                                                                                      ).disabledColor,
+                                                                                    ),
+                                                                                  ),
+                                                                                ],
+                                                                              )
+                                                                            : const SizedBox()
+                                                                      : (Get.find<
+                                                                                  SplashController
+                                                                                >()
+                                                                                .configModel!
+                                                                                .moduleConfig!
+                                                                                .module!
+                                                                                .unit! &&
+                                                                            item.unitType !=
+                                                                                null)
+                                                                      ? Container(
+                                                                          decoration: BoxDecoration(
+                                                                            color: Theme.of(
+                                                                              context,
+                                                                            ).cardColor,
+                                                                            borderRadius: BorderRadius.circular(
+                                                                              8,
+                                                                            ),
+                                                                          ),
+                                                                          child: Padding(
+                                                                            padding: EdgeInsets.symmetric(
+                                                                              horizontal: 6.0,
+                                                                              vertical: 2.0,
+                                                                            ),
+                                                                            child: Text(
+                                                                              item.unitType ??
+                                                                                  '',
+                                                                              style: robotoRegular.copyWith(
+                                                                                fontSize: Dimensions.fontSizeExtraSmall,
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                        )
+                                                                      : const SizedBox(),
+                                                                  Gap(5),
 
-                                                        item.isStoreHalalActive! &&
-                                                                item.isHalalItem!
-                                                            ? const Positioned(
-                                                                top: 40,
-                                                                right: 15,
-                                                                child: CustomAssetImageWidget(
-                                                                  Images
-                                                                      .halalTag,
-                                                                  height: 20,
-                                                                  width: 20,
-                                                                ),
-                                                              )
-                                                            : const SizedBox(),
-                                                        (discount > 0)
-                                                            ? Positioned(
-                                                                top: 0,
-                                                                left: 10,
-                                                                right: 10,
-                                                                child: DiscountBadge(
-                                                                  badgeText:
-                                                                      badgeText,
-                                                                ),
-                                                              )
-                                                            : const SizedBox(),
+                                                                  discount > 0
+                                                                      ? Row(
+                                                                          children: [
+                                                                            Text(
+                                                                              "MRP ",
+                                                                              style: robotoRegular.copyWith(
+                                                                                fontSize: Dimensions.fontSizeExtraSmall,
+                                                                                color: Theme.of(
+                                                                                  context,
+                                                                                ).disabledColor,
+                                                                              ),
+                                                                            ),
+                                                                            Text(
+                                                                              PriceConverter.convertPrice(
+                                                                                Get.find<
+                                                                                      ItemController
+                                                                                    >()
+                                                                                    .getStartingPrice(
+                                                                                      item,
+                                                                                    ),
+                                                                              ),
+                                                                              style: robotoMedium.copyWith(
+                                                                                fontSize: Dimensions.fontSizeExtraSmall,
+                                                                                color: Theme.of(
+                                                                                  context,
+                                                                                ).disabledColor,
+                                                                                decoration: TextDecoration.lineThrough,
+                                                                              ),
+                                                                              textDirection: TextDirection.ltr,
+                                                                            ),
+                                                                          ],
+                                                                        )
+                                                                      : const SizedBox(),
+                                                                  // SizedBox(height: item.discount != null && item.discount! > 0 ? Dimensions.paddingSizeExtraSmall : 0),
+                                                                  Gap(5),
 
-                                                        // OrganicTag(
-                                                        //     item: item,
-                                                        //     placeInImage: false),
-                                                        isShop
-                                                            ? const SizedBox()
-                                                            : Positioned(
-                                                                bottom: 10,
-                                                                right: 10.w,
-                                                                child:
-                                                                    CartCountViewGrocery(
+                                                                  Text(
+                                                                    PriceConverter.convertPrice(
+                                                                      Get.find<
+                                                                            ItemController
+                                                                          >()
+                                                                          .getStartingPrice(
+                                                                            item,
+                                                                          ),
+                                                                      discount:
+                                                                          discount,
+                                                                      discountType:
+                                                                          discountType,
+                                                                    ),
+                                                                    textDirection:
+                                                                        TextDirection
+                                                                            .ltr,
+                                                                    style: robotoBold
+                                                                        .copyWith(
+                                                                          fontSize:
+                                                                              11.sp,
+                                                                        ),
+                                                                  ),
+
+                                                                  const SizedBox(
+                                                                    height: Dimensions
+                                                                        .paddingSizeExtraSmall,
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                            isShop
+                                                                ? Positioned(
+                                                                    bottom: 0,
+                                                                    right: 0,
+                                                                    child: CartCountView(
                                                                       item:
                                                                           item,
                                                                       index:
                                                                           index,
-                                                                    ),
-                                                              ),
-                                                      ],
-                                                    ),
-                                                    Padding(
-                                                      padding: EdgeInsets.only(
-                                                        left: Dimensions
-                                                            .paddingSizeSmall,
-                                                        right: isShop
-                                                            ? 0
-                                                            : Dimensions
-                                                                  .paddingSizeSmall,
-                                                        top: Dimensions
-                                                            .paddingSizeSmall,
-                                                        bottom: isShop
-                                                            ? 0
-                                                            : Dimensions
-                                                                  .paddingSizeSmall,
-                                                      ),
-                                                      child: Stack(
-                                                        clipBehavior: Clip.none,
-                                                        children: [
-                                                          Align(
-                                                            alignment:
-                                                                isPopularItem
-                                                                ? Alignment
-                                                                      .center
-                                                                : Alignment
-                                                                      .centerLeft,
-                                                            child: Column(
-                                                              crossAxisAlignment:
-                                                                  isPopularItem
-                                                                  ? CrossAxisAlignment
-                                                                        .center
-                                                                  : CrossAxisAlignment
-                                                                        .start,
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .spaceAround,
-                                                              children: [
-                                                                Text(
-                                                                  item.name ??
-                                                                      '',
-                                                                  style: robotoBold
-                                                                      .copyWith(
-                                                                        fontSize:
-                                                                            11.sp,
-                                                                      ),
-                                                                  maxLines: 1,
-                                                                  overflow:
-                                                                      TextOverflow
-                                                                          .ellipsis,
-                                                                ),
-                                                                Gap(5),
-                                                                (isFood ||
-                                                                        isShop)
-                                                                    ? item.ratingCount! >
-                                                                              0
-                                                                          ? Row(
-                                                                              mainAxisAlignment: isPopularItem
-                                                                                  ? MainAxisAlignment.center
-                                                                                  : MainAxisAlignment.start,
-                                                                              children: [
-                                                                                Icon(
-                                                                                  Icons.star,
-                                                                                  size: 14,
-                                                                                  color: Theme.of(
-                                                                                    context,
-                                                                                  ).primaryColor,
-                                                                                ),
-                                                                                const SizedBox(
-                                                                                  width: Dimensions.paddingSizeExtraSmall,
-                                                                                ),
-                                                                                Text(
-                                                                                  item.avgRating!.toStringAsFixed(
-                                                                                    1,
-                                                                                  ),
-                                                                                  style: robotoRegular.copyWith(
-                                                                                    fontSize: Dimensions.fontSizeSmall,
-                                                                                  ),
-                                                                                ),
-                                                                                const SizedBox(
-                                                                                  width: Dimensions.paddingSizeExtraSmall,
-                                                                                ),
-                                                                                Text(
-                                                                                  "(${item.ratingCount})",
-                                                                                  style: robotoRegular.copyWith(
-                                                                                    fontSize: Dimensions.fontSizeSmall,
-                                                                                    color: Theme.of(
-                                                                                      context,
-                                                                                    ).disabledColor,
-                                                                                  ),
-                                                                                ),
-                                                                              ],
-                                                                            )
-                                                                          : const SizedBox()
-                                                                    : (Get.find<
-                                                                                SplashController
-                                                                              >()
-                                                                              .configModel!
-                                                                              .moduleConfig!
-                                                                              .module!
-                                                                              .unit! &&
-                                                                          item.unitType !=
-                                                                              null)
-                                                                    ? Container(
+                                                                      child: Container(
+                                                                        height:
+                                                                            35,
+                                                                        width: double
+                                                                            .infinity,
                                                                         decoration: BoxDecoration(
                                                                           color: Theme.of(
                                                                             context,
+                                                                          ).primaryColor,
+                                                                          borderRadius: const BorderRadius.only(
+                                                                            topLeft: Radius.circular(
+                                                                              Dimensions.radiusLarge,
+                                                                            ),
+                                                                            bottomRight: Radius.circular(
+                                                                              Dimensions.radiusLarge,
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                        child: Icon(
+                                                                          Icons
+                                                                              .add,
+                                                                          color: Theme.of(
+                                                                            context,
                                                                           ).cardColor,
-                                                                          borderRadius:
-                                                                              BorderRadius.circular(
-                                                                                8,
-                                                                              ),
+                                                                          size:
+                                                                              20,
                                                                         ),
-                                                                        child: Padding(
-                                                                          padding: EdgeInsets.symmetric(
-                                                                            horizontal:
-                                                                                6.0,
-                                                                            vertical:
-                                                                                2.0,
-                                                                          ),
-                                                                          child: Text(
-                                                                            item.unitType ??
-                                                                                '',
-                                                                            style: robotoRegular.copyWith(
-                                                                              fontSize: Dimensions.fontSizeExtraSmall,
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                      )
-                                                                    : const SizedBox(),
-                                                                Gap(5),
-
-                                                                discount > 0
-                                                                    ? Row(
-                                                                        children: [
-                                                                          Text(
-                                                                            "MRP ",
-                                                                            style: robotoRegular.copyWith(
-                                                                              fontSize: Dimensions.fontSizeExtraSmall,
-                                                                              color: Theme.of(
-                                                                                context,
-                                                                              ).disabledColor,
-                                                                            ),
-                                                                          ),
-                                                                          Text(
-                                                                            PriceConverter.convertPrice(
-                                                                              Get.find<
-                                                                                    ItemController
-                                                                                  >()
-                                                                                  .getStartingPrice(
-                                                                                    item,
-                                                                                  ),
-                                                                            ),
-                                                                            style: robotoMedium.copyWith(
-                                                                              fontSize: Dimensions.fontSizeExtraSmall,
-                                                                              color: Theme.of(
-                                                                                context,
-                                                                              ).disabledColor,
-                                                                              decoration: TextDecoration.lineThrough,
-                                                                            ),
-                                                                            textDirection:
-                                                                                TextDirection.ltr,
-                                                                          ),
-                                                                        ],
-                                                                      )
-                                                                    : const SizedBox(),
-                                                                // SizedBox(height: item.discount != null && item.discount! > 0 ? Dimensions.paddingSizeExtraSmall : 0),
-                                                                Gap(5),
-
-                                                                Text(
-                                                                  PriceConverter.convertPrice(
-                                                                    Get.find<
-                                                                          ItemController
-                                                                        >()
-                                                                        .getStartingPrice(
-                                                                          item,
-                                                                        ),
-                                                                    discount:
-                                                                        discount,
-                                                                    discountType:
-                                                                        discountType,
-                                                                  ),
-                                                                  textDirection:
-                                                                      TextDirection
-                                                                          .ltr,
-                                                                  style: robotoBold
-                                                                      .copyWith(
-                                                                        fontSize:
-                                                                            11.sp,
-                                                                      ),
-                                                                ),
-
-                                                                const SizedBox(
-                                                                  height: Dimensions
-                                                                      .paddingSizeExtraSmall,
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ),
-                                                          isShop
-                                                              ? Positioned(
-                                                                  bottom: 0,
-                                                                  right: 0,
-                                                                  child: CartCountView(
-                                                                    item: item,
-                                                                    index:
-                                                                        index,
-                                                                    child: Container(
-                                                                      height:
-                                                                          35,
-                                                                      width: double
-                                                                          .infinity,
-                                                                      decoration: BoxDecoration(
-                                                                        color: Theme.of(
-                                                                          context,
-                                                                        ).primaryColor,
-                                                                        borderRadius: const BorderRadius.only(
-                                                                          topLeft: Radius.circular(
-                                                                            Dimensions.radiusLarge,
-                                                                          ),
-                                                                          bottomRight: Radius.circular(
-                                                                            Dimensions.radiusLarge,
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                      child: Icon(
-                                                                        Icons
-                                                                            .add,
-                                                                        color: Theme.of(
-                                                                          context,
-                                                                        ).cardColor,
-                                                                        size:
-                                                                            20,
                                                                       ),
                                                                     ),
-                                                                  ),
-                                                                )
-                                                              : const SizedBox(),
-                                                        ],
+                                                                  )
+                                                                : const SizedBox(),
+                                                          ],
+                                                        ),
                                                       ),
-                                                    ),
-                                                  ],
-                                                );
-                                              },
+                                                    ],
+                                                  );
+                                                },
+                                              ),
                                             ),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                );
-                              },
-                                )  );
+                                  );
+                                },
+                              ),
+                            );
                           },
                         ),
                       ),

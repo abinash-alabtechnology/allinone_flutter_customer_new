@@ -27,7 +27,7 @@ class AppConstants {
   static const String submitCaptainReviewUri = '/api/v1/customer/captain-review/submit';
   static const String captainReviewRatingUri = '/api/v1/captain-review/rating/';
   ///
-  static const Color backgroundColor = Color(0xFFFF8110); // Vibrant Pink/Magenta
+  static const Color backgroundColor = Color(0xFFF8FAFC); // Off-white/Light grey
 
 
 

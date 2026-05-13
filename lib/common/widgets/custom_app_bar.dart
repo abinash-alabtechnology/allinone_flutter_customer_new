@@ -86,7 +86,7 @@ class CustomAppBar2 extends StatelessWidget implements PreferredSizeWidget {
               fontSize: Dimensions.fontSizeLarge,
               fontWeight: FontWeight.w600,
               color: Theme.of(context).textTheme.bodyLarge!.color)),
-      centerTitle: false,
+      centerTitle: true,
       leading: backButton
           ? IconButton(
         icon: leadingIcon != null
@@ -162,14 +162,15 @@ class CustomAppBar3 extends StatelessWidget implements PreferredSizeWidget {
     return ResponsiveHelper.isDesktop(context)
         ? const WebMenuBar()
         : AppBar(
-      elevation: 0,
-      backgroundColor: bgcolor ?? Theme.of(context).primaryColor,
-      surfaceTintColor: Colors.transparent,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          bottom: Radius.circular(30),
-        ),
-      ),
+            centerTitle: true,
+            elevation: 0,
+            backgroundColor: bgcolor ?? Theme.of(context).primaryColor,
+            surfaceTintColor: Colors.transparent,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(
+                bottom: Radius.circular(30),
+              ),
+            ),
 
       title: Text(
         title.toUpperCase(),

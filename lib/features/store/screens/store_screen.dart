@@ -1086,7 +1086,7 @@ class _StoreScreenState extends State<StoreScreen> {
                                                                   context,
                                                                 )
                                                                 ? 500
-                                                                : 140,
+                                                                : 180,
                                                             padding: const EdgeInsets.only(
                                                               right: Dimensions
                                                                   .paddingSizeSmall,

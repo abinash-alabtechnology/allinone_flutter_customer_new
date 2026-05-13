@@ -50,6 +50,7 @@ class PlaceOrderBodyModel {
   String? _startDate;
   String? _endDate;
   String? _dropTime;
+  double? _deliveryCharge;
   PlaceOrderBodyModel({
     required List<OnlineCart> cart,
     required double? couponDiscountAmount,
@@ -98,6 +99,7 @@ class PlaceOrderBodyModel {
     String? startDate,
     String? endDate,
     String? dropTime,
+    double? deliveryCharge,
 
   }) {
     _cart = cart;
@@ -147,6 +149,7 @@ class PlaceOrderBodyModel {
     _startDate = startDate;
     _endDate = endDate;
     _dropTime = dropTime;
+    _deliveryCharge = deliveryCharge;
   }
 
   List<OnlineCart>? get cart => _cart;
@@ -195,6 +198,7 @@ class PlaceOrderBodyModel {
   String? get startDate => _startDate;
   String? get endDate => _endDate;
   String? get dropTime => _dropTime;
+  double? get deliveryCharge => _deliveryCharge;
 
   PlaceOrderBodyModel.fromJson(Map<String, dynamic> json) {
     if (json['cart'] != null) {
@@ -250,6 +254,7 @@ class PlaceOrderBodyModel {
     _startDate = json['start_date'];
     _endDate = json['end_date'];
     _dropTime = json['drop_time'];
+    _deliveryCharge = json['delivar_charge'] != null ? double.parse(json['delivar_charge'].toString()) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -336,6 +341,9 @@ class PlaceOrderBodyModel {
     }
     if(_dropTime != null) {
       data['drop_time'] = _dropTime!;
+    }
+    if(_deliveryCharge != null) {
+      data['delivar_charge'] = _deliveryCharge.toString();
     }
 
     return data;
