@@ -26,3 +26,6 @@ samples, guidance on mobile development, and a full API reference.
 # last updation         : 09-05-2026
 ## by                   : Rubini
 ### purpose of upload   :  working on the feature enhancement.
+
+# apk version         : 1.0.0
+## apk date            : 15-05-2026

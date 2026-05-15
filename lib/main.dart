@@ -161,6 +161,17 @@ class _MyAppState extends State<MyApp> {
     return GetBuilder<ThemeController>(builder: (themeController) {
       return GetBuilder<LocalizationController>(builder: (localizeController) {
         return GetBuilder<SplashController>(builder: (splashController) {
+          Color primaryColor = const Color(0xFFFF8110);
+          Color secondaryColor = const Color(0xFF22C55E);
+          if (splashController.module != null) {
+            if (splashController.module!.moduleType.toString() == AppConstants.pharmacy) {
+              primaryColor = const Color(0xFF16A34A);
+            } else if (splashController.module!.moduleType.toString() == AppConstants.grocery) {
+              primaryColor = const Color(0xFF1E7F35);
+              secondaryColor = const Color(0xFF00E676);
+            }
+          }
+
           return (GetPlatform.isWeb && splashController.configModel == null) ? const SizedBox() :
           ScreenUtilInit(
             designSize: const Size(375, 812),  // match your Figma design device
@@ -173,7 +184,7 @@ class _MyAppState extends State<MyApp> {
               scrollBehavior: const MaterialScrollBehavior().copyWith(
                 dragDevices: {PointerDeviceKind.mouse, PointerDeviceKind.touch},
               ),
-              theme: themeController.darkTheme ? dark(color: splashController.module != null && splashController.module!.moduleType.toString() == AppConstants.pharmacy ? const Color(0xFF16A34A) : const Color(0xFFFF8110)) : light(color: splashController.module != null && splashController.module!.moduleType.toString() == AppConstants.pharmacy ? const Color(0xFF16A34A) : const Color(0xFFFF8110)),
+              theme: themeController.darkTheme ? dark(color: primaryColor, secondaryColor: secondaryColor) : light(color: primaryColor, secondaryColor: secondaryColor),
               locale: localizeController.locale,
               translations: Messages(languages: widget.languages),
               fallbackLocale: Locale(AppConstants.languages[0].languageCode!, AppConstants.languages[0].countryCode),

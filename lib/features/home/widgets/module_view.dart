@@ -161,8 +161,8 @@ class ModuleView extends StatelessWidget {
 
                     if (title.toLowerCase().contains('grocery') || mType == 'grocery') {
                       subtitle = 'Essentials & Daily Needs';
-                      bgColor = const Color(0xFF22C55E); // Green 500
-                      iconColor = const Color(0xFF16A34A);
+                      bgColor = const Color(0xFF1E7F35); // Dark Green
+                      iconColor = const Color(0xFF00E676); // Vibrant Green
                       iconData = Icons.shopping_cart_outlined;
                       localAsset = 'assets/image/groceryicon.png';
                     } else if (title.toLowerCase().contains('meat') || title.toLowerCase().contains('fish') || mType == 'meat') {

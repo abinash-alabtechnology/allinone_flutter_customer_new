@@ -2029,6 +2029,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
     StreamSubscription bookingListener, [
     Timer? countdownTimer,
     bool showConfirmation = true,
+    String reason = "user request",
   ]) {
     bookingTimer?.cancel();
     bookingListener.cancel();
@@ -2047,7 +2048,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
       showBookingCancelledBottomSheet(
         Get.context!,
         null,
-        "user request",
+        reason,
       ).then((_) {
         Get.find<SplashController>().showBottomNavBar();
         Get.offAll(() => const DashboardScreen(
@@ -2086,7 +2087,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
       ),
       builder: (BuildContext bottomSheetContext) {
         Timer? countdownTimer;
-        int remainingSeconds = 300; // 5 minutes
+        int remainingSeconds = 10; // 5 minutes
         // startRetryTimer(bottomSheetContext, bookingId, retryCount);
 
         final dbRef = FirebaseDatabase.instanceFor(
@@ -2165,7 +2166,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
             if (countdownTimer == null) {
               countdownTimer = Timer.periodic(const Duration(seconds: 1), (
                 timer,
-              ) {
+              ) async {
                 if (remainingSeconds > 0) {
                   if (context.mounted) {
                     setState(() {
@@ -2174,6 +2175,25 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                   }
                 } else {
                   timer.cancel();
+                  // Cancel the ride via API if no driver found within time
+                  Map<String, dynamic> bookingcancelData = {
+                    "booking_id": bookingId,
+                    "cancel_reason": "No Driver Found",
+                    "type": "user",
+                  };
+                  await vehicleController.cancelBookingAndVerify(
+                    bookingcancelData,
+                    bookingId,
+                  );
+
+                  _handleRideCancellation(
+                    bottomSheetContext,
+                    safeContext,
+                    bookingListener,
+                    timer,
+                    true,
+                    "No Driver Found",
+                  );
                 }
               });
             }

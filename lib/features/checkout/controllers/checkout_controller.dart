@@ -271,6 +271,14 @@ class CheckoutController extends GetxController implements GetxService {
       }
       
       _deliveryCharge = (charge != null && charge != 0) ? charge : -1;
+
+      if (_paymentMethodIndex == 0 && !_codAvailable) {
+        _paymentMethodIndex = -1;
+      } else if (_paymentMethodIndex == 1 && !_walletAvailable) {
+        _paymentMethodIndex = -1;
+      } else if (_paymentMethodIndex == 2 && !_digitalPaymentAvailable) {
+        _paymentMethodIndex = -1;
+      }
     } else {
       _isDeliveryAvailable = false;
       _deliveryMessage = (response.body != null && response.body is Map && response.body['message'] != null)

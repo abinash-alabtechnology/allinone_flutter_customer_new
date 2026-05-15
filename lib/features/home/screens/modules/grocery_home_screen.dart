@@ -283,10 +283,10 @@ class _GroceryHomeScreenState extends State<GroceryHomeScreen> {
                                             decoration: BoxDecoration(
                                               borderRadius:
                                                   BorderRadius.circular(8),
-                                              color: const Color(0xFF4BB045),
+                                              color: const Color(0xFF1E7F35),
                                               border: Border.all(
                                                 width: 1.5,
-                                                color: const Color(0xFF4BB055),
+                                                color: const Color(0xFF00E676),
                                               ),
                                             ),
                                             child: Padding(

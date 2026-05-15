@@ -81,7 +81,7 @@ class _CartScreenState extends State<CartScreen> {
                 const NoDataScreen(isCart: true, text: '', showFooter: true),
                 const SizedBox(height: Dimensions.paddingSizeLarge),
                 CustomButton(
-                  buttonText: 'shop_now'.tr,
+                  buttonText: 'Shop Now'.tr,
                   width: 200,
                   onPressed: () => Get.offAllNamed(RouteHelper.getInitialRoute()),
                 ),

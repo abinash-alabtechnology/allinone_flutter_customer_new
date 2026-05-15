@@ -93,7 +93,6 @@ class CheckoutScreenState extends State<CheckoutScreen> {
   double? _payableAmount = 0;
   double badWeatherChargeForToolTip = 0;
   double extraChargeForToolTip = 0;
-  bool isPassedVariationPrice = false;
 
   final TextEditingController guestContactPersonNameController = TextEditingController();
   final TextEditingController guestContactPersonNumberController = TextEditingController();
@@ -214,6 +213,8 @@ class CheckoutScreenState extends State<CheckoutScreen> {
       }
       if (store != null && neaddress[0].id != null) {
         checkoutController.checkAddressDelivery(neaddress[0].id!, store.id!, notify: false);
+      } else if (widget.storeId != null && neaddress[0].id != null) {
+        checkoutController.checkAddressDelivery(neaddress[0].id!, widget.storeId!, notify: false);
       }
     }
 
@@ -305,13 +306,20 @@ class CheckoutScreenState extends State<CheckoutScreen> {
           .find<CartController>()
           .cartList) : _cartList!.addAll(widget.cartList!);
       if (_cartList != null && _cartList!.isNotEmpty) {
-        Get.find<CheckoutController>().initCheckoutData(
-            _cartList![0]!.item!.storeId);
+        await Get.find<CheckoutController>().initCheckoutData(_cartList![0]!.item!.storeId);
+        AddressModel? userAddress = AddressHelper.getUserAddressFromSharedPref();
+        if (userAddress != null && userAddress.id != null) {
+          Get.find<CheckoutController>().checkAddressDelivery(userAddress.id!, _cartList![0]!.item!.storeId!);
+        }
         Get.find<StoreController>().getCartStoreSuggestedItemList(_cartList![0]!.item!.storeId);
       }
     }
     if (widget.storeId != null) {
-      Get.find<CheckoutController>().initCheckoutData(widget.storeId);
+      await Get.find<CheckoutController>().initCheckoutData(widget.storeId);
+      AddressModel? address = AddressHelper.getUserAddressFromSharedPref();
+      if (address != null && address.id != null) {
+        Get.find<CheckoutController>().checkAddressDelivery(address.id!, widget.storeId!);
+      }
       Get.find<StoreController>().getCartStoreSuggestedItemList(widget.storeId);
       Get.find<CouponController>().removeCouponData(false);
     }
@@ -688,12 +696,14 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                 ? 0
                 : _calculateotherCharge(checkoutController);
 
+            bool taxIncluded = (checkoutController.taxIncluded == 1);
+
             double total = _calculateTotal(
               subTotal: subTotal,
               deliveryCharge: deliveryCharge,
               discount: discount,
               couponDiscount: couponDiscount,
-              taxIncluded: (checkoutController.taxIncluded == 1),
+              taxIncluded: taxIncluded,
               tax: checkoutController.orderTax!,
               orderType: checkoutController.orderType!,
               tips: checkoutController.tips,
@@ -1129,9 +1139,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                   guestConfirmPasswordController: guestConfirmPasswordController,
                                   guestPasswordNode: guestPasswordNode,
                                   guestConfirmPasswordNode: guestConfirmPasswordNode,
-                                  variationPrice: isPassedVariationPrice
-                                      ? variations
-                                      : 0,
+                                  variationPrice: variations,
                                   deliveryChargeForView: _deliveryChargeForView,
                                   badWeatherCharge: badWeatherChargeForToolTip,
                                   extraChargeForToolTip: extraChargeForToolTip,
@@ -1146,9 +1154,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                   subTotal: subTotal,
                                   discount: discount,
                                   couponController: couponController,
-                                  taxIncluded: (checkoutController
-                                      .taxIncluded ==
-                                      1),
+                                  taxIncluded: taxIncluded,
                                   tax: checkoutController.orderTax!,
                                   deliveryCharge: deliveryCharge,
                                   todayClosed: todayClosed,
@@ -1173,13 +1179,15 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                     isPrescriptionRequired,
                                   ),
                                   referralDiscount: referralDiscount,
-                                  variationPrice: isPassedVariationPrice
-                                      ? variations
-                                      : 0,
+                                  variationPrice: variations,
                                   extraDiscount: extraDiscount,
                                 )),
                               ]))
-                                    : isPharmacy ? _pharmacyCheckoutBody(checkoutController, total, _isCashOnDeliveryActive!, _isDigitalPaymentActive!, _isWalletActive, _isOfflinePaymentActive, isPrescriptionRequired) : Column(crossAxisAlignment: CrossAxisAlignment.start,
+                                    : isPharmacy ? _pharmacyCheckoutBody(
+                                        checkoutController, total, _isCashOnDeliveryActive!, _isDigitalPaymentActive!, _isWalletActive, _isOfflinePaymentActive,
+                                        isPrescriptionRequired, deliveryCharge, subTotal, discount, couponDiscount, taxIncluded, checkoutController.orderTax!,
+                                        checkoutController.tips, additionalCharge, extraPackagingCharge, otherCharge, referralDiscount,
+                                    ) : Column(crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
 
                               TopSection(
@@ -1214,9 +1222,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                 guestConfirmPasswordController: guestConfirmPasswordController,
                                 guestPasswordNode: guestPasswordNode,
                                 guestConfirmPasswordNode: guestConfirmPasswordNode,
-                                variationPrice: isPassedVariationPrice
-                                    ? variations
-                                    : 0,
+                                variationPrice: variations,
                                 deliveryChargeForView: _deliveryChargeForView,
                                 badWeatherCharge: badWeatherChargeForToolTip,
                                 extraChargeForToolTip: extraChargeForToolTip,
@@ -1229,8 +1235,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                 subTotal: subTotal,
                                 discount: discount,
                                 couponController: couponController,
-                                taxIncluded: (checkoutController.taxIncluded ==
-                                    1),
+                                taxIncluded: taxIncluded,
                                 tax: checkoutController.orderTax!,
                                 deliveryCharge: deliveryCharge,
                                 todayClosed: todayClosed,
@@ -1255,9 +1260,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                   isPrescriptionRequired,
                                 ),
                                 referralDiscount: referralDiscount,
-                                variationPrice: isPassedVariationPrice
-                                    ? variations
-                                    : 0,
+                                variationPrice: variations,
                                 extraDiscount: extraDiscount,
                               )
                             ]),
@@ -1516,7 +1519,11 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     });
   }
 
-  Widget _pharmacyCheckoutBody(CheckoutController checkoutController, double total, bool isCashOnDeliveryActive, bool isDigitalPaymentActive, bool isWalletActive, bool isOfflinePaymentActive, bool isPrescriptionRequired) {
+  Widget _pharmacyCheckoutBody(
+      CheckoutController checkoutController, double total, bool isCashOnDeliveryActive, bool isDigitalPaymentActive, bool isWalletActive,
+      bool isOfflinePaymentActive, bool isPrescriptionRequired, double deliveryCharge, double subTotal, double discount, double couponDiscount,
+      bool taxIncluded, double tax, double tips, double additionalCharge, double extraPackagingCharge, double otherCharge, double referralDiscount,
+  ) {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
@@ -1533,6 +1540,39 @@ class CheckoutScreenState extends State<CheckoutScreen> {
         PrescriptionImagePickerWidget(checkoutController: checkoutController, storeId: widget.storeId, isPrescriptionRequired: isPrescriptionRequired),
         const SizedBox(height: Dimensions.paddingSizeSmall),
         NoteAndPrescriptionSection(checkoutController: checkoutController, storeId: widget.storeId),
+        const SizedBox(height: Dimensions.paddingSizeLarge),
+
+        // Bill Details Section
+        Container(
+          padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)],
+          ),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('Bill Details', style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
+            const SizedBox(height: Dimensions.paddingSizeSmall),
+            
+            _priceRow('Item Total', subTotal),
+            if (discount > 0) _priceRow('Item Discount', -discount),
+            if (couponDiscount > 0) _priceRow('Coupon Discount', -couponDiscount),
+            if (referralDiscount > 0) _priceRow('Referral Discount', -referralDiscount),
+            _priceRow('Delivery Fee', deliveryCharge),
+            if (extraPackagingCharge > 0) _priceRow('Packaging Charges', extraPackagingCharge),
+            if (additionalCharge > 0) _priceRow('Additional Charge', additionalCharge),
+            if (otherCharge > 0) _priceRow('Other Charge', otherCharge),
+            if (tips > 0) _priceRow('Tips', tips),
+            if (tax > 0) _priceRow(taxIncluded ? 'Tax (Included)' : 'Tax', tax),
+            
+            const Divider(),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              Text('Total Amount', style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
+              Text(PriceConverter.convertPrice(total), style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge, color: const Color(0xFF16A34A))),
+            ]),
+          ]),
+        ),
+        const SizedBox(height: 100),
       ]),
     );
   }
@@ -1555,9 +1595,10 @@ class CheckoutScreenState extends State<CheckoutScreen> {
           Text(selectedAddress?.addressType?.tr ?? 'Home', style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
           InkWell(
             onTap: () async {
-              var result = await Get.toNamed(RouteHelper.getAddAddressRoute(true, false, checkoutController.store!.zoneId));
-              if (result != null && result is AddressModel) {
-                 // The address controller will update, and we might need to refresh
+              await Get.toNamed(RouteHelper.getAccessLocationRoute('checkout'));
+              AddressModel? addressModel = AddressHelper.getUserAddressFromSharedPref();
+              if (addressModel != null && addressModel.id != null && checkoutController.store != null) {
+                checkoutController.checkAddressDelivery(addressModel.id!, checkoutController.store!.id!);
               }
             },
             child: Text('Change', style: robotoBold.copyWith(color: const Color(0xFF16A34A), fontSize: Dimensions.fontSizeSmall)),
@@ -1579,7 +1620,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
 
   Widget _pharmacyPaymentMethodsList(CheckoutController checkoutController, double total, bool isCashOnDeliveryActive, bool isDigitalPaymentActive, bool isWalletActive, bool isOfflinePaymentActive) {
     return Column(children: [
-      if (isDigitalPaymentActive)
+      if (isDigitalPaymentActive && widget.storeId == null && checkoutController.digitalPaymentAvailable)
         _pharmacyPaymentCard(
           title: 'Online Payment',
           subtitle: 'UPI, Credit/Debit Card, Net Banking',
@@ -1592,13 +1633,22 @@ class CheckoutScreenState extends State<CheckoutScreen> {
           customIcon: Image.asset(Images.digitalPay, height: 18),
         ),
 
-      if (isCashOnDeliveryActive)
+      if (isCashOnDeliveryActive && checkoutController.codAvailable)
         _pharmacyPaymentCard(
           title: 'Cash On Delivery',
           subtitle: 'Pay when you receive',
           icon: Icons.account_balance_wallet_outlined,
           isSelected: checkoutController.paymentMethodIndex == 0,
           onTap: () => checkoutController.setPaymentMethod(0),
+        ),
+
+      if (isWalletActive && widget.storeId == null && checkoutController.walletAvailable)
+        _pharmacyPaymentCard(
+          title: 'Wallet Payment',
+          subtitle: 'Pay from your wallet balance',
+          icon: Icons.wallet_outlined,
+          isSelected: checkoutController.paymentMethodIndex == 1,
+          onTap: () => checkoutController.setPaymentMethod(1),
         ),
     ]);
   }
@@ -1640,18 +1690,18 @@ class CheckoutScreenState extends State<CheckoutScreen> {
       ),
       child: SafeArea(
         child: InkWell(
-          onTap: (checkoutController.isLoading || !checkoutController.isDeliveryAvailable) ? null : () => _onPlaceOrderPressed(
+          onTap: (checkoutController.isLoading || !checkoutController.isDeliveryAvailable || checkoutController.paymentMethodIndex == -1) ? (checkoutController.paymentMethodIndex == -1 ? () => showCustomSnackBar('payment_is_not_selected'.tr) : null) : () => _onPlaceOrderPressed(
             checkoutController, todayClosed, tomorrowClosed, orderAmount, deliveryCharge, tax, discount, total, maxCodOrderAmount, isPrescriptionRequired,
           ),
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
             decoration: BoxDecoration(
-              color: const Color(0xFF16A34A),
+              color: (checkoutController.isDeliveryAvailable && checkoutController.paymentMethodIndex != -1) ? const Color(0xFF16A34A) : Colors.grey,
               borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
             ),
             child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Text('Place Order', style: robotoBold.copyWith(color: Colors.white, fontSize: Dimensions.fontSizeLarge)),
+              Text(!checkoutController.isDeliveryAvailable ? 'Delivery is unavailable' : checkoutController.paymentMethodIndex == -1 ? 'Select Payment Method' : 'Place Order', style: robotoBold.copyWith(color: Colors.white, fontSize: Dimensions.fontSizeLarge)),
               const SizedBox(height: 2),
               Text('Total Amount: ${PriceConverter.convertPrice(total)}', style: robotoMedium.copyWith(color: Colors.white, fontSize: Dimensions.fontSizeDefault)),
             ]),
@@ -2061,8 +2111,9 @@ class CheckoutScreenState extends State<CheckoutScreen> {
 
   double _calculateVariationPrice({required Store? store, required List<
       CartModel?>? cartList, int days = 1, bool hasSubscription = false, bool calculateDiscount = false, bool calculateWithoutDiscount = false}) {
-    double variationPrice = 0;
-    double variationDiscount = 0;
+    double variationPrice = 0; // This will hold the discounted variation price
+    double variationWithoutDiscountPrice = 0; // This will hold the full variation price
+    
     if (store != null && cartList != null) {
       for (var cartModel in cartList) {
         double? discount = cartModel!.item!.discount;
@@ -2072,7 +2123,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
             .find<SplashController>()
             .getModuleConfig(cartModel.item!.moduleType)
             .newVariation!) {
-          isPassedVariationPrice = true;
+          // Food variations
           for (int index = 0; index <
               cartModel.item!.foodVariations!.length; index++) {
             for (int i = 0; i <
@@ -2083,19 +2134,20 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                     cartModel.item!.foodVariations![index].variationValues![i]
                         .optionPrice!, discount, discountType,
                     isFoodVariation: true)! * cartModel.quantity!);
-                double vDiscount = (cartModel.item!.foodVariations![index].variationValues![i]
+                double vFullPrice = (cartModel.item!.foodVariations![index].variationValues![i]
                     .optionPrice! * cartModel.quantity!);
 
                 if(hasSubscription || (cartModel.isSubscribed ?? false)) {
                   vPrice = vPrice * days;
-                  vDiscount = vDiscount * days;
+                  vFullPrice = vFullPrice * days;
                 }
                 variationPrice += vPrice;
-                variationDiscount += vDiscount;
+                variationWithoutDiscountPrice += vFullPrice;
               }
             }
           }
         } else {
+          // Non-food variations (Grocery, etc.)
           String variationType = '';
           for (int i = 0; i < cartModel.variation!.length; i++) {
             variationType = cartModel.variation![i].type!;
@@ -2104,33 +2156,31 @@ class CheckoutScreenState extends State<CheckoutScreen> {
           if (cartModel.item!.variations!.isNotEmpty) {
             for (Variation variation in cartModel.item!.variations!) {
               if (variation.type == variationType) {
-                double vPrice = (variation.price! * cartModel.quantity!);
+                double vFullPrice = (variation.price! * cartModel.quantity!);
+                double vDiscountedPrice = (PriceConverter.convertWithDiscount(
+                    variation.price!, discount, discountType)! * cartModel.quantity!);
+                
                 if(hasSubscription || (cartModel.isSubscribed ?? false)) {
-                  vPrice = vPrice * days;
+                  vFullPrice = vFullPrice * days;
+                  vDiscountedPrice = vDiscountedPrice * days;
                 }
-                variationPrice += vPrice;
+                variationWithoutDiscountPrice += vFullPrice;
+                variationPrice += vDiscountedPrice;
                 break;
               }
             }
           } else {
-            double vDiscount = (PriceConverter.convertWithDiscount(
-                cartModel.item!.price!, discount, discountType)! *
-                cartModel.quantity!);
-            double vPrice = (cartModel.item!.price! * cartModel.quantity!);
-            if(hasSubscription || (cartModel.isSubscribed ?? false)) {
-              vDiscount = vDiscount * days;
-              vPrice = vPrice * days;
-            }
-            variationDiscount += vDiscount;
-            variationPrice += vPrice;
+            // For items without variations, the price is already handled in _calculatePrice.
+            // We don't add anything here to avoid double-counting.
           }
         }
       }
     }
+    
     if (calculateDiscount) {
-      return (variationDiscount - variationPrice);
+      return (variationWithoutDiscountPrice - variationPrice);
     } else if (calculateWithoutDiscount) {
-      return variationDiscount;
+      return variationWithoutDiscountPrice;
     } else {
       return variationPrice;
     }
@@ -2509,321 +2559,6 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     return PriceConverter.toFixed(referralDiscount);
   }
 
-  Widget _buildPharmacyCheckoutUI(
-    CheckoutController checkoutController, CartController cartController, CouponController couponController,
-    double total, double subTotal, double? discount, double referralDiscount, double orderAmount,
-    double? maxCodOrderAmount, double originalCharge, double deliveryCharge, List<DropdownItem<int>> addressList,
-    bool tomorrowClosed, bool todayClosed, bool isPrescriptionRequired, Module? module, double variations,
-    double? itemDiscountPrice,
-  ) {
-    bool isDesktop = ResponsiveHelper.isDesktop(context);
-
-    return Column(
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            controller: _scrollController,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Center(
-              child: SizedBox(
-                width: Dimensions.webMaxWidth,
-                child: Column(
-                  children: [
-                    // Pharmacy Items List
-                    ListView.builder(
-                      physics: const NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: cartController.cartList.length,
-                      itemBuilder: (context, index) {
-                        return Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, spreadRadius: 1)],
-                            border: Border.all(color: Colors.grey.shade100),
-                          ),
-                          child: CartItemWidget(
-                            fromCheckout: true,
-                            cart: cartController.cartList[index],
-                            cartIndex: index,
-                            addOns: cartController.addOnsList[index],
-                            isAvailable: cartController.availableList[index],
-                            showDivider: index != cartController.cartList.length - 1,
-                          ),
-                        );
-                      },
-                    ),
-
-
-
-                    // Delivery Address Card
-                    Container(
-                      margin: const EdgeInsets.all(16),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10)],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('Deliver to', style: robotoBold.copyWith(fontSize: 16)),
-                              InkWell(
-                                onTap: () => Get.toNamed(RouteHelper.getAccessLocationRoute('checkout')),
-                                child: Text('Change', style: robotoBold.copyWith(color: const Color(0xFF16A34A), fontSize: 13)),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              const Icon(Icons.location_on_outlined, color: Colors.grey, size: 20),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  AddressHelper.getUserAddressFromSharedPref()?.address ?? 'Select Address',
-                                  style: robotoRegular.copyWith(fontSize: 14, color: Colors.grey.shade700),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // Prescription Section (if required)
-                    if (isPrescriptionRequired)
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 16),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFEF9C3).withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0xFFFEF08A)),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                const Icon(Icons.description_outlined, color: Color(0xFF854D0E), size: 20),
-                                const SizedBox(width: 8),
-                                Text('Prescription Required', style: robotoBold.copyWith(fontSize: 14, color: const Color(0xFF854D0E))),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                             Text('This order contains items that require a valid medical prescription.', 
-                              style: robotoRegular.copyWith(fontSize: 12, color: const Color(0xFF854D0E))),
-                            const SizedBox(height: 12),
-
-                            if(checkoutController.pickedPrescriptions.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: SizedBox(
-                                  height: 60,
-                                  child: ListView.builder(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: checkoutController.pickedPrescriptions.length,
-                                    itemBuilder: (context, index) {
-                                      return Container(
-                                        margin: const EdgeInsets.only(right: 8),
-                                        width: 60,
-                                        height: 60,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(8),
-                                          border: Border.all(color: const Color(0xFFFEF08A)),
-                                          image: DecorationImage(
-                                            image: FileImage(File(checkoutController.pickedPrescriptions[index].path)),
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
-                            CustomButton(
-                              buttonText: 'Upload Prescription',
-                              onPressed: () => Get.to(() => const PrescriptionUploadScreen()),
-                              radius: 8,
-                              height: 35,
-                              color: const Color(0xFF854D0E),
-                              fontSize: 12,
-                            ),
-                          ],
-                        ),
-                      ),
-
-                    // Bill Details Card
-                    Container(
-                      margin: const EdgeInsets.all(16),
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10)],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Bill Details', style: robotoBold.copyWith(fontSize: 16)),
-                          const SizedBox(height: 20),
-                          _buildBillRow('Item Total', PriceConverter.convertPrice(subTotal)),
-                          const SizedBox(height: 12),
-                          _buildBillRow('Delivery Fee', deliveryCharge == 0 ? 'FREE' : PriceConverter.convertPrice(deliveryCharge), isGreen: deliveryCharge == 0),
-                          if (discount! > 0) ...[
-                            const SizedBox(height: 12),
-                            _buildBillRow('Discount', '- ${PriceConverter.convertPrice(discount)}', isGreen: true),
-                          ],
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            child: Divider(height: 1, color: Color(0xFFF1F5F9)),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('Total Amount', style: robotoBold.copyWith(fontSize: 18)),
-                              PriceConverter.convertAnimationPrice(
-                                total,
-                                textStyle: robotoBold.copyWith(fontSize: 18, color: const Color(0xFF16A34A)),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Payment Method Section
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10)],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('Payment Method', style: robotoBold.copyWith(fontSize: 16)),
-                              if (checkoutController.paymentMethodIndex != -1)
-                                TextButton(
-                                  onPressed: !checkoutController.isDeliveryAvailable ? null : () => _onPlaceOrderPressed(checkoutController, todayClosed, tomorrowClosed, orderAmount, deliveryCharge, checkoutController.orderTax!, discount, total, maxCodOrderAmount, isPrescriptionRequired),
-                                  child: Text('Change', style: robotoMedium.copyWith(color: const Color(0xFF16A34A))),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          if (checkoutController.paymentMethodIndex == -1)
-                            InkWell(
-                              onTap: !checkoutController.isDeliveryAvailable ? null : () => _onPlaceOrderPressed(checkoutController, todayClosed, tomorrowClosed, orderAmount, deliveryCharge, checkoutController.orderTax!, discount, total, maxCodOrderAmount, isPrescriptionRequired),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFF1F5F9),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: const Color(0xFFE2E8F0)),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(Icons.account_balance_wallet_outlined, color: Color(0xFF64748B)),
-                                    const SizedBox(width: 12),
-                                    Text('Select Payment Method', style: robotoMedium.copyWith(color: const Color(0xFF64748B))),
-                                    const Spacer(),
-                                    const Icon(Icons.chevron_right, color: Color(0xFF64748B)),
-                                  ],
-                                ),
-                              ),
-                            )
-                          else
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF0FDF4),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: const Color(0xFFDCFCE7)),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    checkoutController.paymentMethodIndex == 0 ? Icons.money : 
-                                    checkoutController.paymentMethodIndex == 1 ? Icons.account_balance_wallet : 
-                                    checkoutController.paymentMethodIndex == 2 ? Icons.payment : Icons.offline_pin,
-                                    color: const Color(0xFF16A34A),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    checkoutController.paymentMethodIndex == 0 ? 'Cash on Delivery' : 
-                                    checkoutController.paymentMethodIndex == 1 ? 'Wallet' : 
-                                    checkoutController.paymentMethodIndex == 2 ? checkoutController.digitalPaymentName ?? 'Digital Payment' : 'Offline Payment',
-                                    style: robotoMedium.copyWith(color: const Color(0xFF16A34A)),
-                                  ),
-                                  const Spacer(),
-                                  const Icon(Icons.check_circle, color: const Color(0xFF16A34A), size: 20),
-                                ],
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 100), // Space for sticky button
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-
-        // Sticky Action Bar
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, -5))],
-          ),
-          child: SafeArea(
-            child: Row(
-              children: [
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Total Amount', style: robotoRegular.copyWith(fontSize: 12, color: Colors.grey)),
-                    PriceConverter.convertAnimationPrice(total, textStyle: robotoBold.copyWith(fontSize: 20, color: const Color(0xFF16A34A))),
-                  ],
-                ),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: CustomButton(
-                    buttonText: widget.fromCart ? 'Proceed to Payment' : 'Place Order',
-                    onPressed: (checkoutController.acceptTerms && checkoutController.isDeliveryAvailable) ? () => _onPlaceOrderPressed(
-                      checkoutController, todayClosed, tomorrowClosed, orderAmount, deliveryCharge,
-                      checkoutController.orderTax!, discount, total, maxCodOrderAmount, isPrescriptionRequired,
-                    ) : null,
-                    radius: 12,
-                    height: 50,
-                    color: const Color(0xFF16A34A),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _buildBillRow(String label, String value, {bool isGreen = false}) {
     return Row(

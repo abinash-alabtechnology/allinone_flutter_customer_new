@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:handy_allinone/util/app_constants.dart';
 
-ThemeData dark({Color color = const Color(0xFF2563EB)}) => ThemeData(
+ThemeData dark({Color color = const Color(0xFF2563EB), Color secondaryColor = const Color(0xFF22C55E)}) => ThemeData(
   fontFamily: AppConstants.fontFamily,
   primaryColor: color,
-  secondaryHeaderColor: const Color(0xFF22C55E),
+  secondaryHeaderColor: secondaryColor,
   disabledColor: const Color(0xffa2a7ad),
   brightness: Brightness.dark,
   hintColor: const Color(0xFFbebebe),
@@ -12,7 +12,7 @@ ThemeData dark({Color color = const Color(0xFF2563EB)}) => ThemeData(
   shadowColor: Colors.white.withValues(alpha: 0.03),
   textTheme: const TextTheme(bodyMedium: TextStyle(color: Colors.white70)),
   textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: color)),
-  colorScheme: ColorScheme.dark(primary: color, secondary: const Color(0xFF22C55E)).copyWith(surface: const Color(0xFF191A26)).copyWith(error: const Color(0xFFE84D4F)),
+  colorScheme: ColorScheme.dark(primary: color, secondary: secondaryColor).copyWith(surface: const Color(0xFF191A26)).copyWith(error: const Color(0xFFE84D4F)),
   popupMenuTheme: const PopupMenuThemeData(color: Color(0xFF29292D), surfaceTintColor: Color(0xFF29292D)),
   dialogTheme: const DialogThemeData(surfaceTintColor: Colors.white10),
   floatingActionButtonTheme: FloatingActionButtonThemeData(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(500))),

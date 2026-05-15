@@ -1798,12 +1798,11 @@ class ConfirmParcelRequest extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               CustomButton(
-                buttonText: checkoutController.isDeliveryAvailable
-                    ? 'confirm_parcel_request'.tr
-                    : 'Delivery is unavailable',
+                buttonText: 'confirm_parcel_request'.tr,
                 isLoading: parcelController.isLoading,
-                onPressed: (parcelController.acceptTerms && checkoutController.isDeliveryAvailable)
+                onPressed: parcelController.acceptTerms
                     ? () {
+
                         if (parcelController.distance == -1) {
                           showCustomSnackBar('delivery_fee_not_set_yet'.tr);
                         } else if (parcelController.tips < 0) {
