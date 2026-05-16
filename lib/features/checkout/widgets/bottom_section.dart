@@ -1,4 +1,5 @@
 import 'package:dotted_border/dotted_border.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:handy_allinone/common/widgets/custom_tool_tip_widget.dart';
@@ -136,7 +137,7 @@ class _BottomSectionState extends State<BottomSection> {
         _priceRow('Packaging Fee', widget.checkoutController.store!.extraPackagingAmount!),
 
       if (widget.storeId == null && widget.checkoutController.store!.otherchargeenabled == true)
-        _priceRow(widget.checkoutController.store?.otherchargelabel ?? "Other Fee", widget.checkoutController.store!.otherchargeamount!),
+        _priceRow((widget.checkoutController.store?.otherchargelabel ?? "Other Fee").capitalizeFirst!, widget.checkoutController.store!.otherchargeamount!),
 
       if (widget.tax > 0) _priceRow('VAT/Tax', widget.tax),
       if (!takeAway && Get.find<SplashController>().configModel!.dmTipsStatus == 1 && widget.checkoutController.tips > 0)
@@ -153,12 +154,20 @@ class _BottomSectionState extends State<BottomSection> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: robotoRegular.copyWith(color: Colors.grey.shade600, fontSize: 14)),
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              color: const Color(0xFF6B7280),
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
           Text(
             (isDiscount ? '(-) ' : '') + PriceConverter.convertPrice(amount),
-            style: robotoMedium.copyWith(
-              color: isDiscount ? Colors.green : Colors.black87,
+            style: GoogleFonts.inter(
+              color: isDiscount ? const Color(0xFF10B981) : const Color(0xFF111827),
               fontSize: 14,
+              fontWeight: FontWeight.w600,
             ),
             textDirection: TextDirection.ltr,
           ),

@@ -31,6 +31,11 @@ import '../../notification/controllers/notification_controller.dart';
 import '../../profile/controllers/profile_controller.dart';
 import 'package:handy_allinone/features/home/widgets/request_based_delivery_widget.dart';
 import '../../store/screens/store_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:handy_allinone/Taxi/Taxi_home.dart';
+import 'package:handy_allinone/Taxi/ridesummary.dart';
+import 'package:handy_allinone/Taxi/sharedservice.dart';
 
 class ModuleView extends StatelessWidget {
   final ScrollController scrollController;
@@ -137,92 +142,251 @@ class ModuleView extends StatelessWidget {
         Skeletonizer(
           enabled: splashController.moduleList == null,
           child: (splashController.moduleList != null && splashController.moduleList!.isNotEmpty)
-              ? GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
-                    mainAxisExtent: 85,
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  itemCount: splashController.moduleList!.length,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemBuilder: (context, index) {
-                    final module = splashController.moduleList![index];
-                    String title = module.moduleName ?? '';
-                    String subtitle = '';
-                    Color bgColor = Colors.white;
-                    Color iconColor = Colors.green;
-                    IconData iconData = Icons.shopping_basket;
-                    String? localAsset;
+              ? (() {
+                  final List<Map<String, dynamic>> extraModules = [
+                    {
+                      'title': 'Travels',
+                      'subtitle': 'Coming soon...',
+                      'imageAsset': Images.travelsIcon,
+                      'color': const Color(0xFFF59E0B), // Amber 500
+                      'iconColor': const Color(0xFFD97706),
+                      'isComingSoon': true,
+                    },
+                    {
+                      'title': 'Rental',
+                      'subtitle': 'Cars, bikes & commercial...',
+                      'imageAsset': Images.rentalIcon,
+                      'color': const Color(0xFF3B82F6), // Blue 500
+                      'iconColor': const Color(0xFF2563EB),
+                      'isComingSoon': false,
+                    },
+                    {
+                      'title': 'Handyman',
+                      'subtitle': 'Coming soon...',
+                      'imageAsset': Images.handymanIcon,
+                      'color': const Color(0xFF10B981), // Emerald 500
+                      'iconColor': const Color(0xFF059669),
+                      'isComingSoon': true,
+                    },
+                    {
+                      'title': 'Utility',
+                      'subtitle': 'Coming soon...',
+                      'imageAsset': Images.utilityIcon,
+                      'color': const Color(0xFF6366F1), // Indigo 500
+                      'iconColor': const Color(0xFF4F46E5),
+                      'isComingSoon': true,
+                    },
+                  ];
 
-                    String mType = module.moduleType ?? '';
+                  return GridView.builder(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 12,
+                      mainAxisExtent: 85,
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    itemCount: splashController.moduleList!.length + extraModules.length,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      if (index < splashController.moduleList!.length) {
+                        final module = splashController.moduleList![index];
+                        String title = module.moduleName ?? '';
+                        String subtitle = '';
+                        Color bgColor = Colors.white;
+                        Color iconColor = Colors.green;
+                        IconData iconData = Icons.shopping_basket;
+                        String? localAsset;
 
-                    if (title.toLowerCase().contains('grocery') || mType == 'grocery') {
-                      subtitle = 'Essentials & Daily Needs';
-                      bgColor = const Color(0xFF1E7F35); // Dark Green
-                      iconColor = const Color(0xFF00E676); // Vibrant Green
-                      iconData = Icons.shopping_cart_outlined;
-                      localAsset = 'assets/image/groceryicon.png';
-                    } else if (title.toLowerCase().contains('meat') || title.toLowerCase().contains('fish') || mType == 'meat') {
-                      subtitle = 'Premium Fresh Cuts & Seafood';
-                      bgColor = const Color(0xFFEF4444);
-                      iconColor = const Color(0xFFB91C1C);
-                      iconData = Icons.kebab_dining;
-                      localAsset = Images.meatModule;
-                    } else if (title.toLowerCase().contains('food') || mType == 'food') {
-                      subtitle = 'Restaurants & Meals';
-                      bgColor = const Color(0xFFF97316); // Orange 500
-                      iconColor = const Color(0xFFEA580C);
-                      iconData = Icons.restaurant_outlined;
-                      localAsset = 'assets/image/foodicon.png';
-                    } else if (title.toLowerCase().contains('taxi') || title.toLowerCase().contains('ride') || title.toLowerCase().contains('cab') || title.toLowerCase().contains('auto') || mType == 'taxi') {
-                      subtitle = 'Book Rides Instantly';
-                      bgColor = const Color(0xFF14B8A6); // Teal 500
-                      iconColor = const Color(0xFF0D9488);
-                      iconData = Icons.local_taxi_outlined;
-                      localAsset = 'assets/image/taxiicon1.png';
-                    } else if (title.toLowerCase().contains('parcel') || mType == 'parcel') {
-                      subtitle = 'Send & Track';
-                      bgColor = const Color(0xFFEF4444); // Red 500
-                      iconColor = const Color(0xFFDC2626);
-                      iconData = Icons.inventory_2_outlined;
-                      localAsset = 'assets/image/parcelicon.png';
-                    } else if (title.toLowerCase().contains('pharmacy') || mType == 'pharmacy') {
-                      subtitle = 'Medicines & Health';
-                      bgColor = const Color(0xFF0EA5E9); // Sky 500
-                      iconColor = const Color(0xFF0284C7);
-                      iconData = Icons.medical_services_outlined;
-                      localAsset = 'assets/image/pharmacyicon.png';
-                    } else if (title.toLowerCase().contains('shop') || title.toLowerCase().contains('ecommerce') || title.toLowerCase().contains('market') || mType == 'ecommerce') {
-                      subtitle = 'Shop Your Favorites';
-                      bgColor = const Color(0xFF8B5CF6); // Violet 500
-                      iconColor = const Color(0xFF7C3AED);
-                      iconData = Icons.shopping_bag_outlined;
-                    } else {
-                      subtitle = module.description ?? 'Quality Services';
-                      bgColor = Colors.blueGrey;
-                      iconColor = Colors.grey;
-                    }
+                        String mType = module.moduleType ?? '';
 
-                    return _buildModuleCard(
-                      context,
-                      title: title,
-                      subtitle: subtitle,
-                      imageUrl: module.iconFullUrl,
-                      iconAsset: localAsset,
-                      icon: iconData,
-                      color: bgColor,
-                      iconColor: iconColor,
-                      onTap: () {
-                        splashController.showBottomNavBar();
-                        scrollController.animateTo(0, duration: const Duration(milliseconds: 400), curve: Curves.easeIn);
-                        splashController.switchModule(index, true);
-                      },
-                    );
-                  },
-                )
+                        if (title.toLowerCase().contains('grocery') || mType == 'grocery') {
+                          subtitle = 'Essentials & Daily Needs';
+                          bgColor = const Color(0xFF1E7F35); // Dark Green
+                          iconColor = const Color(0xFF00E676); // Vibrant Green
+                          iconData = Icons.shopping_cart_outlined;
+                          localAsset = 'assets/image/groceryicon.png';
+                        } else if (title.toLowerCase().contains('meat') || title.toLowerCase().contains('fish') || mType == 'meat') {
+                          subtitle = 'Premium Fresh Cuts & Seafood';
+                          bgColor = const Color(0xFFEF4444);
+                          iconColor = const Color(0xFFB91C1C);
+                          iconData = Icons.kebab_dining;
+                          localAsset = Images.meatModule;
+                        } else if (title.toLowerCase().contains('food') || mType == 'food') {
+                          subtitle = 'Restaurants & Meals';
+                          bgColor = const Color(0xFFF97316); // Orange 500
+                          iconColor = const Color(0xFFEA580C);
+                          iconData = Icons.restaurant_outlined;
+                          localAsset = 'assets/image/foodicon.png';
+                        } else if (title.toLowerCase().contains('taxi') || title.toLowerCase().contains('ride') || title.toLowerCase().contains('cab') || title.toLowerCase().contains('auto') || mType == 'taxi' || mType == AppConstants.taxi) {
+                          subtitle = 'Book Rides Instantly';
+                          bgColor = const Color(0xFF14B8A6); // Teal 500
+                          iconColor = const Color(0xFF0D9488);
+                          iconData = Icons.local_taxi_outlined;
+                          localAsset = 'assets/image/taxiicon1.png';
+                        } else if (title.toLowerCase().contains('parcel') || mType == 'parcel') {
+                          subtitle = 'Send & Track';
+                          bgColor = const Color(0xFFEF4444); // Red 500
+                          iconColor = const Color(0xFFDC2626);
+                          iconData = Icons.inventory_2_outlined;
+                          localAsset = 'assets/image/parcelicon.png';
+                        } else if (title.toLowerCase().contains('pharmacy') || mType == 'pharmacy') {
+                          subtitle = 'Medicines & Health';
+                          bgColor = const Color(0xFF0EA5E9); // Sky 500
+                          iconColor = const Color(0xFF0284C7);
+                          iconData = Icons.medical_services_outlined;
+                          localAsset = 'assets/image/pharmacyicon.png';
+                        } else if (title.toLowerCase().contains('shop') || title.toLowerCase().contains('ecommerce') || title.toLowerCase().contains('market') || mType == 'ecommerce') {
+                          subtitle = 'Shop Your Favorites';
+                          bgColor = const Color(0xFF8B5CF6); // Violet 500
+                          iconColor = const Color(0xFF7C3AED);
+                          iconData = Icons.shopping_bag_outlined;
+                        } else {
+                          subtitle = module.description ?? 'Quality Services';
+                          bgColor = Colors.blueGrey;
+                          iconColor = Colors.grey;
+                        }
+
+                        return _buildModuleCard(
+                          context,
+                          title: title,
+                          subtitle: subtitle,
+                          imageUrl: module.iconFullUrl,
+                          iconAsset: localAsset,
+                          icon: iconData,
+                          color: bgColor,
+                          iconColor: iconColor,
+                          onTap: () async {
+                            splashController.showBottomNavBar();
+                            scrollController.animateTo(0, duration: const Duration(milliseconds: 400), curve: Curves.easeIn);
+                            
+                            bool isTaxiModule = mType == AppConstants.taxi || title.toLowerCase().contains('taxi') || title.toLowerCase().contains('ride');
+                            
+                            if (isTaxiModule) {
+                              // For taxi, manually set the module to avoid switchModule's navigation to index 0
+                              splashController.setModule(splashController.moduleList![index]);
+                            } else {
+                              splashController.switchModule(index, true);
+                            }
+                            
+                            // If it's a taxi module, implement the ride flow
+                            if (mType == AppConstants.taxi || title.toLowerCase().contains('taxi') || title.toLowerCase().contains('ride')) {
+                              var ongoingBooking = await SharedService.getOngoingBooking();
+                              // Fallback to basic booking info if ongoing (with driver) is null
+                              ongoingBooking ??= await SharedService.getBookingIdFromPrefs();
+
+                              if (ongoingBooking != null) {
+                                int bookingId = ongoingBooking['bookingId'];
+                                int? driverId = ongoingBooking['driverId']; // Can be null for pending
+                                int userId = ongoingBooking['userId'];
+                                String otp = ongoingBooking['otp'];
+
+                                final ref = FirebaseDatabase.instanceFor(
+                                  app: Firebase.app(),
+                                  databaseURL: AppConstants.firebaseDBURL,
+                                ).ref('bookings/$bookingId');
+                                
+                                final snapshot = await ref.child('ride_status').get();
+                                if (snapshot.exists) {
+                                  String status = snapshot.value.toString();
+                                  if (['accepted', 'arrived', 'in_progress', 'dropped'].contains(status)) {
+                                    Get.to(() => RideConfirmedScreen(
+                                      Bookingid: bookingId,
+                                      driverid: driverId ?? 0,
+                                      userId: userId,
+                                      otp: otp,
+                                    ));
+                                    return;
+                                  } else if (status == 'pending') {
+                                    Get.to(() => Taxihome(
+                                      showBottomSheet: true,
+                                      bookingId: bookingId,
+                                      userId: userId,
+                                      otp: otp,
+                                    ));
+                                    return;
+                                  }
+                                }
+                              }
+                              Get.offAllNamed(RouteHelper.getMainRoute('cart')); // 'cart' maps to index 2 in RouteHelper
+                            }
+                          },
+                        );
+                      } else {
+                        // Extra Modules Logic
+                        int extraIndex = index - splashController.moduleList!.length;
+                        final extra = extraModules[extraIndex];
+
+                        return _buildModuleCard(
+                          context,
+                          title: extra['title'],
+                          subtitle: extra['subtitle'],
+                          iconAsset: extra['imageAsset'],
+                          color: extra['color'],
+                          iconColor: extra['iconColor'],
+                          onTap: extra['isComingSoon'] == true ? () {} : () async {
+                            // Find the taxi/ride module index from the actual list
+                            int taxiIndex = splashController.moduleList!.indexWhere((m) =>
+                                (m.moduleName?.toLowerCase().contains('taxi') ?? false) ||
+                                (m.moduleName?.toLowerCase().contains('ride') ?? false) ||
+                                m.moduleType == 'taxi' ||
+                                m.moduleType == AppConstants.taxi);
+
+                            if (taxiIndex != -1) {
+                              splashController.showBottomNavBar();
+                              scrollController.animateTo(0, duration: const Duration(milliseconds: 400), curve: Curves.easeIn);
+                              // Manually set the module to avoid switchModule's navigation to index 0
+                              splashController.setModule(splashController.moduleList![taxiIndex]);
+                            }
+                            
+                            // Replicate the exact Ride tab flow from DashboardScreen
+                            var ongoingBooking = await SharedService.getOngoingBooking();
+                            // Fallback to basic booking info if ongoing (with driver) is null
+                            ongoingBooking ??= await SharedService.getBookingIdFromPrefs();
+
+                            if (ongoingBooking != null) {
+                              int bookingId = ongoingBooking['bookingId'];
+                              int? driverId = ongoingBooking['driverId']; // Can be null for pending
+                              int userId = ongoingBooking['userId'];
+                              String otp = ongoingBooking['otp'];
+
+                              final ref = FirebaseDatabase.instanceFor(
+                                app: Firebase.app(),
+                                databaseURL: AppConstants.firebaseDBURL,
+                                ).ref('bookings/$bookingId');
+                              
+                              final snapshot = await ref.child('ride_status').get();
+                              if (snapshot.exists) {
+                                String status = snapshot.value.toString();
+                                if (['accepted', 'arrived', 'in_progress', 'dropped'].contains(status)) {
+                                  Get.to(() => RideConfirmedScreen(
+                                    Bookingid: bookingId,
+                                    driverid: driverId ?? 0,
+                                    userId: userId,
+                                    otp: otp,
+                                  ));
+                                  return;
+                                } else if (status == 'pending') {
+                                  Get.to(() => Taxihome(
+                                    showBottomSheet: true,
+                                    bookingId: bookingId,
+                                    userId: userId,
+                                    otp: otp,
+                                  ));
+                                  return;
+                                }
+                              }
+                            }
+                            
+                            // If no ongoing ride, go to the default Ride tab
+                            Get.offAllNamed(RouteHelper.getMainRoute('cart')); // 'cart' maps to index 2 in RouteHelper
+                          },
+                        );
+                      }
+                    },
+                  );
+                })()
               : notInYourAreaWidget(),
         ),
 
@@ -471,18 +635,18 @@ class ModuleView extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: 44,
-                height: 44,
+                width: 52,
+                height: 52,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withOpacity(0.12),
                   shape: BoxShape.circle,
                 ),
                 child: Center(
                   child: iconAsset != null
-                      ? Image.asset(iconAsset, height: 28, width: 28)
+                      ? Image.asset(iconAsset, height: 36, width: 36)
                       : imageUrl != null
-                          ? CustomImage(image: imageUrl, height: 24, width: 24, color: iconColor)
-                          : Icon(icon, color: iconColor, size: 24),
+                          ? CustomImage(image: imageUrl, height: 32, width: 32, color: iconColor)
+                          : Icon(icon, color: iconColor, size: 28),
                 ),
               ),
               const SizedBox(width: 10),

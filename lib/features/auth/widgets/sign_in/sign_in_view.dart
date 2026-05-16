@@ -427,6 +427,8 @@ else{
       List<int> encoded = utf8.encode(password);
       String data = base64Encode(encoded);
       String token = status.authResponseModel!.token??'';
+      _phoneController.clear();
+      _passwordController.clear();
       if(Get.find<SplashController>().configModel!.firebaseOtpVerification!) {
         Get.find<AuthController>().firebaseVerifyPhoneNumber(phone, token, CentralizeLoginType.manual.name, fromSignUp: true);
       } else {
@@ -437,6 +439,8 @@ else{
       List<int> encoded = utf8.encode(password);
       String data = base64Encode(encoded);
       String token = status.authResponseModel!.token??'';
+      _phoneController.clear();
+      _passwordController.clear();
       Get.toNamed(RouteHelper.getVerificationRoute(null, email, token, RouteHelper.signUp, data, CentralizeLoginType.manual.name));
     } else {
       if(widget.backFromThis) {
@@ -461,6 +465,8 @@ else{
       await Get.find<FavouriteController>().getFavouriteList();
     }
     if(response.authResponseModel != null && !response.authResponseModel!.isPhoneVerified!) {
+      _phoneController.clear();
+      _passwordController.clear();
       if(Get.find<SplashController>().configModel!.firebaseOtpVerification!) {
         Get.find<AuthController>().firebaseVerifyPhoneNumber(countryDialCode + phone, '', CentralizeLoginType.otp.name, fromSignUp: true);
       } else {

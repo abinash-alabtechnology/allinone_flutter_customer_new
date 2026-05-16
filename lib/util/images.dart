@@ -57,7 +57,7 @@ class Images {
   ///
   static const String itemdetail = 'assets/image/itemdetail.png';
 
-  static const String logo = 'assets/image/logo.jpeg';
+  static const String logo = 'assets/image/logo.png';
   static const String offergif = 'assets/animation/offer.gif';
   static const String spendMoney = 'assets/image/presents.png';
   static const String addMoney = 'assets/image/rupee.png';
@@ -385,4 +385,9 @@ class Images {
 
   static const String mapIconExtended = 'assets/json/map-picker-1.json';
   static const String mapIconMinimised = 'assets/json/map-picker-2.json';
+
+  static const String travelsIcon = 'assets/image/travels_icon.png';
+  static const String rentalIcon = 'assets/image/rental_icon.png';
+  static const String handymanIcon = 'assets/image/handyman_icon.png';
+  static const String utilityIcon = 'assets/image/utility_icon.png';
 }

@@ -114,7 +114,7 @@ dependencies:
   loading_animation_widget: ^1.3.0
   scratcher: ^2.5.0
 icons_launcher:
-  image_path: "assets/image/logo.jpeg"
+  image_path: "assets/image/logo.png"
   platforms:
     android:
       enable: true

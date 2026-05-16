@@ -1337,12 +1337,12 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                         child: Row(
                                           children: [
                                             Text(
-                                              "View Details",
+                                              checkoutController.isAmountExpanded ? "hide_details".tr : "view_details".tr,
                                               style: robotoBold.copyWith(color: Colors.white, fontSize: 12),
                                             ),
                                             const SizedBox(width: 6),
                                             Icon(
-                                              checkoutController.isAmountExpanded ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_up,
+                                              checkoutController.isAmountExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
                                               color: Colors.white,
                                               size: 16,
                                             ),

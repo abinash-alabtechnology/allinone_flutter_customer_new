@@ -189,7 +189,7 @@ class SplashScreenState extends State<SplashScreen> {
 
     return Scaffold(
       key: _globalKey,
-      backgroundColor: backgroundColor,
+      // backgroundColor: backgroundColor,
       body: GetBuilder<SplashController>(
         builder: (splashController) {
           return Center(

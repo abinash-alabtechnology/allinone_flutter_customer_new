@@ -131,8 +131,6 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
     }
   }
 
-
-
   Future<void> _getCurrentLocation() async {
     _startAllMarkersAnimation();
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -510,8 +508,6 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
     }
   }
 
-
-
   double _calculateDistanceKm() {
     final dx = _pickupLatLng!.latitude - _dropoffLatLng!.latitude;
     final dy = _pickupLatLng!.longitude - _dropoffLatLng!.longitude;
@@ -730,7 +726,11 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            Icon(Icons.arrow_forward_ios, color: Colors.grey.shade400, size: 14),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: Colors.grey.shade400,
+              size: 14,
+            ),
           ],
         ),
       ),
@@ -827,14 +827,19 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                     width: 48,
                     height: 48,
                     fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) =>
-                        const Icon(Icons.directions_car, size: 32, color: Colors.grey),
+                    errorBuilder: (_, __, ___) => const Icon(
+                      Icons.directions_car,
+                      size: 32,
+                      color: Colors.grey,
+                    ),
                     loadingBuilder: (_, child, loadingProgress) {
                       if (loadingProgress == null) return child;
                       return const SizedBox(
                         width: 48,
                         height: 48,
-                        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                        child: Center(
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
                       );
                     },
                   ),
@@ -856,7 +861,11 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          Icon(Icons.person, size: 14, color: Colors.grey.shade600),
+                          Icon(
+                            Icons.person,
+                            size: 14,
+                            color: Colors.grey.shade600,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             subtitle,
@@ -867,7 +876,13 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                           ),
                           const SizedBox(width: 12),
                           if (eta.isNotEmpty) ...[
-                            Icon(Icons.access_time_filled, size: 14, color: Theme.of(context).primaryColor.withOpacity(0.7)),
+                            Icon(
+                              Icons.access_time_filled,
+                              size: 14,
+                              color: Theme.of(
+                                context,
+                              ).primaryColor.withOpacity(0.7),
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               eta,
@@ -885,7 +900,9 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                           description,
                           style: robotoRegular.copyWith(
                             fontSize: 11,
-                            color: isSelected ? Colors.grey.shade700 : Colors.grey.shade500,
+                            color: isSelected
+                                ? Colors.grey.shade700
+                                : Colors.grey.shade500,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -903,7 +920,9 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                       price,
                       style: robotoBold.copyWith(
                         fontSize: 19,
-                        color: hasDiscount ? const Color(0xFF2E7D32) : Colors.black, // Dark green for discount
+                        color: hasDiscount
+                            ? const Color(0xFF2E7D32)
+                            : Colors.black, // Dark green for discount
                       ),
                     ),
                     if (hasDiscount)
@@ -918,10 +937,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                                 color: Colors.grey.shade500,
                               ),
                             ),
-                            Container(
-                              height: 1,
-                              color: Colors.grey.shade500,
-                            ),
+                            Container(height: 1, color: Colors.grey.shade500),
                           ],
                         ),
                       ),
@@ -936,7 +952,10 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                 top: -24,
                 right: -10,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.orange.shade700,
                     borderRadius: BorderRadius.circular(8),
@@ -1137,7 +1156,9 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                           selectedVehicle.pricePerMin,
                         );
                         final discountedFare = _calculateDiscountedFare(
-                            originalFare, selectedVehicle.discount);
+                          originalFare,
+                          selectedVehicle.discount,
+                        );
 
                         return Padding(
                           padding: const EdgeInsets.only(
@@ -1163,7 +1184,8 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                                       final phone = _phoneController.text;
 
                                       DateTime now = DateTime.now();
-                                      DateTime scheduledDateTime = DateTime.now();
+                                      DateTime scheduledDateTime =
+                                          DateTime.now();
 
                                       Map<String, dynamic> bookingData = {
                                         "pickup_location": _pickupAddress,
@@ -1175,8 +1197,9 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                                             _dropoffLatLng!.longitude,
                                         "distance_km": _calculateDistanceKm()
                                             .toStringAsFixed(2),
-                                        "fare_amount":
-                                            discountedFare.round().toString(),
+                                        "fare_amount": discountedFare
+                                            .round()
+                                            .toString(),
                                         "vehicle_price_type_id":
                                             selectedVehicle.id,
                                         "passenger_name": name,
@@ -1274,7 +1297,9 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                 selectedVehicle.pricePerMin,
               );
               final discountedFare = _calculateDiscountedFare(
-                  originalFare, selectedVehicle.discount);
+                originalFare,
+                selectedVehicle.discount,
+              );
 
               return Padding(
                 padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
@@ -1307,8 +1332,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                               "dropoff_lng": _dropoffLatLng!.longitude,
                               "distance_km": _calculateDistanceKm()
                                   .toStringAsFixed(2),
-                              "fare_amount":
-                                  discountedFare.round().toString(),
+                              "fare_amount": discountedFare.round().toString(),
                               "vehicle_price_type_id": selectedVehicle.id,
                               "passenger_name": name,
                               "passenger_phone": phone,
@@ -1424,7 +1448,11 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
             ),
             child: Row(
               children: [
-                Icon(Icons.search, color: Theme.of(context).primaryColor, size: 22),
+                Icon(
+                  Icons.search,
+                  color: Theme.of(context).primaryColor,
+                  size: 22,
+                ),
                 const SizedBox(width: 12),
                 Text(
                   "Where to?",
@@ -1440,7 +1468,11 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                   color: Colors.grey.shade300,
                   margin: const EdgeInsets.symmetric(horizontal: 12),
                 ),
-                Icon(Icons.map, color: Theme.of(context).primaryColor.withOpacity(0.7), size: 20),
+                Icon(
+                  Icons.map,
+                  color: Theme.of(context).primaryColor.withOpacity(0.7),
+                  size: 20,
+                ),
               ],
             ),
           ),
@@ -1453,10 +1485,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
             padding: const EdgeInsets.only(left: 4, bottom: 12),
             child: Text(
               "Recent Places",
-              style: robotoBold.copyWith(
-                fontSize: 14,
-                color: Colors.black54,
-              ),
+              style: robotoBold.copyWith(fontSize: 14, color: Colors.black54),
             ),
           ),
           ...recentLocations.take(3).map((loc) {
@@ -1469,11 +1498,18 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                     address: loc.address,
                   );
                 } else {
-                  Get.snackbar("Error", "Please Wait...", snackPosition: SnackPosition.BOTTOM);
+                  Get.snackbar(
+                    "Error",
+                    "Please Wait...",
+                    snackPosition: SnackPosition.BOTTOM,
+                  );
                 }
               },
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 4,
+                ),
                 child: Row(
                   children: [
                     Container(
@@ -1482,7 +1518,11 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                         color: Colors.grey.shade100,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.history, color: Colors.grey, size: 18),
+                      child: const Icon(
+                        Icons.history,
+                        color: Colors.grey,
+                        size: 18,
+                      ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -1498,7 +1538,11 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                         ],
                       ),
                     ),
-                    Icon(Icons.chevron_right, color: Colors.grey.shade300, size: 20),
+                    Icon(
+                      Icons.chevron_right,
+                      color: Colors.grey.shade300,
+                      size: 20,
+                    ),
                   ],
                 ),
               ),
@@ -1533,7 +1577,8 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                             ),
                           ),
                           const TextSpan(
-                            text: "Wishing you a smooth and joyful journey ahead 🚖✨",
+                            text:
+                                "Wishing you a smooth and joyful journey ahead 🚖✨",
                             style: TextStyle(fontWeight: FontWeight.w400),
                           ),
                         ],
@@ -1548,78 +1593,93 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
 
         const SizedBox(height: 10),
         const SizedBox(height: 16),
-        GetBuilder<BannerController>(builder: (bannerController) {
-          if (bannerController.taxiBannerImageList == null) {
-            return Shimmer.fromColors(
-              baseColor: Colors.grey[300]!,
-              highlightColor: Colors.grey[100]!,
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16),
-                height: 140,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
+        GetBuilder<BannerController>(
+          builder: (bannerController) {
+            if (bannerController.taxiBannerImageList == null) {
+              return Shimmer.fromColors(
+                baseColor: Colors.grey[300]!,
+                highlightColor: Colors.grey[100]!,
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  height: 140,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
-              ),
-            );
-          }
-          return (bannerController.taxiBannerImageList!.isNotEmpty) ? Column(
-            children: [
-              CarouselSlider.builder(
-                itemCount: bannerController.taxiBannerImageList!.length,
-                options: CarouselOptions(
-                  aspectRatio: 2.5,
-                  enlargeCenterPage: true,
-                  autoPlay: true,
-                  viewportFraction: 0.85,
-                  onPageChanged: (index, reason) {
-                    bannerController.setCurrentIndex(index, true);
-                  },
-                ),
-                itemBuilder: (context, index, realIndex) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
+              );
+            }
+            return (bannerController.taxiBannerImageList!.isNotEmpty)
+                ? Column(
+                    children: [
+                      CarouselSlider.builder(
+                        itemCount: bannerController.taxiBannerImageList!.length,
+                        options: CarouselOptions(
+                          aspectRatio: 2.5,
+                          enlargeCenterPage: true,
+                          autoPlay: true,
+                          viewportFraction: 0.85,
+                          onPageChanged: (index, reason) {
+                            bannerController.setCurrentIndex(index, true);
+                          },
                         ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                      child: CustomImage(
-                        image: bannerController.taxiBannerImageList![index]!,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
+                        itemBuilder: (context, index, realIndex) {
+                          return Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(
+                                Dimensions.radiusDefault,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(
+                                Dimensions.radiusDefault,
+                              ),
+                              child: CustomImage(
+                                image: bannerController
+                                    .taxiBannerImageList![index]!,
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: bannerController.taxiBannerImageList!.map((url) {
-                  int index = bannerController.taxiBannerImageList!.indexOf(url);
-                  return Container(
-                    width: 8.0,
-                    height: 8.0,
-                    margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: bannerController.currentIndex == index
-                          ? Theme.of(context).primaryColor
-                          : Colors.grey.withOpacity(0.3),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ],
-          ) : const SizedBox();
-        }),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: bannerController.taxiBannerImageList!.map((
+                          url,
+                        ) {
+                          int index = bannerController.taxiBannerImageList!
+                              .indexOf(url);
+                          return Container(
+                            width: 8.0,
+                            height: 8.0,
+                            margin: const EdgeInsets.symmetric(
+                              vertical: 10.0,
+                              horizontal: 2.0,
+                            ),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: bannerController.currentIndex == index
+                                  ? Theme.of(context).primaryColor
+                                  : Colors.grey.withOpacity(0.3),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  )
+                : const SizedBox();
+          },
+        ),
       ],
     );
   }
@@ -1675,7 +1735,10 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                     },
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 12,
+                      horizontal: 4,
+                    ),
                     child: Row(
                       children: [
                         Icon(
@@ -1702,7 +1765,6 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                       ],
                     ),
                   ),
-  
                 ],
               ),
               // Connecting line - Refined Dashed Line
@@ -1766,8 +1828,10 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                   v.pricePerKm,
                   v.pricePerMin,
                 );
-                final discountedFare =
-                    _calculateDiscountedFare(originalFare, v.discount);
+                final discountedFare = _calculateDiscountedFare(
+                  originalFare,
+                  v.discount,
+                );
 
                 final matchingDrivers = controller.driverList
                     .where(
@@ -1833,59 +1897,68 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
 
         const SizedBox(height: 16),
 
-        GetBuilder<BannerController>(builder: (bannerController) {
-          if (bannerController.taxiBannerImageList == null) {
-            return Shimmer.fromColors(
-              baseColor: Colors.grey[300]!,
-              highlightColor: Colors.grey[100]!,
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16),
-                height: 140,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            );
-          }
-          return (bannerController.taxiBannerImageList!.isNotEmpty) ? Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: CarouselSlider.builder(
-              itemCount: bannerController.taxiBannerImageList!.length,
-              options: CarouselOptions(
-                aspectRatio: 2.5,
-                enlargeCenterPage: true,
-                autoPlay: true,
-                viewportFraction: 0.85,
-                onPageChanged: (index, reason) {
-                  bannerController.setCurrentIndex(index, true);
-                },
-              ),
-              itemBuilder: (context, index, realIndex) {
-                return Container(
+        GetBuilder<BannerController>(
+          builder: (bannerController) {
+            if (bannerController.taxiBannerImageList == null) {
+              return Shimmer.fromColors(
+                baseColor: Colors.grey[300]!,
+                highlightColor: Colors.grey[100]!,
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  height: 140,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              );
+            }
+            return (bannerController.taxiBannerImageList!.isNotEmpty)
+                ? Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: CarouselSlider.builder(
+                      itemCount: bannerController.taxiBannerImageList!.length,
+                      options: CarouselOptions(
+                        aspectRatio: 2.5,
+                        enlargeCenterPage: true,
+                        autoPlay: true,
+                        viewportFraction: 0.85,
+                        onPageChanged: (index, reason) {
+                          bannerController.setCurrentIndex(index, true);
+                        },
                       ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                    child: CustomImage(
-                      image: bannerController.taxiBannerImageList![index]!,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
+                      itemBuilder: (context, index, realIndex) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(
+                              Dimensions.radiusDefault,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(
+                              Dimensions.radiusDefault,
+                            ),
+                            child: CustomImage(
+                              image:
+                                  bannerController.taxiBannerImageList![index]!,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                  ),
-                );
-              },
-            ),
-          ) : const SizedBox();
-        }),
+                  )
+                : const SizedBox();
+          },
+        ),
 
         const Divider(height: 1),
 
@@ -2043,18 +2116,14 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
       Get.back();
     }
 
-    bool isHomepage = Get.currentRoute.contains('DashboardScreen') || Get.currentRoute == '/';
+    bool isHomepage =
+        Get.currentRoute.contains('DashboardScreen') || Get.currentRoute == '/';
     if (showConfirmation && !isHomepage) {
-      showBookingCancelledBottomSheet(
-        Get.context!,
-        null,
-        reason,
-      ).then((_) {
+      showBookingCancelledBottomSheet(Get.context!, null, reason).then((_) {
         Get.find<SplashController>().showBottomNavBar();
-        Get.offAll(() => const DashboardScreen(
-              pageIndex: 0,
-              fromSplash: false,
-            ));
+        Get.offAll(
+          () => const DashboardScreen(pageIndex: 0, fromSplash: false),
+        );
       });
     }
   }
@@ -2087,7 +2156,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
       ),
       builder: (BuildContext bottomSheetContext) {
         Timer? countdownTimer;
-        int remainingSeconds = 10; // 5 minutes
+        int remainingSeconds = 600; // 5 minutes
         // startRetryTimer(bottomSheetContext, bookingId, retryCount);
 
         final dbRef = FirebaseDatabase.instanceFor(
@@ -2099,7 +2168,13 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
           if (!event.snapshot.exists || event.snapshot.value == null) {
             print("❌ Booking does not exist or deleted");
 
-            _handleRideCancellation(bottomSheetContext, safeContext, bookingListener, null, true);
+            _handleRideCancellation(
+              bottomSheetContext,
+              safeContext,
+              bookingListener,
+              null,
+              true,
+            );
             return;
           }
 
@@ -2107,7 +2182,13 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
 
           if (data is! Map) {
             print("❌ Invalid booking data format");
-            _handleRideCancellation(bottomSheetContext, safeContext, bookingListener, null, true);
+            _handleRideCancellation(
+              bottomSheetContext,
+              safeContext,
+              bookingListener,
+              null,
+              true,
+            );
             return;
           }
 
@@ -2118,7 +2199,13 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
           if (rideStatus == 'cancelled') {
             print("❌ Ride cancelled");
 
-            _handleRideCancellation(bottomSheetContext, safeContext, bookingListener, null, true);
+            _handleRideCancellation(
+              bottomSheetContext,
+              safeContext,
+              bookingListener,
+              null,
+              true,
+            );
             return;
           }
 
@@ -2217,181 +2304,183 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                      const Text(
-                        "Hang tight, finding drivers close by...",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    const Text(
+                      "Hang tight, finding drivers close by...",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const SizedBox(height: 12),
+                    ),
+                    const SizedBox(height: 12),
 
-                      // Highly Appealing Timer UI
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Theme.of(
-                                context,
-                              ).primaryColor.withOpacity(0.15),
-                              blurRadius: 20,
-                              spreadRadius: 5,
-                              offset: const Offset(0, 5),
-                            ),
-                          ],
-                          border: Border.all(
+                    // Highly Appealing Timer UI
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
                             color: Theme.of(
                               context,
                             ).primaryColor.withOpacity(0.15),
-                            width: 1.5,
+                            blurRadius: 20,
+                            spreadRadius: 5,
+                            offset: const Offset(0, 5),
                           ),
+                        ],
+                        border: Border.all(
+                          color: Theme.of(
+                            context,
+                          ).primaryColor.withOpacity(0.15),
+                          width: 1.5,
                         ),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.access_time_rounded,
-                                      color: Theme.of(context).primaryColor,
-                                      size: 24,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    const Text(
-                                      "Estimated wait time",
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.black87,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 6,
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.access_time_rounded,
+                                    color: Theme.of(context).primaryColor,
+                                    size: 24,
                                   ),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(
-                                      context,
-                                    ).primaryColor.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Text(
-                                    "$minutes:$seconds",
+                                  const SizedBox(width: 8),
+                                  const Text(
+                                    "Estimated wait time",
                                     style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w900,
-                                      color: Theme.of(context).primaryColor,
-                                      letterSpacing: 1.0,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.black87,
                                     ),
                                   ),
+                                ],
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
                                 ),
-                              ],
-                            ),
-                            const SizedBox(height: 20),
-                            LayoutBuilder(
-                              builder: (context, constraints) {
-                                return Stack(
-                                  children: [
-                                    Container(
-                                      height: 12,
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey[200],
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(
+                                    context,
+                                  ).primaryColor.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  "$minutes:$seconds",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w900,
+                                    color: Theme.of(context).primaryColor,
+                                    letterSpacing: 1.0,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              return Stack(
+                                children: [
+                                  Container(
+                                    height: 12,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[200],
+                                      borderRadius: BorderRadius.circular(10),
                                     ),
-                                    AnimatedContainer(
-                                      duration: const Duration(seconds: 1),
-                                      curve: Curves.linear,
-                                      height: 12,
-                                      width: constraints.maxWidth * progress,
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          colors: [
-                                            Theme.of(
-                                              context,
-                                            ).primaryColor.withOpacity(0.5),
-                                            Theme.of(context).primaryColor,
-                                          ],
-                                          begin: Alignment.centerLeft,
-                                          end: Alignment.centerRight,
-                                        ),
-                                        borderRadius: BorderRadius.circular(10),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Theme.of(
-                                              context,
-                                            ).primaryColor.withOpacity(0.3),
-                                            blurRadius: 4,
-                                            offset: const Offset(0, 2),
-                                          ),
+                                  ),
+                                  AnimatedContainer(
+                                    duration: const Duration(seconds: 1),
+                                    curve: Curves.linear,
+                                    height: 12,
+                                    width: constraints.maxWidth * progress,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          Theme.of(
+                                            context,
+                                          ).primaryColor.withOpacity(0.5),
+                                          Theme.of(context).primaryColor,
                                         ],
+                                        begin: Alignment.centerLeft,
+                                        end: Alignment.centerRight,
                                       ),
+                                      borderRadius: BorderRadius.circular(10),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Theme.of(
+                                            context,
+                                          ).primaryColor.withOpacity(0.3),
+                                          blurRadius: 4,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 10),
-                      Lottie.asset(
-                        'assets/animation/searching_drivers.json',
-                        height: 160,
-                      ),
-
-                      const SizedBox(height: 20),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.black,
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
+                                  ),
+                                ],
+                              );
+                            },
                           ),
-                          onPressed: () async {
-                            // Open the cancel reason sheet
-                            // Note: We don't cancel the listener here anymore to allow 
-                            // background status updates to handle the UI transition.
-                            bool success = await showCancelReasonBottomSheet(
-                              bottomSheetContext,
-                              bookingId,
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+                    Lottie.asset(
+                      'assets/animation/searching_drivers.json',
+                      height: 160,
+                    ),
+
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: () async {
+                          // Open the cancel reason sheet
+                          // Note: We don't cancel the listener here anymore to allow
+                          // background status updates to handle the UI transition.
+                          bool success = await showCancelReasonBottomSheet(
+                            bottomSheetContext,
+                            bookingId,
+                          );
+
+                          if (success) {
+                            print(
+                              "✅ Cancellation confirmed by user — clearing search UI",
                             );
-
-                            if (success) {
-                              print("✅ Cancellation confirmed by user — clearing search UI");
-                              bookingTimer?.cancel();
-                              bookingListener.cancel();
-                              countdownTimer?.cancel();
-                            }
-                          },
-                          child: Text(
-                            'Cancel Ride',
-                            style: robotoMedium.copyWith(
-                              fontSize: Dimensions.fontSizeExtraLarge,
-                              color: Colors.white,
-                            ),
+                            bookingTimer?.cancel();
+                            bookingListener.cancel();
+                            countdownTimer?.cancel();
+                          }
+                        },
+                        child: Text(
+                          'Cancel Ride',
+                          style: robotoMedium.copyWith(
+                            fontSize: Dimensions.fontSizeExtraLarge,
+                            color: Colors.white,
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              );
-            },
-          );
+              ),
+            );
+          },
+        );
       },
     );
   }
@@ -3001,7 +3090,9 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                     children: [
                       Container(height: 12, width: 40, color: Colors.white),
                       const SizedBox(width: 8),
-                      Expanded(child: Container(height: 12, color: Colors.white)),
+                      Expanded(
+                        child: Container(height: 12, color: Colors.white),
+                      ),
                     ],
                   ),
                 ],

@@ -212,6 +212,9 @@ class DashboardScreenState extends State<DashboardScreen> {
     }
 
     _pageIndex = widget.pageIndex;
+    if(_pageIndex == 2) {
+      isBookingTab = true;
+    }
 
     _pageController = PageController(initialPage: widget.pageIndex);
 

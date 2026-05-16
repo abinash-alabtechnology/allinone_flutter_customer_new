@@ -654,29 +654,37 @@ class _MenuScreenState extends State<MenuScreen> {
                       const SizedBox(height: 20),                      Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _AnimatedIconButton(
-                            color: Colors.blue,
-                            asset: Images.facebook,
-                            url: 'https://www.facebook.com',
-                            delay: const Duration(
-                                milliseconds: 0),
-                          ),
-                          _AnimatedIconButton(
-                            color: Colors.pink,
-                            asset: Images.instagram,
-                            url: 'https://www.instagram.com',
-                            delay: const Duration(
-                                milliseconds: 300),
-                          ),
-                          _AnimatedIconButton(
-                            color: Colors.black,
-                            asset: Images.youtube,
-                            url: 'https://youtube.com',
-                            delay: const Duration(
-                                milliseconds: 600),
-                          ),
-                        ],
+                        children: (Get.find<SplashController>().configModel!.socialMedia ?? []).where((social) {
+                          bool isSupported = ['facebook', 'instagram', 'youtube'].contains(social.name?.toLowerCase());
+                          return social.status == 1 && isSupported;
+                        }).map((social) {
+                          String? asset;
+                          Color color = Colors.blue;
+
+                          switch (social.name?.toLowerCase()) {
+                            case 'facebook':
+                              asset = Images.facebook;
+                              color = const Color(0xFF1877F2);
+                              break;
+                            case 'instagram':
+                              asset = Images.instagram;
+                              color = const Color(0xFFE4405F);
+                              break;
+                            case 'youtube':
+                              asset = Images.youtube;
+                              color = const Color(0xFFFF0000);
+                              break;
+                          }
+
+                          if (asset == null) return const SizedBox();
+
+                          return _AnimatedIconButton(
+                            color: color,
+                            asset: asset,
+                            url: social.link ?? '',
+                            delay: Duration(milliseconds: (Get.find<SplashController>().configModel!.socialMedia!.indexOf(social) * 200)),
+                          );
+                        }).toList(),
                       ),
                     ],
                   ),
