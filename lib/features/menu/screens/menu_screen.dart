@@ -651,7 +651,8 @@ class _MenuScreenState extends State<MenuScreen> {
                           color: Colors.grey[600],
                         ),
                       ),
-                      const SizedBox(height: 20),                      Row(
+                      const SizedBox(height: 20),
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         mainAxisSize: MainAxisSize.min,
                         children: (Get.find<SplashController>().configModel!.socialMedia ?? []).where((social) {
@@ -701,7 +702,7 @@ class _MenuScreenState extends State<MenuScreen> {
                 TypingText(
                   lines: [
                     "©${DateTime.now().year} Crafted with ❤️",
-                    "By Alabtechnology Pvt.Ltd",
+                    "By Alabtechnology Pvt.Ltd",  
                   ],
                   style: const TextStyle(
                     fontSize: 16,

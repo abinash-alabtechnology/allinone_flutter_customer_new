@@ -390,4 +390,22 @@ class Images {
   static const String rentalIcon = 'assets/image/rental_icon.png';
   static const String handymanIcon = 'assets/image/handyman_icon.png';
   static const String utilityIcon = 'assets/image/utility_icon.png';
+
+  static const String handymanInstaHelp = 'assets/image/handyman_instahelp.png';
+  static const String handymanWomenSalon = 'assets/image/handyman_women_salon.png';
+  static const String handymanThreading = 'assets/image/handyman_threading.png';
+  static const String handymanHeadMassage = 'assets/image/handyman_head_massage.png';
+  static const String handymanFacial = 'assets/image/handyman_facial.png';
+  static const String handymanAc = 'assets/image/handyman_ac.png';
+  static const String handymanMenSalon = 'assets/image/handyman_men_salon.png';
+  static const String handymanCleaning = 'assets/image/handyman_cleaning.png';
+  static const String handymanPainting = 'assets/image/handyman_painting.png';
+  static const String handymanAcRepair = 'assets/image/handyman_ac_repair.png';
+  static const String handymanTools = 'assets/image/handyman_tools.png';
+  static const String handymanCctv = 'assets/image/handyman_cctv.png';
+  static const String handymanGardening = 'assets/image/handyman_gardening.png';
+  static const String handymanRenovation = 'assets/image/handyman_renovation.png';
+  static const String handymanTvmount = 'assets/image/handyman_tvmount.png';
+  static const String handymanLocksmith = 'assets/image/handyman_locksmith.png';
+  static const String handymanPromoBanner = 'assets/image/handyman_promo_banner.png';
 }

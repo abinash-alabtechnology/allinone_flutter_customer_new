@@ -19,6 +19,8 @@ import 'package:handy_allinone/features/store/controllers/store_controller.dart'
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:handy_allinone/util/styles.dart';
+import 'package:handy_allinone/features/item/controllers/item_controller.dart';
+import 'package:handy_allinone/common/widgets/custom_ink_well.dart';
 
 import '../../util/images.dart';
 
@@ -1022,8 +1024,12 @@ class _ItemsViewStoreState extends State<ItemsViewStore> {
     final String? discountType = item.discountType;
     final String finalPrice = PriceConverter.convertPrice(price, discount: discount, discountType: discountType);
 
-    return Column(
-      children: [
+    return CustomInkWell(
+      onTap: () {
+        Get.find<ItemController>().navigateToItemPage(item, context, inStore: true);
+      },
+      child: Column(
+        children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 14, 16, 22),
           child: Row(
@@ -1179,6 +1185,7 @@ class _ItemsViewStoreState extends State<ItemsViewStore> {
             color: Theme.of(context).dividerColor.withOpacity(0.1),
           ),
       ],
+      ),
     );
   }
 }

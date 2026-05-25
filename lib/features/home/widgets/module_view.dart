@@ -325,7 +325,11 @@ class ModuleView extends StatelessWidget {
                           iconAsset: extra['imageAsset'],
                           color: extra['color'],
                           iconColor: extra['iconColor'],
-                          onTap: extra['isComingSoon'] == true ? () {} : () async {
+                          onTap: extra['title'] == 'Handyman'
+                              ? () => Get.toNamed(RouteHelper.getHandymanRoute())
+                              : extra['isComingSoon'] == true
+                                  ? () {}
+                                  : () async {
                             // Find the taxi/ride module index from the actual list
                             int taxiIndex = splashController.moduleList!.indexWhere((m) =>
                                 (m.moduleName?.toLowerCase().contains('taxi') ?? false) ||

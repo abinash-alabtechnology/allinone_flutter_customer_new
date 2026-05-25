@@ -219,7 +219,7 @@ class StoreRepository implements StoreRepositoryInterface {
   @override
   Future<ItemModel?> getStoreItemList({int? storeID, required int offset, int? categoryID, String? type, List<String>? filter, int? rating, double? lowerValue, double? upperValue}) async {
     ItemModel? storeItemModel;
-    final filterString = filter != null ? jsonEncode(filter) : null;
+    final filterString = (filter != null && filter.isNotEmpty) ? jsonEncode(filter) : '';
     Response response = await apiClient.getData(
       '${AppConstants.storeItemUri}?store_id=$storeID&category_id=$categoryID&offset=$offset&limit=1000&type=$type&filter=$filterString&rating_count=${rating ?? ''}&min_price=${lowerValue ?? ''}&max_price=${upperValue ?? ''}');
     if(response.statusCode == 200){
