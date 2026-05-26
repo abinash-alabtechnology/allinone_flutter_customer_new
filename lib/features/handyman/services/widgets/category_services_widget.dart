@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:handy_allinone/features/handyman/services/controllers/handyman_home_controller.dart';
 import 'package:handy_allinone/features/handyman/services/models/handyman_service_model.dart';
+import 'package:handy_allinone/features/handyman/services/widgets/service_options_bottom_sheet.dart';
 
 class CategoryServicesWidget extends GetView<HandymanHomeController> {
   final CategorySectionModel section;
@@ -99,11 +100,24 @@ class _CategoryServiceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.find<HandymanHomeController>();
 
-    return SizedBox(
-      width: 140,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    return GestureDetector(
+      onTap: () {
+        Get.bottomSheet(
+          ServiceOptionsBottomSheet(
+            service: service,
+            onOptionAdd: (optionId) {
+              controller.addToCart(service.id);
+            },
+          ),
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+        );
+      },
+      child: SizedBox(
+        width: 140,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
           // Image
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
@@ -183,7 +197,31 @@ class _CategoryServiceCard extends StatelessWidget {
                 return qty == 0
                     ? _AddButton(
                         optionsCount: service.optionsCount,
-                        onTap: () => controller.addToCart(service.id),
+                        onTap: () {
+                          if (service.optionsCount == 0) {
+                            controller.addToCart(service.id);
+                            Get.snackbar(
+                              'Added',
+                              '${service.name} added to cart',
+                              snackPosition: SnackPosition.BOTTOM,
+                              backgroundColor: Colors.black87,
+                              colorText: Colors.white,
+                              margin: const EdgeInsets.all(16),
+                              duration: const Duration(seconds: 2),
+                            );
+                          } else {
+                            Get.bottomSheet(
+                              ServiceOptionsBottomSheet(
+                                service: service,
+                                onOptionAdd: (optionId) {
+                                  controller.addToCart(service.id);
+                                },
+                              ),
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                            );
+                          }
+                        },
                       )
                     : _QuantityButton(
                         quantity: qty,
@@ -196,6 +234,7 @@ class _CategoryServiceCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
     );
   }
 }
@@ -280,78 +319,55 @@ class _QuantityButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      alignment: Alignment.bottomCenter,
-      children: [
-        Container(
-          width: 72,
-          height: 34,
-          margin: EdgeInsets.only(bottom: optionsCount > 0 ? 6 : 0),
-          decoration: BoxDecoration(
-            color: const Color(0xFF6C63FF),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              // Minus
-              GestureDetector(
-                onTap: onRemove,
-                behavior: HitTestBehavior.opaque,
-                child: const SizedBox(
-                  width: 24,
-                  height: 34,
-                  child: Icon(
-                    Icons.remove_rounded,
-                    color: Colors.white,
-                    size: 16,
-                  ),
-                ),
-              ),
-              // Count
-              Text(
-                '$quantity',
-                style: robotoRegular.copyWith(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
-              ),
-              // Plus
-              GestureDetector(
-                onTap: onAdd,
-                behavior: HitTestBehavior.opaque,
-                child: const SizedBox(
-                  width: 24,
-                  height: 34,
-                  child: Icon(
-                    Icons.add_rounded,
-                    color: Colors.white,
-                    size: 16,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        if (optionsCount > 0)
-          Positioned(
-            bottom: 0,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              color: Colors.white,
-              child: Text(
-                '$optionsCount options',
-                style: robotoRegular.copyWith(
-                  fontSize: 9.5,
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFF9CA3AF),
-                ),
+    return Container(
+      width: 72,
+      height: 34,
+      decoration: BoxDecoration(
+        color: const Color(0xFF6C63FF),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          // Minus
+          GestureDetector(
+            onTap: onRemove,
+            behavior: HitTestBehavior.opaque,
+            child: const SizedBox(
+              width: 24,
+              height: 34,
+              child: Icon(
+                Icons.remove_rounded,
+                color: Colors.white,
+                size: 16,
               ),
             ),
           ),
-      ],
+          // Count
+          Text(
+            '$quantity',
+            style: robotoRegular.copyWith(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
+          // Plus
+          GestureDetector(
+            onTap: onAdd,
+            behavior: HitTestBehavior.opaque,
+            child: const SizedBox(
+              width: 24,
+              height: 34,
+              child: Icon(
+                Icons.add_rounded,
+                color: Colors.white,
+                size: 16,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

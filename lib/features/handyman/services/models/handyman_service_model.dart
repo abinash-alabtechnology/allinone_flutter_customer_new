@@ -1,3 +1,29 @@
+class HandymanServiceOption {
+  final String id;
+  final String title;
+  final int originalPrice;
+  final int discountedPrice;
+  final String discountText;
+  final String subtitle;
+  final String? imageAsset;
+  final double? rating;
+  final String? reviewCount;
+  int quantity;
+
+  HandymanServiceOption({
+    required this.id,
+    required this.title,
+    required this.originalPrice,
+    required this.discountedPrice,
+    required this.discountText,
+    required this.subtitle,
+    this.imageAsset,
+    this.rating,
+    this.reviewCount,
+    this.quantity = 0,
+  });
+}
+
 class HandymanServiceModel {
   final String id;
   final String name;
@@ -7,6 +33,11 @@ class HandymanServiceModel {
   final int startingPrice;
   final int optionsCount;
   final String imageAsset;
+  final String? coverImageAsset;
+  final String? coverTitle;
+  final String? coverDescription;
+  final bool isCoverTextDark;
+  final List<HandymanServiceOption> options;
   bool isWishlisted;
   int cartQuantity;
 
@@ -19,6 +50,11 @@ class HandymanServiceModel {
     required this.startingPrice,
     required this.optionsCount,
     required this.imageAsset,
+    this.coverImageAsset,
+    this.coverTitle,
+    this.coverDescription,
+    this.isCoverTextDark = true,
+    this.options = const [],
     this.isWishlisted = false,
     this.cartQuantity = 0,
   });
@@ -36,6 +72,11 @@ class HandymanServiceModel {
       startingPrice: startingPrice,
       optionsCount: optionsCount,
       imageAsset: imageAsset,
+      coverImageAsset: coverImageAsset,
+      coverTitle: coverTitle,
+      coverDescription: coverDescription,
+      isCoverTextDark: isCoverTextDark,
+      options: options,
       isWishlisted: isWishlisted ?? this.isWishlisted,
       cartQuantity: cartQuantity ?? this.cartQuantity,
     );

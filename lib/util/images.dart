@@ -408,4 +408,17 @@ class Images {
   static const String handymanTvmount = 'assets/image/handyman_tvmount.png';
   static const String handymanLocksmith = 'assets/image/handyman_locksmith.png';
   static const String handymanPromoBanner = 'assets/image/handyman_promo_banner.png';
+  static const String handymanElectricianBanner = 'assets/image/Electrian.png';
+  static const String handymanPainterBanner = 'assets/image/Paniter.png';
+  static const String handymanUpperLip = 'assets/image/handyman_upper_lip.png';
+  static const String handymanChin = 'assets/image/handyman_chin.png';
+  static const String facialFruit = 'assets/image/facial_fruit.png';
+  static const String facialGold = 'assets/image/facial_gold.png';
+  static const String facialDetan = 'assets/image/facial_detan.png';
+  static const String facialHerbal = 'assets/image/facial_herbal.png';
+  static const String facialGlow = 'assets/image/facial_glow.png';
+  static const String handymanWaxing = 'assets/image/handyman_waxing.png';
+  static const String acDeepClean = 'assets/image/ac_deep_clean.png';
+  static const String acInstallation = 'assets/image/ac_installation.png';
+  static const String geyserRepair = 'assets/image/geyser_repair.png';
 }

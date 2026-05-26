@@ -162,11 +162,11 @@ class ModuleView extends StatelessWidget {
                     },
                     {
                       'title': 'Handyman',
-                      'subtitle': 'Coming soon...',
+                      'subtitle': 'Instant gratification, delivered to your door.',
                       'imageAsset': Images.handymanIcon,
                       'color': const Color(0xFF10B981), // Emerald 500
                       'iconColor': const Color(0xFF059669),
-                      'isComingSoon': true,
+                      'isComingSoon': false,
                     },
                     {
                       'title': 'Utility',

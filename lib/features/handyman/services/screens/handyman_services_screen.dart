@@ -10,6 +10,7 @@ import 'package:handy_allinone/features/handyman/services/widgets/most_booked_se
 import 'package:handy_allinone/features/handyman/services/widgets/category_services_widget.dart';
 import 'package:handy_allinone/features/location/controllers/location_controller.dart';
 import 'package:handy_allinone/helper/address_helper.dart';
+import 'dart:async';
 import 'package:handy_allinone/helper/route_helper.dart';
 import 'package:handy_allinone/util/images.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
@@ -124,6 +125,26 @@ class HandymanHomeScreenBody extends StatefulWidget {
 class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
   final ScrollController _scrollController = ScrollController();
   bool _isScrolled = false;
+  int _currentBannerIndex = 0;
+  Timer? _bannerTimer;
+
+  final List<Map<String, String>> _promoBanners = [
+    {
+      'title': '20% off on your\nfirst AC servicing',
+      'subtitle': 'Up to \u20B9100 off',
+      'image': 'assets/image/Ac_mechanic.png',
+    },
+    {
+      'title': '20% off on your\nfirst Electrician service',
+      'subtitle': 'Up to \u20B9100 off',
+      'image': Images.handymanElectricianBanner,
+    },
+    {
+      'title': '20% off on your\nfirst Painting service',
+      'subtitle': 'Up to \u20B9100 off',
+      'image': Images.handymanPainterBanner,
+    },
+  ];
 
   @override
   void initState() {
@@ -133,10 +154,18 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
     if (!Get.isRegistered<HandymanHomeController>()) {
       Get.put(HandymanHomeController(), permanent: false);
     }
+    _bannerTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      if (mounted) {
+        setState(() {
+          _currentBannerIndex = (_currentBannerIndex + 1) % _promoBanners.length;
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
+    _bannerTimer?.cancel();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
@@ -178,14 +207,50 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
                   ),
                 ],
         ),
-        child: GetBuilder<CartController>(
-          builder: (cartController) {
-            return const CartWidget(
-              color: Colors.black87,
-              size: 24,
-            );
-          },
-        ),
+        child: Obx(() {
+          final handymanController = Get.find<HandymanHomeController>();
+          final int handymanQty = handymanController.totalCartItems;
+          int normalQty = 0;
+          if (Get.isRegistered<CartController>()) {
+            normalQty = Get.find<CartController>().cartList.length;
+          }
+          final int totalQty = handymanQty + normalQty;
+          
+          return Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Image.asset(
+                Images.shoppingCart,
+                height: 24,
+                width: 24,
+                color: Colors.black87,
+              ),
+              if (totalQty > 0)
+                Positioned(
+                  top: -5,
+                  right: -5,
+                  child: Container(
+                    height: 14,
+                    width: 14,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Theme.of(context).colorScheme.error,
+                      border: Border.all(width: 1, color: Colors.white),
+                    ),
+                    child: Text(
+                      totalQty.toString(),
+                      style: robotoRegular.copyWith(
+                        fontSize: 9,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          );
+        }),
       ),
     );
   }
@@ -819,31 +884,21 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
 
                         // AC Mechanic Promo Banner
                         Expanded(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(bottom: 12),
-                                  child: TweenAnimationBuilder<double>(
-                                    tween: Tween<double>(begin: 0.0, end: 1.0),
-                                    duration: const Duration(milliseconds: 800),
-                                    curve: Curves.easeOutBack,
-                                    builder: (context, value, child) {
-                                      return Transform.translate(
-                                        offset: Offset(-30 * (1 - value), 0),
-                                        child: Opacity(
-                                          opacity: value.clamp(0.0, 1.0),
-                                          child: child,
-                                        ),
-                                      );
-                                    },
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 800),
+                            child: Row(
+                              key: ValueKey(_currentBannerIndex),
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(bottom: 12),
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         Text(
-                                          '20% off on your\nfirst AC servicing',
+                                          _promoBanners[_currentBannerIndex]['title']!,
                                           style: robotoRegular.copyWith(
                                             fontSize: 16,
                                             fontWeight: FontWeight.w800,
@@ -853,7 +908,7 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
                                         ),
                                         const Gap(4),
                                         Text(
-                                          'Up to \u20B9100 off',
+                                          _promoBanners[_currentBannerIndex]['subtitle']!,
                                           style: robotoRegular.copyWith(
                                             fontSize: 12,
                                             fontWeight: FontWeight.w500,
@@ -864,31 +919,14 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
                                     ),
                                   ),
                                 ),
-                              ),
-                              TweenAnimationBuilder<double>(
-                                tween: Tween<double>(begin: 0.0, end: 1.0),
-                                duration: const Duration(milliseconds: 900),
-                                curve: Curves.easeOutBack,
-                                builder: (context, value, child) {
-                                  return Transform.translate(
-                                    offset: Offset(30 * (1 - value), 10 * (1 - value)),
-                                    child: Transform.scale(
-                                      scale: 0.8 + (value * 0.2),
-                                      child: Opacity(
-                                        opacity: value.clamp(0.0, 1.0),
-                                        child: child,
-                                      ),
-                                    ),
-                                  );
-                                },
-                                child: Image.asset(
-                                  'assets/image/Ac_mechanic.png',
+                                Image.asset(
+                                  _promoBanners[_currentBannerIndex]['image']!,
                                   height: 105,
                                   fit: BoxFit.contain,
                                   alignment: Alignment.bottomCenter,
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ],

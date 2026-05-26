@@ -692,7 +692,7 @@ class _MenuScreenState extends State<MenuScreen> {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  "App Version: DEV -3.5.0",
+                  "App Version: DEV -3.6.1",
                   style: TextStyle(
                     fontSize: Dimensions.fontSizeDefault,
                     color: Theme.of(context).hintColor,
