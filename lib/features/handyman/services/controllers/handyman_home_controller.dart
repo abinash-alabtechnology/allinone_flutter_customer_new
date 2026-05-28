@@ -23,6 +23,8 @@ class HandymanHomeController extends GetxController {
 
   final RxBool isLoading = false.obs;
 
+  final RxMap<String, int> customCart = <String, int>{}.obs;
+
   // ─── Derived ─────────────────────────────────────────────────────────────────
   int get totalCartItems {
     int total = 0;
@@ -34,7 +36,90 @@ class HandymanHomeController extends GetxController {
         total += s.cartQuantity;
       }
     }
+    customCart.forEach((key, val) {
+      total += val;
+    });
     return total;
+  }
+
+  int getServiceQuantity(String serviceId) {
+    if (customCart.containsKey(serviceId)) {
+      return customCart[serviceId]!;
+    }
+    final idx = mostBookedServices.indexWhere((s) => s.id == serviceId);
+    if (idx != -1) {
+      return mostBookedServices[idx].cartQuantity;
+    }
+    for (final section in categorySections) {
+      final sIdx = section.services.indexWhere((s) => s.id == serviceId);
+      if (sIdx != -1) {
+        return section.services[sIdx].cartQuantity;
+      }
+    }
+    return 0;
+  }
+
+  void addServiceToCart(String serviceId) {
+    bool updated = false;
+    final idx = mostBookedServices.indexWhere((s) => s.id == serviceId);
+    if (idx != -1) {
+      mostBookedServices[idx].cartQuantity++;
+      if (mostBookedServices[idx].options.length == 1) {
+        mostBookedServices[idx].options[0].quantity++;
+      }
+      mostBookedServices.refresh();
+      updated = true;
+    }
+    for (final section in categorySections) {
+      final sIdx = section.services.indexWhere((s) => s.id == serviceId);
+      if (sIdx != -1) {
+        section.services[sIdx].cartQuantity++;
+        if (section.services[sIdx].options.length == 1) {
+          section.services[sIdx].options[0].quantity++;
+        }
+        categorySections.refresh();
+        updated = true;
+      }
+    }
+    if (!updated) {
+      customCart[serviceId] = (customCart[serviceId] ?? 0) + 1;
+    }
+  }
+
+  void removeServiceFromCart(String serviceId) {
+    bool updated = false;
+    final idx = mostBookedServices.indexWhere((s) => s.id == serviceId);
+    if (idx != -1) {
+      if (mostBookedServices[idx].cartQuantity > 0) {
+        mostBookedServices[idx].cartQuantity--;
+        if (mostBookedServices[idx].options.length == 1 && mostBookedServices[idx].options[0].quantity > 0) {
+          mostBookedServices[idx].options[0].quantity--;
+        }
+        mostBookedServices.refresh();
+      }
+      updated = true;
+    }
+    for (final section in categorySections) {
+      final sIdx = section.services.indexWhere((s) => s.id == serviceId);
+      if (sIdx != -1) {
+        if (section.services[sIdx].cartQuantity > 0) {
+          section.services[sIdx].cartQuantity--;
+          if (section.services[sIdx].options.length == 1 && section.services[sIdx].options[0].quantity > 0) {
+            section.services[sIdx].options[0].quantity--;
+          }
+          categorySections.refresh();
+        }
+        updated = true;
+      }
+    }
+    if (!updated) {
+      if (customCart.containsKey(serviceId) && customCart[serviceId]! > 0) {
+        customCart[serviceId] = customCart[serviceId]! - 1;
+        if (customCart[serviceId] == 0) {
+          customCart.remove(serviceId);
+        }
+      }
+    }
   }
 
   List<HandymanServiceModel> get wishlistedServices {

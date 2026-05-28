@@ -421,4 +421,19 @@ class Images {
   static const String acDeepClean = 'assets/image/ac_deep_clean.png';
   static const String acInstallation = 'assets/image/ac_installation.png';
   static const String geyserRepair = 'assets/image/geyser_repair.png';
+
+  static const String bathroomCleaning = 'assets/image/bathroom_cleaning.png';
+  static const String kitchenCleaning = 'assets/image/kitchen_cleaning.png';
+  static const String kitchenSink = 'assets/image/kitchen_sink.png';
+  static const String bungalowCleaning = 'assets/image/bungalow_cleaning.png';
+  static const String mirrorCabinet = 'assets/image/mirror_cabinet.png';
+  static const String kitchenCounter = 'assets/image/kitchen_counter.png';
+
+  static const String bathroomSink = 'assets/image/bathroom_sink.png';
+  static const String geyserClean = 'assets/image/geyser_clean.png';
+  static const String sofaClean = 'assets/image/sofa_clean.png';
+  static const String houseClean = 'assets/image/house_clean.png';
+  static const String intenseBathroom = 'assets/image/intense_bathroom.png';
+  static const String antControl = 'assets/image/ant_control.png';
+  static const String furnishedApartment = 'assets/image/furnished_apartment.png';
 }

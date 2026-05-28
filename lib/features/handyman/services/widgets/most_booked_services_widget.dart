@@ -105,7 +105,7 @@ class _ServiceCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
+              color: Colors.black.withOpacity(0.08),
               blurRadius: 10,
               offset: const Offset(0, 3),
             ),
@@ -157,11 +157,11 @@ class _ServiceCard extends StatelessWidget {
                         width: 30,
                         height: 30,
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.92),
+                          color: Colors.white.withOpacity(0.92),
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.12),
+                              color: Colors.black.withOpacity(0.12),
                               blurRadius: 6,
                               offset: const Offset(0, 2),
                             ),
@@ -345,7 +345,7 @@ class _AddButton extends StatelessWidget {
               border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.02),
+                  color: Colors.black.withOpacity(0.02),
                   blurRadius: 2,
                   offset: const Offset(0, 1),
                 ),

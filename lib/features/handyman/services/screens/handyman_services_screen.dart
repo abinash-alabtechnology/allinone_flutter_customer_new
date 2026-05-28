@@ -112,9 +112,6 @@ class _HandymanServicesScreenState extends State<HandymanServicesScreen> {
   }
 }
 
-// ----------------------------------------------------
-// TAB 0: HOME SCREEN BODY (Original Categories List)
-// ----------------------------------------------------
 class HandymanHomeScreenBody extends StatefulWidget {
   const HandymanHomeScreenBody({super.key});
 
@@ -256,9 +253,9 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
   }
 
   Widget _buildSearchBar({required bool isScrolled}) {
-    return InkWell(
-      onTap: () => Get.toNamed(RouteHelper.getSearchRoute()),
-      borderRadius: BorderRadius.circular(12),
+    return GestureDetector(
+      onTap: () => Get.toNamed(RouteHelper.getHandymanSearchRoute()),
+      behavior: HitTestBehavior.opaque,
       child: Container(
         height: 46,
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -276,13 +273,14 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
                   ),
                 ],
         ),
-        child: Row(
-          children: [
-            const Icon(
-              Icons.search,
-              color: Colors.grey,
-              size: 22,
-            ),
+        child: IgnorePointer(
+          child: Row(
+            children: [
+              const Icon(
+                Icons.search,
+                color: Colors.grey,
+                size: 22,
+              ),
             const Gap(10),
             Text(
               "Search for ",
@@ -363,7 +361,8 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 
   @override
@@ -489,8 +488,8 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
                       return InkWell(
                         onTap: () {
                           Get.toNamed(
-                            RouteHelper.getHandymanProcessRoute(),
-                            arguments: {'serviceTitle': title.replaceAll('\n', ' ')},
+                            RouteHelper.getHandymanSubCategoriesRoute(),
+                            arguments: {'category': title.replaceAll('\n', ' ')},
                           );
                         },
                         borderRadius: BorderRadius.circular(12),

@@ -83,6 +83,9 @@ import 'package:handy_allinone/features/search/screens/search_screen.dart';
 import 'package:handy_allinone/features/splash/screens/splash_screen.dart';
 import 'package:handy_allinone/features/handyman/services/screens/handyman_services_screen.dart';
 import 'package:handy_allinone/features/handyman/processes/screens/handyman_process_screen.dart';
+import 'package:handy_allinone/features/handyman/services/screens/handyman_search_screen.dart';
+import 'package:handy_allinone/features/handyman/services/screens/handyman_available_services_screen.dart';
+import 'package:handy_allinone/features/handyman/services/screens/handyman_sub_categories_screen.dart';
 import 'package:handy_allinone/features/support/screens/support_screen.dart';
 import 'package:handy_allinone/features/update/screens/update_screen.dart';
 import 'package:flutter/material.dart';
@@ -166,6 +169,9 @@ class RouteHelper {
   static const String itemViewAllScreen = '/item-view-all-screen';
   static const String handymanServices = '/handyman-services';
   static const String handymanProcess = '/handyman-process';
+  static const String handymanSearch = '/handyman-search';
+  static const String handymanAvailableServices = '/handyman-available-services';
+  static const String handymanSubCategories = '/handyman-sub-categories';
 
 ///added by ak
   // static String getInitialRoute({bool fromSplash = false}) => '$initial?from-splash=$fromSplash';
@@ -339,6 +345,9 @@ class RouteHelper {
   static String getItemViewAllScreen(bool isPopular, bool isSpecial, {bool isSubscription = false, bool isFresh = false}) => '$itemViewAllScreen?page=${isPopular ? 'popular' : isSpecial ? 'reviewed' : isSubscription ? 'subscription' : isFresh ? 'fresh' : 'reviewed'}&special=${isSpecial.toString()}&subscription=${isSubscription.toString()}&fresh=${isFresh.toString()}';
   static String getHandymanRoute() => handymanServices;
   static String getHandymanProcessRoute() => handymanProcess;
+  static String getHandymanSearchRoute() => handymanSearch;
+  static String getHandymanAvailableServicesRoute() => handymanAvailableServices;
+  static String getHandymanSubCategoriesRoute() => handymanSubCategories;
 
   static List<GetPage> routes = [
     GetPage(name: initial,
@@ -680,6 +689,9 @@ class RouteHelper {
     GetPage(name: prescriptionUpload, page: () => const PrescriptionUploadScreen()),
     GetPage(name: handymanServices, customTransition: ZoomInTransition(), page: () => getRoute(const HandymanServicesScreen())),
     GetPage(name: handymanProcess, customTransition: ZoomInTransition(), page: () => getRoute(const HandymanProcessScreen())),
+    GetPage(name: handymanSearch, customTransition: ZoomInTransition(), page: () => getRoute(const HandymanSearchScreen())),
+    GetPage(name: handymanAvailableServices, customTransition: ZoomInTransition(), page: () => getRoute(const HandymanAvailableServicesScreen())),
+    GetPage(name: handymanSubCategories, customTransition: ZoomInTransition(), page: () => getRoute(const HandymanSubCategoriesScreen())),
   ];
 
   static Widget getRoute(Widget navigateTo, {AccessLocationScreen? locationScreen, bool byPuss = false}) {

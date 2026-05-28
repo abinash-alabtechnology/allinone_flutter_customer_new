@@ -145,14 +145,6 @@ class ModuleView extends StatelessWidget {
               ? (() {
                   final List<Map<String, dynamic>> extraModules = [
                     {
-                      'title': 'Travels',
-                      'subtitle': 'Coming soon...',
-                      'imageAsset': Images.travelsIcon,
-                      'color': const Color(0xFFF59E0B), // Amber 500
-                      'iconColor': const Color(0xFFD97706),
-                      'isComingSoon': true,
-                    },
-                    {
                       'title': 'Rental',
                       'subtitle': 'Cars, bikes & commercial...',
                       'imageAsset': Images.rentalIcon,
@@ -659,12 +651,17 @@ class ModuleView extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF1F2937),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF1F2937),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 2),
