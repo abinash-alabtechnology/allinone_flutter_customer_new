@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:handy_allinone/features/handyman/services/controllers/handyman_home_controller.dart';
+import 'package:handy_allinone/features/handyman/services/screens/handyman_services_screen.dart';
 import 'package:handy_allinone/helper/route_helper.dart';
 import 'package:handy_allinone/util/images.dart';
 import 'package:handy_allinone/util/styles.dart';
@@ -141,13 +142,13 @@ class _HandymanSubCategoriesScreenState extends State<HandymanSubCategoriesScree
         name: 'Electrical',
         description: 'Installation/replacement of switches and boards.',
         servicesCount: 1,
-        imageAsset: Images.handymanTools,
+        imageAsset: Images.handymanElectricalRepair,
       ),
       SubCategoryItemModel(
         name: 'Carpentry',
         description: 'Professional carpentry assembly services.',
         servicesCount: 1,
-        imageAsset: Images.handymanTools,
+        imageAsset: Images.handymanCarpentryRepair,
       ),
     ],
     'CCTV & Smart Home': [
@@ -209,6 +210,11 @@ class _HandymanSubCategoriesScreenState extends State<HandymanSubCategoriesScree
             .replaceAll('&', 'and')
             .replaceAll('-', ' ')
             .toLowerCase();
+        if ((passedCategory.contains('women') && passedCategory.contains('salon')) &&
+            (normalizedKey.contains('women') && normalizedKey.contains('salon'))) {
+          _activeCategoryName = key;
+          break;
+        }
         if (passedCategory.contains(normalizedKey) || normalizedKey.contains(passedCategory)) {
           _activeCategoryName = key;
           break;
@@ -250,7 +256,7 @@ class _HandymanSubCategoriesScreenState extends State<HandymanSubCategoriesScree
                 children: [
                   IconButton(
                     icon: const Icon(Icons.shopping_cart, color: Colors.white),
-                    onPressed: () => Get.toNamed(RouteHelper.getCartRoute()),
+                    onPressed: () => Get.to(() => HandymanCartScreen(onBackToHome: () => Get.back())),
                   ),
                   if (qty > 0)
                     Positioned(

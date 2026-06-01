@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:handy_allinone/features/handyman/services/controllers/handyman_home_controller.dart';
+import 'package:handy_allinone/features/handyman/services/screens/handyman_services_screen.dart';
 import 'package:handy_allinone/helper/route_helper.dart';
 import 'package:handy_allinone/util/images.dart';
 import 'package:handy_allinone/util/styles.dart';
@@ -65,7 +66,7 @@ class _HandymanAvailableServicesScreenState extends State<HandymanAvailableServi
             price: 399,
             rating: 4.85,
             reviews: '1.2K',
-            imageAsset: Images.handymanTools,
+            imageAsset: Images.handymanElectricianBanner,
             description: 'Quick response emergency troubleshooting, wiring repair, short circuit fixes.',
           ),
           HandymanServiceItem(
@@ -381,7 +382,7 @@ class _HandymanAvailableServicesScreenState extends State<HandymanAvailableServi
             price: 199,
             rating: 4.65,
             reviews: '890K',
-            imageAsset: Images.bathroomSink,
+            imageAsset: Images.kitchenSink,
             description: 'We are well-equipped and well-prepared to check your plumbing problems.',
           ),
           HandymanServiceItem(
@@ -404,7 +405,7 @@ class _HandymanAvailableServicesScreenState extends State<HandymanAvailableServi
             price: 149,
             rating: 4.80,
             reviews: '120K',
-            imageAsset: Images.handymanTools,
+            imageAsset: Images.handymanElectricianBanner,
             description: 'Installation/replacement of switches and boards.',
           ),
         ],
@@ -539,7 +540,28 @@ class _HandymanAvailableServicesScreenState extends State<HandymanAvailableServi
     final args = Get.arguments;
     if (args != null && args is Map) {
       if (args.containsKey('category')) {
-        _activeCategoryName = args['category'].toString();
+        final String passedCategory = args['category']
+            .toString()
+            .replaceAll('\n', ' ')
+            .replaceAll('&', 'and')
+            .replaceAll('-', ' ')
+            .toLowerCase();
+
+        for (final key in _categorySubCategories.keys) {
+          final normalizedKey = key
+              .replaceAll('&', 'and')
+              .replaceAll('-', ' ')
+              .toLowerCase();
+          if ((passedCategory.contains('women') && passedCategory.contains('salon')) &&
+              (normalizedKey.contains('women') && normalizedKey.contains('salon'))) {
+            _activeCategoryName = key;
+            break;
+          }
+          if (passedCategory.contains(normalizedKey) || normalizedKey.contains(passedCategory)) {
+            _activeCategoryName = key;
+            break;
+          }
+        }
       }
       if (args.containsKey('subCategoryName')) {
         _activeSubCategoryName = args['subCategoryName'].toString();
@@ -594,7 +616,7 @@ class _HandymanAvailableServicesScreenState extends State<HandymanAvailableServi
                 children: [
                   IconButton(
                     icon: const Icon(Icons.shopping_cart_outlined, color: Colors.white),
-                    onPressed: () => Get.toNamed(RouteHelper.getCartRoute()),
+                    onPressed: () => Get.to(() => HandymanCartScreen(onBackToHome: () => Get.back())),
                   ),
                   if (qty > 0)
                     Positioned(
@@ -644,6 +666,7 @@ class _HandymanAvailableServicesScreenState extends State<HandymanAvailableServi
               ),
               itemBuilder: (context, index) {
                 final service = activeServices[index];
+                final homeController = Get.find<HandymanHomeController>();
 
                 void openBottomSheet() {
                   final homeController = Get.find<HandymanHomeController>();
@@ -834,6 +857,45 @@ class _HandymanAvailableServicesScreenState extends State<HandymanAvailableServi
                               ),
                             ),
                           ),
+                        ),
+                        // Heart Icon overlay
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: Obx(() {
+                            final wishlisted = homeController.allServices[service.id]?.isWishlisted ?? false;
+                            return GestureDetector(
+                              onTap: () => homeController.toggleWishlist(service.id),
+                              child: AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 200),
+                                child: Container(
+                                  key: ValueKey(wishlisted),
+                                  width: 28.w,
+                                  height: 28.h,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.92),
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.12),
+                                        blurRadius: 4,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Icon(
+                                    wishlisted
+                                        ? Icons.favorite_rounded
+                                        : Icons.favorite_border_rounded,
+                                    color: wishlisted
+                                        ? const Color(0xFFEF4444)
+                                        : const Color(0xFF9CA3AF),
+                                    size: 15.sp,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
                         ),
                         Positioned(
                           bottom: 0,

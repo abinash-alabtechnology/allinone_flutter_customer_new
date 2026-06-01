@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:handy_allinone/features/handyman/services/controllers/handyman_home_controller.dart';
 import 'package:handy_allinone/features/handyman/services/models/handyman_service_model.dart';
 import 'package:handy_allinone/features/handyman/services/widgets/service_options_bottom_sheet.dart';
+import 'package:handy_allinone/helper/route_helper.dart';
 
 class CategoryServicesWidget extends GetView<HandymanHomeController> {
   final CategorySectionModel section;
@@ -49,20 +50,25 @@ class CategoryServicesWidget extends GetView<HandymanHomeController> {
                   ),
                 ],
               ),
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: GestureDetector(
-                  onTap: () {},
-                  child: Text(
-                    'See all',
-                    style: robotoRegular.copyWith(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF6C63FF),
-                    ),
-                  ),
-                ),
-              ),
+               Padding(
+                 padding: const EdgeInsets.only(top: 4),
+                 child: GestureDetector(
+                   onTap: () {
+                     Get.toNamed(
+                       RouteHelper.getHandymanSubCategoriesRoute(),
+                       arguments: {'category': section.title},
+                     );
+                   },
+                   child: Text(
+                     'See all',
+                     style: robotoRegular.copyWith(
+                       fontSize: 14,
+                       fontWeight: FontWeight.w600,
+                       color: const Color(0xFF6C63FF),
+                     ),
+                   ),
+                 ),
+               ),
             ],
           ),
         ),
@@ -118,15 +124,65 @@ class _CategoryServiceCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-          // Image
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.asset(
-              service.imageAsset,
-              width: 140,
-              height: 140,
-              fit: BoxFit.cover,
-            ),
+          // Image with favourite overlay
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset(
+                  service.imageAsset,
+                  width: 140,
+                  height: 140,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              // Favourite heart icon
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Obx(() {
+                  bool wishlisted = false;
+                  for (final sec in controller.categorySections) {
+                    final match = sec.services.firstWhereOrNull((s) => s.id == service.id);
+                    if (match != null) {
+                      wishlisted = match.isWishlisted;
+                      break;
+                    }
+                  }
+                  return GestureDetector(
+                    onTap: () => controller.toggleWishlist(service.id),
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      child: Container(
+                        key: ValueKey(wishlisted),
+                        width: 30,
+                        height: 30,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.92),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.12),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          wishlisted
+                              ? Icons.favorite_rounded
+                              : Icons.favorite_border_rounded,
+                          color: wishlisted
+                              ? const Color(0xFFEF4444)
+                              : const Color(0xFF9CA3AF),
+                          size: 16,
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ],
           ),
           const Gap(12),
           // Title

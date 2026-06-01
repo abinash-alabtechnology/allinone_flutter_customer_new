@@ -3,11 +3,13 @@ import 'package:handy_allinone/util/styles.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:handy_allinone/common/widgets/cart_widget.dart';
 import 'package:handy_allinone/features/cart/controllers/cart_controller.dart';
 import 'package:handy_allinone/features/handyman/services/controllers/handyman_home_controller.dart';
+import 'package:handy_allinone/features/handyman/services/models/handyman_service_model.dart';
 import 'package:handy_allinone/features/handyman/services/widgets/most_booked_services_widget.dart';
 import 'package:handy_allinone/features/handyman/services/widgets/category_services_widget.dart';
+import 'package:handy_allinone/features/handyman/services/widgets/service_options_bottom_sheet.dart';
+import 'package:handy_allinone/features/handyman/services/widgets/category_promo_banner.dart';
 import 'package:handy_allinone/features/location/controllers/location_controller.dart';
 import 'package:handy_allinone/helper/address_helper.dart';
 import 'dart:async';
@@ -17,6 +19,8 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:handy_allinone/features/dashboard/screens/dashboard_screen.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:handy_allinone/features/dashboard/widgets/bottom_nav_item_widget.dart';
+import 'package:handy_allinone/features/handyman/services/screens/handyman_bookings_screen.dart';
+
 
 class HandymanServicesScreen extends StatefulWidget {
   const HandymanServicesScreen({super.key});
@@ -31,9 +35,11 @@ class _HandymanServicesScreenState extends State<HandymanServicesScreen> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> screens = [
-      const HandymanHomeScreenBody(),
+      HandymanHomeScreenBody(onCartTap: () {
+        Get.to(() => HandymanCartScreen(onBackToHome: () => Get.back()));
+      }),
       HandymanWishlistScreen(onBackToHome: () => setState(() => _pageIndex = 0)),
-      HandymanCartScreen(onBackToHome: () => setState(() => _pageIndex = 0)),
+      const HandymanBookingsScreen(),
     ];
 
     return Scaffold(
@@ -58,9 +64,10 @@ class _HandymanServicesScreenState extends State<HandymanServicesScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 BottomNavItemWidget(
-                  title: 'Gograb',
-                  selectedIcon: Images.logotransparent,
-                  unSelectedIcon: Images.logotransparent,
+                  title: 'Main',
+                  selectedIcon: '',
+                  unSelectedIcon: '',
+                  icon: Icons.arrow_back,
                   isSelected: false,
                   activeColor: Theme.of(context).primaryColor,
                   onTap: () {
@@ -68,9 +75,9 @@ class _HandymanServicesScreenState extends State<HandymanServicesScreen> {
                   },
                 ),
                 BottomNavItemWidget(
-                  title: 'Home',
-                  selectedIcon: Images.homeSelect,
-                  unSelectedIcon: Images.homeUnselect,
+                  title: 'Gograb',
+                  selectedIcon: Images.logotransparent,
+                  unSelectedIcon: Images.logotransparent,
                   isSelected: _pageIndex == 0,
                   activeColor: Theme.of(context).primaryColor,
                   onTap: () {
@@ -92,7 +99,7 @@ class _HandymanServicesScreenState extends State<HandymanServicesScreen> {
                   },
                 ),
                 BottomNavItemWidget(
-                  title: 'Booking',
+                  title: 'Bookings',
                   selectedIcon: Images.orderSelect,
                   unSelectedIcon: Images.orderUnselect,
                   isSelected: _pageIndex == 2,
@@ -113,7 +120,8 @@ class _HandymanServicesScreenState extends State<HandymanServicesScreen> {
 }
 
 class HandymanHomeScreenBody extends StatefulWidget {
-  const HandymanHomeScreenBody({super.key});
+  final VoidCallback? onCartTap;
+  const HandymanHomeScreenBody({super.key, this.onCartTap});
 
   @override
   State<HandymanHomeScreenBody> createState() => _HandymanHomeScreenBodyState();
@@ -129,7 +137,7 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
     {
       'title': '20% off on your\nfirst AC servicing',
       'subtitle': 'Up to \u20B9100 off',
-      'image': 'assets/image/Ac_mechanic.png',
+      'image': Images.handymanAcMechanicNoBg,
     },
     {
       'title': '20% off on your\nfirst Electrician service',
@@ -186,7 +194,7 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
 
   Widget _buildCartButton({required bool isScrolled}) {
     return InkWell(
-      onTap: () => Get.toNamed(RouteHelper.getCartRoute()),
+      onTap: widget.onCartTap ?? () => Get.toNamed(RouteHelper.getCartRoute()),
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(8),
@@ -465,117 +473,145 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
                         ),
                       ),
 
-                      // Horizontal 3-row grid
-                      SizedBox(
-                  height: 380,
-                  child: GridView.builder(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: handymanServices.length,
-                    physics: const BouncingScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                      mainAxisExtent: 105,
-                    ),
-                    itemBuilder: (context, index) {
-                      final service = handymanServices[index];
-                      final String title = service['title'];
-                      final String? imagePath = service['image'];
-                      final String? badgeText = service['badge'];
+                      // Responsive vertical grid (adapts to screen width)
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final double screenW = constraints.maxWidth;
+                          // Column count: 4 → 6 → 8 based on width
+                          final int cols = screenW >= 800
+                              ? 8
+                              : screenW >= 520
+                                  ? 6
+                                  : 4;
+                          const double hPad = 16.0;
+                          const double spacing = 10.0;
+                          final double cellW =
+                              (screenW - hPad * 2 - spacing * (cols - 1)) / cols;
+                          // Keep cells roughly square
+                          final double cellH = cellW * 1.15;
+                          final double imgSz = (cellW * 0.46).clamp(28.0, 56.0);
+                          final double fs = (cellW * 0.10).clamp(8.5, 11.5);
+                          final double radius = (cellW * 0.10).clamp(8.0, 14.0);
 
-                      return InkWell(
-                        onTap: () {
-                          Get.toNamed(
-                            RouteHelper.getHandymanSubCategoriesRoute(),
-                            arguments: {'category': title.replaceAll('\n', ' ')},
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: hPad),
+                            child: GridView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: handymanServices.length,
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: cols,
+                                crossAxisSpacing: spacing,
+                                mainAxisSpacing: spacing,
+                                childAspectRatio: cellW / cellH,
+                              ),
+                              itemBuilder: (context, index) {
+                                final service = handymanServices[index];
+                                final String title = service['title'];
+                                final String? imagePath = service['image'];
+                                final String? badgeText = service['badge'];
+
+                                return InkWell(
+                                  onTap: () {
+                                    Get.toNamed(
+                                      RouteHelper.getHandymanSubCategoriesRoute(),
+                                      arguments: {
+                                        'category': title.replaceAll('\n', ' ')
+                                      },
+                                    );
+                                  },
+                                  borderRadius: BorderRadius.circular(radius),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF9FAFB),
+                                      borderRadius:
+                                          BorderRadius.circular(radius),
+                                      border: Border.all(
+                                        color: const Color(0xFFF3F4F6),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            imagePath != null
+                                                ? Image.asset(
+                                                    imagePath,
+                                                    height: imgSz,
+                                                    width: imgSz,
+                                                    fit: BoxFit.contain,
+                                                    color: const Color(0xFFF9FAFB),
+                                                    colorBlendMode: BlendMode.multiply,
+                                                  )
+                                                : Icon(
+                                                    Icons.construction,
+                                                    size: imgSz * 0.6,
+                                                    color: Colors.grey,
+                                                  ),
+                                            SizedBox(height: cellW * 0.05),
+                                            Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: cellW * 0.06),
+                                              child: Text(
+                                                title,
+                                                textAlign: TextAlign.center,
+                                                maxLines: 3,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: robotoRegular.copyWith(
+                                                  fontSize: fs,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: const Color(0xFF374151),
+                                                  height: 1.2,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        if (badgeText != null)
+                                          Positioned(
+                                            bottom: cellW * 0.06,
+                                            child: Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 6,
+                                                      vertical: 1.5),
+                                              decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
+                                                border: Border.all(
+                                                  color:
+                                                      const Color(0xFF16A34A),
+                                                  width: 0.8,
+                                                ),
+                                              ),
+                                              child: Text(
+                                                badgeText,
+                                                style: robotoRegular.copyWith(
+                                                  fontSize:
+                                                      (fs * 0.72).clamp(7.0, 9.0),
+                                                  fontWeight: FontWeight.w700,
+                                                  color:
+                                                      const Color(0xFF16A34A),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                           );
                         },
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF9FAFB),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: const Color(0xFFF3F4F6),
-                              width: 1,
-                            ),
-                          ),
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Expanded(
-                                    child: Center(
-                                      child: imagePath != null
-                                          ? Image.asset(
-                                              imagePath,
-                                              height: 52,
-                                              width: 52,
-                                              fit: BoxFit.contain,
-                                            )
-                                          : const Icon(
-                                              Icons.construction,
-                                              size: 28,
-                                              color: Colors.grey,
-                                            ),
-                                    ),
-                                  ),
-                                  const Gap(4),
-
-                                  // Title Text
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                                    child: Text(
-                                      title,
-                                      textAlign: TextAlign.center,
-                                      maxLines: 3,
-                                      style: robotoRegular.copyWith(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w600,
-                                        color: const Color(0xFF374151),
-                                        height: 1.2,
-                                      ),
-                                    ),
-                                  ),
-                                  const Gap(8),
-                                ],
-                              ),
-
-                              if (badgeText != null)
-                                Positioned(
-                                  bottom: 22,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(6),
-                                      border: Border.all(
-                                        color: const Color(0xFF16A34A),
-                                        width: 0.8,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      badgeText,
-                                      style: robotoRegular.copyWith(
-                                        fontSize: 7.5,
-                                        fontWeight: FontWeight.w700,
-                                        color: const Color(0xFF16A34A),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
+                      ),
+                    ],
             ),
           ),
 
@@ -605,13 +641,94 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
                 // Dynamic Category Services Sections
                 Obx(() {
                   final controller = Get.find<HandymanHomeController>();
+                  final widgets = <Widget>[];
+                  for (final section in controller.categorySections) {
+                    widgets.add(Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: CategoryServicesWidget(section: section),
+                    ));
+
+                    // Add category-specific promo banner
+                    if (section.title == 'Salon for Women') {
+                      widgets.add(CategoryPromoBanner(
+                        tag: 'LUXURY SPA & SALON',
+                        title: 'Up to 30% Off Home Salon',
+                        subtitle: 'Threadings, Facials & Hair Services',
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFFF7E9D), Color(0xFF9B51E0)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        imageAsset: Images.handymanWomenSalonNoBg,
+                        onTap: () {
+                          Get.toNamed(
+                            RouteHelper.getHandymanSubCategoriesRoute(),
+                            arguments: {'category': 'Salon for Women'},
+                          );
+                        },
+                      ));
+                      widgets.add(const Gap(12));
+                    } else if (section.title == 'AC & Appliance Repair') {
+                      widgets.add(CategoryPromoBanner(
+                        tag: 'SUMMER SPECIALS',
+                        title: 'Flat ₹150 Off AC Repairs',
+                        subtitle: 'Certified expert repair & maintenance',
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF2193B0), Color(0xFF6DD5ED)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        imageAsset: Images.handymanAcMechanicNoBg,
+                        onTap: () {
+                          Get.toNamed(
+                            RouteHelper.getHandymanSubCategoriesRoute(),
+                            arguments: {'category': 'AC & Appliance Repair'},
+                          );
+                        },
+                      ));
+                      widgets.add(const Gap(12));
+                    } else if (section.title == 'Cleaning & Pest Control') {
+                      widgets.add(CategoryPromoBanner(
+                        tag: 'HYGIENE FIRST',
+                        title: 'Flat 20% Off Home Deep Clean',
+                        subtitle: 'Sofa, Kitchen & Bathroom sanitization',
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF1D976C), Color(0xFF93F9B9)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        imageAsset: Images.handymanCleaningNoBg,
+                        onTap: () {
+                          Get.toNamed(
+                            RouteHelper.getHandymanSubCategoriesRoute(),
+                            arguments: {'category': 'Cleaning & Pest Control'},
+                          );
+                        },
+                      ));
+                      widgets.add(const Gap(12));
+                    } else if (section.title == 'Electrician, Plumber & Carpenter') {
+                      widgets.add(CategoryPromoBanner(
+                        tag: 'INSTANT FIXES',
+                        title: 'Handyman Services from ₹149',
+                        subtitle: 'Quick home repair at transparent rates',
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFF2994A), Color(0xFFF2C94C)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        imageAsset: Images.handymanElectricianBanner,
+                        onTap: () {
+                          Get.toNamed(
+                            RouteHelper.getHandymanSubCategoriesRoute(),
+                            arguments: {'category': 'Electrician, Plumber & Carpenter'},
+                          );
+                        },
+                      ));
+                      widgets.add(const Gap(12));
+                    }
+                  }
                   return Column(
-                    children: controller.categorySections
-                        .map((section) => Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: CategoryServicesWidget(section: section),
-                            ))
-                        .toList(),
+                    children: widgets,
                   );
                 }),
 
@@ -1022,19 +1139,7 @@ class HandymanWishlistScreen extends StatefulWidget {
 }
 
 class _HandymanWishlistScreenState extends State<HandymanWishlistScreen> {
-  // Pre-populated mock wishlist items
-  final List<Map<String, dynamic>> _wishlistItems = [
-    {
-      'title': 'AC & Appliance Repair',
-      'image': Images.handymanAcRepair,
-      'desc': 'Expert ac repair, gas refilling & cleaning services.',
-    },
-    {
-      'title': 'Cleaning & Pest Control',
-      'image': Images.handymanCleaning,
-      'desc': 'Deep home cleaning, sanitation & pesticide spray.',
-    },
-  ];
+  HandymanHomeController get _controller => Get.find<HandymanHomeController>();
 
   @override
   Widget build(BuildContext context) {
@@ -1057,7 +1162,10 @@ class _HandymanWishlistScreenState extends State<HandymanWishlistScreen> {
         ),
         centerTitle: true,
       ),
-      body: _wishlistItems.isEmpty
+      body: Obx(() {
+        _controller.allServices.value; // Force reactivity tracking
+        final wishlistedServices = _controller.wishlistedServices;
+        return wishlistedServices.isEmpty
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -1101,142 +1209,452 @@ class _HandymanWishlistScreenState extends State<HandymanWishlistScreen> {
                 ],
               ),
             )
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _wishlistItems.length,
-              itemBuilder: (context, index) {
-                final item = _wishlistItems[index];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+          : LayoutBuilder(
+              builder: (context, constraints) {
+                final screenW = constraints.maxWidth;
+                // Responsive column count
+                final int cols = screenW >= 900
+                    ? 4
+                    : screenW >= 600
+                        ? 3
+                        : 2;
+                final double spacing = 16.0;
+                final double padding = 16.0;
+                // Card width = (available width - padding*2 - spacing*(cols-1)) / cols
+                final double cardW =
+                    (screenW - padding * 2 - spacing * (cols - 1)) / cols;
+                // Image is a square matching the 1:1 aspect ratio of Category services card
+                final double imgH = cardW;
+                // Total card height = image + text area (matches the 140/258 ratio: 1.0 + 0.84)
+                final double cardH = imgH + cardW * 0.84;
+
+                return GridView.builder(
+                  padding: EdgeInsets.all(padding),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: cols,
+                    crossAxisSpacing: spacing,
+                    mainAxisSpacing: spacing,
+                    childAspectRatio: cardW / cardH,
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Row(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Container(
-                            color: const Color(0xFFF9FAFB),
-                            padding: const EdgeInsets.all(8),
-                            child: Image.asset(
-                              item['image'],
-                              height: 54,
-                              width: 54,
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                        ),
-                        const Gap(12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item['title'],
-                                style: robotoRegular.copyWith(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                  color: const Color(0xFF1F2937),
-                                ),
-                              ),
-                              const Gap(4),
-                              Text(
-                                item['desc'],
-                                style: robotoRegular.copyWith(
-                                  fontSize: 11,
-                                  color: Colors.grey.shade500,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Gap(8),
-                        Column(
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.favorite, color: Colors.redAccent),
-                              onPressed: () {
-                                setState(() {
-                                  _wishlistItems.removeAt(index);
-                                });
-                                Get.snackbar(
-                                  'Removed',
-                                  'Removed from Wishlist!',
-                                  snackPosition: SnackPosition.BOTTOM,
-                                  duration: const Duration(seconds: 1),
-                                );
-                              },
-                            ),
-                            ElevatedButton(
-                              onPressed: () {
-                                Get.toNamed(
-                                  RouteHelper.getHandymanProcessRoute(),
-                                  arguments: {'serviceTitle': item['title']},
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF0091FF),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                minimumSize: Size.zero,
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              ),
-                              child: Text(
-                                'Book',
-                                style: robotoRegular.copyWith(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
+                  itemCount: wishlistedServices.length,
+                  itemBuilder: (context, index) {
+                    final service = wishlistedServices[index];
+                    return _WishlistServiceCard(
+                      service: service,
+                      controller: _controller,
+                      cardWidth: cardW,
+                    );
+                  },
+                );
+              },
+            );
+      }),
+    );
+  }
+}
+
+
+// ─── Wishlist Service Card (same UI as _CategoryServiceCard) ──────────────────
+
+class _WishlistServiceCard extends StatelessWidget {
+  final HandymanServiceModel service;
+  final HandymanHomeController controller;
+  /// Actual card pixel width — computed by LayoutBuilder in the parent grid.
+  final double cardWidth;
+
+  const _WishlistServiceCard({
+    required this.service,
+    required this.controller,
+    required this.cardWidth,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Responsive sizing derived from real card width
+    final double imgH     = cardWidth; // 1:1 aspect ratio square image
+    final double iconSize = (cardWidth * 0.065).clamp(11.0, 16.0);
+    final double nameFs   = (cardWidth * 0.10).clamp(11.0, 15.0);
+    final double ratingFs = (cardWidth * 0.085).clamp(9.0, 12.0);
+    final double labelFs  = (cardWidth * 0.075).clamp(9.0, 11.0);
+    final double priceFs  = (cardWidth * 0.11).clamp(12.0, 16.0);
+    final double btnW     = (cardWidth * 0.50).clamp(56.0, 80.0);
+    final double btnH     = (cardWidth * 0.24).clamp(28.0, 36.0);
+    final double heartSz  = (cardWidth * 0.12).clamp(22.0, 30.0);
+    final double heartIco = (cardWidth * 0.065).clamp(12.0, 18.0);
+    final double radius   = (cardWidth * 0.08).clamp(8.0, 14.0);
+    final double gap1     = (cardWidth * 0.07).clamp(6.0, 12.0);
+    final double gap2     = (cardWidth * 0.07).clamp(6.0, 12.0);
+    final double starSz   = (cardWidth * 0.065).clamp(10.0, 15.0);
+
+    return GestureDetector(
+      onTap: () {
+        Get.bottomSheet(
+          ServiceOptionsBottomSheet(
+            service: service,
+            onOptionAdd: (optionId) => controller.addToCart(service.id),
+          ),
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+        );
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Image with heart overlay ─────────────────────────────────
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(radius),
+                child: Image.asset(
+                  service.imageAsset,
+                  width: double.infinity,
+                  height: imgH,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    width: double.infinity,
+                    height: imgH,
+                    color: const Color(0xFFEFF6FF),
+                    child: Icon(
+                      Icons.build_rounded,
+                      color: const Color(0xFF0091FF),
+                      size: imgH * 0.28,
+                    ),
+                  ),
+                ),
+              ),
+              // Favourite heart icon
+              Positioned(
+                top: 6,
+                right: 6,
+                child: Obx(() {
+                  final wishlisted = controller.wishlistedServices
+                      .any((s) => s.id == service.id);
+                  return GestureDetector(
+                    onTap: () => controller.toggleWishlist(service.id),
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      child: Container(
+                        key: ValueKey(wishlisted),
+                        width: heartSz,
+                        height: heartSz,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.92),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.12),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
                             ),
                           ],
                         ),
-                      ],
+                        child: Icon(
+                          wishlisted
+                              ? Icons.favorite_rounded
+                              : Icons.favorite_border_rounded,
+                          color: wishlisted
+                              ? const Color(0xFFEF4444)
+                              : const Color(0xFF9CA3AF),
+                          size: heartIco,
+                        ),
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                }),
+              ),
+            ],
+          ),
+          SizedBox(height: gap1),
+          // ── Service Name ─────────────────────────────────────────────
+          Text(
+            service.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: robotoRegular.copyWith(
+              fontSize: nameFs,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF1F2937),
             ),
+          ),
+          SizedBox(height: gap2 * 0.4),
+          // ── Rating ───────────────────────────────────────────────────
+          Row(
+            children: [
+              Icon(Icons.star, color: const Color(0xFFFFC107), size: starSz),
+              SizedBox(width: gap2 * 0.35),
+              Flexible(
+                child: Text(
+                  '${service.rating} (${service.reviewCount})',
+                  overflow: TextOverflow.ellipsis,
+                  style: robotoRegular.copyWith(
+                    fontSize: ratingFs,
+                    fontWeight: FontWeight.w400,
+                    color: const Color(0xFF6B7280),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: gap2),
+          // ── Price & Add Button ────────────────────────────────────────
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Starts at',
+                      style: robotoRegular.copyWith(
+                        fontSize: labelFs,
+                        fontWeight: FontWeight.w400,
+                        color: const Color(0xFF9CA3AF),
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      '₹${service.startingPrice}',
+                      overflow: TextOverflow.ellipsis,
+                      style: robotoRegular.copyWith(
+                        fontSize: priceFs,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF111827),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Obx(() {
+                int qty = controller.mostBookedServices
+                        .firstWhereOrNull((s) => s.id == service.id)
+                        ?.cartQuantity ??
+                    0;
+                if (qty == 0) {
+                  for (final sec in controller.categorySections) {
+                    final match = sec.services
+                        .firstWhereOrNull((s) => s.id == service.id);
+                    if (match != null) {
+                      qty = match.cartQuantity;
+                      break;
+                    }
+                  }
+                }
+                return qty == 0
+                    ? _WishlistAddButton(
+                        optionsCount: service.optionsCount,
+                        btnWidth: btnW,
+                        btnHeight: btnH,
+                        labelFs: iconSize,
+                        optionFs: ratingFs * 0.82,
+                        onTap: () {
+                          if (service.optionsCount == 0) {
+                            controller.addToCart(service.id);
+                            Get.snackbar(
+                              'Added',
+                              '${service.name} added to cart',
+                              snackPosition: SnackPosition.BOTTOM,
+                              backgroundColor: Colors.black87,
+                              colorText: Colors.white,
+                              margin: const EdgeInsets.all(16),
+                              duration: const Duration(seconds: 2),
+                            );
+                          } else {
+                            Get.bottomSheet(
+                              ServiceOptionsBottomSheet(
+                                service: service,
+                                onOptionAdd: (optionId) {
+                                  controller.addToCart(service.id);
+                                },
+                              ),
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                            );
+                          }
+                        },
+                      )
+                    : _WishlistQuantityButton(
+                        quantity: qty,
+                        btnWidth: btnW,
+                        btnHeight: btnH,
+                        countFs: ratingFs,
+                        onAdd: () => controller.addToCart(service.id),
+                        onRemove: () => controller.removeFromCart(service.id),
+                      );
+              }),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Add Button (Wishlist) ────────────────────────────────────────────────────
+
+class _WishlistAddButton extends StatelessWidget {
+  final int optionsCount;
+  final VoidCallback onTap;
+  final double btnWidth;
+  final double btnHeight;
+  final double labelFs;
+  final double optionFs;
+
+  const _WishlistAddButton({
+    required this.optionsCount,
+    required this.onTap,
+    required this.btnWidth,
+    required this.btnHeight,
+    required this.labelFs,
+    required this.optionFs,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.bottomCenter,
+        children: [
+          Container(
+            width: btnWidth,
+            height: btnHeight,
+            margin: EdgeInsets.only(bottom: optionsCount > 0 ? 7 : 0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.02),
+                  blurRadius: 2,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              'Add',
+              style: robotoRegular.copyWith(
+                fontSize: (labelFs * 1.3).clamp(11.0, 15.0),
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF6C63FF),
+              ),
+            ),
+          ),
+          if (optionsCount > 0)
+            Positioned(
+              bottom: 0,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                color: Colors.white,
+                child: Text(
+                  '$optionsCount options',
+                  style: robotoRegular.copyWith(
+                    fontSize: optionFs.clamp(8.0, 10.5),
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF9CA3AF),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Quantity Stepper (Wishlist) ──────────────────────────────────────────────
+
+class _WishlistQuantityButton extends StatelessWidget {
+  final int quantity;
+  final VoidCallback onAdd;
+  final VoidCallback onRemove;
+  final double btnWidth;
+  final double btnHeight;
+  final double countFs;
+
+  const _WishlistQuantityButton({
+    required this.quantity,
+    required this.onAdd,
+    required this.onRemove,
+    required this.btnWidth,
+    required this.btnHeight,
+    required this.countFs,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: btnWidth,
+      height: btnHeight,
+      decoration: BoxDecoration(
+        color: const Color(0xFF6C63FF),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          GestureDetector(
+            onTap: onRemove,
+            behavior: HitTestBehavior.opaque,
+            child: SizedBox(
+              width: btnWidth * 0.33,
+              height: btnHeight,
+              child: Icon(Icons.remove_rounded,
+                  color: Colors.white, size: countFs.clamp(12.0, 17.0)),
+            ),
+          ),
+          Text(
+            '$quantity',
+            style: robotoRegular.copyWith(
+              fontSize: countFs.clamp(11.0, 14.0),
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
+          GestureDetector(
+            onTap: onAdd,
+            behavior: HitTestBehavior.opaque,
+            child: SizedBox(
+              width: btnWidth * 0.33,
+              height: btnHeight,
+              child: Icon(Icons.add_rounded,
+                  color: Colors.white, size: countFs.clamp(12.0, 17.0)),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
 // ----------------------------------------------------
-// TAB 2: CART / BOOKINGS SCREEN
+// TAB 2: CART SCREEN
 // ----------------------------------------------------
-class HandymanCartScreen extends StatefulWidget {
+
+class HandymanCartScreen extends StatelessWidget {
   final VoidCallback onBackToHome;
   const HandymanCartScreen({super.key, required this.onBackToHome});
 
-  @override
-  State<HandymanCartScreen> createState() => _HandymanCartScreenState();
-}
-
-class _HandymanCartScreenState extends State<HandymanCartScreen> {
-  // Pre-populated mock active booking
-  bool _hasActiveBooking = true;
+  HandymanHomeController get _controller =>
+      Get.find<HandymanHomeController>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
         backgroundColor: const Color(0xFF0091FF),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: widget.onBackToHome,
+          onPressed: onBackToHome,
         ),
         title: Text(
-          'My Bookings',
+          'My Cart',
           style: robotoRegular.copyWith(
             color: Colors.white,
             fontWeight: FontWeight.w700,
@@ -1244,281 +1662,403 @@ class _HandymanCartScreenState extends State<HandymanCartScreen> {
           ),
         ),
         centerTitle: true,
+        actions: [
+          Obx(() {
+            final count = _controller.cartServices.length;
+            if (count == 0) return const SizedBox.shrink();
+            return TextButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                    title: Text('Clear Cart',
+                        style: robotoRegular.copyWith(
+                            fontWeight: FontWeight.bold)),
+                    content: Text(
+                        'Remove all $count service(s) from the cart?',
+                        style: robotoRegular.copyWith(fontSize: 13)),
+                    actions: [
+                      TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text('Cancel',
+                              style:
+                                  robotoRegular.copyWith(color: Colors.grey))),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _controller.clearCart();
+                        },
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.redAccent),
+                        child: Text('Clear',
+                            style:
+                                robotoRegular.copyWith(color: Colors.white)),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              child: Text(
+                'Clear all',
+                style: robotoRegular.copyWith(
+                  color: Colors.white.withOpacity(0.9),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            );
+          }),
+        ],
       ),
-      body: !_hasActiveBooking
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.shopping_bag_outlined, size: 80, color: Colors.grey.shade300),
-                  const Gap(16),
-                  Text(
-                    'No Active Bookings',
-                    style: robotoRegular.copyWith(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.grey.shade700,
-                    ),
+      body: Obx(() {
+        _controller.allServices.value; // Force reactivity tracking
+        final cartItems = _controller.cartServices;
+        if (cartItems.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.shopping_cart_outlined,
+                    size: 90, color: Colors.grey.shade300),
+                const Gap(16),
+                Text(
+                  'Your Cart is Empty',
+                  style: robotoRegular.copyWith(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.grey.shade700,
                   ),
-                  const Gap(8),
-                  Text(
-                    'Book expert services and track details here.',
-                    style: robotoRegular.copyWith(
-                      fontSize: 13,
-                      color: Colors.grey.shade400,
-                    ),
+                ),
+                const Gap(8),
+                Text(
+                  'Add services to get expert help at your doorstep.',
+                  textAlign: TextAlign.center,
+                  style: robotoRegular.copyWith(
+                    fontSize: 13,
+                    color: Colors.grey.shade400,
                   ),
-                  const Gap(24),
-                  ElevatedButton(
-                    onPressed: widget.onBackToHome,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0091FF),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    ),
-                    child: Text(
-                      'Book a Service',
-                      style: robotoRegular.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
+                ),
+                const Gap(28),
+                ElevatedButton.icon(
+                  onPressed: onBackToHome,
+                  icon: const Icon(Icons.explore_outlined,
+                      size: 18, color: Colors.white),
+                  label: Text(
+                    'Explore Services',
+                    style: robotoRegular.copyWith(
+                        fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0091FF),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 28, vertical: 14),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return Column(
+          children: [
+            // ── Cart item list ──────────────────────────────────────────
+            Expanded(
+              child: ListView.separated(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                itemCount: cartItems.length,
+                separatorBuilder: (_, __) => const Gap(12),
+                itemBuilder: (context, index) {
+                  final service = cartItems[index];
+                  return _CartItemCard(
+                    service: service,
+                    controller: _controller,
+                  );
+                },
+              ),
+            ),
+
+            // ── Order Summary Footer ────────────────────────────────────
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(20)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 16,
+                    offset: const Offset(0, -4),
                   ),
                 ],
               ),
-            )
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Section Title
                   Text(
-                    'Active Booking',
+                    'Order Summary',
                     style: robotoRegular.copyWith(
-                      fontSize: 15,
+                      fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: const Color(0xFF1F2937),
                     ),
                   ),
                   const Gap(12),
-
-                  // Active Booking Detail Card
-                  Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Container(
-                                  color: const Color(0xFF0091FF).withOpacity(0.08),
-                                  padding: const EdgeInsets.all(10),
-                                  child: Image.asset(
-                                    Images.handymanAcRepair,
-                                    height: 48,
-                                    width: 48,
-                                    fit: BoxFit.contain,
-                                  ),
+                  ...cartItems.map((s) => Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                '${s.name} × ${s.cartQuantity}',
+                                overflow: TextOverflow.ellipsis,
+                                style: robotoRegular.copyWith(
+                                  fontSize: 12,
+                                  color: const Color(0xFF6B7280),
                                 ),
                               ),
-                              const Gap(12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                      decoration: BoxDecoration(
-                                        color: Colors.green.shade50,
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Text(
-                                        'CONFIRMED',
-                                        style: robotoRegular.copyWith(
-                                          fontSize: 9,
-                                          fontWeight: FontWeight.w800,
-                                          color: Colors.green.shade700,
-                                        ),
-                                      ),
-                                    ),
-                                    const Gap(4),
-                                    Text(
-                                      'AC Filter Cleaning & Gas Refill',
-                                      style: robotoRegular.copyWith(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w700,
-                                        color: const Color(0xFF1F2937),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                            ),
+                            Text(
+                              '₹${s.startingPrice * s.cartQuantity}',
+                              style: robotoRegular.copyWith(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF1F2937),
                               ),
-                            ],
-                          ),
-                          const Divider(height: 24),
-                          
-                          // Schedule details row
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'SCHEDULED FOR',
-                                    style: robotoRegular.copyWith(fontSize: 9, color: Colors.grey, fontWeight: FontWeight.bold),
-                                  ),
-                                  const Gap(2),
-                                  Text(
-                                    'Tomorrow, 10:00 AM',
-                                    style: robotoRegular.copyWith(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.black87),
-                                  ),
-                                ],
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    'ESTIMATED COST',
-                                    style: robotoRegular.copyWith(fontSize: 9, color: Colors.grey, fontWeight: FontWeight.bold),
-                                  ),
-                                  const Gap(2),
-                                  Text(
-                                    '\$50.00',
-                                    style: robotoRegular.copyWith(fontSize: 14, fontWeight: FontWeight.w800, color: const Color(0xFF0091FF)),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          const Divider(height: 24),
-
-                          // Actions
-                          Row(
-                            children: [
-                              Expanded(
-                                child: OutlinedButton(
-                                  onPressed: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) => AlertDialog(
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                        title: Text('Cancel Booking', style: robotoRegular.copyWith(fontWeight: FontWeight.bold)),
-                                        content: Text('Are you sure you want to cancel this handyman booking?', style: robotoRegular.copyWith(fontSize: 13)),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () => Navigator.pop(context),
-                                            child: Text('Dismiss', style: robotoRegular.copyWith(color: Colors.grey)),
-                                          ),
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                              setState(() {
-                                                _hasActiveBooking = false;
-                                              });
-                                              Get.snackbar(
-                                                'Cancelled',
-                                                'Your booking has been cancelled successfully.',
-                                                snackPosition: SnackPosition.BOTTOM,
-                                                backgroundColor: Colors.white,
-                                                colorText: Colors.red,
-                                              );
-                                            },
-                                            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                                            child: Text('Cancel Booking', style: robotoRegular.copyWith(color: Colors.white)),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                  style: OutlinedButton.styleFrom(
-                                    side: const BorderSide(color: Colors.redAccent),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                    padding: const EdgeInsets.symmetric(vertical: 10),
-                                  ),
-                                  child: Text(
-                                    'Cancel',
-                                    style: robotoRegular.copyWith(color: Colors.redAccent, fontSize: 13, fontWeight: FontWeight.w600),
-                                  ),
-                                ),
-                              ),
-                              const Gap(12),
-                              Expanded(
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    Get.snackbar(
-                                      'Modify Schedule',
-                                      'Rescheduling request sent to technician!',
-                                      snackPosition: SnackPosition.BOTTOM,
-                                      backgroundColor: const Color(0xFF0091FF),
-                                      colorText: Colors.white,
-                                    );
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF0091FF),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                    padding: const EdgeInsets.symmetric(vertical: 10),
-                                    elevation: 0,
-                                  ),
-                                  child: Text(
-                                    'Modify Time',
-                                    style: robotoRegular.copyWith(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const Gap(28),
-
-                  // Trust indicators
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF9FAFB),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade100),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.shield_outlined, color: Colors.blueAccent, size: 28),
-                        const Gap(12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Satisfaction Guarantee',
-                                style: robotoRegular.copyWith(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black87),
-                              ),
-                              const Gap(2),
-                              Text(
-                                'Certified handymen inspect and guarantee a clean job after task completion.',
-                                style: robotoRegular.copyWith(fontSize: 10, color: Colors.grey.shade600),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
+                      )),
+                  const Divider(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Total',
+                        style: robotoRegular.copyWith(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF1F2937),
+                        ),
+                      ),
+                      Text(
+                        '₹${_controller.cartTotalPrice}',
+                        style: robotoRegular.copyWith(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFF0091FF),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Gap(16),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Get.snackbar(
+                          'Order Placed!',
+                          'Your services have been scheduled. A technician will contact you soon.',
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: const Color(0xFF0091FF),
+                          colorText: Colors.white,
+                          margin: const EdgeInsets.all(16),
+                          duration: const Duration(seconds: 3),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0091FF),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14)),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        'Proceed to Checkout',
+                        style: robotoRegular.copyWith(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
+          ],
+        );
+      }),
     );
   }
 }
+
+// ─── Single Cart Item Card ────────────────────────────────────────────────────
+
+class _CartItemCard extends StatelessWidget {
+  final HandymanServiceModel service;
+  final HandymanHomeController controller;
+
+  const _CartItemCard({required this.service, required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Service image
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.asset(
+              service.imageAsset,
+              width: 70,
+              height: 70,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(
+                width: 70,
+                height: 70,
+                color: const Color(0xFFEFF6FF),
+                child: const Icon(Icons.build_rounded,
+                    color: Color(0xFF0091FF), size: 28),
+              ),
+            ),
+          ),
+          const Gap(14),
+
+          // Name + category + price
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  service.name,
+                  style: robotoRegular.copyWith(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF1F2937),
+                  ),
+                ),
+                const Gap(3),
+                Text(
+                  service.category,
+                  style: robotoRegular.copyWith(
+                    fontSize: 11,
+                    color: const Color(0xFF6B7280),
+                  ),
+                ),
+                const Gap(6),
+                // Per-unit price + row total
+                Row(
+                  children: [
+                    Text(
+                      '₹${service.startingPrice}',
+                      style: robotoRegular.copyWith(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF374151),
+                      ),
+                    ),
+                    if (service.cartQuantity > 1) ...[
+                      Text(
+                        ' × ${service.cartQuantity} = ',
+                        style: robotoRegular.copyWith(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      Text(
+                        '₹${service.startingPrice * service.cartQuantity}',
+                        style: robotoRegular.copyWith(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF0091FF),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // Quantity stepper
+          Obx(() {
+            final qty = controller
+                    .mostBookedServices
+                    .firstWhereOrNull((s) => s.id == service.id)
+                    ?.cartQuantity ??
+                (() {
+                  for (final sec in controller.categorySections) {
+                    final m = sec.services
+                        .firstWhereOrNull((s) => s.id == service.id);
+                    if (m != null) return m.cartQuantity;
+                  }
+                  return service.cartQuantity;
+                })();
+
+            return Container(
+              height: 36,
+              decoration: BoxDecoration(
+                color: const Color(0xFF0091FF),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  GestureDetector(
+                    onTap: () => controller.removeFromCart(service.id),
+                    behavior: HitTestBehavior.opaque,
+                    child: const SizedBox(
+                      width: 34,
+                      height: 36,
+                      child: Icon(Icons.remove_rounded,
+                          color: Colors.white, size: 16),
+                    ),
+                  ),
+                  Text(
+                    '$qty',
+                    style: robotoRegular.copyWith(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => controller.addToCart(service.id),
+                    behavior: HitTestBehavior.opaque,
+                    child: const SizedBox(
+                      width: 34,
+                      height: 36,
+                      child: Icon(Icons.add_rounded,
+                          color: Colors.white, size: 16),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+}
+

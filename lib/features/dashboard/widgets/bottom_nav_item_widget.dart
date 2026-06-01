@@ -123,6 +123,7 @@ import 'package:handy_allinone/util/styles.dart';
 class BottomNavItemWidget extends StatelessWidget {
   final String selectedIcon;
   final String unSelectedIcon;
+  final IconData? icon;
   final String title;
   final Function? onTap;
   final bool isSelected;
@@ -135,6 +136,7 @@ class BottomNavItemWidget extends StatelessWidget {
     required this.title,
     required this.selectedIcon,
     required this.unSelectedIcon,
+    this.icon,
     this.activeColor,
   });
 
@@ -146,9 +148,6 @@ class BottomNavItemWidget extends StatelessWidget {
 
     final double iconSize = 28 * widthFactor.clamp(0.8, 1.2);
     final double textSize = 12 * widthFactor.clamp(0.8, 1.1);
-    final double containerWidth = isSelected
-        ? (130 * widthFactor).clamp(90, 150)
-        : (50 * widthFactor).clamp(40, 60);
     final double containerHeight =
         (GetPlatform.isIOS ? 90 : 73) * heightFactor.clamp(0.9, 1.1);
 
@@ -176,15 +175,22 @@ class BottomNavItemWidget extends StatelessWidget {
                 duration: const Duration(milliseconds: 30),
                 transitionBuilder: (child, anim) =>
                     ScaleTransition(scale: anim, child: child),
-                child: CustomAssetImageWidget(
-                  isSelected ? selectedIcon : unSelectedIcon,
-                  key: ValueKey(isSelected),
-                  height: iconSize,
-                  width: iconSize,
-                  color: isSelected
-                      ? primaryColor
-                      : Colors.black,
-                ),
+                child: icon != null
+                    ? Icon(
+                        icon,
+                        key: ValueKey(isSelected),
+                        size: iconSize,
+                        color: isSelected ? primaryColor : Colors.black,
+                      )
+                    : CustomAssetImageWidget(
+                        isSelected ? selectedIcon : unSelectedIcon,
+                        key: ValueKey(isSelected),
+                        height: iconSize,
+                        width: iconSize,
+                        color: isSelected
+                            ? primaryColor
+                            : Colors.black,
+                      ),
               ),
               AnimatedSize(
                 duration: const Duration(milliseconds: 30),

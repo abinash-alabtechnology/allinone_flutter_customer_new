@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:handy_allinone/features/handyman/services/controllers/handyman_home_controller.dart';
 
 class HandymanProcessScreen extends StatefulWidget {
   const HandymanProcessScreen({super.key});
@@ -800,6 +801,20 @@ class _HandymanProcessScreenState extends State<HandymanProcessScreen> {
   }
 
   void _showSuccessDialog(double totalCost) {
+    final now = DateTime.now();
+    final bookingDate = now.add(Duration(days: _selectedDateIndex));
+    final String timeString = _selectedTimeIndex != -1 ? _timeSlots[_selectedTimeIndex] : 'Anytime';
+
+    if (Get.isRegistered<HandymanHomeController>()) {
+      Get.find<HandymanHomeController>().placeBooking(
+        serviceName: _serviceTitle,
+        price: totalCost,
+        serviceDate: bookingDate,
+        tasks: _selectedTasks,
+        timeSlot: timeString,
+      );
+    }
+
     showDialog(
       context: context,
       barrierDismissible: false,

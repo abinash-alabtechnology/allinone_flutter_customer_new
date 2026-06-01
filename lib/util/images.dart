@@ -393,12 +393,14 @@ class Images {
 
   static const String handymanInstaHelp = 'assets/image/handyman_instahelp.png';
   static const String handymanWomenSalon = 'assets/image/handyman_women_salon.png';
+  static const String handymanWomenSalonNoBg = 'assets/image/handyman_women_salon_nobg.png';
   static const String handymanThreading = 'assets/image/handyman_threading.png';
   static const String handymanHeadMassage = 'assets/image/handyman_head_massage.png';
   static const String handymanFacial = 'assets/image/handyman_facial.png';
   static const String handymanAc = 'assets/image/handyman_ac.png';
   static const String handymanMenSalon = 'assets/image/handyman_men_salon.png';
   static const String handymanCleaning = 'assets/image/handyman_cleaning.png';
+  static const String handymanCleaningNoBg = 'assets/image/handyman_cleaning_nobg.png';
   static const String handymanPainting = 'assets/image/handyman_painting.png';
   static const String handymanAcRepair = 'assets/image/handyman_ac_repair.png';
   static const String handymanTools = 'assets/image/handyman_tools.png';
@@ -410,6 +412,9 @@ class Images {
   static const String handymanPromoBanner = 'assets/image/handyman_promo_banner.png';
   static const String handymanElectricianBanner = 'assets/image/Electrian.png';
   static const String handymanPainterBanner = 'assets/image/Paniter.png';
+  static const String handymanAcMechanicNoBg = 'assets/image/Ac_mechanic_nobg.png';
+  static const String handymanElectricalRepair = 'assets/image/handyman_electrical_repair.png';
+  static const String handymanCarpentryRepair = 'assets/image/handyman_carpentry_repair.png';
   static const String handymanUpperLip = 'assets/image/handyman_upper_lip.png';
   static const String handymanChin = 'assets/image/handyman_chin.png';
   static const String facialFruit = 'assets/image/facial_fruit.png';
