@@ -171,7 +171,7 @@ class ServiceOptionsBottomSheet extends StatelessWidget {
                                 Get.snackbar(
                                   'Added',
                                   '${service.name} added to cart',
-                                  snackPosition: SnackPosition.BOTTOM,
+                                  snackPosition: SnackPosition.TOP,
                                   backgroundColor: Colors.black87,
                                   colorText: Colors.white,
                                   margin: const EdgeInsets.all(16),
@@ -406,7 +406,7 @@ class ServiceOptionsBottomSheet extends StatelessWidget {
                                                   Get.snackbar(
                                                     'Added',
                                                     '${option.title} added to cart',
-                                                    snackPosition: SnackPosition.BOTTOM,
+                                                    snackPosition: SnackPosition.TOP,
                                                     backgroundColor: Colors.black87,
                                                     colorText: Colors.white,
                                                     margin: const EdgeInsets.all(16),

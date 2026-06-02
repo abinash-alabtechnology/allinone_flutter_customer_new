@@ -906,13 +906,33 @@ class HandymanHomeController extends GetxController {
     bookings.assignAll([
       HandymanBookingModel(
         id: '100138',
-        serviceName: 'Foam-jet AC service',
-        bookingDate: DateTime(2026, 6, 1, 17, 14),
-        serviceDate: DateTime(2026, 6, 1, 17, 15),
-        price: 450.0,
+        serviceName: 'Rent Ambulance',
+        bookingDate: DateTime(2026, 6, 2, 16, 57),
+        serviceDate: DateTime(2026, 6, 2, 16, 59),
+        price: 11340.0,
         status: 'Pending',
-        tasks: ['1 AC deep clean'],
-        timeSlot: '05:15 PM',
+        tasks: ['Ambulance with life support', 'Emergency ambulance'],
+        timeSlot: '04:59 PM',
+        address: 'Q93Q+GC2, Green Rd, Dhaka 1215, Bangladesh',
+        paymentMethod: 'Cash after service',
+        paymentStatus: 'Unpaid',
+        items: [
+          HandymanBookingItem(
+            title: 'Rent Ambulance',
+            variantName: 'Ambulance with life support',
+            quantity: 1,
+            unitPrice: 8000.0,
+          ),
+          HandymanBookingItem(
+            title: 'Rent Ambulance',
+            variantName: 'Emergency ambulance',
+            quantity: 1,
+            unitPrice: 3000.0,
+          ),
+        ],
+        subTotal: 11000.0,
+        vat: 330.0,
+        fee: 10.0,
       ),
       HandymanBookingModel(
         id: '100137',
@@ -923,6 +943,26 @@ class HandymanHomeController extends GetxController {
         status: 'Pending',
         tasks: ['Eyebrow threading', 'Upper lip threading'],
         timeSlot: '05:12 PM',
+        address: 'Q93Q+GC2, Green Rd, Dhaka 1215, Bangladesh',
+        paymentMethod: 'Cash after service',
+        paymentStatus: 'Unpaid',
+        items: [
+          HandymanBookingItem(
+            title: 'Threading',
+            variantName: 'Eyebrow threading',
+            quantity: 1,
+            unitPrice: 500.0,
+          ),
+          HandymanBookingItem(
+            title: 'Threading',
+            variantName: 'Upper lip threading',
+            quantity: 1,
+            unitPrice: 400.0,
+          ),
+        ],
+        subTotal: 900.0,
+        vat: 28.0,
+        fee: 10.0,
       ),
       HandymanBookingModel(
         id: '100136',
@@ -933,6 +973,20 @@ class HandymanHomeController extends GetxController {
         status: 'Accepted',
         tasks: ['Switchboard repair'],
         timeSlot: '11:30 AM',
+        address: 'Q93Q+GC2, Green Rd, Dhaka 1215, Bangladesh',
+        paymentMethod: 'Gograb Wallet',
+        paymentStatus: 'Paid',
+        items: [
+          HandymanBookingItem(
+            title: 'Emergency Electrician',
+            variantName: 'Switchboard repair',
+            quantity: 1,
+            unitPrice: 135.0,
+          ),
+        ],
+        subTotal: 135.0,
+        vat: 5.0,
+        fee: 10.0,
       ),
       HandymanBookingModel(
         id: '100135',
@@ -943,6 +997,20 @@ class HandymanHomeController extends GetxController {
         status: 'Ongoing',
         tasks: ['Wall touchup'],
         timeSlot: '03:00 PM',
+        address: 'Q93Q+GC2, Green Rd, Dhaka 1215, Bangladesh',
+        paymentMethod: 'Cash after service',
+        paymentStatus: 'Unpaid',
+        items: [
+          HandymanBookingItem(
+            title: 'Home Painting',
+            variantName: 'Wall touchup',
+            quantity: 1,
+            unitPrice: 669.0,
+          ),
+        ],
+        subTotal: 669.0,
+        vat: 20.0,
+        fee: 10.0,
       ),
       HandymanBookingModel(
         id: '100134',
@@ -953,6 +1021,26 @@ class HandymanHomeController extends GetxController {
         status: 'Completed',
         tasks: ['Haircut', 'Hair styling'],
         timeSlot: '10:00 AM',
+        address: 'Q93Q+GC2, Green Rd, Dhaka 1215, Bangladesh',
+        paymentMethod: 'Gograb Wallet',
+        paymentStatus: 'Paid',
+        items: [
+          HandymanBookingItem(
+            title: 'Haircut',
+            variantName: 'Men\'s Haircut',
+            quantity: 1,
+            unitPrice: 150.0,
+          ),
+          HandymanBookingItem(
+            title: 'Styling',
+            variantName: 'Hair styling',
+            quantity: 1,
+            unitPrice: 120.0,
+          ),
+        ],
+        subTotal: 270.0,
+        vat: 19.0,
+        fee: 10.0,
       ),
       HandymanBookingModel(
         id: '100133',
@@ -963,6 +1051,20 @@ class HandymanHomeController extends GetxController {
         status: 'Cancelled',
         tasks: ['Door lock opening'],
         timeSlot: '05:00 PM',
+        address: 'Q93Q+GC2, Green Rd, Dhaka 1215, Bangladesh',
+        paymentMethod: 'Cash after service',
+        paymentStatus: 'Unpaid',
+        items: [
+          HandymanBookingItem(
+            title: 'Lockout Service',
+            variantName: 'Door lock opening',
+            quantity: 1,
+            unitPrice: 180.0,
+          ),
+        ],
+        subTotal: 180.0,
+        vat: 9.0,
+        fee: 10.0,
       ),
     ]);
   }
@@ -975,6 +1077,10 @@ class HandymanHomeController extends GetxController {
     required String timeSlot,
   }) {
     final nextNum = bookings.isEmpty ? 100139 : int.parse(bookings.first.id) + 1;
+    final double calculatedSubTotal = price * 0.9;
+    final double calculatedVat = price * 0.03;
+    final double calculatedFee = price - calculatedSubTotal - calculatedVat;
+
     final newBooking = HandymanBookingModel(
       id: nextNum.toString(),
       serviceName: serviceName,
@@ -984,6 +1090,18 @@ class HandymanHomeController extends GetxController {
       status: 'Pending',
       tasks: tasks,
       timeSlot: timeSlot,
+      address: 'Q93Q+GC2, Green Rd, Dhaka 1215, Bangladesh',
+      paymentMethod: 'Cash after service',
+      paymentStatus: 'Unpaid',
+      items: tasks.map((t) => HandymanBookingItem(
+        title: serviceName,
+        variantName: t,
+        quantity: 1,
+        unitPrice: calculatedSubTotal / (tasks.isEmpty ? 1 : tasks.length),
+      )).toList(),
+      subTotal: calculatedSubTotal,
+      vat: calculatedVat,
+      fee: calculatedFee,
     );
     bookings.insert(0, newBooking);
   }

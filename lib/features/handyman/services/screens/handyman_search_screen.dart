@@ -23,6 +23,9 @@ class _HandymanSearchScreenState extends State<HandymanSearchScreen> {
   @override
   void initState() {
     super.initState();
+    if (!Get.isRegistered<HandymanHomeController>()) {
+      Get.put(HandymanHomeController());
+    }
     _searchControllerObx = Get.put(HandymanSearchController());
     
     // Auto focus the search field on entering

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:handy_allinone/features/handyman/services/controllers/handyman_home_controller.dart';
 import 'package:handy_allinone/features/handyman/services/models/handyman_booking_model.dart';
+import 'package:handy_allinone/features/handyman/services/screens/handyman_booking_details_screen.dart';
 import 'package:handy_allinone/util/styles.dart';
 
 class HandymanBookingsScreen extends StatefulWidget {
@@ -23,6 +24,14 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
     'Cancelled'
   ];
   int _selectedStatusIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    if (!Get.isRegistered<HandymanHomeController>()) {
+      Get.put(HandymanHomeController());
+    }
+  }
 
   HandymanHomeController get _controller => Get.find<HandymanHomeController>();
 
@@ -50,17 +59,17 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
   Color _getIconColorForStatus(String status) {
     switch (status) {
       case 'All':
-        return const Color(0xFF0091FF);
+        return const Color(0xFF6C63FF);
       case 'Pending':
-        return const Color(0xFF0284C7);
+        return const Color(0xFFF59E0B);
       case 'Accepted':
-        return const Color(0xFF16A34A);
+        return const Color(0xFF6C63FF);
       case 'Ongoing':
-        return const Color(0xFFD97706);
+        return const Color(0xFF3B82F6);
       case 'Completed':
-        return const Color(0xFF15803D);
+        return const Color(0xFF10B981);
       case 'Cancelled':
-        return const Color(0xFFDC2626);
+        return const Color(0xFFEF4444);
       default:
         return Colors.grey;
     }
@@ -93,34 +102,34 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
   Color _getStatusBgColor(String status) {
     switch (status) {
       case 'Pending':
-        return const Color(0xFFE0F2FE); // Light blue
+        return const Color(0xFFFFFBEB);
       case 'Accepted':
-        return const Color(0xFFE0E7FF); // Light indigo
+        return const Color(0xFFEEF2FF);
       case 'Ongoing':
-        return const Color(0xFFFEF3C7); // Light amber
+        return const Color(0xFFEFF6FF);
       case 'Completed':
-        return const Color(0xFFDCFCE7); // Light green
+        return const Color(0xFFECFDF5);
       case 'Cancelled':
-        return const Color(0xFFFEE2E2); // Light red
+        return const Color(0xFFFEF2F2);
       default:
-        return Colors.grey.shade100;
+        return Colors.grey.shade50;
     }
   }
 
   Color _getStatusTextColor(String status) {
     switch (status) {
       case 'Pending':
-        return const Color(0xFF0284C7);
+        return const Color(0xFFF59E0B);
       case 'Accepted':
-        return const Color(0xFF4F46E5);
+        return const Color(0xFF6C63FF);
       case 'Ongoing':
-        return const Color(0xFFD97706);
+        return const Color(0xFF3B82F6);
       case 'Completed':
-        return const Color(0xFF16A34A);
+        return const Color(0xFF10B981);
       case 'Cancelled':
-        return const Color(0xFFDC2626);
+        return const Color(0xFFEF4444);
       default:
-        return Colors.grey.shade700;
+        return Colors.grey;
     }
   }
 
@@ -213,7 +222,7 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
                   style: GoogleFonts.inter(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
-                    color: const Color(0xFF0091FF),
+                    color: const Color(0xFF6C63FF),
                   ),
                 ),
               ],
@@ -252,7 +261,7 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
               child: ElevatedButton(
                 onPressed: () => Get.back(),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0091FF),
+                  backgroundColor: const Color(0xFF6C63FF),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -348,7 +357,7 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
                 Get.snackbar(
                   'Cancelled',
                   'Booking #${booking.id} has been cancelled successfully.',
-                  snackPosition: SnackPosition.BOTTOM,
+                  snackPosition: SnackPosition.TOP,
                   backgroundColor: Colors.black87,
                   colorText: Colors.white,
                   margin: const EdgeInsets.all(16),
@@ -373,7 +382,7 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
       backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: const Color(0xFF3F51B5), // Premium Indigo color matching screenshot
+        backgroundColor: const Color(0xFF6C63FF), // Unified brand purple
         elevation: 0,
         title: Text(
           'My Bookings',
@@ -412,12 +421,12 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? const Color(0xFF3F51B5)
+                            ? const Color(0xFF6C63FF)
                             : const Color(0xFFF3F4F6),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: isSelected
-                              ? const Color(0xFF3F51B5)
+                              ? const Color(0xFF6C63FF)
                               : Colors.grey.shade200,
                           width: 1,
                         ),
@@ -513,44 +522,50 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
                 itemBuilder: (context, index) {
                   final booking = filteredBookings[index];
 
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: InkWell(
+                      onTap: () {
+                        Get.to(() => HandymanBookingDetailsScreen(booking: booking));
+                      },
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.grey.shade100, width: 1),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.02),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Card Header: Title + Menu Button
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Booking# ${booking.id}',
-                              style: GoogleFonts.inter(
-                                fontSize: 14.5,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.black87,
-                              ),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.grey.shade100, width: 1),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.02),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
                             ),
-                            PopupMenuButton<String>(
-                              onSelected: (val) {
-                                if (val == 'details') {
-                                  _showBookingDetailsSheet(booking);
-                                } else if (val == 'cancel') {
-                                  _cancelBooking(booking);
-                                }
-                              },
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Card Header: Title + Menu Button
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Booking# ${booking.id}',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 14.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                PopupMenuButton<String>(
+                                  onSelected: (val) {
+                                    if (val == 'details') {
+                                      Get.to(() => HandymanBookingDetailsScreen(booking: booking));
+                                    } else if (val == 'cancel') {
+                                      _cancelBooking(booking);
+                                    }
+                                  },
                               icon: const Icon(
                                 Icons.more_vert_rounded,
                                 color: Colors.black54,
@@ -620,15 +635,17 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
                               style: GoogleFonts.inter(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w800,
-                                color: const Color(0xFF3F51B5), // Indigo matching screenshot
+                                color: const Color(0xFF6C63FF), // Aligned brand purple
                               ),
                             ),
                           ],
                         ),
                       ],
                     ),
-                  );
-                },
+                  ),
+                ),
+              );
+            },
               );
             }),
           ),

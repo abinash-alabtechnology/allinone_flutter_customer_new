@@ -278,7 +278,7 @@ class _ServiceCard extends StatelessWidget {
                                     Get.snackbar(
                                       'Added',
                                       '${service.name} added to cart',
-                                      snackPosition: SnackPosition.BOTTOM,
+                                      snackPosition: SnackPosition.TOP,
                                       backgroundColor: Colors.black87,
                                       colorText: Colors.white,
                                       margin: const EdgeInsets.all(16),

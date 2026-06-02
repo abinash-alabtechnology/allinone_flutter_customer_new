@@ -196,6 +196,9 @@ class _HandymanSubCategoriesScreenState extends State<HandymanSubCategoriesScree
   @override
   void initState() {
     super.initState();
+    if (!Get.isRegistered<HandymanHomeController>()) {
+      Get.put(HandymanHomeController());
+    }
     final args = Get.arguments;
     if (args != null && args is Map && args.containsKey('category')) {
       final String passedCategory = args['category']
@@ -230,7 +233,7 @@ class _HandymanSubCategoriesScreenState extends State<HandymanSubCategoriesScree
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF3F51B5),
+        backgroundColor: const Color(0xFF6C63FF),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
@@ -247,43 +250,44 @@ class _HandymanSubCategoriesScreenState extends State<HandymanSubCategoriesScree
         centerTitle: true,
         actions: [
           Padding(
-            padding: EdgeInsets.only(right: 12.w),
+            padding: EdgeInsets.only(right: 8.w),
             child: Obx(() {
               final homeController = Get.find<HandymanHomeController>();
               final int qty = homeController.totalCartItems;
-              return Stack(
-                alignment: Alignment.center,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.shopping_cart, color: Colors.white),
-                    onPressed: () => Get.to(() => HandymanCartScreen(onBackToHome: () => Get.back())),
-                  ),
-                  if (qty > 0)
-                    Positioned(
-                      top: 4,
-                      right: 4,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
-                        constraints: BoxConstraints(
-                          minWidth: 16.w,
-                          minHeight: 16.h,
-                        ),
-                        child: Text(
-                          '$qty',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.bold,
+              return IconButton(
+                icon: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    const Icon(Icons.shopping_cart, color: Colors.white),
+                    if (qty > 0)
+                      Positioned(
+                        top: -6,
+                        right: -6,
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: const Color(0xFF6C63FF), width: 1.5),
                           ),
-                          textAlign: TextAlign.center,
+                          constraints: BoxConstraints(
+                            minWidth: 16.w,
+                            minHeight: 16.w,
+                          ),
+                          child: Text(
+                            '$qty',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 9.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
                         ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
+                onPressed: () => Get.to(() => HandymanCartScreen(onBackToHome: () => Get.back())),
               );
             }),
           ),
@@ -376,7 +380,7 @@ class _HandymanSubCategoriesScreenState extends State<HandymanSubCategoriesScree
                                     style: GoogleFonts.inter(
                                       fontSize: 12.sp,
                                       fontWeight: FontWeight.w600,
-                                      color: const Color(0xFF3F51B5),
+                                      color: const Color(0xFF6C63FF),
                                       decoration: TextDecoration.underline,
                                     ),
                                   ),

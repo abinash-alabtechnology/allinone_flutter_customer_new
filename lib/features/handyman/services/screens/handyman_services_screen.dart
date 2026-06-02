@@ -20,10 +20,12 @@ import 'package:handy_allinone/features/dashboard/screens/dashboard_screen.dart'
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:handy_allinone/features/dashboard/widgets/bottom_nav_item_widget.dart';
 import 'package:handy_allinone/features/handyman/services/screens/handyman_bookings_screen.dart';
+import 'package:handy_allinone/features/handyman/services/screens/handyman_checkout_screen.dart';
 
 
 class HandymanServicesScreen extends StatefulWidget {
-  const HandymanServicesScreen({super.key});
+  final int initialPageIndex;
+  const HandymanServicesScreen({super.key, this.initialPageIndex = 0});
 
   @override
   State<HandymanServicesScreen> createState() => _HandymanServicesScreenState();
@@ -31,6 +33,18 @@ class HandymanServicesScreen extends StatefulWidget {
 
 class _HandymanServicesScreenState extends State<HandymanServicesScreen> {
   int _pageIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    if (Get.arguments is Map && Get.arguments['tab'] != null) {
+      _pageIndex = Get.arguments['tab'];
+    } else if (Get.arguments is int) {
+      _pageIndex = Get.arguments;
+    } else {
+      _pageIndex = widget.initialPageIndex;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -740,14 +754,14 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [Color(0xFF0091FF), Color(0xFF0052D4)],
+                        colors: [Color(0xFF6C63FF), Color(0xFF4F46E5)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF0091FF).withOpacity(0.2),
+                          color: const Color(0xFF6C63FF).withOpacity(0.2),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -831,15 +845,15 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
                                 Get.snackbar(
                                   'Promo Applied',
                                   'Code HANDY50 copied to clipboard!',
-                                  snackPosition: SnackPosition.BOTTOM,
+                                  snackPosition: SnackPosition.TOP,
                                   backgroundColor: Colors.white,
-                                  colorText: const Color(0xFF0091FF),
+                                   colorText: const Color(0xFF6C63FF),
                                   duration: const Duration(seconds: 2),
                                 );
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.white,
-                                foregroundColor: const Color(0xFF0091FF),
+                                foregroundColor: const Color(0xFF6C63FF),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
                                 ),
@@ -902,7 +916,7 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
             clipBehavior: Clip.hardEdge,
             padding: EdgeInsets.fromLTRB(16, MediaQuery.of(context).padding.top + 8, 16, 0),
             decoration: BoxDecoration(
-              color: _isScrolled ? Colors.white : const Color(0xFF0091FF),
+              color: _isScrolled ? Colors.white : const Color(0xFF6C63FF),
               boxShadow: _isScrolled
                   ? [
                       BoxShadow(
@@ -1087,12 +1101,12 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: const Color(0xFF0091FF).withOpacity(0.08),
+            color: const Color(0xFF6C63FF).withOpacity(0.08),
             shape: BoxShape.circle,
           ),
           child: Icon(
             icon,
-            color: const Color(0xFF0091FF),
+            color: const Color(0xFF6C63FF),
             size: 20,
           ),
         ),
@@ -1146,7 +1160,7 @@ class _HandymanWishlistScreenState extends State<HandymanWishlistScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0091FF),
+        backgroundColor: const Color(0xFF6C63FF),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -1192,7 +1206,7 @@ class _HandymanWishlistScreenState extends State<HandymanWishlistScreen> {
                   ElevatedButton(
                     onPressed: widget.onBackToHome,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0091FF),
+                      backgroundColor: const Color(0xFF6C63FF),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -1316,7 +1330,7 @@ class _WishlistServiceCard extends StatelessWidget {
                     color: const Color(0xFFEFF6FF),
                     child: Icon(
                       Icons.build_rounded,
-                      color: const Color(0xFF0091FF),
+                      color: const Color(0xFF6C63FF),
                       size: imgH * 0.28,
                     ),
                   ),
@@ -1454,7 +1468,7 @@ class _WishlistServiceCard extends StatelessWidget {
                             Get.snackbar(
                               'Added',
                               '${service.name} added to cart',
-                              snackPosition: SnackPosition.BOTTOM,
+                              snackPosition: SnackPosition.TOP,
                               backgroundColor: Colors.black87,
                               colorText: Colors.white,
                               margin: const EdgeInsets.all(16),
@@ -1647,7 +1661,7 @@ class HandymanCartScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0091FF),
+        backgroundColor: const Color(0xFF6C63FF),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -1751,7 +1765,7 @@ class HandymanCartScreen extends StatelessWidget {
                         fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0091FF),
+                    backgroundColor: const Color(0xFF6C63FF),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                     padding: const EdgeInsets.symmetric(
@@ -1852,7 +1866,7 @@ class HandymanCartScreen extends StatelessWidget {
                         style: robotoRegular.copyWith(
                           fontSize: 17,
                           fontWeight: FontWeight.w800,
-                          color: const Color(0xFF0091FF),
+                          color: const Color(0xFF6C63FF),
                         ),
                       ),
                     ],
@@ -1863,18 +1877,10 @@ class HandymanCartScreen extends StatelessWidget {
                     height: 50,
                     child: ElevatedButton(
                       onPressed: () {
-                        Get.snackbar(
-                          'Order Placed!',
-                          'Your services have been scheduled. A technician will contact you soon.',
-                          snackPosition: SnackPosition.BOTTOM,
-                          backgroundColor: const Color(0xFF0091FF),
-                          colorText: Colors.white,
-                          margin: const EdgeInsets.all(16),
-                          duration: const Duration(seconds: 3),
-                        );
+                        Get.to(() => const HandymanCheckoutScreen());
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0091FF),
+                        backgroundColor: const Color(0xFF6C63FF),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14)),
                         elevation: 0,
@@ -1938,7 +1944,7 @@ class _CartItemCard extends StatelessWidget {
                 height: 70,
                 color: const Color(0xFFEFF6FF),
                 child: const Icon(Icons.build_rounded,
-                    color: Color(0xFF0091FF), size: 28),
+                    color: const Color(0xFF6C63FF), size: 28),
               ),
             ),
           ),
@@ -1990,7 +1996,7 @@ class _CartItemCard extends StatelessWidget {
                         style: robotoRegular.copyWith(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFF0091FF),
+                          color: const Color(0xFF6C63FF),
                         ),
                       ),
                     ],
@@ -2018,7 +2024,7 @@ class _CartItemCard extends StatelessWidget {
             return Container(
               height: 36,
               decoration: BoxDecoration(
-                color: const Color(0xFF0091FF),
+                color: const Color(0xFF6C63FF),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Row(

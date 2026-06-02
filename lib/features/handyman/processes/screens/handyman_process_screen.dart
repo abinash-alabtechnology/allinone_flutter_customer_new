@@ -86,7 +86,7 @@ class _HandymanProcessScreenState extends State<HandymanProcessScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0091FF),
+        backgroundColor: const Color(0xFF6C63FF),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -116,7 +116,7 @@ class _HandymanProcessScreenState extends State<HandymanProcessScreen> {
           Container(
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
             decoration: BoxDecoration(
-              color: const Color(0xFF0091FF).withOpacity(0.05),
+              color: const Color(0xFF6C63FF).withOpacity(0.05),
               border: Border(
                 bottom: BorderSide(color: Colors.grey.shade200, width: 1),
               ),
@@ -171,7 +171,7 @@ class _HandymanProcessScreenState extends State<HandymanProcessScreen> {
                         },
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 15),
-                          side: const BorderSide(color: Color(0xFF0091FF)),
+                          side: const BorderSide(color: Color(0xFF6C63FF)),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -179,7 +179,7 @@ class _HandymanProcessScreenState extends State<HandymanProcessScreen> {
                         child: Text(
                           'Back',
                           style: GoogleFonts.inter(
-                            color: const Color(0xFF0091FF),
+                            color: const Color(0xFF6C63FF),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -192,7 +192,7 @@ class _HandymanProcessScreenState extends State<HandymanProcessScreen> {
                     child: ElevatedButton(
                       onPressed: () => _handleNextStep(totalCost),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0091FF),
+                        backgroundColor: const Color(0xFF6C63FF),
                         padding: const EdgeInsets.symmetric(vertical: 15),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -219,7 +219,7 @@ class _HandymanProcessScreenState extends State<HandymanProcessScreen> {
   }
 
   Widget _buildStepHeader(int index, String label, {required bool isActive}) {
-    final color = isActive ? const Color(0xFF0091FF) : Colors.grey.shade400;
+    final color = isActive ? const Color(0xFF6C63FF) : Colors.grey.shade400;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -259,7 +259,7 @@ class _HandymanProcessScreenState extends State<HandymanProcessScreen> {
       child: Container(
         height: 2,
         margin: const EdgeInsets.symmetric(horizontal: 8),
-        color: isActive ? const Color(0xFF0091FF) : Colors.grey.shade300,
+        color: isActive ? const Color(0xFF6C63FF) : Colors.grey.shade300,
       ),
     );
   }
@@ -309,9 +309,9 @@ class _HandymanProcessScreenState extends State<HandymanProcessScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   decoration: BoxDecoration(
-                    color: isSelected ? const Color(0xFF0091FF).withOpacity(0.04) : Colors.white,
+                    color: isSelected ? const Color(0xFF6C63FF).withOpacity(0.04) : Colors.white,
                     border: Border.all(
-                      color: isSelected ? const Color(0xFF0091FF) : Colors.grey.shade200,
+                      color: isSelected ? const Color(0xFF6C63FF) : Colors.grey.shade200,
                       width: 1.5,
                     ),
                     borderRadius: BorderRadius.circular(12),
@@ -320,7 +320,7 @@ class _HandymanProcessScreenState extends State<HandymanProcessScreen> {
                     children: [
                       Icon(
                         isSelected ? Icons.check_circle : Icons.radio_button_off,
-                        color: isSelected ? const Color(0xFF0091FF) : Colors.grey.shade400,
+                        color: isSelected ? const Color(0xFF6C63FF) : Colors.grey.shade400,
                       ),
                       const Gap(12),
                       Expanded(
@@ -329,7 +329,7 @@ class _HandymanProcessScreenState extends State<HandymanProcessScreen> {
                           style: GoogleFonts.inter(
                             fontSize: 14,
                             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                            color: isSelected ? const Color(0xFF0091FF) : Colors.black87,
+                            color: isSelected ? const Color(0xFF6C63FF) : Colors.black87,
                           ),
                         ),
                       ),
@@ -365,7 +365,7 @@ class _HandymanProcessScreenState extends State<HandymanProcessScreen> {
               style: GoogleFonts.inter(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF0091FF),
+                color: const Color(0xFF6C63FF),
               ),
             ),
           ],
@@ -373,11 +373,11 @@ class _HandymanProcessScreenState extends State<HandymanProcessScreen> {
         const Gap(8),
         SliderTheme(
           data: SliderTheme.of(context).copyWith(
-            activeTrackColor: const Color(0xFF0091FF),
+            activeTrackColor: const Color(0xFF6C63FF),
             inactiveTrackColor: Colors.grey.shade200,
-            thumbColor: const Color(0xFF0091FF),
-            overlayColor: const Color(0xFF0091FF).withOpacity(0.2),
-            valueIndicatorColor: const Color(0xFF0091FF),
+            thumbColor: const Color(0xFF6C63FF),
+            overlayColor: const Color(0xFF6C63FF).withOpacity(0.2),
+            valueIndicatorColor: const Color(0xFF6C63FF),
           ),
           child: Slider(
             value: _hours,
@@ -423,7 +423,7 @@ class _HandymanProcessScreenState extends State<HandymanProcessScreen> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF0091FF), width: 1.5),
+              borderSide: const BorderSide(color: Color(0xFF6C63FF), width: 1.5),
             ),
           ),
         ),
@@ -475,9 +475,9 @@ class _HandymanProcessScreenState extends State<HandymanProcessScreen> {
                   child: Container(
                     width: 65,
                     decoration: BoxDecoration(
-                      color: isSelected ? const Color(0xFF0091FF) : const Color(0xFFF9FAFB),
+                      color: isSelected ? const Color(0xFF6C63FF) : const Color(0xFFF9FAFB),
                       border: Border.all(
-                        color: isSelected ? const Color(0xFF0091FF) : Colors.grey.shade200,
+                        color: isSelected ? const Color(0xFF6C63FF) : Colors.grey.shade200,
                         width: 1,
                       ),
                       borderRadius: BorderRadius.circular(12),
@@ -561,9 +561,9 @@ class _HandymanProcessScreenState extends State<HandymanProcessScreen> {
               borderRadius: BorderRadius.circular(12),
               child: Container(
                 decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFF0091FF).withOpacity(0.04) : Colors.white,
+                  color: isSelected ? const Color(0xFF6C63FF).withOpacity(0.04) : Colors.white,
                   border: Border.all(
-                    color: isSelected ? const Color(0xFF0091FF) : Colors.grey.shade200,
+                    color: isSelected ? const Color(0xFF6C63FF) : Colors.grey.shade200,
                     width: 1.5,
                   ),
                   borderRadius: BorderRadius.circular(12),
@@ -575,7 +575,7 @@ class _HandymanProcessScreenState extends State<HandymanProcessScreen> {
                   style: GoogleFonts.inter(
                     fontSize: 12.5,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                    color: isSelected ? const Color(0xFF0091FF) : Colors.black87,
+                    color: isSelected ? const Color(0xFF6C63FF) : Colors.black87,
                   ),
                 ),
               ),
@@ -648,11 +648,11 @@ class _HandymanProcessScreenState extends State<HandymanProcessScreen> {
                     ),
                   ),
                   Text(
-                    '\$${totalCost.toStringAsFixed(2)}',
+                    '₹${totalCost.toStringAsFixed(2)}',
                     style: GoogleFonts.inter(
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
-                      color: const Color(0xFF0091FF),
+                      color: const Color(0xFF6C63FF),
                     ),
                   ),
                 ],
@@ -725,9 +725,9 @@ class _HandymanProcessScreenState extends State<HandymanProcessScreen> {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF0091FF).withOpacity(0.04) : Colors.white,
+            color: isSelected ? const Color(0xFF6C63FF).withOpacity(0.04) : Colors.white,
             border: Border.all(
-              color: isSelected ? const Color(0xFF0091FF) : Colors.grey.shade200,
+              color: isSelected ? const Color(0xFF6C63FF) : Colors.grey.shade200,
               width: 1.5,
             ),
             borderRadius: BorderRadius.circular(12),
@@ -736,7 +736,7 @@ class _HandymanProcessScreenState extends State<HandymanProcessScreen> {
             children: [
               Icon(
                 icon,
-                color: isSelected ? const Color(0xFF0091FF) : Colors.grey.shade600,
+                color: isSelected ? const Color(0xFF6C63FF) : Colors.grey.shade600,
               ),
               const Gap(16),
               Expanded(
@@ -745,13 +745,13 @@ class _HandymanProcessScreenState extends State<HandymanProcessScreen> {
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                    color: isSelected ? const Color(0xFF0091FF) : Colors.black87,
+                    color: isSelected ? const Color(0xFF6C63FF) : Colors.black87,
                   ),
                 ),
               ),
               Icon(
                 isSelected ? Icons.check_circle : Icons.radio_button_off,
-                color: isSelected ? const Color(0xFF0091FF) : Colors.grey.shade300,
+                color: isSelected ? const Color(0xFF6C63FF) : Colors.grey.shade300,
               ),
             ],
           ),
@@ -771,7 +771,7 @@ class _HandymanProcessScreenState extends State<HandymanProcessScreen> {
         Get.snackbar(
           'Task Required',
           'Please select at least one task to customize your service.',
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red.shade50,
           colorText: Colors.red.shade800,
         );
@@ -785,7 +785,7 @@ class _HandymanProcessScreenState extends State<HandymanProcessScreen> {
         Get.snackbar(
           'Time Slot Required',
           'Please select a convenient time slot for arrival.',
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red.shade50,
           colorText: Colors.red.shade800,
         );
@@ -872,7 +872,7 @@ class _HandymanProcessScreenState extends State<HandymanProcessScreen> {
                       ),
                     ),
                     Text(
-                      '\$${totalCost.toStringAsFixed(2)}',
+                      '₹${totalCost.toStringAsFixed(2)}',
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -887,7 +887,7 @@ class _HandymanProcessScreenState extends State<HandymanProcessScreen> {
                     Get.close(2); // Close dialog & pop back to Handyman Screen
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0091FF),
+                    backgroundColor: const Color(0xFF6C63FF),
                     padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 36),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
