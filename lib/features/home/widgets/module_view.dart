@@ -128,7 +128,7 @@ class ModuleView extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
-            'Explore GoGrabX',
+            'Explore Handy',
             style: GoogleFonts.inter(
               fontSize: 18,
               fontWeight: FontWeight.w700,

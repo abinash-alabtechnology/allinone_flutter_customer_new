@@ -62,21 +62,22 @@ Future<void> main() async {
 
   if(GetPlatform.isWeb){
     await Firebase.initializeApp(options: const FirebaseOptions(
-        apiKey: "AIzaSyCIkAsZdKa6jPVnBv2Dly3T02-XZgj3sEA",
-        authDomain: "gograb-87d87.firebaseapp.com",
-        databaseURL: "https://gograb-87d87-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "gograb-87d87",
-        storageBucket: "gograb-87d87.firebasestorage.app",
-        messagingSenderId: "167391621913",
-        appId: "1:167391621913:web:7a85472e8cf436284bcb88"
+        apiKey: "AIzaSyCLRIsZgBnF3M4H9jvjXi1tftYsd74hBwc",
+        authDomain: "alabtechdemos.firebaseapp.com",
+        databaseURL: "https://alabtechdemos-default-rtdb.firebaseio.com",
+        projectId: "alabtechdemos",
+        storageBucket: "alabtechdemos.firebasestorage.app",
+        messagingSenderId: "591429626414",
+        appId: "1:591429626414:web:1a1fb782f5b85074290dbf",
+        measurementId: "G-K3RQ31D4HD"
     ));
   } else if(GetPlatform.isAndroid) {
     await Firebase.initializeApp(
       options: const FirebaseOptions(
-        apiKey: "AIzaSyBwxLH6jYwh2yYISCW7YMo5gjF43vxI_jU",
-        appId: "1:167391621913:android:b999436b1e559fdf4bcb88",
-        messagingSenderId: "167391621913",
-        projectId: "gograb-87d87",
+        apiKey: "AIzaSyA9k3Box6xLUqwAXuiMDQqgbK2Rlw7kG9Y",
+        appId: "1:591429626414:android:a9276f43200a53bb290dbf",
+        messagingSenderId: "591429626414",
+        projectId: "alabtechdemos",
       ),
     );
   } else {

@@ -1,4 +1,4 @@
-package com.gograbx.user
+package alabee.allinonemv.customer
 
 import io.flutter.embedding.android.FlutterActivity
 

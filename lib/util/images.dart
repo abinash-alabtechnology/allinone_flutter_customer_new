@@ -24,7 +24,7 @@ class Images {
   static const String card = 'assets/image/card.png';
   static const String favouritenew = 'assets/image/favouritenew.png';
   static const String tickmark = 'assets/image/tickmark.png';
-  static const String logotransparent = 'assets/image/Logotrans.png';
+  static const String logotransparent = 'assets/image/logo_transparent.png';
   // static const String TaxiIconsolid = 'assets/image/taxiicon1.png';
   // static const String TaxiIcon = 'assets/taxi/taxiicon.png';
 

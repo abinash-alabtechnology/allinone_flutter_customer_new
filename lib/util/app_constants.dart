@@ -14,7 +14,7 @@ class AppConstants {
   static const String TaxiIcon = 'assets/taxi/taxiicon.png';
 
   ///Taxi Integration
-  static const String firebaseDBURL ='https://gograb-87d87-default-rtdb.asia-southeast1.firebasedatabase.app';
+  static const String firebaseDBURL ='https://alabtechdemos-default-rtdb.firebaseio.com';
   // static const String firebaseDBURL ='https://zeastigo-default-rtdb.asia-southeast1.firebasedatabase.app';
   static const String captiondetails = '/api/v1/captain/details';
   static const String Vehiclelist = '/api/v1/vehicle-price-types';
@@ -33,7 +33,7 @@ class AppConstants {
 
   static const String addwalletamount = 'api/v1/customer/wallet/add-amount';
 
-  static const String appName = 'Gograb';
+  static const String appName = 'Handy';
   static const double appVersion = 3.3;
   static const String searchimage = '/public/assets/admin/customer_search_img/';
   static const String fontFamily = 'Roboto';
@@ -42,8 +42,8 @@ class AppConstants {
   static const String webHostedUrl = 'https://web.allinonego.in';
   static const bool useReactWebsite = false;
   // static const String baseUrl = 'http://192.168.0.9:8000';
-  //static const String baseUrl = 'https://admin.allinonego.in';
-   static const String baseUrl = 'https://admin.gograbx.com';
+  static const String baseUrl = 'https://admin.allinonego.in';
+  // static const String baseUrl = 'https://admin.gograbx.com';
   // static const String baseUrl = 'https://zesteat.alabproject.in';
   static const String polylinemap = '/api/v1/get-google-map-key';
   static const String configUri = '/api/v1/config';

@@ -675,7 +675,7 @@ class _HandymanProcessScreenState extends State<HandymanProcessScreen> {
 
         // Payment Methods Option List
         _buildPaymentOption(0, 'Cash on Delivery', Icons.payments_outlined),
-        _buildPaymentOption(1, 'Gograb Wallet', Icons.account_balance_wallet_outlined),
+        _buildPaymentOption(1, 'Handy Wallet', Icons.account_balance_wallet_outlined),
         _buildPaymentOption(2, 'Card / Net Banking', Icons.credit_card_outlined),
       ],
     );

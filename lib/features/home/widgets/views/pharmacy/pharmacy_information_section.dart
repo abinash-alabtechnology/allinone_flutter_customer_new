@@ -40,7 +40,7 @@ class PharmacyInformationSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'WHY CHOOSE GOGRABX PHARMACY?',
+            'WHY CHOOSE HandyX PHARMACY?',
             style: robotoBold.copyWith(fontSize: 14, color: Colors.black.withValues(alpha: 0.8)),
           ),
           const SizedBox(height: Dimensions.paddingSizeLarge),

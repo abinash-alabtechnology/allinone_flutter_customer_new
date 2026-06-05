@@ -89,7 +89,7 @@ class _HandymanServicesScreenState extends State<HandymanServicesScreen> {
                   },
                 ),
                 BottomNavItemWidget(
-                  title: 'Gograb',
+                  title: 'Handy',
                   selectedIcon: Images.logotransparent,
                   unSelectedIcon: Images.logotransparent,
                   isSelected: _pageIndex == 0,
@@ -144,6 +144,7 @@ class HandymanHomeScreenBody extends StatefulWidget {
 class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
   final ScrollController _scrollController = ScrollController();
   bool _isScrolled = false;
+  double _scrollOffset = 0.0;
   int _currentBannerIndex = 0;
   Timer? _bannerTimer;
 
@@ -191,19 +192,16 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
   }
 
   void _onScroll() {
-    if (_scrollController.offset > 50) {
-      if (!_isScrolled) {
-        setState(() {
-          _isScrolled = true;
-        });
-      }
-    } else {
-      if (_isScrolled) {
-        setState(() {
-          _isScrolled = false;
-        });
-      }
-    }
+    if (!mounted) return;
+    final double offset = _scrollController.offset;
+    final double maxHeaderHeight = MediaQuery.of(context).padding.top + 240;
+    final double minHeaderHeight = MediaQuery.of(context).padding.top + 70;
+    final double threshold = maxHeaderHeight - minHeaderHeight;
+
+    setState(() {
+      _scrollOffset = offset;
+      _isScrolled = offset > threshold;
+    });
   }
 
   Widget _buildCartButton({required bool isScrolled}) {
@@ -909,184 +907,186 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
           top: 0,
           left: 0,
           right: 0,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            height: _isScrolled ? minHeaderHeight : maxHeaderHeight,
+          child: Container(
+            height: (maxHeaderHeight - _scrollOffset).clamp(minHeaderHeight, maxHeaderHeight),
             width: double.infinity,
-            clipBehavior: Clip.hardEdge,
-            padding: EdgeInsets.fromLTRB(16, MediaQuery.of(context).padding.top + 8, 16, 0),
-            decoration: BoxDecoration(
-              color: _isScrolled ? Colors.white : const Color(0xFF6C63FF),
-              boxShadow: _isScrolled
-                  ? [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ]
-                  : [],
-            ),
-            child: Stack(
-              children: [
-                // Expanded Header (Location row + Search bar)
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: maxHeaderHeight - MediaQuery.of(context).padding.top - 8,
-                  child: AnimatedOpacity(
-                    opacity: _isScrolled ? 0.0 : 1.0,
-                    duration: const Duration(milliseconds: 200),
-                    child: IgnorePointer(
-                      ignoring: _isScrolled,
-                    child: SizedBox(
-                      height: maxHeaderHeight - MediaQuery.of(context).padding.top - 8,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                        // Top Row (Location & Cart)
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              clipBehavior: Clip.hardEdge,
+              padding: EdgeInsets.fromLTRB(16, MediaQuery.of(context).padding.top + 8, 16, 0),
+              decoration: BoxDecoration(
+                color: _isScrolled ? Colors.white : const Color(0xFF6C63FF),
+                boxShadow: _isScrolled
+                    ? [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : [],
+              ),
+              child: Stack(
+                children: [
+                  // Expanded Header (Location row + Search bar)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: maxHeaderHeight - MediaQuery.of(context).padding.top - 8,
+                    child: AnimatedOpacity(
+                      opacity: _isScrolled ? 0.0 : 1.0,
+                      duration: const Duration(milliseconds: 200),
+                      child: IgnorePointer(
+                        ignoring: _isScrolled,
+                      child: SizedBox(
+                        height: maxHeaderHeight - MediaQuery.of(context).padding.top - 8,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(
-                              Icons.location_on,
-                              color: Colors.white,
-                              size: 28,
-                            ),
-                            const Gap(8),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
+                          // Top Row (Location & Cart)
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.location_on,
+                                color: Colors.white,
+                                size: 28,
+                              ),
+                              const Gap(8),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'In 48 minutes',
+                                      style: robotoRegular.copyWith(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    const Gap(2),
+                                    InkWell(
+                                      onTap: () => Get.find<LocationController>().navigateToLocationScreen('home'),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Flexible(
+                                            child: GetBuilder<LocationController>(
+                                              builder: (locationController) {
+                                                final address = AddressHelper.getUserAddressFromSharedPref()?.address ?? 'Select Location';
+                                                return Text(
+                                                  address,
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: robotoRegular.copyWith(
+                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Colors.white.withOpacity(0.9),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                          const Icon(
+                                            Icons.keyboard_arrow_down,
+                                            color: Colors.white,
+                                            size: 18,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const Gap(12),
+                              _buildCartButton(isScrolled: false),
+                            ],
+                          ),
+                          const Gap(10),
+
+                          // Search Controller Row
+                          _buildSearchBar(isScrolled: false),
+                          const Gap(10),
+
+                          // AC Mechanic Promo Banner
+                          Expanded(
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 800),
+                              child: Row(
+                                key: ValueKey(_currentBannerIndex),
+                                crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                  Text(
-                                    'In 48 minutes',
-                                    style: robotoRegular.copyWith(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white,
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(bottom: 12),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            _promoBanners[_currentBannerIndex]['title']!,
+                                            style: robotoRegular.copyWith(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w800,
+                                              color: Colors.white,
+                                              height: 1.2,
+                                            ),
+                                          ),
+                                          const Gap(4),
+                                          Text(
+                                            _promoBanners[_currentBannerIndex]['subtitle']!,
+                                            style: robotoRegular.copyWith(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.white.withOpacity(0.85),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                  const Gap(2),
-                                  InkWell(
-                                    onTap: () => Get.find<LocationController>().navigateToLocationScreen('home'),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Flexible(
-                                          child: GetBuilder<LocationController>(
-                                            builder: (locationController) {
-                                              final address = AddressHelper.getUserAddressFromSharedPref()?.address ?? 'Select Location';
-                                              return Text(
-                                                address,
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: robotoRegular.copyWith(
-                                                  fontSize: 13,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: Colors.white.withOpacity(0.9),
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                        ),
-                                        const Icon(
-                                          Icons.keyboard_arrow_down,
-                                          color: Colors.white,
-                                          size: 18,
-                                        ),
-                                      ],
-                                    ),
+                                  Image.asset(
+                                    _promoBanners[_currentBannerIndex]['image']!,
+                                    height: 105,
+                                    fit: BoxFit.contain,
+                                    alignment: Alignment.bottomCenter,
                                   ),
                                 ],
                               ),
                             ),
-                            const Gap(12),
-                            _buildCartButton(isScrolled: false),
-                          ],
-                        ),
-                        const Gap(10),
-
-                        // Search Controller Row
-                        _buildSearchBar(isScrolled: false),
-                        const Gap(10),
-
-                        // AC Mechanic Promo Banner
-                        Expanded(
-                          child: AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 800),
-                            child: Row(
-                              key: ValueKey(_currentBannerIndex),
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(bottom: 12),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          _promoBanners[_currentBannerIndex]['title']!,
-                                          style: robotoRegular.copyWith(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w800,
-                                            color: Colors.white,
-                                            height: 1.2,
-                                          ),
-                                        ),
-                                        const Gap(4),
-                                        Text(
-                                          _promoBanners[_currentBannerIndex]['subtitle']!,
-                                          style: robotoRegular.copyWith(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w500,
-                                            color: Colors.white.withOpacity(0.85),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Image.asset(
-                                  _promoBanners[_currentBannerIndex]['image']!,
-                                  height: 105,
-                                  fit: BoxFit.contain,
-                                  alignment: Alignment.bottomCenter,
-                                ),
-                              ],
-                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              ),
-                // Collapsed Header (Search Bar & Cart button side-by-side)
-                AnimatedOpacity(
-                  opacity: _isScrolled ? 1.0 : 0.0,
-                  duration: const Duration(milliseconds: 200),
-                  child: IgnorePointer(
-                    ignoring: !_isScrolled,
-                    child: Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Row(
-                          children: [
-                            Expanded(child: _buildSearchBar(isScrolled: true)),
-                            const Gap(12),
-                            _buildCartButton(isScrolled: true),
-                          ],
-                        ),
+                        ],
                       ),
                     ),
                   ),
                 ),
-              ],
+                ),
+                  // Collapsed Header (Search Bar & Cart button side-by-side)
+                  AnimatedOpacity(
+                    opacity: _isScrolled ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 200),
+                    child: IgnorePointer(
+                      ignoring: !_isScrolled,
+                      child: Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Row(
+                            children: [
+                              Expanded(child: _buildSearchBar(isScrolled: true)),
+                              const Gap(12),
+                              _buildCartButton(isScrolled: true),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

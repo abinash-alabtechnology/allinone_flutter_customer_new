@@ -157,6 +157,7 @@ import 'package:handy_allinone/helper/address_helper.dart';
 import 'package:handy_allinone/helper/responsive_helper.dart';
 import 'package:handy_allinone/helper/route_helper.dart';
 import 'package:handy_allinone/util/dimensions.dart';
+import 'package:handy_allinone/util/styles.dart';
 import 'package:handy_allinone/common/widgets/custom_button.dart';
 import 'package:handy_allinone/common/widgets/web_menu_bar.dart';
 import 'package:flutter/material.dart';
@@ -179,6 +180,18 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
     'assets/image/onboard_3.png',
   ];
 
+  final List<String> onboardTitles = [
+    'on_boarding_1_title'.tr,
+    'on_boarding_2_title'.tr,
+    'on_boarding_3_title'.tr,
+  ];
+
+  final List<String> onboardDescriptions = [
+    'on_boarding_1_description'.tr,
+    'on_boarding_2_description'.tr,
+    'on_boarding_3_description'.tr,
+  ];
+
   @override
   void dispose() {
     _pageController.dispose();
@@ -196,13 +209,53 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
             itemCount: onboardImages.length,
             controller: _pageController,
             itemBuilder: (context, index) {
-              return SizedBox(
-                width: context.width,
-                height: context.height,
-                child: Image.asset(
-                  onboardImages[index],
-                  fit: BoxFit.cover,
-                ),
+              return Column(
+                children: [
+                  SizedBox(height: context.height * 0.08),
+                  
+                  // Clean Illustration Graphic (foreground + cityscape background)
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraLarge),
+                      child: Image.asset(
+                        onboardImages[index],
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                  
+                  SizedBox(height: Dimensions.paddingSizeExtraLarge),
+                  
+                  // Title Text in Code
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+                    child: Text(
+                      onboardTitles[index],
+                      style: robotoBold.copyWith(
+                        fontSize: context.height * 0.026,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  
+                  SizedBox(height: Dimensions.paddingSizeDefault),
+                  
+                  // Description Text in Code
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraLarge),
+                    child: Text(
+                      onboardDescriptions[index],
+                      style: robotoRegular.copyWith(
+                        fontSize: context.height * 0.016,
+                        color: Theme.of(context).disabledColor,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  
+                  SizedBox(height: context.height * 0.16),
+                ],
               );
             },
             onPageChanged: (index) {

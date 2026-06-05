@@ -974,7 +974,7 @@ class HandymanHomeController extends GetxController {
         tasks: ['Switchboard repair'],
         timeSlot: '11:30 AM',
         address: 'Q93Q+GC2, Green Rd, Dhaka 1215, Bangladesh',
-        paymentMethod: 'Gograb Wallet',
+        paymentMethod: 'Handy Wallet',
         paymentStatus: 'Paid',
         items: [
           HandymanBookingItem(
@@ -1022,7 +1022,7 @@ class HandymanHomeController extends GetxController {
         tasks: ['Haircut', 'Hair styling'],
         timeSlot: '10:00 AM',
         address: 'Q93Q+GC2, Green Rd, Dhaka 1215, Bangladesh',
-        paymentMethod: 'Gograb Wallet',
+        paymentMethod: 'Handy Wallet',
         paymentStatus: 'Paid',
         items: [
           HandymanBookingItem(
