@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:handy_allinone/common/widgets/custom_asset_image_widget.dart';
 import 'package:handy_allinone/features/cart/controllers/cart_controller.dart';
 import 'package:handy_allinone/helper/route_helper.dart';
 import 'package:handy_allinone/util/styles.dart';
-
-import '../../../util/app_constants.dart';
-import '../../../util/images.dart';
 
 class DetailsAppBarWidget extends StatefulWidget implements PreferredSizeWidget {
   const DetailsAppBarWidget({super.key});
@@ -51,49 +47,23 @@ class DetailsAppBarWidgetState extends State<DetailsAppBarWidget> with SingleTic
       automaticallyImplyLeading: false,
       backgroundColor: Colors.transparent,
       elevation: 0,
-      leading: Row(
-        mainAxisAlignment: .start,
-        crossAxisAlignment: .center,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Container(
-              width: 30,
-              height: 40,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(6.r),
-                border: Border.all(color: Colors.grey.shade200),
-              ),
-              child: IconButton(
-                icon: Icon(Icons.arrow_back_ios,
-                    color: Theme.of(context).textTheme.bodyLarge!.color),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ),
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 8.0),
+        child: Container(
+          width: 30,
+          height: 40,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(6.r),
+            border: Border.all(color: Colors.grey.shade200),
           ),
-          SizedBox(width: 15.w),
-          Column(
-            mainAxisAlignment: .center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              CustomAssetImageWidget(
-                Images.logo,
-                width: 60.w,
-                height: 30.h,
-                fit: BoxFit.fill,
-              ),
-              Text(
-                AppConstants.developedby,
-                style: robotoMedium.copyWith(
-                  fontSize: 8.r,
-                  color: Theme.of(context).textTheme.bodyLarge!.color,
-                ),
-              ),
-            ],
+          child: IconButton(
+            icon: Icon(Icons.arrow_back_ios,
+                color: Theme.of(context).textTheme.bodyLarge!.color),
+            onPressed: () => Navigator.pop(context),
           ),
-        ],
+        ),
       ),
-      leadingWidth: 180.w,
+      leadingWidth: 50.w,
       actions: [
       AnimatedBuilder(
       animation: offsetAnimation,

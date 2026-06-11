@@ -36,7 +36,8 @@ import '../../../util/app_constants.dart';
 import '../../profile/controllers/profile_controller.dart';
 
 class MenuScreen extends StatefulWidget {
-  const MenuScreen({super.key});
+  final bool fromNav;
+  const MenuScreen({super.key, this.fromNav = false});
 
   @override
   State<MenuScreen> createState() => _MenuScreenState();
@@ -74,7 +75,7 @@ class _MenuScreenState extends State<MenuScreen> {
                         style: robotoBold.copyWith(
                             fontSize: 22, color: Theme.of(context).cardColor),
                       ),
-                      GestureDetector(
+                      widget.fromNav ? const SizedBox() : GestureDetector(
                           onTap: () {
                             Get.back();
                           },

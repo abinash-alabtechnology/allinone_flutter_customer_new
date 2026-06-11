@@ -479,33 +479,7 @@ class ItemTitleViewWidget extends StatelessWidget {
                       ],
                     ),
 
-                    const SizedBox(height: 20),
 
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildTrustBadge(
-                            context,
-                            title: "Secure payments",
-                            subtitle: "100% protected checkout",
-                            icon: Images.card,
-                            color: const Color(0xFFF5F3FF),
-                            iconColor: const Color(0xFF7C3AED),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _buildTrustBadge(
-                            context,
-                            title: "Original products",
-                            subtitle: "Trusted and verified brands",
-                            icon: Images.approve,
-                            color: const Color(0xFFF0FDF4),
-                            iconColor: const Color(0xFF16A34A),
-                          ),
-                        ),
-                      ],
-                    ),
                   ],
                 );
               },
@@ -541,43 +515,5 @@ class ItemTitleViewWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildTrustBadge(BuildContext context, {required String title, required String subtitle, required String icon, required Color color, required Color iconColor}) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: CustomAssetImageWidget(icon, height: 20, width: 20, color: iconColor),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: robotoBold.copyWith(fontSize: 11.sp, color: Colors.black87),
-                ),
-                Text(
-                  subtitle,
-                  style: robotoRegular.copyWith(fontSize: 9.sp, color: Colors.black54),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 }

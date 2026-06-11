@@ -2221,6 +2221,7 @@ class _StoreStickyHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    bool isFood = Get.find<SplashController>().module != null && Get.find<SplashController>().module!.moduleType.toString() == AppConstants.food;
     return SizedBox(
       height: _height,
       child: Material(
@@ -2269,34 +2270,36 @@ class _StoreStickyHeaderDelegate extends SliverPersistentHeaderDelegate {
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
               child: Row(
                 children: [
-                  _FilterChip(
-                    label: 'Veg',
-                    icon: Container(
-                      width: 14, height: 14,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: const Color(0xFF00A550), width: 1.5),
-                        borderRadius: BorderRadius.circular(3),
-                      ),
-                      child: Center(
-                        child: Container(
-                          width: 6, height: 6,
-                          decoration: const BoxDecoration(color: Color(0xFF00A550), shape: BoxShape.circle),
+                  if (isFood) ...[
+                    _FilterChip(
+                      label: 'Veg',
+                      icon: Container(
+                        width: 14, height: 14,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: const Color(0xFF00A550), width: 1.5),
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                        child: Center(
+                          child: Container(
+                            width: 6, height: 6,
+                            decoration: const BoxDecoration(color: Color(0xFF00A550), shape: BoxShape.circle),
+                          ),
                         ),
                       ),
+                      isActive: vegFilter,
+                      activeColor: const Color(0xFF00A550),
+                      onTap: onVegTap,
                     ),
-                    isActive: vegFilter,
-                    activeColor: const Color(0xFF00A550),
-                    onTap: onVegTap,
-                  ),
-                  const SizedBox(width: 8),
-                  _FilterChip(
-                    label: 'Non-veg',
-                    icon: CustomPaint(size: const Size(14, 14), painter: _TrianglePainter(color: const Color(0xFFE43B3B))),
-                    isActive: nonVegFilter,
-                    activeColor: const Color(0xFFE43B3B),
-                    onTap: onNonVegTap,
-                  ),
-                  const SizedBox(width: 8),
+                    const SizedBox(width: 8),
+                    _FilterChip(
+                      label: 'Non-veg',
+                      icon: CustomPaint(size: const Size(14, 14), painter: _TrianglePainter(color: const Color(0xFFE43B3B))),
+                      isActive: nonVegFilter,
+                      activeColor: const Color(0xFFE43B3B),
+                      onTap: onNonVegTap,
+                    ),
+                    const SizedBox(width: 8),
+                  ],
                   _FilterChip(
                     label: 'Offers',
                     icon: Icon(Icons.local_offer_rounded, size: 14, color: discountFilter ? primaryColor : disabledColor),

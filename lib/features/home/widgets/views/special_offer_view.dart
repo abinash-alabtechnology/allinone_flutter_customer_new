@@ -1,3 +1,4 @@
+// ignore_for_file: dead_code, unused_local_variable, unused_element, unused_import
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
@@ -229,28 +230,29 @@ class SpecialOfferView extends StatelessWidget {
                                                                     CrossAxisAlignment
                                                                         .start,
                                                                 children: [
-                                                                  Stack(
-                                                                    children: [
-                                                                      ClipRRect(
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(
-                                                                              20.r,
+                                                                  Expanded(
+                                                                    child: SizedBox(
+                                                                      width: double.infinity,
+                                                                      child: Stack(
+                                                                        children: [
+                                                                          Positioned.fill(
+                                                                            child: ClipRRect(
+                                                                              borderRadius:
+                                                                                  BorderRadius.circular(
+                                                                                    20.r,
+                                                                                  ),
+                                                                              child: CustomImage(
+                                                                                isHovered:
+                                                                                    isHovered,
+                                                                                placeholder:
+                                                                                    Images.placeholder,
+                                                                                image:
+                                                                                    '${item.imageFullUrl}',
+                                                                                fit: BoxFit
+                                                                                    .cover,
+                                                                              ),
                                                                             ),
-                                                                        child: CustomImage(
-                                                                          isHovered:
-                                                                              isHovered,
-                                                                          placeholder:
-                                                                              Images.placeholder,
-                                                                          image:
-                                                                              '${item.imageFullUrl}',
-                                                                          fit: BoxFit
-                                                                              .cover,
-                                                                          width:
-                                                                              120.w,
-                                                                          height:
-                                                                              130.h,
-                                                                        ),
-                                                                      ),
+                                                                          ),
 
                                                                       item.isStoreHalalActive! &&
                                                                               item.isHalalItem!
@@ -329,23 +331,24 @@ class SpecialOfferView extends StatelessWidget {
                                                                               radius: Dimensions.radiusLarge,
                                                                               isAllSideRound: isPopularItem,
                                                                             ),
-                                                                    ],
-                                                                  ),
-                                                                  Padding(
-                                                                    padding: EdgeInsets.only(
-                                                                      left: Dimensions
-                                                                          .paddingSizeSmall,
-                                                                      right:
-                                                                          isShop
-                                                                          ? 0
-                                                                          : Dimensions.paddingSizeSmall,
-                                                                      top: Dimensions
-                                                                          .paddingSizeSmall,
-                                                                      bottom:
-                                                                          isShop
-                                                                          ? 0
-                                                                          : Dimensions.paddingSizeSmall,
+                                                                      ],
                                                                     ),
+                                                                  ),
+                                                                ),
+                                                                Padding(
+                                                                  padding: EdgeInsets.only(
+                                                                    left: Dimensions
+                                                                        .paddingSizeSmall,
+                                                                    right:
+                                                                        isShop
+                                                                        ? 0
+                                                                        : Dimensions.paddingSizeSmall,
+                                                                    top: 6.h,
+                                                                    bottom:
+                                                                        isShop
+                                                                        ? 0
+                                                                        : 6.h,
+                                                                  ),
                                                                     child: Stack(
                                                                       clipBehavior:
                                                                           Clip.none,
@@ -360,8 +363,7 @@ class SpecialOfferView extends StatelessWidget {
                                                                                 isPopularItem
                                                                                 ? CrossAxisAlignment.center
                                                                                 : CrossAxisAlignment.start,
-                                                                            mainAxisAlignment:
-                                                                                MainAxisAlignment.spaceAround,
+                                                                            mainAxisSize: MainAxisSize.min,
                                                                             children: [
                                                                               Text(
                                                                                 item.name ??
@@ -417,42 +419,7 @@ class SpecialOfferView extends StatelessWidget {
                                                                                             ],
                                                                                           )
                                                                                         : const SizedBox()
-                                                                                  : (Get.find<
-                                                                                              SplashController
-                                                                                            >()
-                                                                                            .configModel!
-                                                                                            .moduleConfig!
-                                                                                            .module!
-                                                                                            .unit! &&
-                                                                                        item.unitType !=
-                                                                                            null)
-                                                                                  ? Container(
-                                                                                      decoration: BoxDecoration(
-                                                                                        color: Theme.of(
-                                                                                          context,
-                                                                                        ).cardColor,
-                                                                                        borderRadius: BorderRadius.circular(
-                                                                                          8,
-                                                                                        ),
-                                                                                      ),
-                                                                                      child: Padding(
-                                                                                        padding: EdgeInsets.symmetric(
-                                                                                          horizontal: 6.0,
-                                                                                          vertical: 2.0,
-                                                                                        ),
-                                                                                        child: Text(
-                                                                                          item.unitType ??
-                                                                                              '',
-                                                                                          style: robotoRegular.copyWith(
-                                                                                            fontSize: Dimensions.fontSizeExtraSmall,
-                                                                                          ),
-                                                                                        ),
-                                                                                      ),
-                                                                                    )
                                                                                   : const SizedBox(),
-                                                                              Gap(
-                                                                                5,
-                                                                              ),
 
                                                                               discount >
                                                                                       0
@@ -773,25 +740,28 @@ class SpecialOfferViewGrocery extends StatelessWidget {
                                                         CrossAxisAlignment
                                                             .start,
                                                     children: [
-                                                      Stack(
-                                                        children: [
-                                                          ClipRRect(
-                                                            borderRadius:
-                                                                BorderRadius.circular(
-                                                                  20.r,
+                                                      Expanded(
+                                                        child: SizedBox(
+                                                          width: double.infinity,
+                                                          child: Stack(
+                                                            children: [
+                                                              Positioned.fill(
+                                                                child: ClipRRect(
+                                                                  borderRadius:
+                                                                      BorderRadius.circular(
+                                                                        20.r,
+                                                                      ),
+                                                                  child: CustomImage(
+                                                                    isHovered:
+                                                                        isHovered,
+                                                                    placeholder: Images
+                                                                        .placeholder,
+                                                                    image:
+                                                                        '${item.imageFullUrl}',
+                                                                    fit: BoxFit.cover,
+                                                                  ),
                                                                 ),
-                                                            child: CustomImage(
-                                                              isHovered:
-                                                                  isHovered,
-                                                              placeholder: Images
-                                                                  .placeholder,
-                                                              image:
-                                                                  '${item.imageFullUrl}',
-                                                              fit: BoxFit.cover,
-                                                              width: 120.w,
-                                                              height: 130.h,
-                                                            ),
-                                                          ),
+                                                              ),
 
                                                           item.isStoreHalalActive! &&
                                                                   item.isHalalItem!
@@ -832,7 +802,9 @@ class SpecialOfferViewGrocery extends StatelessWidget {
                                                                         index,
                                                                   ),
                                                                 ),
-                                                        ],
+                                                            ],
+                                                          ),
+                                                        ),
                                                       ),
                                                       Padding(
                                                         padding: EdgeInsets.only(
@@ -842,12 +814,10 @@ class SpecialOfferViewGrocery extends StatelessWidget {
                                                               ? 0
                                                               : Dimensions
                                                                     .paddingSizeSmall,
-                                                          top: Dimensions
-                                                              .paddingSizeSmall,
+                                                          top: 6.h,
                                                           bottom: isShop
                                                               ? 0
-                                                              : Dimensions
-                                                                    .paddingSizeSmall,
+                                                              : 6.h,
                                                         ),
                                                         child: Stack(
                                                           clipBehavior:
@@ -867,9 +837,9 @@ class SpecialOfferViewGrocery extends StatelessWidget {
                                                                           .center
                                                                     : CrossAxisAlignment
                                                                           .start,
-                                                                mainAxisAlignment:
-                                                                    MainAxisAlignment
-                                                                        .spaceAround,
+                                                                mainAxisSize:
+                                                                    MainAxisSize
+                                                                        .min,
                                                                 children: [
                                                                   Text(
                                                                     item.name ??
@@ -927,40 +897,7 @@ class SpecialOfferViewGrocery extends StatelessWidget {
                                                                                 ],
                                                                               )
                                                                             : const SizedBox()
-                                                                      : (Get.find<
-                                                                                  SplashController
-                                                                                >()
-                                                                                .configModel!
-                                                                                .moduleConfig!
-                                                                                .module!
-                                                                                .unit! &&
-                                                                            item.unitType !=
-                                                                                null)
-                                                                      ? Container(
-                                                                          decoration: BoxDecoration(
-                                                                            color: Theme.of(
-                                                                              context,
-                                                                            ).cardColor,
-                                                                            borderRadius: BorderRadius.circular(
-                                                                              8,
-                                                                            ),
-                                                                          ),
-                                                                          child: Padding(
-                                                                            padding: EdgeInsets.symmetric(
-                                                                              horizontal: 6.0,
-                                                                              vertical: 2.0,
-                                                                            ),
-                                                                            child: Text(
-                                                                              item.unitType ??
-                                                                                  '',
-                                                                              style: robotoRegular.copyWith(
-                                                                                fontSize: Dimensions.fontSizeExtraSmall,
-                                                                              ),
-                                                                            ),
-                                                                          ),
-                                                                        )
                                                                       : const SizedBox(),
-                                                                  Gap(5),
 
                                                                   discount > 0
                                                                       ? Row(

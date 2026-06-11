@@ -47,33 +47,11 @@ class OtpLoginWidget extends StatelessWidget {
           ),
           const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
-          InkWell(
-            onTap: () => authController.toggleRememberMe(),
-            child: Row(
-              children: [
-                SizedBox(
-                  height: 24, width: 24,
-                  child: Checkbox(
-                    side: BorderSide(color: Theme.of(context).hintColor),
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    activeColor: Theme.of(context).primaryColor,
-                    value: authController.isActiveRememberMe,
-                    onChanged: (bool? isChecked) => authController.toggleRememberMe(),
-                  ),
-                ),
-                const SizedBox(width: Dimensions.paddingSizeSmall),
-
-                Expanded(child: Text('remember_me'.tr, style: robotoRegular)),
-              ],
-            ),
-          ),
-          const SizedBox(height: Dimensions.paddingSizeLarge),
-
           const ConditionCheckBoxWidget(forSignUp: true),
           const SizedBox(height: Dimensions.paddingSizeLarge),
 
           CustomButton(
-            buttonText: 'login'.tr,
+            buttonText: 'get_otp'.tr,
             radius: Dimensions.radiusDefault,
             isBold: isDesktop ? false : true,
             isLoading: authController.isLoading,
@@ -156,34 +134,12 @@ class OtpLoginWidgetApp extends StatelessWidget {
                 ),
                 const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
-                InkWell(
-                  onTap: () => authController.toggleRememberMe(),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        height: 24, width: 24,
-                        child: Checkbox(
-                          side: BorderSide(color: Theme.of(context).hintColor),
-                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          activeColor: Theme.of(context).primaryColor,
-                          value: authController.isActiveRememberMe,
-                          onChanged: (bool? isChecked) => authController.toggleRememberMe(),
-                        ),
-                      ),
-                      const SizedBox(width: Dimensions.paddingSizeSmall),
-
-                      Expanded(child: Text('remember_me'.tr, style: robotoRegular.copyWith(color: Theme.of(context).cardColor))),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: Dimensions.paddingSizeLarge),
-
                 const ConditionCheckBoxWidget(forSignUp: true),
                 const SizedBox(height: Dimensions.paddingSizeLarge),
 
                 CustomButton(
                   color: Colors.black,
-                  buttonText: 'login'.tr,
+                  buttonText: 'get_otp'.tr,
                   radius: Dimensions.radiusDefault,
                   isBold: isDesktop ? false : true,
                   isLoading: authController.isLoading,

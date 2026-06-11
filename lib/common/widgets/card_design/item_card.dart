@@ -684,44 +684,7 @@ class MostSellItemCard extends StatelessWidget {
                                           mainAxisAlignment: .start,
                                           crossAxisAlignment: .start,
                                           children: [
-                                            (Get.find<SplashController>()
-                                                        .configModel!
-                                                        .moduleConfig!
-                                                        .module!
-                                                        .unit! &&
-                                                    item.unitType != null)
-                                                ? Flexible(
-                                                    child: Container(
-                                                      decoration: BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius.circular(
-                                                              6.r,
-                                                            ),
-                                                        color: Colors
-                                                            .grey
-                                                            .shade300,
-                                                      ),
-                                                      child: Padding(
-                                                        padding:
-                                                            EdgeInsets.symmetric(
-                                                              horizontal: 8.0,
-                                                              vertical: 4,
-                                                            ),
-                                                        child: Text(
-                                                          '${item.unitType ?? ''}',
-                                                          style: robotoRegular.copyWith(
-                                                            fontSize: Dimensions
-                                                                .fontSizeExtraSmall,
-                                                          ),
-                                                          maxLines: 1,
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  )
-                                                : const SizedBox(),
-                                            if (!isFood) SizedBox(width: 10.w),
+
                                             Container(
                                               decoration: BoxDecoration(
                                                 borderRadius:

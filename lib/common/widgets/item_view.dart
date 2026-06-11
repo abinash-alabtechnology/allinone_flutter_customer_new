@@ -630,10 +630,10 @@ class _ItemsViewStoreState extends State<ItemsViewStore> {
                                         ? widget.stores != null &&
                                                   widget.isStore
                                               ? 200
-                                              : 240
+                                              : 255
                                         : ResponsiveHelper.isDesktop(context)
                                         ? 300
-                                        : 240,
+                                        : 255,
                                     crossAxisCount:
                                         ResponsiveHelper.isMobile(context)
                                         ? 3
@@ -772,10 +772,10 @@ class _ItemsViewStoreState extends State<ItemsViewStore> {
                       : ResponsiveHelper.isMobile(context)
                       ? widget.stores != null && widget.isStore
                             ? 200
-                            : 240
+                            : 255
                       : ResponsiveHelper.isDesktop(context)
                       ? 300
-                      : 240,
+                      : 255,
                   crossAxisCount: ResponsiveHelper.isMobile(context)
                       ? 3
                       : ResponsiveHelper.isDesktop(context) &&
@@ -800,6 +800,7 @@ class _ItemsViewStoreState extends State<ItemsViewStore> {
                           isEnabled: isNull,
                           isStore: widget.isStore,
                           hasDivider: index != widget.shimmerLength - 1,
+                          isGridView: true,
                         );
                 },
               ) : GridView.builder(

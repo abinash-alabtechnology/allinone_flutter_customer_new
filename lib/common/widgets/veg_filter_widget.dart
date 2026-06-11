@@ -44,12 +44,11 @@ class VegFilterWidget extends StatelessWidget {
           ])));
     }
 
-    return (Get.find<SplashController>()
-                .configModel!
-                .moduleConfig!
-                .module!
-                .vegNonVeg! &&
-            Get.find<SplashController>().configModel!.toggleVegNonVeg!)
+    final splashController = Get.find<SplashController>();
+    final isFood = splashController.module != null && splashController.module!.moduleType.toString() == AppConstants.food;
+    return (isFood &&
+            splashController.configModel!.moduleConfig!.module!.vegNonVeg! &&
+            splashController.configModel!.toggleVegNonVeg!)
         ? Padding(
             padding: fromAppBar
                 ? EdgeInsets.zero
@@ -100,12 +99,11 @@ class VegFilterWidget1 extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool ltr = Get.find<LocalizationController>().isLtr;
 
-    return (Get.find<SplashController>()
-                .configModel!
-                .moduleConfig!
-                .module!
-                .vegNonVeg! &&
-            Get.find<SplashController>().configModel!.toggleVegNonVeg!)
+    final splashController = Get.find<SplashController>();
+    final isFood = splashController.module != null && splashController.module!.moduleType.toString() == AppConstants.food;
+    return (isFood &&
+            splashController.configModel!.moduleConfig!.module!.vegNonVeg! &&
+            splashController.configModel!.toggleVegNonVeg!)
         ? Padding(
             padding: fromAppBar
                 ? EdgeInsets.zero
@@ -256,9 +254,12 @@ class _VegFilterWidget1FoodState extends State<VegFilterWidget1Food> {
   @override
   Widget build(BuildContext context) {
     final bool ltr = Get.find<LocalizationController>().isLtr;
-    final config = Get.find<SplashController>().configModel!;
+    final splashController = Get.find<SplashController>();
+    final config = splashController.configModel!;
+    final isFood = splashController.module != null && splashController.module!.moduleType.toString() == AppConstants.food;
 
-    if (!(config.moduleConfig?.module?.vegNonVeg ?? false) ||
+    if (!isFood ||
+        !(config.moduleConfig?.module?.vegNonVeg ?? false) ||
         !(config.toggleVegNonVeg ?? false)) {
       return const SizedBox();
     }

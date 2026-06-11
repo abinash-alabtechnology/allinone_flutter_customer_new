@@ -2608,10 +2608,9 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
 
                           const SizedBox(height: 12),
 
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: SizedBox(
-                              height: 340,
+                          Expanded(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
                               child: GoogleMap(
                                 initialCameraPosition: CameraPosition(
                                   target: pickup,
@@ -2718,7 +2717,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                             ),
                           ),
 
-                          const Spacer(),
+                          const SizedBox(height: 16),
 
                           Row(
                             children: [

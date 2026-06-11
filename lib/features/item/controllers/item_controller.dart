@@ -930,10 +930,19 @@ class ItemController extends GetxController implements GetxService {
   }
 
   void itemDirectlyAddToCart(Item? item, BuildContext context, {bool inStore = false, bool isCampaign = false}) {
+    final cartController = Get.find<CartController>();
+    cartController.setLoadingItemId(item?.id);
+    cartController.setIsLoading(true);
     getItemDetails(itemId: item!.id!).then((value) {
-      if(_item!.isSubscription == true) {
-        navigateToItemPage(_item, context, inStore: inStore, isCampaign: isCampaign);
-      } else if (((_item!.foodVariations != null && _item!.foodVariations!.isEmpty) && _item?.moduleType == AppConstants.food) || (_item?.variations != null && _item!.variations!.isEmpty && _item?.moduleType != AppConstants.food)) {
+      bool hasSubscription = _item!.isSubscription == true;
+      bool hasVariations = false;
+      if (_item!.moduleType == AppConstants.food) {
+        hasVariations = _item!.foodVariations != null && _item!.foodVariations!.isNotEmpty;
+      } else {
+        hasVariations = _item!.variations != null && _item!.variations!.isNotEmpty;
+      }
+
+      if (!hasVariations && !hasSubscription) {
         double price = _item!.price!;
         double discount = _item!.discount!;
         double discountPrice = PriceConverter.convertWithDiscount(price, discount, _item!.discountType)!;
@@ -950,18 +959,22 @@ class ItemController extends GetxController implements GetxService {
         );
         if(Get.find<SplashController>().configModel!.moduleConfig!.module!.stock! && _item!.stock! <= 0){
           showCustomSnackBar('out_of_stock'.tr);
+          cartController.setIsLoading(false);
+          cartController.setLoadingItemId(null);
         }
-        else if (Get.find<CartController>().existAnotherStoreItem(cartModel.item!.storeId, ModuleHelper.getModule() != null
+        else if (cartController.existAnotherStoreItem(cartModel.item!.storeId, ModuleHelper.getModule() != null
             ? ModuleHelper.getModule()?.id : ModuleHelper.getCacheModule()?.id)) {
+          cartController.setIsLoading(false);
+          cartController.setLoadingItemId(null);
           Get.dialog(ConfirmationDialog(
             icon: Images.warning,
             title: 'are_you_sure_to_reset'.tr,
             description: Get.find<SplashController>().configModel!.moduleConfig!.module!.showRestaurantText!
                 ? 'if_you_continue'.tr : 'if_you_continue_without_another_store'.tr,
             onYesPressed: () {
-              Get.find<CartController>().clearCartOnline().then((success) async {
+              cartController.clearCartOnline().then((success) async {
                 if (success) {
-                  await Get.find<CartController>().addToCartOnline(onlineCart);
+                  await cartController.addToCartOnline(onlineCart);
                   Get.back();
                   // showCartSnackBar();
                 }
@@ -969,19 +982,17 @@ class ItemController extends GetxController implements GetxService {
             },
           ), barrierDismissible: false);
         } else {
-          Get.find<CartController>().addToCartOnline(onlineCart);
+          cartController.addToCartOnline(onlineCart);
           // showCartSnackBar();
         }
-      } else if(Get.find<SplashController>().configModel!.moduleConfig!.module!.showRestaurantText! || _item?.moduleType == AppConstants.food){
-        ResponsiveHelper.isMobile(Get.context) ? Get.bottomSheet(
-          ItemBottomSheet(itemId: _item!.id!, inStorePage: inStore, isCampaign: isCampaign),
-          backgroundColor: Colors.transparent, isScrollControlled: true,
-        ) : Get.dialog(
-          Dialog(child: ItemBottomSheet(itemId: _item!.id!, inStorePage: inStore, isCampaign: isCampaign)),
-        );
       } else {
-        Get.toNamed(RouteHelper.getItemDetailsRoute(_item!.id, inStore), arguments: ItemDetailsScreen(itemId: _item!.id!, inStorePage: inStore));
+        cartController.setIsLoading(false);
+        cartController.setLoadingItemId(null);
+        navigateToItemPage(_item, context, inStore: inStore, isCampaign: isCampaign);
       }
+    }).catchError((error) {
+      cartController.setIsLoading(false);
+      cartController.setLoadingItemId(null);
     });
   }
 

@@ -1088,7 +1088,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                           if(item.isSubscription == true) ...[
                                             const SizedBox(height: Dimensions.paddingSizeSmall),
                                             CustomButton(
-                                              isLoading: cartController.isLoading,
+                                              isLoading: cartController.isSubscriptionLoading,
                                               buttonText: 'subscribe'.tr,
                                               onPressed: () {
                                                 print("---- Subscription cart fgdfg model: ${cartModel!.toJson()}  ${cartModel!.isSubscribed}");
@@ -1116,7 +1116,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                                         ? 'if_you_continue'.tr : 'if_you_continue_without_another_store'.tr,
                                                     onYesPressed: () {
                                                       Get.back();
-                                                      cartController.clearCartOnline().then((success) async {
+                                                      cartController.clearCartOnline(isSubscription: true).then((success) async {
                                                         if (success) {
                                                           await cartController.addToCartOnline(subscriptionOnlineCart).then((_) {
                                                                CartModel? newItem;

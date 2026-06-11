@@ -292,20 +292,7 @@ class ReviewItemCard extends StatelessWidget {
                           Text("(${item!.ratingCount})", style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor)),
                         ]),
                       )) : const SizedBox(),
-                      SizedBox(width: 10.w,),
 
-                      (Get.find<SplashController>().configModel!.moduleConfig!.module!.unit! && item!.unitType != null) ? Container(
-                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(6.r),
-                            color: Colors.greenAccent.withValues(alpha: 0.1),
-                            border:Border.all(color: Colors.green.shade400)),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0,vertical: 3),
-                          child: Text(
-                            item!.unitType ?? '',
-                            style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Colors.green.shade400),
-                          ),
-                        ),
-                      ) : const SizedBox(),
 
                     ],
                   ),
@@ -390,7 +377,7 @@ class ReviewItemCardFood extends StatelessWidget {
           color: Theme.of(context).cardColor,
           boxShadow: [
             BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 spreadRadius: 1,
                 blurRadius: 5,
                 offset: const Offset(0, 1))
@@ -531,7 +518,7 @@ class ReviewItemCardFood extends StatelessWidget {
           color: Theme.of(context).cardColor,
           boxShadow: [
             BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 spreadRadius: 1,
                 blurRadius: 5,
                 offset: const Offset(0, 1))
@@ -633,16 +620,20 @@ class ReviewItemCardFood extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(
-                                    item!.storeName!,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: robotoRegular.copyWith(
-                                        color:
-                                        Theme.of(context).cardColor,
-                                        fontSize:
-                                        Dimensions.fontSizeSmall),
-                                  ),Row(
+                                  Expanded(
+                                    child: Text(
+                                      item!.storeName!,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: robotoRegular.copyWith(
+                                          color:
+                                          Theme.of(context).cardColor,
+                                          fontSize:
+                                          Dimensions.fontSizeSmall),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Row(
                                       mainAxisAlignment:
                                       MainAxisAlignment.start,
                                       children: [

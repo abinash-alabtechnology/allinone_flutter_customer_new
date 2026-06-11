@@ -1522,6 +1522,7 @@
   "please_enter_the_registered_phone_where_you_want": "Please enter the registered phone where you want to sent your password recovery OTP.",
   "please_enter_the_registered_email_where_you_want": "Please enter the registered email where you want to sent your password recovery OTP.",
   "request_otp": "Request OTP",
+  "get_otp": "Get OTP",
   "back_to": "Back to",
   "login_in": "Log In",
   "sorry_something_went_wrong": "Sorry, something went wrong",

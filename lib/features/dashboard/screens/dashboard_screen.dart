@@ -224,7 +224,7 @@ class DashboardScreenState extends State<DashboardScreen> {
       Taxihome(),
       const CartScreen(fromNav: false),
       const OrderScreen(),
-      const MenuScreen(),HistoryScreen()
+      const MenuScreen(fromNav: true),HistoryScreen()
     ];
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (await inAppReview.isAvailable()) {
@@ -429,7 +429,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                                   ? const SizedBox()
                                   : const CartScreen(fromNav: false)),
                               OrderScreen(index: isTaxi ? 1 : 0),
-                              const MenuScreen(),
+                              const MenuScreen(fromNav: true),
                               HistoryScreen(),
                             ];
 
@@ -631,6 +631,15 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                           onTap: () => _setPage(isBookingTab
                                                               ? 6 : 4) ,
                                                         ),
+                                                         if (!(splashController.module != null && splashController.configModel!.module == null)) BottomNavItemWidget(
+                                                            title: 'profile'.tr,
+                                                            selectedIcon: '',
+                                                            unSelectedIcon: '',
+                                                            icon: Icons.person_outline_rounded,
+                                                            isSelected: _pageIndex == 5,
+                                                            activeColor: Theme.of(context).primaryColor,
+                                                            onTap: () => _setPage(5),
+                                                         ),
                                                         const SizedBox.shrink()
                                                       ],
                                                     ),

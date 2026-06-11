@@ -75,6 +75,27 @@ class CartController extends GetxController implements GetxService {
     _directAddCartItemIndex = index;
   }
 
+  int? _loadingItemId;
+  int? get loadingItemId => _loadingItemId;
+
+  void setLoadingItemId(int? id) {
+    _loadingItemId = id;
+    update();
+  }
+
+  void setIsLoading(bool isLoading) {
+    _isLoading = isLoading;
+    update();
+  }
+
+  bool _isSubscriptionLoading = false;
+  bool get isSubscriptionLoading => _isSubscriptionLoading;
+
+  void setSubscriptionLoading(bool status) {
+    _isSubscriptionLoading = status;
+    update();
+  }
+
   void toggleExtraPackage({bool willUpdate = true}) {
     _needExtraPackage = !_needExtraPackage;
     if(willUpdate) {
@@ -182,6 +203,7 @@ class CartController extends GetxController implements GetxService {
     _isLoading = true;
 
     final cartItem = _cartList[cartIndex];
+    _loadingItemId = cartItem.item?.id;
 
     final newQty = await cartServiceInterface.decideItemQuantity(
       isIncrement,
@@ -199,6 +221,7 @@ class CartController extends GetxController implements GetxService {
 
     if (newQty == cartItem.quantity) {
       _isLoading = false;
+      _loadingItemId = null;
       return;
     }
 
@@ -229,6 +252,7 @@ class CartController extends GetxController implements GetxService {
       }
 
       _isLoading = false;
+      _loadingItemId = null;
       update();
     }());
 
@@ -256,6 +280,7 @@ class CartController extends GetxController implements GetxService {
 
   Future<void> removeFromCart(int index, {Item? item}) async {
     int cartId = _cartList[index].id!;
+    _loadingItemId = _cartList[index].item?.id;
     _cartList.removeAt(index);
     update();
     Get.find<ItemController>().cartIndexSet();
@@ -263,7 +288,8 @@ class CartController extends GetxController implements GetxService {
     if(Get.find<ItemController>().item != null) {
       Get.find<ItemController>().cartIndexSet();
     }
-
+    _loadingItemId = null;
+    update();
   }
 
   Future<void> clearCartList({bool canRemoveOnline = true}) async {
@@ -291,7 +317,12 @@ class CartController extends GetxController implements GetxService {
   }
 
   Future<bool> addToCartOnline(OnlineCart cart) async {
-    _isLoading = true;
+    if (cart.isSubscribed == true) {
+      _isSubscriptionLoading = true;
+    } else {
+      _isLoading = true;
+    }
+    _loadingItemId = cart.itemId;
     bool success = false;
     update();
     List<OnlineCartModel>? onlineCartList = await cartServiceInterface.addToCartOnline(cart);
@@ -302,6 +333,8 @@ class CartController extends GetxController implements GetxService {
       success = true;
     }
     _isLoading = false;
+    _isSubscriptionLoading = false;
+    _loadingItemId = null;
     update();
 
     return success;
@@ -310,6 +343,7 @@ class CartController extends GetxController implements GetxService {
   Future<bool> updateCartOnline(OnlineCart cart) async {
     print("dfsf");
     _isLoading = true;
+    _loadingItemId = cart.itemId;
     bool success = false;
     update();
     List<OnlineCartModel>? onlineCartList = await cartServiceInterface.updateCartOnline(cart);
@@ -320,6 +354,7 @@ class CartController extends GetxController implements GetxService {
       success = true;
     }
     _isLoading = false;
+    _loadingItemId = null;
     update();
 
     return success;
@@ -335,12 +370,17 @@ class CartController extends GetxController implements GetxService {
       await Future.delayed(const Duration(milliseconds: 200));
     }
     _isLoading = false;
+    _loadingItemId = null;
     update();
   }
 
-  Future<void> getCartDataOnline() async {
+  Future<void> getCartDataOnline({bool isSubscription = false}) async {
     if(ModuleHelper.getModule() != null || ModuleHelper.getCacheModule() != null) {
-      _isLoading = true;
+      if (isSubscription) {
+        _isSubscriptionLoading = true;
+      } else {
+        _isLoading = true;
+      }
       List<OnlineCartModel>? onlineCartList = await cartServiceInterface.getCartDataOnline();
       if(onlineCartList != null) {
         _cartList = [];
@@ -348,12 +388,17 @@ class CartController extends GetxController implements GetxService {
         calculationCart();
       }
       _isLoading = false;
+      _isSubscriptionLoading = false;
+      _loadingItemId = null;
       update();
     }
   }
 
   Future<bool> removeCartItemOnline(int cartId, {Item? item}) async {
     _isLoading = true;
+    if (item != null) {
+      _loadingItemId = item.id;
+    }
     update();
     bool success = await cartServiceInterface.removeCartItemOnline(cartId);
     if(success) {
@@ -363,18 +408,25 @@ class CartController extends GetxController implements GetxService {
       }
     }
     _isLoading = false;
+    _loadingItemId = null;
     update();
     return success;
   }
 
-  Future<bool> clearCartOnline() async {
-    _isLoading = true;
+  Future<bool> clearCartOnline({bool isSubscription = false}) async {
+    if (isSubscription) {
+      _isSubscriptionLoading = true;
+    } else {
+      _isLoading = true;
+    }
     update();
     bool success = await cartServiceInterface.clearCartOnline();
     if(success) {
-      getCartDataOnline();
+      await getCartDataOnline(isSubscription: isSubscription);
     }
     _isLoading = false;
+    _isSubscriptionLoading = false;
+    _loadingItemId = null;
     update();
     return success;
   }

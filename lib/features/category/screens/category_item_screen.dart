@@ -725,7 +725,7 @@ class _ItemsViewCategoryState extends State<ItemsViewCategory> {
         itemCount: widget.shimmerLength,
         padding: widget.padding,
         itemBuilder: (context, index) {
-          return !widget.isStore ? ItemShimmer(isEnabled: isNull, isStore: widget.isStore, hasDivider: index != widget.shimmerLength-1)
+          return !widget.isStore ? ItemShimmer(isEnabled: isNull, isStore: widget.isStore, hasDivider: index != widget.shimmerLength-1, isGridView: true)
               : widget.isFoodOrGrocery! ? const StoreCardShimmer()
               : const NewOnShimmerView();
         },
