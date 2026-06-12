@@ -22,8 +22,8 @@ class BannerService implements BannerServiceInterface {
   }
 
   @override
-  Future<BannerModel?> getFeaturedBannerList() async {
-    return await bannerRepositoryInterface.getList(isFeaturedBanner: true);
+  Future<BannerModel?> getFeaturedBannerList({required DataSourceEnum source}) async {
+    return await bannerRepositoryInterface.getList(isFeaturedBanner: true, source: source);
   }
 
   @override

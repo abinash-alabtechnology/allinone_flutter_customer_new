@@ -162,7 +162,7 @@ class SignInScreenState extends State<SignInScreen> {
             SizedBox(
               height: context.height,
               width: context.width,
-              child: Image.asset('assets/image/logimimge.png', fit: BoxFit.cover),
+              child:Padding(padding: EdgeInsets.only(bottom: 140),child: Image.asset('assets/image/logimimge.png', fit: BoxFit.cover)),
             ),
             SafeArea(
               child: Align(

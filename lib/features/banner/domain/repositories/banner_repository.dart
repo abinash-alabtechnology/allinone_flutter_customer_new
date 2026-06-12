@@ -25,7 +25,7 @@ class BannerRepository implements BannerRepositoryInterface {
     } else if (isTaxiBanner) {
       return await _getTaxiBannerList();
     } else if (isFeaturedBanner) {
-      return await _getFeaturedBannerList();
+      return await _getFeaturedBannerList(source: source!);
     } else if (isParcelOtherBanner) {
       return await _getParcelOtherBannerList();
     } else if (isPromotionalBanner) {
@@ -90,14 +90,25 @@ class BannerRepository implements BannerRepositoryInterface {
     return bannerModel;
   }
 
-  Future<BannerModel?> _getFeaturedBannerList() async {
+  Future<BannerModel?> _getFeaturedBannerList({required DataSourceEnum source}) async {
     BannerModel? bannerModel;
-    final headers = HeaderHelper.featuredHeader();
-    print("🔹 Request Headers: $headers");
-    Response response = await apiClient.getData('${AppConstants.bannerUri}?featured=1', headers: HeaderHelper.featuredHeader());
-    print("fdggg ${response.statusCode}${response.body}");
-    if (response.statusCode == 200) {
-      bannerModel = BannerModel.fromJson(response.body);
+    String cacheId = '${AppConstants.bannerUri}-featured';
+
+    switch (source) {
+      case DataSourceEnum.client:
+        final headers = HeaderHelper.featuredHeader();
+        print("🔹 Request Headers: $headers");
+        Response response = await apiClient.getData('${AppConstants.bannerUri}?featured=1', headers: HeaderHelper.featuredHeader());
+        print("fdggg ${response.statusCode}${response.body}");
+        if (response.statusCode == 200) {
+          bannerModel = BannerModel.fromJson(response.body);
+          LocalClient.organize(source, cacheId, jsonEncode(response.body), apiClient.getHeader());
+        }
+      case DataSourceEnum.local:
+        String? cacheResponseData = await LocalClient.organize(source, cacheId, null, null);
+        if (cacheResponseData != null) {
+          bannerModel = BannerModel.fromJson(jsonDecode(cacheResponseData));
+        }
     }
     return bannerModel;
   }

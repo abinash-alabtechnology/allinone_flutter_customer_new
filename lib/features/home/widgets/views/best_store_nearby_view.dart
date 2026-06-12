@@ -203,12 +203,17 @@ class BestStoreNearbyView extends StatelessWidget {
                                           borderRadius: BorderRadius.circular(
                                             16,
                                           ),
-                                          child: CustomImage(
-                                            image:
-                                                store.coverPhotoFullUrl ?? "",
-                                            height: 240,
-                                            width: 290,
-                                            fit: BoxFit.cover,
+                                          child: ColorFiltered(
+                                            colorFilter: storeController.isOpenNow(store)
+                                                ? const ColorFilter.mode(Colors.transparent, BlendMode.dst)
+                                                : const ColorFilter.mode(Colors.grey, BlendMode.saturation),
+                                            child: CustomImage(
+                                              image:
+                                                  store.coverPhotoFullUrl ?? "",
+                                              height: 240,
+                                              width: 290,
+                                              fit: BoxFit.cover,
+                                            ),
                                           ),
                                         ),
 
@@ -232,6 +237,16 @@ class BestStoreNearbyView extends StatelessWidget {
                                             ),
                                           ),
                                         ),
+
+                                        if (!storeController.isOpenNow(store))
+                                          Positioned.fill(
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                color: Colors.black.withValues(alpha: 0.35),
+                                                borderRadius: BorderRadius.circular(16),
+                                              ),
+                                            ),
+                                          ),
 
                                         /// Favorite Button
                                         Positioned(

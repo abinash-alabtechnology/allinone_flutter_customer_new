@@ -973,31 +973,32 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                           ),
 
 
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                            child: InkWell(
-                                              onTap: () {
-                                                // Instructions logic
-                                              },
-                                              child: Container(
-                                                padding: const EdgeInsets.all(12),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.white,
-                                                  borderRadius: BorderRadius.circular(12),
-                                                  border: Border.all(color: Colors.grey.shade100),
-                                                ),
-                                                child: Row(
-                                                  children: [
-                                                    const Icon(Icons.note_add_outlined, color: Color(0xFF16A34A), size: 20),
-                                                    const SizedBox(width: 8),
-                                                    Text('Add cooking instructions', style: robotoMedium.copyWith(fontSize: 14, color: Colors.grey.shade700)),
-                                                    const Spacer(),
-                                                    const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
-                                                  ],
+                                          if (isFood)
+                                            Padding(
+                                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                              child: InkWell(
+                                                onTap: () {
+                                                  // Instructions logic
+                                                },
+                                                child: Container(
+                                                  padding: const EdgeInsets.all(12),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius: BorderRadius.circular(12),
+                                                    border: Border.all(color: Colors.grey.shade100),
+                                                  ),
+                                                  child: Row(
+                                                    children: [
+                                                      const Icon(Icons.note_add_outlined, color: Color(0xFF16A34A), size: 20),
+                                                      const SizedBox(width: 8),
+                                                      Text('Add cooking instructions', style: robotoMedium.copyWith(fontSize: 14, color: Colors.grey.shade700)),
+                                                      const Spacer(),
+                                                      const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
+                                                    ],
+                                                  ),
                                                 ),
                                               ),
                                             ),
-                                          ),
                                           ExtraPackagingWidget(cartController: cartController),
                                           const SizedBox(),
                                         ]),

@@ -90,8 +90,10 @@ class HomeScreen extends StatefulWidget {
 
       final location = Get.find<LocationController>();
       location.syncZoneData();
-      await splash.getModules();
-      await banner.getFeaturedBanner();
+      await Future.wait([
+        splash.getModules(),
+        banner.getFeaturedBanner(reload),
+      ]);
 
       flash.setEmptyFlashSale(fromModule: fromModule);
 
@@ -498,7 +500,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       await loadTaxiApis();
                     }
                     else {
-                      await Get.find<BannerController>().getFeaturedBanner();
+                      await Get.find<BannerController>().getFeaturedBanner(true);
                       await Get.find<SplashController>().getModules();
                       if (AuthHelper.isLoggedIn()) {
                         await Get.find<AddressController>().getAddressList();

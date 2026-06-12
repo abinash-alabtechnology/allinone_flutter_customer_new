@@ -480,11 +480,16 @@ class ModuleView extends StatelessWidget {
                                       children: [
                                         ClipRRect(
                                           borderRadius: BorderRadius.circular(16),
-                                          child: CustomImage(
-                                            image: store.coverPhotoFullUrl ?? "",
-                                            height: 280,
-                                            width: 280,
-                                            fit: BoxFit.cover,
+                                          child: ColorFiltered(
+                                            colorFilter: storeController.isOpenNow(store)
+                                                ? const ColorFilter.mode(Colors.transparent, BlendMode.dst)
+                                                : const ColorFilter.mode(Colors.grey, BlendMode.saturation),
+                                            child: CustomImage(
+                                              image: store.coverPhotoFullUrl ?? "",
+                                              height: 280,
+                                              width: 280,
+                                              fit: BoxFit.cover,
+                                            ),
                                           ),
                                         ),
                                         Positioned.fill(
@@ -494,11 +499,20 @@ class ModuleView extends StatelessWidget {
                                               gradient: LinearGradient(
                                                 begin: Alignment.topCenter,
                                                 end: Alignment.bottomCenter,
-                                                colors: [Colors.transparent, Colors.black.withOpacity(0.8)],
+                                                colors: [Colors.transparent, Colors.black.withValues(alpha: 0.8)],
                                               ),
                                             ),
                                           ),
                                         ),
+                                        if (!storeController.isOpenNow(store))
+                                          Positioned.fill(
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                color: Colors.black.withValues(alpha: 0.35),
+                                                borderRadius: BorderRadius.circular(16),
+                                              ),
+                                            ),
+                                          ),
                                         Positioned(
                                           top: 12,
                                           left: 12,

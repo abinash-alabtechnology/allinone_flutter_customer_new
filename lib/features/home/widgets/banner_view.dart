@@ -170,16 +170,15 @@ class BannerView extends StatelessWidget {
               },
             ),
             const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-            if (bannerController.bannerImageList != null &&
-                bannerController.bannerImageList!.isNotEmpty)
+            if (bannerList != null && bannerList.isNotEmpty)
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: bannerController.bannerImageList!
+                children: bannerList
                     .asMap()
                     .entries
                     .map((entry) {
                   final index = entry.key;
-                  final total = bannerController.bannerImageList!.length;
+                  final total = bannerList.length;
                   final isActive = index == bannerController.currentIndex;
 
                   return Padding(
@@ -261,111 +260,154 @@ class BannerViewModule extends StatelessWidget {
             top: Dimensions.paddingSizeDefault,
             bottom: Dimensions.paddingSizeSmall),
         // padding: const EdgeInsets.only(top: Dimensions.paddingSizeDefault),
-        child: CarouselSlider.builder(
-          options: CarouselOptions(
-            autoPlay: true,
-            viewportFraction: 1.0,
-            enlargeCenterPage: true,
-            disableCenter: true,
-            autoPlayInterval: const Duration(seconds: 7),
-            onPageChanged: (index, reason) {
-              bannerController.setCurrentIndex(index, true);
-            },
-          ),
-          itemCount: bannerList.length,
-          itemBuilder: (context, index, _) {
-            return InkWell(
-              onTap: () async {
-                final data = bannerDataList?[index];
-                if (data == null) return;
+        child: Column(
+          children: [
+            CarouselSlider.builder(
+              options: CarouselOptions(
+                autoPlay: true,
+                viewportFraction: 1.0,
+                enlargeCenterPage: true,
+                disableCenter: true,
+                autoPlayInterval: const Duration(seconds: 7),
+                onPageChanged: (index, reason) {
+                  bannerController.setCurrentIndex(index, true);
+                },
+              ),
+              itemCount: bannerList.length,
+              itemBuilder: (context, index, _) {
+                return InkWell(
+                  onTap: () async {
+                    final data = bannerDataList?[index];
+                    if (data == null) return;
 
-                if (data is Item) {
-                  Get.find<ItemController>()
-                      .navigateToItemPage(data, context);
-                } else if (data is Store) {
-                  final store = data;
+                    if (data is Item) {
+                      Get.find<ItemController>()
+                          .navigateToItemPage(data, context);
+                    } else if (data is Store) {
+                      final store = data;
 
-                  if (isFeatured &&
-                      (AddressHelper.getUserAddressFromSharedPref()
-                          ?.zoneData !=
-                          null &&
+                      if (isFeatured &&
+                          (AddressHelper.getUserAddressFromSharedPref()
+                              ?.zoneData !=
+                              null &&
+                              AddressHelper.getUserAddressFromSharedPref()!
+                                  .zoneData!
+                                  .isNotEmpty)) {
+                        for (final module
+                        in Get.find<SplashController>().moduleList ?? []) {
+                          if (module.id == store.moduleId) {
+                            Get.find<SplashController>().setModule(module);
+                            break;
+                          }
+                        }
+
+                        final zoneData = AddressHelper
+                            .getUserAddressFromSharedPref()!
+                            .zoneData!
+                            .firstWhere(
+                              (data) => data.id == store.zoneId,
+                          orElse: () =>
                           AddressHelper.getUserAddressFromSharedPref()!
                               .zoneData!
-                              .isNotEmpty)) {
-                    for (final module
-                    in Get.find<SplashController>().moduleList ?? []) {
-                      if (module.id == store.moduleId) {
-                        Get.find<SplashController>().setModule(module);
-                        break;
+                              .first,
+                        );
+
+                        final module = zoneData.modules!.firstWhere(
+                                (m) => m.id == store.moduleId,
+                            orElse: () => zoneData.modules!.first);
+
+                        Get.find<SplashController>().setModule(ModuleModel(
+                          id: module.id,
+                          moduleName: module.moduleName,
+                          moduleType: module.moduleType,
+                          themeId: module.themeId,
+                          storesCount: module.storesCount,
+                        ));
+                      }
+
+                      Get.toNamed(
+                        RouteHelper.getStoreRoute(
+                            id: store.id,
+                            page: isFeatured ? 'module' : 'banner'),
+                        arguments:
+                        StoreScreen(store: store, fromModule: isFeatured),
+                      );
+                    } else if (data is BasicCampaignModel) {
+                      Get.toNamed(RouteHelper.getBasicCampaignRoute(data));
+                    } else if (data is String) {
+                      if (await canLaunchUrlString(data)) {
+                        await launchUrlString(data,
+                            mode: LaunchMode.externalApplication);
+                      } else {
+                        showCustomSnackBar('unable_to_found_url'.tr);
                       }
                     }
-
-                    final zoneData = AddressHelper
-                        .getUserAddressFromSharedPref()!
-                        .zoneData!
-                        .firstWhere(
-                          (data) => data.id == store.zoneId,
-                      orElse: () =>
-                      AddressHelper.getUserAddressFromSharedPref()!
-                          .zoneData!
-                          .first,
-                    );
-
-                    final module = zoneData.modules!.firstWhere(
-                            (m) => m.id == store.moduleId,
-                        orElse: () => zoneData.modules!.first);
-
-                    Get.find<SplashController>().setModule(ModuleModel(
-                      id: module.id,
-                      moduleName: module.moduleName,
-                      moduleType: module.moduleType,
-                      themeId: module.themeId,
-                      storesCount: module.storesCount,
-                    ));
-                  }
-
-                  Get.toNamed(
-                    RouteHelper.getStoreRoute(
-                        id: store.id,
-                        page: isFeatured ? 'module' : 'banner'),
-                    arguments:
-                    StoreScreen(store: store, fromModule: isFeatured),
-                  );
-                } else if (data is BasicCampaignModel) {
-                  Get.toNamed(RouteHelper.getBasicCampaignRoute(data));
-                } else if (data is String) {
-                  if (await canLaunchUrlString(data)) {
-                    await launchUrlString(data,
-                        mode: LaunchMode.externalApplication);
-                  } else {
-                    showCustomSnackBar('unable_to_found_url'.tr);
-                  }
-                }
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius:
-                    BorderRadius.circular(18),
-                  ),
-                  child: ClipRRect(
-                    borderRadius:
-                    BorderRadius.circular(18),
-                    child: GetBuilder<SplashController>(
-                      builder: (splashController) {
-                        return CustomImage(
-                          image: bannerList[index] ?? '',
-                          fit: BoxFit.contain,
-                        );
-                      },
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).cardColor,
+                        borderRadius:
+                        BorderRadius.circular(18),
+                      ),
+                      child: ClipRRect(
+                        borderRadius:
+                        BorderRadius.circular(18),
+                        child: GetBuilder<SplashController>(
+                          builder: (splashController) {
+                            return CustomImage(
+                              image: bannerList[index] ?? '',
+                              fit: BoxFit.contain,
+                            );
+                          },
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-            );
-          },
+                );
+              },
+            ),
+            const SizedBox(height: 10),
+            GetBuilder<BannerController>(
+              builder: (bannerController) {
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(bannerList.length, (index) {
+                    bool isActive = bannerController.currentIndex == index;
+                    int total = bannerList.length;
+
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 3),
+                      child: isActive
+                          ? Container(
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).primaryColor,
+                                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              child: Text(
+                                '${index + 1}/$total',
+                                style: robotoRegular.copyWith(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            )
+                          : Container(
+                              height: 5,
+                              width: 6,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).primaryColor.withAlpha((255 * 0.5).round()),
+                                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                              ),
+                            ),
+                    );
+                  }),
+                );
+              },
+            ),
+          ],
         ),
       );
     });
@@ -539,20 +581,34 @@ return Container(
           return Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(bannerList.length, (index) {
-
               bool isActive = bannerController.currentIndex == index;
+              int total = bannerList.length;
 
-              return AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                height: 6,
-                width: isActive ? 28 : 6,
-                decoration: BoxDecoration(
-                  color: isActive
-                      ? Theme.of(context).cardColor
-                      : Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(20),
-                ),
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 3),
+                child: isActive
+                    ? Container(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor,
+                          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        child: Text(
+                          '${index + 1}/$total',
+                          style: robotoRegular.copyWith(
+                            color: Colors.white,
+                            fontSize: 12,
+                          ),
+                        ),
+                      )
+                    : Container(
+                        height: 5,
+                        width: 6,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor.withAlpha((255 * 0.5).round()),
+                          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                        ),
+                      ),
               );
             }),
           );

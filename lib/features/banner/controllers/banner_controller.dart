@@ -37,9 +37,33 @@ class BannerController extends GetxController implements GetxService {
   PromotionalBanner? _promotionalBanner;
   PromotionalBanner? get promotionalBanner => _promotionalBanner;
 
-  Future<void> getFeaturedBanner() async {
-    BannerModel? bannerModel = await bannerServiceInterface
-        .getFeaturedBannerList();
+  Future<void> getFeaturedBanner(
+    bool reload, {
+    DataSourceEnum dataSource = DataSourceEnum.local,
+    bool fromRecall = false,
+  }) async {
+    if (_featuredBannerList == null || reload || fromRecall) {
+      if (reload) {
+        _featuredBannerList = null;
+      }
+      BannerModel? bannerModel;
+      if (dataSource == DataSourceEnum.local) {
+        bannerModel = await bannerServiceInterface.getFeaturedBannerList(source: DataSourceEnum.local);
+        await _prepareFeaturedBanner(bannerModel);
+
+        getFeaturedBanner(
+          false,
+          dataSource: DataSourceEnum.client,
+          fromRecall: true,
+        );
+      } else {
+        bannerModel = await bannerServiceInterface.getFeaturedBannerList(source: DataSourceEnum.client);
+        _prepareFeaturedBanner(bannerModel);
+      }
+    }
+  }
+
+  Future<void> _prepareFeaturedBanner(BannerModel? bannerModel) async {
     if (bannerModel != null) {
       _featuredBannerList = [];
       _featuredBannerDataList = [];

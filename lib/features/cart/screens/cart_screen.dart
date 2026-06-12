@@ -92,6 +92,7 @@ class _CartScreenState extends State<CartScreen> {
 
 
         bool isPharmacy = Get.find<SplashController>().module?.moduleType == 'pharmacy';
+        bool isFood = Get.find<SplashController>().module != null && Get.find<SplashController>().module!.moduleType.toString() == AppConstants.food;
 
         return Column(
           children: [
@@ -185,9 +186,9 @@ class _CartScreenState extends State<CartScreen> {
                                   ),
                                 ),
                               ),
-                              const Divider(height: 1, indent: 16, endIndent: 16, color: Color(0xFFF1F5F9)),
+                              if (isFood) const Divider(height: 1, indent: 16, endIndent: 16, color: Color(0xFFF1F5F9)),
                               
-                              GetBuilder<CheckoutController>(builder: (checkoutController) {
+                              if (isFood) GetBuilder<CheckoutController>(builder: (checkoutController) {
                                 return InkWell(
                                   onTap: () {
                                     _showInstructionsBottomSheet(context, checkoutController);

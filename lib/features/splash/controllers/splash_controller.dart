@@ -332,7 +332,7 @@ class SplashController extends GetxController implements GetxService {
 
   void removeModule() {
     setModule(null);
-    Get.find<BannerController>().getFeaturedBanner();
+    Get.find<BannerController>().getFeaturedBanner(false);
     getModules();
     Get.find<HomeController>().forcefullyNullCashBackOffers();
     if(AuthHelper.isLoggedIn()) {
