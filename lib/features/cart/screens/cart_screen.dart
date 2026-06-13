@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+﻿import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:handy_allinone/common/widgets/custom_app_bar.dart';
@@ -380,8 +380,9 @@ class _CartScreenState extends State<CartScreen> {
                 style: robotoRegular.copyWith(
                   fontSize: 13,
                   color: Colors.grey,
-                  decoration: TextDecoration.lineThrough,
+                  decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid,
                 ),
+                textAlign: TextAlign.center,
               ),
             if (originalPrice != null) const SizedBox(width: 8),
             Text(

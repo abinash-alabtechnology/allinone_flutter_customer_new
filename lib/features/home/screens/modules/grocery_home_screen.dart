@@ -71,6 +71,8 @@ import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:handy_allinone/common/widgets/card_design/item_card.dart';
 import 'package:handy_allinone/features/category/controllers/category_controller.dart';
+import 'package:handy_allinone/features/item/controllers/item_controller.dart';
+import 'package:handy_allinone/features/item/domain/models/item_model.dart';
 import 'package:handy_allinone/helper/auth_helper.dart';
 import 'package:handy_allinone/util/dimensions.dart';
 import 'package:handy_allinone/util/styles.dart';
@@ -796,69 +798,63 @@ class _GroceryHomeScreenState extends State<GroceryHomeScreen> {
                       Skeletonizer(
                         enabled: list == null,
                         child: SizedBox(
-                          height: 130.h,
-                          width: double.maxFinite,
-                          child: ListView.builder(
-                            padding: EdgeInsets.symmetric(horizontal: 10.w),
+                          height: 280.h,
+                          child: GridView.builder(
+                            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
                             scrollDirection: Axis.horizontal,
-                            shrinkWrap: true,
                             physics: const BouncingScrollPhysics(),
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              mainAxisSpacing: 12.w,
+                              crossAxisSpacing: 10.h,
+                              childAspectRatio: 1.25,
+                            ),
                             itemCount: list?.length ?? 12,
                             itemBuilder: (_, index) {
-                              final category = list != null
-                                  ? list[index]
-                                  : null;
+                              final category = list != null ? list[index] : null;
                               final isLoading = category == null;
-                              return Padding(
-                                padding: EdgeInsets.only(right: 10.w),
-                                child: InkWell(
-                                  onTap: isLoading
-                                      ? null
-                                      : () => Get.toNamed(
-                                          RouteHelper.getCategoryItemRoute(
-                                            category.id,
-                                            category.name!,
-                                          ),
+                              return InkWell(
+                                onTap: isLoading
+                                    ? null
+                                    : () => Get.toNamed(
+                                        RouteHelper.getCategoryItemRoute(
+                                          category.id,
+                                          category.name!,
                                         ),
-                                  child: SizedBox(
-                                    height: 115.h,
-                                    width: 90.w,
-                                    child: Column(
-                                      children: [
-                                        Container(
-                                          width: 90.w,
-                                          height: 90.w,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            border: Border.all(
-                                              color: Colors.grey.shade300,
-                                            ),
-                                            color: Colors.grey.shade200,
-                                          ),
-                                          child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(100),
-                                            child: isLoading
-                                                ? const SizedBox()
-                                                : CustomImage(
-                                                    image:
-                                                        '${categoryController.categoryList![index].imageFullUrl}',
-                                                    fit: BoxFit.cover,
-                                                  ),
-                                          ),
+                                      ),
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      width: 50.w,
+                                      height: 50.w,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: Colors.grey.shade300,
                                         ),
-                                        SizedBox(height: 4.h),
-                                        Text(
-                                          category?.name ?? "Loading...",
-                                          style: robotoBold.copyWith(
-                                            fontSize: 11.sp,
-                                          ),
-                                          maxLines: 1,
-                                          textAlign: TextAlign.center,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ],
+                                        color: Colors.grey.shade200,
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(100),
+                                        child: isLoading
+                                            ? const SizedBox()
+                                            : CustomImage(
+                                                image: '${category.imageFullUrl}',
+                                                fit: BoxFit.cover,
+                                              ),
+                                      ),
                                     ),
-                                  ),
+                                    SizedBox(height: 4.h),
+                                    Text(
+                                      category?.name ?? "Loading...",
+                                      style: robotoBold.copyWith(
+                                        fontSize: 10.sp,
+                                      ),
+                                      maxLines: 2,
+                                      textAlign: TextAlign.center,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
                                 ),
                               );
                             },
@@ -965,6 +961,7 @@ class _GroceryHomeScreenState extends State<GroceryHomeScreen> {
                     const MostPopularItemView(isFood: false, isShop: false),
                     const SubscriptionItemView(isFood: false, isShop: false),
                     const FreshItemView(isFood: false, isShop: false),
+                    const CategoryListScreen(),
                     const MiddleSectionBannerView(),
                     const BestReviewItemView(),
                     // const JustForYouView(),
@@ -1028,183 +1025,144 @@ class _GroceryHomeScreenState extends State<GroceryHomeScreen> {
   }
 }
 
-class CategoryListScreen extends StatefulWidget {
+class CategoryListScreen extends StatelessWidget {
   const CategoryListScreen({super.key});
 
   @override
-  State<CategoryListScreen> createState() => _CategoryListScreenState();
-}
-
-class _CategoryListScreenState extends State<CategoryListScreen> {
-  final CategoryController categoryController = Get.find<CategoryController>();
-
-  final ScrollController scrollController = ScrollController();
-  final Map<int, GlobalKey> categoryKeys = {}; // categoryId → key mapping
-
-  @override
-  void initState() {
-    super.initState();
-
-    categoryController.getCategoryList(true).then((_) {
-      for (var category in categoryController.categoryList!) {
-        categoryKeys[category.id!] = GlobalKey();
-        categoryController.fetchItemsForCategory(
-          category.id!.toString(),
-          1,
-          'all',
-          true,
-        );
-      }
-    });
-  }
-
-  /// Auto-scroll to the selected category
-  void scrollToSelectedCategory() {
-    int selectedId = categoryController.selectedCategoryId;
-
-    if (!categoryKeys.containsKey(selectedId)) return;
-
-    final keyContext = categoryKeys[selectedId]!.currentContext;
-
-    if (keyContext != null) {
-      Scrollable.ensureVisible(
-        keyContext,
-        duration: const Duration(milliseconds: 450),
-        curve: Curves.easeOut,
-      );
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return GetBuilder<CategoryController>(
-      builder: (_) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          scrollToSelectedCategory();
-        });
+    return GetBuilder<ItemController>(
+      builder: (itemController) {
+        return GetBuilder<CategoryController>(
+          builder: (categoryController) {
+            if (categoryController.isLoadingCategories) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-        if (categoryController.isLoadingCategories) {
-          return const Center(child: CircularProgressIndicator());
-        }
+            if (categoryController.categoryList == null || categoryController.categoryList!.isEmpty) {
+              return const SizedBox.shrink();
+            }
 
-        if (categoryController.categoryList!.isEmpty) {
-          return const Center(child: Text('No categories available.'));
-        }
+            // Combine fresh items and subscription items, ensuring uniqueness by ID
+            final List<Item> sourceItems = [];
+            final Set<int> uniqueIds = {};
 
-        return SingleChildScrollView(
-          controller: scrollController,
-          child: Column(
-            children: categoryController.categoryList!.map((category) {
-              final items = categoryController.getItemsForCategory(
-                category.id!.toString(),
-              );
-
-              final width = MediaQuery.of(context).size.width;
-
-              int columns = width >= 700
-                  ? 4
-                  : width >= 500
-                  ? 3
-                  : width < 350
-                  ? 1
-                  : 2;
-
-              double gridHeight = 0;
-
-              if (items != null && items.isNotEmpty) {
-                int rows = (items.length / columns).ceil();
-                gridHeight = rows * 250 + (rows - 1) * 10;
+            for (var item in (itemController.freshItemList ?? [])) {
+              if (item.id != null && uniqueIds.add(item.id!)) {
+                sourceItems.add(item);
               }
+            }
+            for (var item in (itemController.subscriptionItemList ?? [])) {
+              if (item.id != null && uniqueIds.add(item.id!)) {
+                sourceItems.add(item);
+              }
+            }
 
-              return Container(
-                key: categoryKeys[category.id], // <-- critical for scrolling
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (items == null || items.isEmpty)
-                      const SizedBox.shrink()
-                    else
-                      Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 5,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  category.name!.capitalizeFirst ?? "",
-                                  style: robotoBold.copyWith(
-                                    fontSize: Dimensions.fontSizeExtraLarge,
-                                  ),
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+
+                // Category & Product List
+                ...categoryController.categoryList!.map((category) {
+                  // Filter items that belong to the current category and exist in the sourceItems list
+                  final items = sourceItems.where((item) {
+                    return item.categoryId == category.id ||
+                        item.categoryIds?.any((catId) => catId.id == category.id) == true;
+                  }).toList();
+
+                  if (items.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+
+                  final width = MediaQuery.of(context).size.width;
+                  int columns = width >= 700
+                      ? 4
+                      : width >= 500
+                      ? 3
+                      : width < 350
+                      ? 1
+                      : 2;
+
+                  int rows = (items.length / columns).ceil();
+                  double gridHeight = rows * 250.0 + (rows - 1) * 10.0;
+
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                category.name?.capitalizeFirst ?? "",
+                                style: robotoBold.copyWith(
+                                  fontSize: 18.sp,
+                                  color: Colors.black87,
                                 ),
-                                InkWell(
-                                  onTap: () {
-                                    Get.to(
-                                      () => CategoryItemsScreen(
-                                        categoryId: category.id!.toString(),
-                                        categoryName: category.name!,
-                                      ),
-                                    );
-                                  },
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        "See All",
-                                        style: TextStyle(
-                                          color: Theme.of(context).primaryColor,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                      Icon(
-                                        Icons.arrow_forward_ios_rounded,
-                                        color: Theme.of(context).primaryColor,
-                                        size: 16,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                            height: gridHeight,
-                            child: GridView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 5,
                               ),
-                              itemCount: items.length,
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: columns,
-                                    mainAxisSpacing: 10,
-                                    crossAxisSpacing: 10,
-                                    mainAxisExtent: 250,
-                                  ),
-                              itemBuilder: (context, idx) {
-                                return ItemCard(
-                                  key: ValueKey(items[idx].id),
-                                  item: items[idx],
-                                  isFood: false,
-                                  isShop: false,
-                                );
-                              },
-                            ),
+                              InkWell(
+                                onTap: () {
+                                  Get.to(
+                                    () => CategoryItemsScreen(
+                                      categoryId: category.id!.toString(),
+                                      categoryName: category.name!,
+                                    ),
+                                  );
+                                },
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      "See All",
+                                      style: TextStyle(
+                                        color: Theme.of(context).primaryColor,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14.sp,
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.arrow_forward_ios_rounded,
+                                      color: Theme.of(context).primaryColor,
+                                      size: 14.sp,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                  ],
-                ),
-              );
-            }).toList(),
-          ),
+                        ),
+                        SizedBox(
+                          height: gridHeight,
+                          child: GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                            itemCount: items.length,
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: columns,
+                              mainAxisSpacing: 10,
+                              crossAxisSpacing: 10,
+                              mainAxisExtent: 250,
+                            ),
+                            itemBuilder: (context, idx) {
+                              return ItemCard(
+                                key: ValueKey(items[idx].id),
+                                item: items[idx],
+                                isFood: false,
+                                isShop: false,
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ],
+            );
+          },
         );
       },
     );

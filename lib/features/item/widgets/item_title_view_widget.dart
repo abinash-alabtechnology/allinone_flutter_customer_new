@@ -1,3 +1,4 @@
+import 'package:handy_allinone/util/app_constants.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -40,6 +41,9 @@ class ItemTitleViewWidget extends StatelessWidget {
       print(inStock ? 'out_of_stock'.tr : 'in_stock'.tr);
     }
     final bool isLoggedIn = AuthHelper.isLoggedIn();
+    bool isFood = Get.find<SplashController>().module != null &&
+        Get.find<SplashController>().module!.moduleType.toString().toLowerCase() ==
+            AppConstants.food.toLowerCase();
     double? startingPrice;
     double? endingPrice;
     if (item!.variations != null && item!.variations!.isNotEmpty) {
@@ -115,7 +119,7 @@ class ItemTitleViewWidget extends StatelessWidget {
                                               .module!
                                               .unit! &&
                                           item!.unitType != null) ||
-                                      (Get.find<SplashController>()
+                                      (isFood && Get.find<SplashController>()
                                               .configModel!
                                               .moduleConfig!
                                               .module!
@@ -296,22 +300,6 @@ class ItemTitleViewWidget extends StatelessWidget {
 
                   Row(
                     children: [
-                      discount! > 0
-                          ? Flexible(
-                              child: Text(
-                                '${PriceConverter.convertPrice(startingPrice)}'
-                                '${endingPrice != null ? ' - ${PriceConverter.convertPrice(endingPrice)}' : ''}',
-                                textDirection: TextDirection.ltr,
-                                style: robotoRegular.copyWith(
-                                  color: Theme.of(context).disabledColor,
-                                  decoration: TextDecoration.lineThrough,
-                                  fontSize: Dimensions.fontSizeExtraSmall,
-                                ),
-                              ),
-                            )
-                          : const SizedBox(),
-                      SizedBox(width: discount > 0 ? 10 : 0),
-
                       Text(
                         '${PriceConverter.convertPrice(startingPrice, discount: discount, discountType: discountType)}'
                         '${endingPrice != null ? ' - ${PriceConverter.convertPrice(endingPrice, discount: discount, discountType: discountType)}' : ''}',
@@ -423,28 +411,6 @@ class ItemTitleViewWidget extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              if (discount! > 0)
-                                Row(
-                                  children: [
-                                    Text(
-                                      PriceConverter.convertPrice(startingPrice),
-                                      style: robotoRegular.copyWith(
-                                        color: Colors.grey,
-                                        decoration: TextDecoration.lineThrough,
-                                        fontSize: 14.sp,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'MRP (incl. of all taxes)',
-                                      style: robotoRegular.copyWith(
-                                        color: Colors.grey,
-                                        fontSize: 12.sp,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              const SizedBox(height: 4),
                               Row(
                                 children: [
                                   Text(
@@ -454,23 +420,6 @@ class ItemTitleViewWidget extends StatelessWidget {
                                       fontSize: 26.sp,
                                     ),
                                   ),
-                                  if (discount > 0) ...[
-                                    const SizedBox(width: 12),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFDC2626),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Text(
-                                        '${discount.toStringAsFixed(0)}% OFF',
-                                        style: robotoBold.copyWith(
-                                          color: Colors.white,
-                                          fontSize: 12.sp,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
                                 ],
                               ),
                             ],

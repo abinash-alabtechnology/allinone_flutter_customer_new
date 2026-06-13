@@ -1,3 +1,4 @@
+import 'package:handy_allinone/util/app_constants.dart';
 import 'package:handy_allinone/features/search/controllers/search_controller.dart' as search;
 import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
 import 'package:handy_allinone/helper/responsive_helper.dart';
@@ -95,7 +96,9 @@ class FilterWidget extends StatelessWidget {
               Text('filter_by'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge)),
               const SizedBox(height: Dimensions.paddingSizeSmall),
 
-              (Get.find<SplashController>().configModel!.toggleVegNonVeg!
+              (Get.find<SplashController>().module != null
+              && Get.find<SplashController>().module!.moduleType.toString().toLowerCase() == AppConstants.food.toLowerCase()
+              && Get.find<SplashController>().configModel!.toggleVegNonVeg!
               && Get.find<SplashController>().configModel!.moduleConfig!.module!.vegNonVeg!
               && !((Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('meat') ?? false) ||
                   (Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('fish') ?? false) ||
@@ -105,7 +108,9 @@ class FilterWidget extends StatelessWidget {
                 onClick: () => isStore ? searchController.toggleStoreVeg() : searchController.toggleVeg(),
               ) : const SizedBox(),
 
-              (Get.find<SplashController>().configModel!.toggleVegNonVeg!
+              (Get.find<SplashController>().module != null
+              && Get.find<SplashController>().module!.moduleType.toString().toLowerCase() == AppConstants.food.toLowerCase()
+              && Get.find<SplashController>().configModel!.toggleVegNonVeg!
               && Get.find<SplashController>().configModel!.moduleConfig!.module!.vegNonVeg!
               && !((Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('meat') ?? false) ||
                   (Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('fish') ?? false) ||

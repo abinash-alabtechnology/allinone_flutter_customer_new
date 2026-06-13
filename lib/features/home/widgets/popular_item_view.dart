@@ -1,3 +1,4 @@
+﻿import 'package:handy_allinone/util/app_constants.dart';
 import 'package:handy_allinone/common/widgets/corner_banner/banner.dart';
 import 'package:handy_allinone/common/widgets/corner_banner/corner_discount_tag.dart';
 import 'package:handy_allinone/common/widgets/title_widget.dart';
@@ -27,6 +28,7 @@ class PopularItemView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isFood = Get.find<SplashController>().module != null && Get.find<SplashController>().module!.moduleType.toString().toLowerCase() == AppConstants.food.toLowerCase();
     return GetBuilder<ItemController>(builder: (itemController) {
       List<Item>? itemList = isPopular ? itemController.popularItemList : itemController.reviewedItemList;
 
@@ -98,7 +100,7 @@ class PopularItemView extends StatelessWidget {
                                     ]),
                                     const SizedBox(width: Dimensions.paddingSizeExtraSmall),
 
-                                    (Get.find<SplashController>().configModel!.moduleConfig!.module!.vegNonVeg! && Get.find<SplashController>().configModel!.toggleVegNonVeg!)
+                                    (isFood && Get.find<SplashController>().configModel!.moduleConfig!.module!.vegNonVeg! && Get.find<SplashController>().configModel!.toggleVegNonVeg!)
                                         ? CustomAssetImageWidget(itemList[index].veg == 0 ? Images.nonVegImage : Images.vegImage,
                                         height: 10, width: 10, fit: BoxFit.contain) : const SizedBox(),
                                   ]),
@@ -136,8 +138,9 @@ class PopularItemView extends StatelessWidget {
                                           PriceConverter.convertPrice(itemController.getStartingPrice(itemList[index])),
                                           style: robotoMedium.copyWith(
                                             fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor,
-                                            decoration: TextDecoration.lineThrough,
-                                          ), textDirection: TextDirection.ltr,
+                                            decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid,
+                                          ),
+                                          textAlign: TextAlign.center, textDirection: TextDirection.ltr,
                                         )) : const SizedBox(),
                                       ]),
                                     ),

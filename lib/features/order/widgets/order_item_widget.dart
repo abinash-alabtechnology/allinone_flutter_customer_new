@@ -1,3 +1,4 @@
+import 'package:handy_allinone/util/app_constants.dart';
 import 'package:handy_allinone/common/widgets/custom_asset_image_widget.dart';
 import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
 import 'package:handy_allinone/features/item/domain/models/item_model.dart';
@@ -95,8 +96,8 @@ class OrderItemWidget extends StatelessWidget {
                   const SizedBox(width: Dimensions.paddingSizeExtraSmall),
 
                   ((Get.find<SplashController>().configModel!.moduleConfig!.module!.unit! && orderDetails.itemDetails!.unitType != null)
-                      || (Get.find<SplashController>().configModel!.moduleConfig!.module!.vegNonVeg! && Get.find<SplashController>().configModel!.toggleVegNonVeg!))
-                      ? Get.find<SplashController>().getModuleConfig(order.moduleType).newVariation! ? CustomAssetImageWidget(
+                      || (order.moduleType == AppConstants.food && Get.find<SplashController>().configModel!.moduleConfig!.module!.vegNonVeg! && Get.find<SplashController>().configModel!.toggleVegNonVeg!))
+                      ? (Get.find<SplashController>().getModuleConfig(order.moduleType).newVariation! && order.moduleType == AppConstants.food) ? CustomAssetImageWidget(
                     orderDetails.itemDetails!.veg == 0 ? Images.nonVegImage : Images.vegImage,
                     height: 11, width: 11,
                   ) : Container(

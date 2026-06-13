@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:icons_plus/icons_plus.dart';
@@ -104,8 +104,9 @@ class ReviewItemCard extends StatelessWidget {
                           PriceConverter.convertPrice(Get.find<ItemController>().getStartingPrice(item!)),
                           style: robotoRegular.copyWith(
                             fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor,
-                            decoration: TextDecoration.lineThrough,
+                            decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid,
                           ),
+                          textAlign: TextAlign.center,
                         ) : const SizedBox(),
                         SizedBox(width: item!.discount != null && item!.discount! > 0  ? Dimensions.paddingSizeExtraSmall : 0),
 
@@ -256,8 +257,9 @@ class ReviewItemCard extends StatelessWidget {
                         Get.find<ItemController>().getStartingPrice(item!),
                       ),
                       style: robotoRegular.copyWith(
-                        fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor, decoration: TextDecoration.lineThrough,
+                        fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor, decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid,
                       ),
+                      textAlign: TextAlign.center,
                     ) : const SizedBox(),
                     SizedBox(width: item!.discount! > 0 ? Dimensions.paddingSizeExtraSmall : 0),
 
@@ -322,8 +324,9 @@ class ReviewItemCard extends StatelessWidget {
                                 Get.find<ItemController>().getStartingPrice(item!),
                               ),
                               style: robotoRegular.copyWith(
-                                fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor, decoration: TextDecoration.lineThrough,
+                                fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor, decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid,
                               ),
+                              textAlign: TextAlign.center,
                             ) : const SizedBox(),
                             Text(
                               PriceConverter.convertPrice(
@@ -488,8 +491,9 @@ class ReviewItemCardFood extends StatelessWidget {
                           style: robotoRegular.copyWith(
                             fontSize: Dimensions.fontSizeExtraSmall,
                             color: Theme.of(context).disabledColor,
-                            decoration: TextDecoration.lineThrough,
+                            decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid,
                           ),
+                          textAlign: TextAlign.center,
                         )
                             : const SizedBox(),
                         // SizedBox(height: item!.discount != null && item!.discount! > 0 ? Dimensions.paddingSizeExtraSmall : 0),

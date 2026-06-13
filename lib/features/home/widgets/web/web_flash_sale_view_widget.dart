@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:handy_allinone/features/flash_sale/controllers/flash_sale_controller.dart';
 import 'package:handy_allinone/features/home/widgets/web/web_recomanded_store_view_widget.dart';
@@ -86,8 +86,9 @@ class _WebFlashSaleViewWidgetState extends State<WebFlashSaleViewWidget> {
               PriceConverter.convertPrice(Get.find<ItemController>().getStartingPrice(item)),
               style: robotoMedium.copyWith(
                 fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor,
-                decoration: TextDecoration.lineThrough,
-              ), textDirection: TextDirection.ltr,
+                decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid,
+              ),
+              textAlign: TextAlign.center, textDirection: TextDirection.ltr,
             )) : const SizedBox(),
             SizedBox(width: item.discount != null && item.discount! > 0 ? Dimensions.paddingSizeExtraSmall : 0),
 

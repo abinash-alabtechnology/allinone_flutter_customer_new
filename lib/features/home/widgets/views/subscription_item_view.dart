@@ -61,13 +61,22 @@ class SubscriptionItemView extends StatelessWidget {
                                           CrossAxisAlignment.center,
                                       children: [
                                         Text(
-                                          "Subscribe and save",
+                                          "Subscribe & Save 📦",
                                           style: robotoBold.copyWith(
                                             fontSize: 18.sp,
                                             color: Colors.blue.shade800,
                                           ),
                                         ),
-                                        SizedBox(height: 5.h),
+                                        SizedBox(height: 4.h),
+                                        Text(
+                                          "Hassle-free daily subscription delivery",
+                                          style: robotoMedium.copyWith(
+                                            fontSize: 12.sp,
+                                            color: Colors.blue.shade600,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        SizedBox(height: 8.h),
                                         Container(
                                           height: 2,
                                           width: 180.w,
@@ -99,7 +108,7 @@ class SubscriptionItemView extends StatelessWidget {
                                         ),
                                         child: SizedBox(
                                           width: 140.w,
-                                          child: MostSellItemCard(
+                                          child: SubscriptionItemCard(
                                             isPopularItem: false,
                                             isPopularItemCart: true,
                                             item: itemList[index],

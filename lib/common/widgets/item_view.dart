@@ -1,3 +1,4 @@
+﻿import 'package:handy_allinone/util/app_constants.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:handy_allinone/common/widgets/card_design/store_card_with_distance.dart';
 import 'package:handy_allinone/common/widgets/custom_asset_image_widget.dart';
@@ -1019,6 +1020,7 @@ class _ItemsViewStoreState extends State<ItemsViewStore> {
 
   /// Swiggy-style item card: text LEFT, image RIGHT with ADD button overlay.
   Widget _buildSwiggyItem(BuildContext context, Item item, bool isLast) {
+    final bool isFood = Get.find<SplashController>().module != null && Get.find<SplashController>().module!.moduleType.toString().toLowerCase() == AppConstants.food.toLowerCase();
     final bool isVeg = (item.veg ?? 0) == 1;
     final double price = item.price ?? 0;
     final double? discount = item.discount != null && item.discount! > 0 ? item.discount : null;
@@ -1042,7 +1044,7 @@ class _ItemsViewStoreState extends State<ItemsViewStore> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Veg / non-veg indicator
-                    Container(
+                    isFood ? Container(
                       width: 16,
                       height: 16,
                       decoration: BoxDecoration(
@@ -1062,7 +1064,7 @@ class _ItemsViewStoreState extends State<ItemsViewStore> {
                           ),
                         ),
                       ),
-                    ),
+                    ) : const SizedBox(),
                     const SizedBox(height: 6),
 
                     // Item name
@@ -1094,8 +1096,9 @@ class _ItemsViewStoreState extends State<ItemsViewStore> {
                             style: robotoRegular.copyWith(
                               fontSize: 12,
                               color: Theme.of(context).disabledColor,
-                              decoration: TextDecoration.lineThrough,
+                              decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid,
                             ),
+                            textAlign: TextAlign.center,
                           ),
                         ],
                       ],

@@ -139,8 +139,9 @@ class _WebItemThatYouLoveViewWidgetState extends State<WebItemThatYouLoveViewWid
                                                       PriceConverter.convertPrice(
                                                         Get.find<ItemController>().getStartingPrice(recommendItems[index]),
                                                       ),
+                                                      textAlign: TextAlign.center,
                                                       style: robotoRegular.copyWith(
-                                                        fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor, decoration: TextDecoration.lineThrough,
+                                                        fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor, decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid,
                                                       ))) : const SizedBox(),
                                                   SizedBox(width: recommendItems[index].discount! > 0 ? Dimensions.paddingSizeExtraSmall : 0),
 
@@ -336,8 +337,9 @@ class _WebItemThatYouLoveForShopState extends State<WebItemThatYouLoveForShop> {
                                                     PriceConverter.convertPrice(
                                                       Get.find<ItemController>().getStartingPrice(recommendItems[index]),
                                                     ),
+                                                    textAlign: TextAlign.center,
                                                     style: robotoRegular.copyWith(
-                                                      fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor, decoration: TextDecoration.lineThrough,
+                                                      fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor, decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid,
                                                     ))) : const SizedBox(),
                                                 SizedBox(width: recommendItems[index].discount! > 0 ? Dimensions.paddingSizeExtraSmall : 0),
 

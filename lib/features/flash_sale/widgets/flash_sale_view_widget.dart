@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:handy_allinone/common/widgets/custom_ink_well.dart';
@@ -95,8 +95,9 @@ class _FlashSaleViewWidgetState extends State<FlashSaleViewWidget> {
               PriceConverter.convertPrice(Get.find<ItemController>().getStartingPrice(item)),
               style: robotoMedium.copyWith(
                 fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor,
-                decoration: TextDecoration.lineThrough,
-              ), textDirection: TextDirection.ltr,
+                decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid,
+              ),
+              textAlign: TextAlign.center, textDirection: TextDirection.ltr,
             )) : const SizedBox(),
             SizedBox(width: item.discount != null && item.discount! > 0 ? Dimensions.paddingSizeExtraSmall : 0),
 

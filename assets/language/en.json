@@ -101,6 +101,7 @@
   "addons": "Addons",
   "total_amount": "Total Amount",
   "add_to_cart": "Add To Cart",
+  "go_to_cart": "Go to Cart",
   "item_added_to_cart": "Item added to cart",
   "already_added_in_cart": "Already Added in Cart",
   "out_of_stock": "Out of Stock",

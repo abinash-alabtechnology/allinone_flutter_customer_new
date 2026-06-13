@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:handy_allinone/common/widgets/custom_ink_well.dart';
 import 'package:handy_allinone/common/widgets/hover/text_hover.dart';
@@ -129,8 +129,9 @@ class MedicineItemCard extends StatelessWidget {
                         PriceConverter.convertPrice(Get.find<ItemController>().getStartingPrice(item)),
                         style: robotoMedium.copyWith(
                           fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor,
-                          decoration: TextDecoration.lineThrough,
-                        ), textDirection: TextDirection.ltr,
+                          decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid,
+                        ),
+                        textAlign: TextAlign.center, textDirection: TextDirection.ltr,
                       ) : const SizedBox(),
 
                       Align(

@@ -1,3 +1,4 @@
+﻿import 'package:handy_allinone/util/app_constants.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:handy_allinone/common/widgets/custom_asset_image_widget.dart';
@@ -66,6 +67,7 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    bool isFood = Get.find<SplashController>().module != null && Get.find<SplashController>().module!.moduleType.toString().toLowerCase() == AppConstants.food.toLowerCase();
     return Container(
       width: 550,
       margin: EdgeInsets.only(top: GetPlatform.isWeb ? 0 : 30),
@@ -255,7 +257,7 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                                 price > priceWithDiscount ? Text(
                                   '${PriceConverter.convertPrice(startingPrice)}'
                                       '${endingPrice != null ? ' - ${PriceConverter.convertPrice(endingPrice)}' : ''}', textDirection: TextDirection.ltr,
-                                  style: robotoMedium.copyWith(color: Theme.of(context).disabledColor, decoration: TextDecoration.lineThrough),
+                                  style: robotoMedium.copyWith(color: Theme.of(context).disabledColor, decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid), textAlign: TextAlign.center,
                                 ) : const SizedBox(),
                               ]),
                             ),
@@ -311,27 +313,27 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
 
                                 Text('description'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault,fontWeight: FontWeight.w800)),
 
-                                ((Get.find<SplashController>().configModel!.moduleConfig!.module!.unit! && item.unitType != null)
-                                    || (Get.find<SplashController>().configModel!.moduleConfig!.module!.vegNonVeg! && Get.find<SplashController>().configModel!.toggleVegNonVeg!)) ? Container(
-                                  padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeExtraSmall, horizontal: Dimensions.paddingSizeSmall),
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(6),
-                                      color: Theme.of(context).disabledColor.withValues(alpha: 0.15),
-                                      // boxShadow: [BoxShadow(color: Theme.of(context).primaryColor.withValues(alpha: 0.2), blurRadius: 5)]
-                                  ),
-                                  child: Get.find<SplashController>().configModel!.moduleConfig!.module!.unit! ? Text(
-                                    item.unitType ?? '',
-                                    style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).primaryColor),
-                                  ) : Row(children: [
-                                    SvgPicture.asset(
-                                      item.veg == 1 ? Images.vegImage : Images.nonVegImage,
-                                      height: 20,
-                                      width: 20,
-                                    ),                                    const SizedBox(width: Dimensions.paddingSizeSmall),
+                                 ((Get.find<SplashController>().configModel!.moduleConfig!.module!.unit! && item.unitType != null)
+                                     || (isFood && Get.find<SplashController>().configModel!.moduleConfig!.module!.vegNonVeg! && Get.find<SplashController>().configModel!.toggleVegNonVeg!)) ? Container(
+                                   padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeExtraSmall, horizontal: Dimensions.paddingSizeSmall),
+                                   decoration: BoxDecoration(
+                                       borderRadius: BorderRadius.circular(6),
+                                       color: Theme.of(context).disabledColor.withValues(alpha: 0.15),
+                                       // boxShadow: [BoxShadow(color: Theme.of(context).primaryColor.withValues(alpha: 0.2), blurRadius: 5)]
+                                   ),
+                                   child: Get.find<SplashController>().configModel!.moduleConfig!.module!.unit! ? Text(
+                                     item.unitType ?? '',
+                                     style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).primaryColor),
+                                   ) : Row(children: [
+                                     SvgPicture.asset(
+                                       item.veg == 1 ? Images.vegImage : Images.nonVegImage,
+                                       height: 20,
+                                       width: 20,
+                                     ),                                    const SizedBox(width: Dimensions.paddingSizeSmall),
 
-                                    Text(item.veg == 1 ? 'veg'.tr : 'non_veg'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault)),
-                                  ]),
-                                ) : const SizedBox(),
+                                     Text(item.veg == 1 ? 'veg'.tr : 'non_veg'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault)),
+                                   ]),
+                                 ) : const SizedBox(),
 
                               ]),
                               const SizedBox(height: Dimensions.paddingSizeExtraSmall),
@@ -450,7 +452,7 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                             Row(children: [
                               discount! > 0 ? PriceConverter.convertAnimationPrice(
                                 (price * itemController.quantity!) + addonsCost,
-                                textStyle: robotoMedium.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeSmall, decoration: TextDecoration.lineThrough),
+                                textStyle: robotoMedium.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeSmall, decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid),
                               ) : const SizedBox(),
                               const SizedBox(width: Dimensions.paddingSizeExtraSmall),
 
@@ -1138,7 +1140,7 @@ class NewVariationView extends StatelessWidget {
                         showOriginalPrice ? Text(
                           '+${PriceConverter.convertPrice(item!.foodVariations![index].variationValues![i].optionPrice)}',
                           maxLines: 1, overflow: TextOverflow.ellipsis, textDirection: TextDirection.ltr,
-                          style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor, decoration: TextDecoration.lineThrough),
+                          style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor, decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid), textAlign: TextAlign.center,
                         ) : const SizedBox(),
                         SizedBox(width: showOriginalPrice ? Dimensions.paddingSizeExtraSmall : 0),
 

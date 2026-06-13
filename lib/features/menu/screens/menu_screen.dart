@@ -693,7 +693,7 @@ class _MenuScreenState extends State<MenuScreen> {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  "App Version: DEV -3.6.1",
+                  "App Version: DEV -3.6.2",
                   style: TextStyle(
                     fontSize: Dimensions.fontSizeDefault,
                     color: Theme.of(context).hintColor,
@@ -987,6 +987,4 @@ class _AnimatedIconButtonState extends State<_AnimatedIconButton>
   }
 }
 
-// class MenuScreen extends StatefulWidget {
-//   const MenuScreen({super.key});
-//
+

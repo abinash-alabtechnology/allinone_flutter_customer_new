@@ -37,21 +37,18 @@ class CategoryItemScreen extends StatefulWidget {
   CategoryItemScreenState createState() => CategoryItemScreenState();
 }
 
-class CategoryItemScreenState extends State<CategoryItemScreen> with TickerProviderStateMixin {
+class CategoryItemScreenState extends State<CategoryItemScreen> {
   final ScrollController scrollController = ScrollController();
-  final ScrollController storeScrollController = ScrollController();
-  TabController? _tabController;
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
 
-    _tabController = TabController(length: 2, initialIndex: 0, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final catController = Get.find<CategoryController>();
-      catController.setRestaurant(true); // Set store mode FIRST
-      catController.getSubCategoryList(widget.categoryID); // Now respects isStore=true
+      catController.setRestaurant(false); // Set store mode to false so we fetch items
+      catController.getSubCategoryList(widget.categoryID); // Now respects isStore=false
     });
 
     scrollController.addListener(() {
@@ -72,45 +69,18 @@ class CategoryItemScreenState extends State<CategoryItemScreen> with TickerProvi
         }
       }
     });
-    storeScrollController.addListener(() {
-      if (storeScrollController.position.pixels == storeScrollController.position.maxScrollExtent
-          && Get.find<CategoryController>().categoryStoreList != null
-          && !Get.find<CategoryController>().isLoading) {
-        int pageSize = (Get.find<CategoryController>().restPageSize! / 10).ceil();
-        if (Get.find<CategoryController>().offset < pageSize) {
-          if (kDebugMode) {
-            print('end of the page');
-          }
-          Get.find<CategoryController>().showBottomLoader();
-          Get.find<CategoryController>().getCategoryStoreList(
-            Get.find<CategoryController>().subCategoryIndex == 0 ? widget.categoryID
-                : Get.find<CategoryController>().subCategoryList![Get.find<CategoryController>().subCategoryIndex].id.toString(),
-            Get.find<CategoryController>().offset+1, Get.find<CategoryController>().type, false,
-          );
-        }
-      }
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<CategoryController>(builder: (catController) {
       List<Item>? item;
-      List<Store>? stores;
       if(catController.isSearching ? catController.searchItemList != null : catController.categoryItemList != null) {
         item = [];
         if (catController.isSearching) {
           item.addAll(catController.searchItemList!);
         } else {
           item.addAll(catController.categoryItemList!);
-        }
-      }
-      if(catController.isSearching ? catController.searchStoreList != null : catController.categoryStoreList != null) {
-        stores = [];
-        if (catController.isSearching) {
-          stores.addAll(catController.searchStoreList!);
-        } else {
-          stores.addAll(catController.categoryStoreList!);
         }
       }
 
@@ -203,17 +173,10 @@ class CategoryItemScreenState extends State<CategoryItemScreen> with TickerProvi
                         : catController.subCategoryList![catController.subCategoryIndex].id.toString(), '1', type,
                   );
                 }else {
-                  if(catController.isStore) {
-                    catController.getCategoryStoreList(
-                      catController.subCategoryIndex == 0 ? widget.categoryID
-                          : catController.subCategoryList![catController.subCategoryIndex].id.toString(), 1, type, true,
-                    );
-                  }else {
-                    catController.getCategoryItemList(
-                      catController.subCategoryIndex == 0 ? widget.categoryID
-                          : catController.subCategoryList![catController.subCategoryIndex].id.toString(), 1, type, true,
-                    );
-                  }
+                  catController.getCategoryItemList(
+                    catController.subCategoryIndex == 0 ? widget.categoryID
+                        : catController.subCategoryList![catController.subCategoryIndex].id.toString(), 1, type, true,
+                  );
                 }
               }),
 
@@ -261,74 +224,10 @@ class CategoryItemScreenState extends State<CategoryItemScreen> with TickerProvi
                     ),
                   )) : const SizedBox(),
 
-                  Center(child: Container(
-                    width: Dimensions.webMaxWidth,
-                    color: Theme.of(context).cardColor,
-                    child: TabBar(
-                      controller: _tabController,
-                      indicatorColor: Theme.of(context).primaryColor,
-                      indicatorWeight: 6,
-                      labelColor: Theme.of(context).primaryColor,
-                      unselectedLabelColor: Theme.of(context).disabledColor,
-                      unselectedLabelStyle: robotoRegular.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeSmall),
-                      labelStyle: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).primaryColor),
-                      tabs: [
-                        Tab(text: Get.find<SplashController>().configModel!.moduleConfig!.module!.showRestaurantText! ? 'restaurants'.tr : 'stores'.tr),
-                        Tab(text: 'item'.tr),
-                      ],
-                    ),
-                  )),
-
-                  SizedBox(
-                    height: 600,
-                    child: NotificationListener(
-                      onNotification: (dynamic scrollNotification) {
-                        if (scrollNotification is ScrollEndNotification) {
-                          bool isStoreTab = _tabController!.index == 0;
-                          if(isStoreTab != catController.isStore) {
-                            catController.setRestaurant(isStoreTab);
-                            if(catController.isSearching) {
-                                catController.searchData(
-                                  catController.searchText, catController.subCategoryIndex == 0 ? widget.categoryID
-                                    : catController.subCategoryList![catController.subCategoryIndex].id.toString(), catController.type,
-                                );
-                            }else {
-                              if(isStoreTab) {
-                                catController.getCategoryStoreList(
-                                  catController.subCategoryIndex == 0 ? widget.categoryID
-                                      : catController.subCategoryList![catController.subCategoryIndex].id.toString(),
-                                  1, catController.type, false,
-                                );
-                              }else {
-                                catController.getCategoryItemList(
-                                  catController.subCategoryIndex == 0 ? widget.categoryID
-                                      : catController.subCategoryList![catController.subCategoryIndex].id.toString(),
-                                  1, catController.type, false,
-                                );
-                              }
-                            }
-                          }
-                        }
-                        return false;
-                      },
-                      child: TabBarView(
-                        controller: _tabController,
-                        children: [
-                          SingleChildScrollView(
-                            controller: storeScrollController,
-                            child: ItemsView(
-                              isStore: true, items: null, stores: stores,
-                              noDataText: Get.find<SplashController>().configModel!.moduleConfig!.module!.showRestaurantText! ? 'no_category_restaurant_found'.tr : 'no_category_store_found'.tr,
-                            ),
-                          ),
-                          SingleChildScrollView(
-                            controller: scrollController,
-                            child: ItemsViewStore(
-                              isStore: false, items: item, stores: null, noDataText: 'no_category_item_found'.tr, backButton: () {  },
-                            ),
-                          ),
-                        ],
-                      ),
+                  SingleChildScrollView(
+                    controller: scrollController,
+                    child: ItemsViewStore(
+                      isStore: false, items: item, stores: null, noDataText: 'no_category_item_found'.tr, backButton: () {  },
                     ),
                   ),
 
@@ -344,246 +243,109 @@ class CategoryItemScreenState extends State<CategoryItemScreen> with TickerProvi
             width: Dimensions.webMaxWidth,
             child: Column(children: [
 
-              Expanded(child: NotificationListener(
-                onNotification: (dynamic scrollNotification) {
-                  if (scrollNotification is ScrollEndNotification) {
-                    if((_tabController!.index == 1 && !catController.isStore) || _tabController!.index == 0 && catController.isStore) {
-                      catController.setRestaurant(_tabController!.index == 1);
-                      if(catController.isSearching) {
-                        catController.searchData(
-                          catController.searchText, catController.subCategoryIndex == 0 ? widget.categoryID
-                            : catController.subCategoryList![catController.subCategoryIndex].id.toString(), catController.type,
-                        );
-                      }else {
-                        if(_tabController!.index == 1) {
-                          catController.getCategoryStoreList(
-                            catController.subCategoryIndex == 0 ? widget.categoryID
-                                : catController.subCategoryList![catController.subCategoryIndex].id.toString(),
-                            1, catController.type, false,
-                          );
-                        }else {
-                          catController.getCategoryItemList(
-                            catController.subCategoryIndex == 0 ? widget.categoryID
-                                : catController.subCategoryList![catController.subCategoryIndex].id.toString(),
-                            1, catController.type, false,
-                          );
-                        }
-                      }
-                    }
-                  }
-                  return false;
-                },
-                child: TabBarView(
-                  controller: _tabController,
+              Expanded(
+                child: Row(
                   children: [
-                    Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(top:8.0),
-                          child: Container(height: double.infinity,width: 90,
-                            decoration: BoxDecoration(
-                              color:Colors.grey.withValues(alpha: 0.1),
-                              border:Border(
-                                right: BorderSide(
-                                  color: Colors.grey.shade200,
-                                  width: 1.5,
-                                ),
-                              ),
+                    Padding(
+                      padding: const EdgeInsets.only(top:8.0),
+                      child: Container(height: double.infinity,width: 90,
+                        decoration: BoxDecoration(
+                          color:Colors.grey.withValues(alpha: 0.1),
+                          border:Border(
+                            right: BorderSide(
+                              color: Colors.grey.shade200,
+                              width: 1.5,
                             ),
-                            child:
-                            (catController.subCategoryList != null && !catController.isSearching) ? Container(
-                              height: 40, width:double.infinity, color: Theme.of(context).cardColor,
-                              child: ListView.builder(
-                                key: scaffoldKey,
-                                scrollDirection: Axis.vertical,
-                                itemCount: catController.subCategoryList!.length,
-                                itemBuilder: (context, index) {
-                                  return InkWell(
-                                    onTap: () => catController.setSubCategoryIndex(index, widget.categoryID),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(2),
-                                      margin: const EdgeInsets.only(right: 2,left: 2),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                                        border: Border.all(
-                                          color: index == catController.subCategoryIndex ? Theme.of(context).primaryColor: Colors.transparent,
-                                        ),
-                                        color: index == catController.subCategoryIndex ? Theme.of(context).disabledColor.withValues(alpha: 0.1) : Colors.transparent,
-                                      ),
-                                      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                                        const SizedBox(height: 10,),
-                                        ClipRRect(
-                                            borderRadius: BorderRadius.circular(10),
-                                            child: CustomImage(image: catController.subCategoryList![index].imageFullUrl??"", height: 70, width: 80, fit: BoxFit.fill)),
-                                        const SizedBox(height: 10,),
-                                        Text(
-                                          catController.subCategoryList![index].name!,
-                                          textAlign: TextAlign.center,
-                                          style: index == catController.subCategoryIndex
-                                              ? robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).primaryColor)
-                                              : robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall),
-                                        ),
-                                      ]),
+                          ),
+                        ),
+                        child:
+                        (catController.subCategoryList != null && !catController.isSearching) ? Container(
+                          height: 40, width:double.infinity, color: Theme.of(context).cardColor,
+                          child: ListView.builder(
+                            key: scaffoldKey,
+                            scrollDirection: Axis.vertical,
+                            itemCount: catController.subCategoryList!.length,
+                            itemBuilder: (context, index) {
+                              return InkWell(
+                                onTap: () => catController.setSubCategoryIndex(index, widget.categoryID),
+                                child: Container(
+                                  padding: const EdgeInsets.all(2),
+                                  margin: const EdgeInsets.only(right: 2,left: 2),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                                    border: Border.all(
+                                      color: index == catController.subCategoryIndex ? Theme.of(context).primaryColor: Colors.transparent,
                                     ),
-                                  );
-                                },
-                              ),
-                            ) : const SizedBox(),
-
-                          ),
-                        ),
-                        Expanded(
-                          child: SingleChildScrollView(
-                            controller: storeScrollController,
-                            child: ItemsView(
-                              isStore: true, items: null, stores: stores,
-                              noDataText: Get.find<SplashController>().configModel!.moduleConfig!.module!.showRestaurantText! ? 'no_category_restaurant_found'.tr : 'no_category_store_found'.tr,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(top:8.0),
-                          child: Container(height: double.infinity,width: 90,
-                            decoration: BoxDecoration(
-                              color:Colors.grey.withValues(alpha: 0.1),
-                              border:Border(
-                                right: BorderSide(
-                                  color: Colors.grey.shade200,
-                                  width: 1.5,
-                                ),
-                              ),
-                            ),
-                            child:
-                            (catController.subCategoryList != null && !catController.isSearching) ? Container(
-                              height: 40, width:double.infinity, color: Theme.of(context).cardColor,
-                              child: ListView.builder(
-                                key: scaffoldKey,
-                                scrollDirection: Axis.vertical,
-                                itemCount: catController.subCategoryList!.length,
-                                itemBuilder: (context, index) {
-                                  return InkWell(
-                                    onTap: () => catController.setSubCategoryIndex(index, widget.categoryID),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(2),
-                                      margin: const EdgeInsets.only(right: 2,left: 2),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                                        border: Border.all(
-                                          color: index == catController.subCategoryIndex ? Theme.of(context).primaryColor: Colors.transparent,
-                                        ),
-                                        color: index == catController.subCategoryIndex ? Theme.of(context).disabledColor.withValues(alpha: 0.1) : Colors.transparent,
-                                      ),
-                                      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                                        const SizedBox(height: 10,),
-                                        ClipRRect(
-                                            borderRadius: BorderRadius.circular(10),
-                                            child: CustomImage(image: catController.subCategoryList![index].imageFullUrl??"", height: 70, width: 80, fit: BoxFit.fill)),
-                                        const SizedBox(height: 10,),
-                                        Text(
-                                          catController.subCategoryList![index].name!,
-                                          textAlign: TextAlign.center,
-                                          style: index == catController.subCategoryIndex
-                                              ? robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).primaryColor)
-                                              : robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall),
-                                        ),
-                                      ]),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ) : const SizedBox(),
-
-                          ),
-                        ),
-
-                        Expanded(
-                          child: Container(
-                           height: double.infinity,
-                            child: SingleChildScrollView(
-                              controller: scrollController,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  ItemsViewCategory(
-                                    isStore: false, items: item, stores: null, noDataText: 'no_category_item_found'.tr, backButton: () {  },
-                                    showbackbutton: false,
+                                    color: index == catController.subCategoryIndex ? Theme.of(context).disabledColor.withValues(alpha: 0.1) : Colors.transparent,
                                   ),
-                                ],
+                                  child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                    const SizedBox(height: 10,),
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: index == 0
+                                          ? Container(
+                                              height: 70,
+                                              width: 80,
+                                              decoration: BoxDecoration(
+                                                color: index == catController.subCategoryIndex
+                                                    ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
+                                                    : Colors.grey.shade100,
+                                                borderRadius: BorderRadius.circular(10),
+                                              ),
+                                              child: Icon(
+                                                Icons.grid_view_rounded,
+                                                size: 32,
+                                                color: index == catController.subCategoryIndex
+                                                    ? Theme.of(context).primaryColor
+                                                    : Colors.grey.shade600,
+                                              ),
+                                            )
+                                          : CustomImage(
+                                              image: catController.subCategoryList![index].imageFullUrl ?? "",
+                                              height: 70,
+                                              width: 80,
+                                              fit: BoxFit.fill,
+                                            ),
+                                    ),
+                                    const SizedBox(height: 10,),
+                                    Text(
+                                      catController.subCategoryList![index].name!,
+                                      textAlign: TextAlign.center,
+                                      style: index == catController.subCategoryIndex
+                                          ? robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).primaryColor)
+                                          : robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall),
+                                    ),
+                                  ]),
+                                ),
+                              );
+                            },
+                          ),
+                        ) : const SizedBox(),
+
+                      ),
+                    ),
+
+                    Expanded(
+                      child: Container(
+                       height: double.infinity,
+                        child: SingleChildScrollView(
+                          controller: scrollController,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ItemsViewCategory(
+                                isStore: false, items: item, stores: null, noDataText: 'no_category_item_found'.tr, backButton: () {  },
+                                showbackbutton: false,
                               ),
-                            ),
+                            ],
                           ),
                         ),
-                      ],
+                      ),
                     ),
                   ],
                 ),
-              )),
-               Get.find<SplashController>().configModel!.moduleConfig!.module!.showRestaurantText! ?
-                Center(
-                child: Container(
-                  width: Dimensions.webMaxWidth,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      height: 75,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor,
-                        borderRadius: BorderRadius.circular(18),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.08),
-                            blurRadius: 8,
-                          ),
-                        ],
-                      ),
-                      child: TabBar(
-                        controller: _tabController,
-                        isScrollable: false,
-                        dividerColor: Colors.transparent,
-                        indicatorSize: TabBarIndicatorSize.tab,
-                        indicator: BoxDecoration(
-                          color: Colors.black87,
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-
-                        labelColor: Colors.white,
-                        unselectedLabelColor: Theme.of(context).cardColor,
-
-                        labelStyle: robotoBold.copyWith(
-                          fontSize: Dimensions.fontSizeSmall + 1,
-                          fontWeight: FontWeight.w900,
-                        ),
-                        unselectedLabelStyle: robotoRegular.copyWith(
-                          fontSize: Dimensions.fontSizeSmall,
-                          fontWeight: FontWeight.w500,
-                        ),
-
-                        tabs: [
-                          _pillTab(
-                            icon: Icons.storefront_outlined,
-                            label: Get.find<SplashController>()
-                                .configModel!
-                                .moduleConfig!
-                                .module!
-                                .showRestaurantText!
-                                ? 'restaurants'.tr
-                                : 'stores'.tr,
-                          ),
-                          _pillTab(
-                            icon: Icons.shopping_bag,
-                            label: 'item'.tr,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ) : const SizedBox(),
+              ),
 
               catController.isLoading ? Center(child: Padding(
                 padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
@@ -596,23 +358,6 @@ class CategoryItemScreenState extends State<CategoryItemScreen> with TickerProvi
       );
     });
   }
-}
-
-Tab _pillTab({required IconData icon, required String label}) {
-  return Tab(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(icon, size: 18),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
-    ),
-  );
 }
 
 

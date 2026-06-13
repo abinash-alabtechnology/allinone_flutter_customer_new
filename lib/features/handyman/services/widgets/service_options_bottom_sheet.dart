@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:handy_allinone/features/handyman/services/models/handyman_service_model.dart';
@@ -343,8 +343,9 @@ class ServiceOptionsBottomSheet extends StatelessWidget {
                                             style: robotoRegular.copyWith(
                                               fontSize: 12,
                                               color: Colors.black54,
-                                              decoration: TextDecoration.lineThrough,
+                                              decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid,
                                             ),
+                                            textAlign: TextAlign.center,
                                           ),
                                         ],
                                       ],
@@ -607,8 +608,9 @@ class ServiceOptionsBottomSheet extends StatelessWidget {
                                   style: robotoRegular.copyWith(
                                     fontSize: 12,
                                     color: Colors.black54,
-                                    decoration: TextDecoration.lineThrough,
+                                    decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid,
                                   ),
+                                  textAlign: TextAlign.center,
                                 ),
                               ],
                             ],

@@ -1018,83 +1018,84 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                     ? WebSuggestedItemViewWidget(
                                     cartList: _cartList!.cast<CartModel>())
                                     : const SizedBox(),
-                                if (!isPharmacy) Padding(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 8.0,
-                                    vertical: 12,
-                                  ),
-                                  child: Container(
-                                    width: double.infinity,
-                                    padding: EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: Colors.amber.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(12.0),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.03),
-                                          offset: const Offset(0, 2),
-                                          blurRadius: 6,
-                                        ),
-                                      ],
-                                    ),
-                                    child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        Container(
-                                          width: 44.w,
-                                          height: 44.h,
-                                          alignment: Alignment.center,
-                                          margin: const EdgeInsets.only(right: 12),
-                                          child: CustomAssetImageWidget(
-                                            "assets/image/brain.png",
-                                            width: 44.w,
-                                            height: 44.h,
-                                          ),
-                                        ),
-                                        Container(
-                                          width: 1,
-                                          height: 44,
-                                          color: Colors.black12,
-                                          margin: const EdgeInsets.only(right: 12),
-                                        ),
-                                        Expanded(
-                                          child: RichText(
-                                            text: TextSpan(
-                                              style: robotoRegular.copyWith(
-                                                color: Colors.black,
-                                                fontSize: 11.sp,
-                                                height: 1.25,
-                                              ),
-                                              children:  [
-                                                TextSpan(
-                                                  text:
-                                                  "We're currently in our AYT testing phase\n",
-                                                  style: robotoRegular.copyWith(
-                                                    fontWeight: FontWeight.w100,
-                                                    fontSize: 12,color:Colors.grey.shade600
-                                                  ),
-                                                ),
-                                                TextSpan(
-                                                  text: "to ",
-                                                  style: robotoRegular.copyWith(
-                                                    fontWeight: FontWeight.w100,
-                                                      fontSize: 12,color:Colors.grey.shade600
-                                                  ),
-                                                ),
-                                                TextSpan(
-                                                  text: "fine-tune your experience",
-                                                  style: robotoBold.copyWith(
-                                                    fontWeight: FontWeight.w700,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
+                                // if (!isPharmacy) Padding(
+                                //   padding: EdgeInsets.symmetric(
+                                //     horizontal: 8.0,
+                                //     vertical: 12,
+                                //   ),
+                                //   child: Container(
+                                //     width: double.infinity,
+                                //     padding: EdgeInsets.all(12),
+                                //     decoration: BoxDecoration(
+                                //       color: Colors.amber.withOpacity(0.1),
+                                //       borderRadius: BorderRadius.circular(12.0),
+                                //       boxShadow: [
+                                //         BoxShadow(
+                                //           color: Colors.black.withOpacity(0.03),
+                                //           offset: const Offset(0, 2),
+                                //           blurRadius: 6,
+                                //         ),
+                                //       ],
+                                //     ),
+                                //     child: Row(
+                                //       crossAxisAlignment: CrossAxisAlignment.center,
+                                //       children: [
+                                //         Container(
+                                //           width: 44.w,
+                                //           height: 44.h,
+                                //           alignment: Alignment.center,
+                                //           margin: const EdgeInsets.only(right: 12),
+                                //           child: CustomAssetImageWidget(
+                                //             "assets/image/brain.png",
+                                //             width: 44.w,
+                                //             height: 44.h,
+                                //           ),
+                                //         ),
+                                //         Container(
+                                //           width: 1,
+                                //           height: 44,
+                                //           color: Colors.black12,
+                                //           margin: const EdgeInsets.only(right: 12),
+                                //         ),
+                                //         Expanded(
+                                //           child: RichText(
+                                //             text: TextSpan(
+                                //               style: robotoRegular.copyWith(
+                                //                 color: Colors.black,
+                                //                 fontSize: 11.sp,
+                                //                 height: 1.25,
+                                //               ),
+                                //               children:  [
+                                //                 TextSpan(
+                                //                   text:
+                                //                   "We're currently in our AYT testing phase\n",
+                                //                   style: robotoRegular.copyWith(
+                                //                     fontWeight: FontWeight.w100,
+                                //                     fontSize: 12,color:Colors.grey.shade600
+                                //                   ),
+                                //                 ),
+                                //                 TextSpan(
+                                //                   text: "to ",
+                                //                   style: robotoRegular.copyWith(
+                                //                     fontWeight: FontWeight.w100,
+                                //                       fontSize: 12,color:Colors.grey.shade600
+                                //                   ),
+                                //                 ),
+                                //                 TextSpan(
+                                //                   text: "fine-tune your experience",
+                                //                   style: robotoBold.copyWith(
+                                //                     fontWeight: FontWeight.w700,
+                                //                   ),
+                                //                 ),
+                                //               ],
+                                //             ),
+                                //           ),
+                                //         ),
+                                //       ],
+                                //     ),
+                                //   ),
+                                // ),
+                            
                               ])
                                   : SizedBox();
                             });
@@ -1814,7 +1815,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
       showCustomSnackBar('no_payment_method_is_enabled'.tr);
     }else if(checkoutController.paymentMethodIndex == -1) {
       showCustomSnackBar('payment_is_not_selected'.tr);
-    } else if(orderAmount < checkoutController.store!.minimumOrder! && widget.storeId == null) {
+    } else if((checkoutController.store!.minimumOrder ?? 0) > 0 && orderAmount < (checkoutController.store!.minimumOrder ?? 0) && widget.storeId == null) {
       showCustomSnackBar('${'minimum_order_amount_is'.tr} ${checkoutController.store!.minimumOrder}');
     }else if(checkoutController.tipController.text.isNotEmpty && checkoutController.tipController.text != 'not_now' && double.parse(checkoutController.tipController.text.trim()) < 0) {
       showCustomSnackBar('tips_can_not_be_negative'.tr);
@@ -2338,7 +2339,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     orderAmount =
         (price + variationPrice - discount) + addOns - couponDiscount -
             referralDiscount;
-    return PriceConverter.toFixed(orderAmount);
+    return PriceConverter.toFixed(orderAmount < 0 ? 0.0 : orderAmount);
   }
 
   double _calculateSubTotal(
