@@ -826,7 +826,9 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                         children: [
                                           Flexible(
                                             child: Text(
-                                              AddressHelper.getUserAddressFromSharedPref()?.address ?? 'Select Address',
+                                              AddressHelper.isAddressComplete(AddressHelper.getUserAddressFromSharedPref())
+                                                  ? AddressHelper.getUserAddressFromSharedPref()?.address ?? 'Select Address'
+                                                  : 'Select Address',
                                               style: robotoBold.copyWith(fontSize: 14, color: Colors.black),
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
@@ -1978,16 +1980,18 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     List<DropdownItem<int>> dropDownAddressList = [];
 
     if (addressList != null && store != null) {
+      int dropdownIndex = 0;
       for (int index = 0; index < addressList.length; index++) {
-        if (addressList[index].zoneIds!.contains(store.zoneId)) {
+        if (addressList[index].zoneIds!.contains(store.zoneId) && AddressHelper.isAddressComplete(addressList[index])) {
           dropDownAddressList.add(
-              DropdownItem<int>(value: index, child: Container(
+              DropdownItem<int>(value: dropdownIndex, child: Container(
                 width: context.width > Dimensions.webMaxWidth ? Dimensions.webMaxWidth - 50 : context.width - 50,
                 padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                 child: AddressWidgetCustom(
                   address: addressList[index],
                 ),
               )));
+          dropdownIndex++;
         }
       }
     }
@@ -2002,7 +2006,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
 
     if (addressList != null && store != null) {
       for (int index = 0; index < addressList.length; index++) {
-        if (addressList[index].zoneIds!.contains(store.zoneId)) {
+        if (addressList[index].zoneIds!.contains(store.zoneId) && AddressHelper.isAddressComplete(addressList[index])) {
           address.add(addressList[index]);
         }
       }

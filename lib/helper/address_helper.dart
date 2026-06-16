@@ -52,6 +52,14 @@ class AddressHelper {
     return addressModel;
   }
 
+  static bool isAddressComplete(AddressModel? address) {
+    if (address == null) return false;
+    return address.city != null && address.city!.trim().isNotEmpty &&
+        address.state != null && address.state!.trim().isNotEmpty &&
+        address.country != null && address.country!.trim().isNotEmpty &&
+        address.pincode != null && address.pincode!.trim().isNotEmpty;
+  }
+
   static bool clearAddressFromSharedPref() {
     SharedPreferences sharedPreferences = Get.find<SharedPreferences>();
     sharedPreferences.remove(AppConstants.userAddress);

@@ -453,6 +453,11 @@ class CheckoutController extends GetxController implements GetxService {
     _lastCheckedStoreId = null;
   }
 
+  void toggleTerms() {
+    _acceptTerms = !_acceptTerms;
+    update();
+  }
+
   Future<void> initializeTimeSlot(Store store) async {
     _timeSlots = await checkoutServiceInterface.initializeTimeSlot(store, Get.find<SplashController>().configModel!.scheduleOrderSlotDuration!);
     _allTimeSlots = await checkoutServiceInterface.initializeTimeSlot(store, Get.find<SplashController>().configModel!.scheduleOrderSlotDuration!);

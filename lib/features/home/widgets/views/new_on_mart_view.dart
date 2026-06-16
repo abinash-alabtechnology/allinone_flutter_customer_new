@@ -25,12 +25,52 @@ import '../../../location/controllers/location_controller.dart';
 import '../../../splash/controllers/splash_controller.dart';
 import '../../../store/screens/store_screen.dart';
 import '../module_view.dart';
+import '../../../../helper/responsive_helper.dart';
+import '../web/widgets/arrow_icon_button.dart';
 
-class NewOnMartView extends StatelessWidget {
+class NewOnMartView extends StatefulWidget {
   final bool isPharmacy;
   final bool isShop;
   final bool isNewStore;
   const NewOnMartView({super.key, required this.isPharmacy, required this.isShop, this.isNewStore = false});
+
+  @override
+  State<NewOnMartView> createState() => _NewOnMartViewState();
+}
+
+class _NewOnMartViewState extends State<NewOnMartView> {
+  final ScrollController scrollController = ScrollController();
+  bool showBackButton = false;
+  bool showForwardButton = false;
+  bool isFirstTime = true;
+
+  @override
+  void initState() {
+    super.initState();
+    scrollController.addListener(_checkScrollPosition);
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  void _checkScrollPosition() {
+    setState(() {
+      if (scrollController.position.pixels <= 0) {
+        showBackButton = false;
+      } else {
+        showBackButton = true;
+      }
+
+      if (scrollController.position.pixels >= scrollController.position.maxScrollExtent) {
+        showForwardButton = false;
+      } else {
+        showForwardButton = true;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,82 +78,79 @@ class NewOnMartView extends StatelessWidget {
       List<Store>? storeList = storeController.latestStoreList;
       bool isFood = Get.find<SplashController>().module != null && Get.find<SplashController>().module!.moduleType.toString() == AppConstants.food;
 
-      return  Skeletonizer(
-        enabled: storeList == null,
-        child: storeList != null && storeList.isNotEmpty ?Column(children: [
-          Container(
-            color: Colors.white,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeDefault),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("${'new_on'.tr} ${AppConstants.appName}+",style: robotoMedium.copyWith(fontSize: 18.sp),),
-                      Gap(5.h),
-                      Container(
-                        width: 100.w,
-                        height: 0.8.h,
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.black,
-                              Colors.transparent,
-                            ],
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                          ),
-                        ),
-                      )
-        
-                      // TitleWidget(
-                      //   title: '${'new_on'.tr} ${AppConstants.appName}+',
-                      //   islottie: true,
-                      //   image: Images.newtag,
-                      //   onTap: () => Get.toNamed(RouteHelper.getAllStoreRoute('latest')),
-                      // ),
-                    ],
-                  ),
-                  GestureDetector(
-                    onTap: (){
-                      Get.toNamed(RouteHelper.getAllStoreRoute('latest'));
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10.r),
-                          color: Colors.grey.shade200
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12.0,vertical: 6.0),
-                        child: Row(
-                          children: [
-                            Text("View All",style: robotoMedium.copyWith(fontSize: 12.sp,),),
-                            Gap(5),
-                            Icon(Icons.arrow_forward_outlined,size: 18.h,)
+      if (storeList != null && storeList.length > 3 && isFirstTime) {
+        showForwardButton = true;
+        isFirstTime = false;
+      }
+
+      Widget content = Column(children: [
+        Container(
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeDefault),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("${'new_on'.tr} ${AppConstants.appName}+",style: robotoMedium.copyWith(fontSize: 18.sp),),
+                    Gap(5.h),
+                    Container(
+                      width: 100.w,
+                      height: 0.8.h,
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.black,
+                            Colors.transparent,
                           ],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
                         ),
+                      ),
+                    )
+                  ],
+                ),
+                GestureDetector(
+                  onTap: (){
+                    Get.toNamed(RouteHelper.getAllStoreRoute('latest'));
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10.r),
+                        color: Colors.grey.shade200
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0,vertical: 6.0),
+                      child: Row(
+                        children: [
+                          Text("View All",style: robotoMedium.copyWith(fontSize: 12.sp,),),
+                          Gap(5),
+                          Icon(Icons.arrow_forward_outlined,size: 18.h,)
+                        ],
                       ),
                     ),
-                  )
-                ],
-              ),
+                  ),
+                )
+              ],
             ),
           ),
-          // const SizedBox(height: Dimensions.paddingSizeSmall),
-        
+        ),
+
+        Stack(children: [
           SizedBox(
-            height: 215.h,
+            height: ResponsiveHelper.isDesktop(context) ? 230 : 215.h,
             child: ListView.builder(
+                controller: scrollController,
                 primary: false,
                 physics: const ClampingScrollPhysics(),
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.only(left: Dimensions.paddingSizeDefault),
-                itemCount: storeList.length,
+                itemCount: storeList?.length ?? 0,
                 itemBuilder: (context, index){
-                  final store = storeList[index];
+                  final store = storeList![index];
                   double distance = Get.find<LocationController>().getRestaurantDistance(
                     LatLng(double.parse(store.latitude!), double.parse(store.longitude!)),
                   );
@@ -148,7 +185,7 @@ class NewOnMartView extends StatelessWidget {
                                 }
                               }
                             }
-        
+
                             Get.toNamed(
                               RouteHelper.getStoreRoute(
                                 id: store.id,
@@ -180,7 +217,7 @@ class NewOnMartView extends StatelessWidget {
                                   ),
                                 ),
                               ),
-        
+
                               /// Bottom gradient overlay
                               Positioned.fill(
                                 child: IgnorePointer(
@@ -211,7 +248,7 @@ class NewOnMartView extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-        
+
                               /// Favorite Button
                               Positioned(
                                 top: 12,
@@ -220,7 +257,7 @@ class NewOnMartView extends StatelessWidget {
                                     builder: (fc) {
                                       final isWished = fc.wishStoreIdList
                                           .contains(store.id);
-        
+
                                       return InkWell(
                                         onTap: () {
                                           if (AuthHelper.isLoggedIn()) {
@@ -255,7 +292,7 @@ class NewOnMartView extends StatelessWidget {
                                       );
                                     }),
                               ),
-        
+
                               /// Bottom store info
                               Positioned(
                                 bottom: 0,
@@ -281,45 +318,8 @@ class NewOnMartView extends StatelessWidget {
                                       /// Rating + Delivery
                                       Row(
                                         children: [
-                                          // Icon(
-                                          //   FontAwesome.star_solid,
-                                          //   color: Theme.of(context)
-                                          //       .cardColor,
-                                          //   size: 12,
-                                          // ),
-                                          // const SizedBox(width: 5),
-                                          //
-                                          // store.avgRating != null
-                                          //     ? Text(
-                                          //   store.avgRating
-                                          //       ?.toStringAsFixed(
-                                          //       1) ??
-                                          //       "0.0",
-                                          //   style:
-                                          //   GoogleFonts.inter(
-                                          //       color: Colors
-                                          //           .white,
-                                          //       fontSize: 12,
-                                          //       fontWeight:
-                                          //       FontWeight
-                                          //           .bold),
-                                          // )
-                                          //     : const SizedBox.shrink(),
-                                          // const SizedBox(width: 5),
-                                          //
-                                          // store.ratingCount != null
-                                          //     ? Text(
-                                          //   "(${store.ratingCount?.toStringAsFixed(0) ?? 0})",
-                                          //   style:
-                                          //   GoogleFonts.inter(
-                                          //       color: Colors
-                                          //           .white,
-                                          //       fontSize: 12),
-                                          // )
-                                          //     : const SizedBox.shrink(),
-        
                                           const SizedBox(width: 10),
-        
+
                                           Icon(
                                             Icons.circle,
                                             color: Theme.of(context)
@@ -327,7 +327,7 @@ class NewOnMartView extends StatelessWidget {
                                             size: 5,
                                           ),
                                           const SizedBox(width: 10),
-        
+
                                           /// Delivery Time tag
                                           Container(
                                             decoration: BoxDecoration(
@@ -343,14 +343,6 @@ class NewOnMartView extends StatelessWidget {
                                                   vertical: 4),
                                               child: Row(
                                                 children: [
-                                                  // const Icon(
-                                                  //   Icons.bolt,
-                                                  //   color: AppConstants
-                                                  //       .backgroundColor,
-                                                  //   size: 12,
-                                                  // ),
-                                                  // const SizedBox(
-                                                  //     width: 5),
                                                   Text(
                                                     store.deliveryTime ??
                                                         "",
@@ -417,7 +409,7 @@ class NewOnMartView extends StatelessWidget {
                                   ),
                                 ),
                               ),
-        
+
                               /// Closed Banner
                               storeController.isOpenNow(store)
                                   ? const SizedBox()
@@ -435,12 +427,43 @@ class NewOnMartView extends StatelessWidget {
                         ),
                       ),
                     )
-        
-                    // StoreCardWithDistance(store: storeList[index], isNewStore: isNewStore),
                   );
                 }),
-          )
-        ]):SizedBox(),
+          ),
+
+          if(ResponsiveHelper.isDesktop(context) && showBackButton)
+            Positioned(
+              top: 80, left: 5,
+              child: ArrowIconButton(
+                isRight: false,
+                onTap: () => scrollController.animateTo(scrollController.offset - (Dimensions.webMaxWidth / 3),
+                    duration: const Duration(milliseconds: 500), curve: Curves.easeInOut),
+              ),
+            ),
+
+          if(ResponsiveHelper.isDesktop(context) && showForwardButton)
+            Positioned(
+              top: 80, right: 5,
+              child: ArrowIconButton(
+                onTap: () => scrollController.animateTo(scrollController.offset + (Dimensions.webMaxWidth / 3),
+                    duration: const Duration(milliseconds: 500), curve: Curves.easeInOut),
+              ),
+            ),
+        ]),
+      ]);
+
+      return Skeletonizer(
+        enabled: storeList == null,
+        child: storeList != null && storeList.isNotEmpty
+            ? ResponsiveHelper.isDesktop(context)
+                ? Center(
+                    child: SizedBox(
+                      width: Dimensions.webMaxWidth,
+                      child: content,
+                    ),
+                  )
+                : content
+            : const SizedBox(),
       );
     });
   }

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/cupertino.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:handy_allinone/common/widgets/custom_app_bar.dart';
@@ -126,7 +126,9 @@ class _CartScreenState extends State<CartScreen> {
                                     const SizedBox(width: 28),
                                     Expanded(
                                       child: Text(
-                                        AddressHelper.getUserAddressFromSharedPref()?.address ?? 'Select Address',
+                                        AddressHelper.isAddressComplete(AddressHelper.getUserAddressFromSharedPref())
+                                            ? AddressHelper.getUserAddressFromSharedPref()?.address ?? 'Select Address'
+                                            : 'Select Address',
                                         style: robotoBold.copyWith(fontSize: 14, color: Colors.black),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
@@ -399,7 +401,7 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   void _onCheckout(BuildContext context, CartController cartController) {
-    if (AddressHelper.getUserAddressFromSharedPref() == null) {
+    if (!AddressHelper.isAddressComplete(AddressHelper.getUserAddressFromSharedPref())) {
       showCustomSnackBar('select_address_first'.tr);
     } else if (cartController.cartList.isEmpty) {
       showCustomSnackBar('cart_is_empty'.tr);

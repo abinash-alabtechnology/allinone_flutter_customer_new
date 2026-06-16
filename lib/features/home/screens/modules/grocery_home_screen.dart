@@ -756,39 +756,53 @@ class _GroceryHomeScreenState extends State<GroceryHomeScreen> {
                                 color: Theme.of(context).primaryColor,
                               ),
                             ),
-                            if (!ResponsiveHelper.isMobile(context) &&
-                                list != null)
+                            if (list != null)
                               Padding(
                                 padding: const EdgeInsets.only(left: 8),
                                 child: InkWell(
                                   onTap: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (c) => Dialog(
-                                        child: SizedBox(
-                                          width: 600,
-                                          height: 550,
-                                          child: CategoryPopUp(
-                                            categoryController:
-                                                categoryController,
+                                    if (ResponsiveHelper.isMobile(context)) {
+                                      Get.toNamed(RouteHelper.getCategoryRoute());
+                                    } else {
+                                      showDialog(
+                                        context: context,
+                                        builder: (c) => Dialog(
+                                          child: SizedBox(
+                                            width: 600,
+                                            height: 550,
+                                            child: CategoryPopUp(
+                                              categoryController:
+                                                  categoryController,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    );
+                                      );
+                                    }
                                   },
-                                  child: CircleAvatar(
-                                    radius: 32,
-                                    backgroundColor: Theme.of(
-                                      context,
-                                    ).primaryColor,
-                                    child: Text(
-                                      'view_all'.tr,
-                                      style: TextStyle(
-                                        fontSize: Dimensions.paddingSizeDefault,
-                                        color: Theme.of(context).cardColor,
-                                      ),
-                                    ),
-                                  ),
+                                  child: ResponsiveHelper.isMobile(context)
+                                      ? Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                          child: Text(
+                                            'see_all'.tr,
+                                            style: robotoMedium.copyWith(
+                                              color: Theme.of(context).primaryColor,
+                                              fontSize: 14.sp,
+                                            ),
+                                          ),
+                                        )
+                                      : CircleAvatar(
+                                          radius: 32,
+                                          backgroundColor: Theme.of(
+                                            context,
+                                          ).primaryColor,
+                                          child: Text(
+                                            'view_all'.tr,
+                                            style: TextStyle(
+                                              fontSize: Dimensions.paddingSizeDefault,
+                                              color: Theme.of(context).cardColor,
+                                            ),
+                                          ),
+                                        ),
                                 ),
                               ),
                           ],
@@ -798,16 +812,16 @@ class _GroceryHomeScreenState extends State<GroceryHomeScreen> {
                       Skeletonizer(
                         enabled: list == null,
                         child: SizedBox(
-                          height: 280.h,
+                          height: 270.h,
                           child: GridView.builder(
-                            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
                             scrollDirection: Axis.horizontal,
                             physics: const BouncingScrollPhysics(),
                             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 3,
                               mainAxisSpacing: 12.w,
                               crossAxisSpacing: 10.h,
-                              childAspectRatio: 1.25,
+                              childAspectRatio: .85,
                             ),
                             itemCount: list?.length ?? 12,
                             itemBuilder: (_, index) {
@@ -825,8 +839,8 @@ class _GroceryHomeScreenState extends State<GroceryHomeScreen> {
                                 child: Column(
                                   children: [
                                     Container(
-                                      width: 50.w,
-                                      height: 50.w,
+                                      width: 60.h,
+                                      height: 60.h,
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
                                         border: Border.all(
@@ -844,13 +858,13 @@ class _GroceryHomeScreenState extends State<GroceryHomeScreen> {
                                               ),
                                       ),
                                     ),
-                                    SizedBox(height: 4.h),
+                                    SizedBox(height: 2.h),
                                     Text(
                                       category?.name ?? "Loading...",
                                       style: robotoBold.copyWith(
                                         fontSize: 10.sp,
                                       ),
-                                      maxLines: 2,
+                                      maxLines: 1,
                                       textAlign: TextAlign.center,
                                       overflow: TextOverflow.ellipsis,
                                     ),

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:handy_allinone/common/widgets/custom_asset_image_widget.dart';
@@ -196,17 +196,28 @@ class ItemCard extends StatelessWidget {
                               ),
                               if (discount != null && discount > 0) ...[
                                 SizedBox(width: 4.w),
-                                Center(child: Text(
-                                  PriceConverter.convertPrice(
-                                    Get.find<ItemController>().getStartingPrice(item),
-                                  ),
-                                  style: robotoMedium.copyWith(
-                                    fontSize: 10.sp,
-                                    color: Colors.grey,
-                                    decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),),
+                                Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    Text(
+                                      PriceConverter.convertPrice(
+                                        Get.find<ItemController>().getStartingPrice(item),
+                                      ),
+                                      style: robotoMedium.copyWith(
+                                        fontSize: 10.sp,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                    Positioned(
+                                      left: 0,
+                                      right: 0,
+                                      child: Container(
+                                        height: 1,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ],
                             ],
                           ),

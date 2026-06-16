@@ -94,6 +94,7 @@ import 'package:handy_allinone/features/checkout/controllers/checkout_controller
 import 'package:handy_allinone/features/checkout/domain/models/place_order_body_model.dart';
 import 'package:handy_allinone/features/checkout/widgets/guest_create_account.dart';
 import 'package:handy_allinone/features/checkout/widgets/tips_widget.dart';
+import 'package:handy_allinone/features/checkout/widgets/condition_check_box.dart';
 import 'package:handy_allinone/features/location/domain/models/zone_response_model.dart';
 import 'package:handy_allinone/features/parcel/controllers/parcel_controller.dart';
 import 'package:handy_allinone/features/parcel/domain/models/parcel_category_model.dart';
@@ -204,6 +205,10 @@ class _ParcelNewRequestScreenState extends State<ParcelNewRequestScreen> {
                 isGuestLoggedIn: isGuestLoggedIn,
               ),
               OrderSummaryBooking(total: total, charge: charge, dmTips: dmTips),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeSmall),
+                child: CheckoutCondition(isParcel: true),
+              ),
             ],
           ),
           bottomNavigationBar: ConfirmParcelRequest(
