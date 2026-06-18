@@ -556,7 +556,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                       cart.item!.id,
                       cart.isCampaign! ? cart.item!.id : null,
                       cart.discountedPrice.toString(),
-                      '',
+                      (cart.variation != null && cart.variation!.isNotEmpty) ? cart.variation![0].type ?? '' : '',
                       Get
                           .find<SplashController>()
                           .getModuleConfig(cart.item!.moduleType)
@@ -1896,7 +1896,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
           }
           carts.add(OnlineCart(
             cart.id, cart.item!.id, cart.isCampaign! ? cart.item!.id : null,
-            cart.discountedPrice.toString(), '',
+            cart.discountedPrice.toString(), (cart.variation != null && cart.variation!.isNotEmpty) ? cart.variation![0].type ?? '' : '',
             Get.find<SplashController>().getModuleConfig(cart.item!.moduleType).newVariation! ? null : cart.variation,
             Get.find<SplashController>().getModuleConfig(cart.item!.moduleType).newVariation! ? variations : null,
             cart.quantity, addOnIdList, cart.addOns, addOnQtyList, 'Item', cart.isSubscribed ?? false, itemType: "App\\Models\\Item",

@@ -53,6 +53,7 @@ import 'package:handy_allinone/api/api_client.dart';
 import 'package:flutter/foundation.dart';
 import 'package:handy_allinone/util/app_constants.dart';
 
+import '../sharedservice.dart';
 import '../model/vehicle_listmodel.dart';
 
 class VehicleListController extends GetxController {
@@ -68,6 +69,7 @@ class VehicleListController extends GetxController {
   int? userId;
   String? otp;
   var vehicleFareMap = <int, double>{}.obs;
+  bool isCancellationDialogShown = false;
 
   Future<void> fetchVehicleList({
     required double pickupLat,
@@ -162,12 +164,17 @@ class VehicleListController extends GetxController {
   Future<bool> cancelbooking(Map<String, dynamic> bookingcancelData) async {
     isLoading.value = true;
     try {
-      Response response = await apiClient.postData(AppConstants.bookingcancel, bookingcancelData);
-print("gddfgdfg ${response.statusCode}");
-print(response.body);
+      Response response = await apiClient.postData(AppConstants.bookingcancel, bookingcancelData, handleError: false);
+      print("gddfgdfg ${response.statusCode}");
+      print(response.body);
       if (response.statusCode == 200 && response.body != null) {
         final responseData = response.body;
         print("✅ Booking cancelled Successful $responseData");
+        return true;
+      } else if (response.statusCode == 400 && response.body != null &&
+          ((response.body is Map && response.body['message'] == 'Booking already cancelled.') ||
+           response.body.toString().contains('already cancelled'))) {
+        print("✅ Booking was already cancelled. Treating as success.");
         return true;
       } else {
         print("❌ Booking Failed: ${response.statusCode} - ${response.body}");
@@ -182,7 +189,6 @@ print(response.body);
   }
 
   Future<bool> cancelBookingAndVerify(
-
       Map<String, dynamic> bookingCancelData, int? bookingId) async {
     isLoading.value = true;
     try {
@@ -199,6 +205,8 @@ print(response.body);
       await dbRef.child('bookings/$bookingId').remove();
       print("✅ Booking with ID $bookingId deleted from Firebase");
 
+      await SharedService.clearOngoingBooking();
+      print("✅ Ongoing booking cleared from shared preferences");
 
       // Step 3: Confirm the update (optional but good practice)
       final DataSnapshot snapshot =
@@ -213,7 +221,8 @@ print(response.body);
       }
     } catch (e) {
       print("❌ Exception in cancelBookingAndUpdateStatus: $e");
-      return false;
+      await SharedService.clearOngoingBooking();
+      return true;
     } finally {
       isLoading.value = false;
     }

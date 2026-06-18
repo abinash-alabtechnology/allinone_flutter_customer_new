@@ -470,7 +470,16 @@ Future<bool> showCancelConfirmationSheet(
                                     bookingId,
                                   );
                                   if (success) {
-                                    // Feedback and navigation are handled globally by _handleRideCancellation in Taxi_home.dart
+                                    await SharedService.clearOngoingBooking();
+                                    if (!vehicleController.isCancellationDialogShown) {
+                                      vehicleController.isCancellationDialogShown = true;
+                                      Navigator.popUntil(context, (route) => route is PageRoute);
+                                      showBookingCancelledBottomSheet(Get.context!, null, reason).then((_) {
+                                        vehicleController.isCancellationDialogShown = false;
+                                        Get.find<SplashController>().showBottomNavBar();
+                                        Get.offAll(() => const DashboardScreen(pageIndex: 0, fromSplash: false));
+                                      });
+                                    }
                                   }
                                 },
                           style: ElevatedButton.styleFrom(

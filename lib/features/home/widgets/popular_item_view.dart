@@ -1,4 +1,4 @@
-﻿import 'package:handy_allinone/util/app_constants.dart';
+import 'package:handy_allinone/util/app_constants.dart';
 import 'package:handy_allinone/common/widgets/corner_banner/banner.dart';
 import 'package:handy_allinone/common/widgets/corner_banner/corner_discount_tag.dart';
 import 'package:handy_allinone/common/widgets/title_widget.dart';
@@ -134,11 +134,10 @@ class PopularItemView extends StatelessWidget {
                                           style: robotoBold.copyWith(fontSize: Dimensions.fontSizeSmall),
                                         ),
                                         SizedBox(width: itemList[index].discount! > 0 ? Dimensions.paddingSizeExtraSmall : 0),
-                                        itemList[index].discount! > 0  ? Flexible(child: Text(
-                                          PriceConverter.convertPrice(itemController.getStartingPrice(itemList[index])),
+                                        itemList[index].discount! > 0  ? Flexible(child: CustomLineThroughText(
+                                          text: PriceConverter.convertPrice(itemController.getStartingPrice(itemList[index])),
                                           style: robotoMedium.copyWith(
                                             fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor,
-                                            decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid,
                                           ),
                                           textAlign: TextAlign.center, textDirection: TextDirection.ltr,
                                         )) : const SizedBox(),

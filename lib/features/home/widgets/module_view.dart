@@ -279,13 +279,30 @@ class ModuleView extends StatelessWidget {
                                   databaseURL: AppConstants.firebaseDBURL,
                                 ).ref('bookings/$bookingId');
                                 
-                                final snapshot = await ref.child('ride_status').get();
-                                if (snapshot.exists) {
-                                  String status = snapshot.value.toString();
+                                final snapshot = await ref.get();
+                                if (snapshot.exists && snapshot.value is Map) {
+                                  final bookingData = snapshot.value as Map;
+                                  String status = bookingData['ride_status']?.toString() ?? '';
                                   if (['accepted', 'arrived', 'in_progress', 'dropped'].contains(status)) {
+                                    int resolvedDriverId = 0;
+                                    final driverIdsMap = bookingData['driver_ids'];
+                                    if (driverIdsMap is Map && driverIdsMap.isNotEmpty) {
+                                      final rawDriverKey = driverIdsMap.keys.first;
+                                      resolvedDriverId = int.tryParse(
+                                        rawDriverKey.replaceAll(RegExp(r'[^0-9]'), ''),
+                                      ) ?? 0;
+                                    }
+                                    if (resolvedDriverId != 0) {
+                                      await SharedService.saveOngoingBooking(
+                                        bookingId,
+                                        resolvedDriverId,
+                                        userId,
+                                        otp,
+                                      );
+                                    }
                                     Get.to(() => RideConfirmedScreen(
                                       Bookingid: bookingId,
-                                      driverid: driverId ?? 0,
+                                      driverid: resolvedDriverId != 0 ? resolvedDriverId : (driverId ?? 0),
                                       userId: userId,
                                       otp: otp,
                                     ));
@@ -352,13 +369,30 @@ class ModuleView extends StatelessWidget {
                                 databaseURL: AppConstants.firebaseDBURL,
                                 ).ref('bookings/$bookingId');
                               
-                              final snapshot = await ref.child('ride_status').get();
-                              if (snapshot.exists) {
-                                String status = snapshot.value.toString();
+                              final snapshot = await ref.get();
+                              if (snapshot.exists && snapshot.value is Map) {
+                                final bookingData = snapshot.value as Map;
+                                String status = bookingData['ride_status']?.toString() ?? '';
                                 if (['accepted', 'arrived', 'in_progress', 'dropped'].contains(status)) {
+                                  int resolvedDriverId = 0;
+                                  final driverIdsMap = bookingData['driver_ids'];
+                                  if (driverIdsMap is Map && driverIdsMap.isNotEmpty) {
+                                    final rawDriverKey = driverIdsMap.keys.first;
+                                    resolvedDriverId = int.tryParse(
+                                      rawDriverKey.replaceAll(RegExp(r'[^0-9]'), ''),
+                                    ) ?? 0;
+                                  }
+                                  if (resolvedDriverId != 0) {
+                                    await SharedService.saveOngoingBooking(
+                                      bookingId,
+                                      resolvedDriverId,
+                                      userId,
+                                      otp,
+                                    );
+                                  }
                                   Get.to(() => RideConfirmedScreen(
                                     Bookingid: bookingId,
-                                    driverid: driverId ?? 0,
+                                    driverid: resolvedDriverId != 0 ? resolvedDriverId : (driverId ?? 0),
                                     userId: userId,
                                     otp: otp,
                                   ));

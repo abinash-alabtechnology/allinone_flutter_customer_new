@@ -1,4 +1,4 @@
-﻿import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:handy_allinone/common/widgets/cart_count_view.dart';
 import 'package:handy_allinone/common/widgets/corner_banner/banner.dart';
 import 'package:handy_allinone/common/widgets/corner_banner/corner_discount_tag.dart';
@@ -568,16 +568,15 @@ class ItemWidget extends StatelessWidget {
                                               ),
                                               if (discount != null && discount > 0) ...[
                                                 const SizedBox(width: 6),
-                                               Center(child: Text(
-                                                  PriceConverter.convertPrice(item!.price),
-                                                  style: robotoMedium.copyWith(
-                                                    fontSize: 10.sp,
-                                                    color: Colors.grey,
-                                                    decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid,
-                                                  ),
-                                                  textAlign: TextAlign.center,
-                                                  textDirection: TextDirection.ltr,
-                                                )),
+                                                Center(child: CustomLineThroughText(
+                                                   text: PriceConverter.convertPrice(item!.price),
+                                                   style: robotoMedium.copyWith(
+                                                     fontSize: 10.sp,
+                                                     color: Colors.grey,
+                                                   ),
+                                                   textAlign: TextAlign.center,
+                                                   textDirection: TextDirection.ltr,
+                                                 )),
                                               ],
                                             ],
                                           ),

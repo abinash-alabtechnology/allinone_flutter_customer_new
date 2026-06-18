@@ -126,6 +126,16 @@ class DashboardScreenState extends State<DashboardScreen> {
     ).ref('bookings/$_bookingId');
 
     _rideStatusSubscription = ref.onValue.listen((event) async {
+      if (!event.snapshot.exists || event.snapshot.value == null) {
+        print("ℹ️ Firebase booking node does not exist. Clearing ongoing booking.");
+        await SharedService.clearOngoingBooking();
+        if (!mounted) return;
+        setState(() {
+          _showRideBanner = false;
+          _showFloatingIcon = false;
+        });
+        return;
+      }
       final snapshot = event.snapshot.value as Map<dynamic, dynamic>?;
 
       if (snapshot != null && snapshot['ride_status'] != null) {
@@ -140,6 +150,22 @@ class DashboardScreenState extends State<DashboardScreen> {
         }
         else if (['pending', 'accepted', 'arrived', 'in_progress', 'dropped']
             .contains(status)) {
+          final driverIdsMap = snapshot['driver_ids'];
+          if (driverIdsMap is Map && driverIdsMap.isNotEmpty) {
+            final rawDriverKey = driverIdsMap.keys.first;
+            final parsedDriverId = int.tryParse(
+              rawDriverKey.replaceAll(RegExp(r'[^0-9]'), ''),
+            );
+            if (parsedDriverId != null) {
+              _driverId = parsedDriverId;
+              await SharedService.saveOngoingBooking(
+                _bookingId,
+                _driverId,
+                _userId,
+                _otp,
+              );
+            }
+          }
           if (!mounted) return;
           setState(() {
             _rideStatus = status;

@@ -361,7 +361,16 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                               print("dfsggfvs $success");
                               if (success) {
                                 bookingTimer?.cancel();
-                                // showBookingCancelledBottomSheet handles the feedback globally via background listener
+                                await SharedService.clearOngoingBooking();
+                                if (!vehicleController.isCancellationDialogShown) {
+                                  vehicleController.isCancellationDialogShown = true;
+                                  Navigator.popUntil(ctx, (route) => route is PageRoute);
+                                  showBookingCancelledBottomSheet(Get.context!, null, reason).then((_) {
+                                    vehicleController.isCancellationDialogShown = false;
+                                    Get.find<SplashController>().showBottomNavBar();
+                                    Get.offAll(() => const DashboardScreen(pageIndex: 0, fromSplash: false));
+                                  });
+                                }
                               }
                             },
                       style: ElevatedButton.styleFrom(
@@ -2103,28 +2112,32 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
     Timer? countdownTimer,
     bool showConfirmation = true,
     String reason = "user request",
-  ]) {
+  ]) async {
     bookingTimer?.cancel();
     bookingListener.cancel();
     countdownTimer?.cancel();
 
-    // Clear all modal sheets and dialogs to prevent overlapping
-    while (Get.isBottomSheetOpen ?? false) {
-      Get.back();
-    }
-    while (Get.isDialogOpen ?? false) {
-      Get.back();
-    }
+    await SharedService.clearOngoingBooking();
+    print("✅ Ongoing booking cleared in _handleRideCancellation");
 
-    bool isHomepage =
-        Get.currentRoute.contains('DashboardScreen') || Get.currentRoute == '/';
-    if (showConfirmation && !isHomepage) {
-      showBookingCancelledBottomSheet(Get.context!, null, reason).then((_) {
-        Get.find<SplashController>().showBottomNavBar();
-        Get.offAll(
-          () => const DashboardScreen(pageIndex: 0, fromSplash: false),
-        );
-      });
+    if (showConfirmation) {
+      if (!vehicleController.isCancellationDialogShown) {
+        vehicleController.isCancellationDialogShown = true;
+        Navigator.popUntil(Get.context!, (route) => route is PageRoute);
+        showBookingCancelledBottomSheet(Get.context!, null, reason).then((_) {
+          vehicleController.isCancellationDialogShown = false;
+          Get.find<SplashController>().showBottomNavBar();
+          Get.offAll(
+            () => const DashboardScreen(pageIndex: 0, fromSplash: false),
+          );
+        });
+      }
+    } else {
+      Navigator.popUntil(Get.context!, (route) => route is PageRoute);
+      Get.find<SplashController>().showBottomNavBar();
+      Get.offAll(
+        () => const DashboardScreen(pageIndex: 0, fromSplash: false),
+      );
     }
   }
 
@@ -2231,7 +2244,7 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
               countdownTimer?.cancel();
 
               Future.delayed(const Duration(milliseconds: 300), () {
-                if (Navigator.canPop(bottomSheetContext)) {
+                if (bottomSheetContext.mounted && Navigator.canPop(bottomSheetContext)) {
                   Navigator.pop(bottomSheetContext);
                 }
 

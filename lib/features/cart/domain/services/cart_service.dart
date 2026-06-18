@@ -242,7 +242,6 @@ class CartService implements CartServiceInterface {
       String? discountType = cart.item!.discountType;
       double discountedPrice = PriceConverter.convertWithDiscount(price, discount, discountType)!;
 
-      double? discountAmount = price - discountedPrice;
       int? quantity = cart.quantity;
       int? stock = cart.item!.stock ?? 0;
 
@@ -265,11 +264,14 @@ class CartService implements CartServiceInterface {
         String variationType = cart.productVariation != null && cart.productVariation!.isNotEmpty ? cart.productVariation![0].type! : '';
         for (item_variation.Variation variation in cart.item!.variations!) {
           if (variation.type == variationType) {
-            discountedPrice = (PriceConverter.convertWithDiscount(variation.price!, discount, discountType)! * cart.quantity!);
+            price = variation.price!;
+            discountedPrice = PriceConverter.convertWithDiscount(variation.price!, discount, discountType)!;
             break;
           }
         }
       }
+
+      double? discountAmount = price - discountedPrice;
 
       List<AddOn> addOnIdList = [];
       List<AddOns> addOnsList = [];

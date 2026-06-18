@@ -1,4 +1,4 @@
-﻿import 'package:handy_allinone/util/app_constants.dart';
+import 'package:handy_allinone/util/app_constants.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:handy_allinone/common/widgets/custom_asset_image_widget.dart';
@@ -106,6 +106,7 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
         double? discount = item.discount;
         String? discountType = item.discountType;
         int? stock = item.stock ?? 0;
+        String variationType = '';
 
         if(discountType == 'amount'){
           discount = discount! * itemController.quantity!;
@@ -124,7 +125,7 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
           for (int index = 0; index < item.choiceOptions!.length; index++) {
             variationList.add(item.choiceOptions![index].options![itemController.variationIndex![index]].replaceAll(' ', ''));
           }
-          String variationType = '';
+          variationType = '';
           bool isFirst = true;
           for (var variation in variationList) {
             if (isFirst) {
@@ -254,10 +255,10 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                                       discountType: discountType)}' : ''}',
                                   style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge), textDirection: TextDirection.ltr,
                                 ),
-                                price > priceWithDiscount ? Text(
-                                  '${PriceConverter.convertPrice(startingPrice)}'
+                                price > priceWithDiscount ? CustomLineThroughText(
+                                  text: '${PriceConverter.convertPrice(startingPrice)}'
                                       '${endingPrice != null ? ' - ${PriceConverter.convertPrice(endingPrice)}' : ''}', textDirection: TextDirection.ltr,
-                                  style: robotoMedium.copyWith(color: Theme.of(context).disabledColor, decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid), textAlign: TextAlign.center,
+                                  style: robotoMedium.copyWith(color: Theme.of(context).disabledColor), textAlign: TextAlign.center,
                                 ) : const SizedBox(),
                               ]),
                             ),
@@ -450,9 +451,22 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                             const SizedBox(width: Dimensions.paddingSizeExtraSmall),
 
                             Row(children: [
-                              discount! > 0 ? PriceConverter.convertAnimationPrice(
-                                (price * itemController.quantity!) + addonsCost,
-                                textStyle: robotoMedium.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeSmall, decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid),
+                              discount! > 0 ? Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  PriceConverter.convertAnimationPrice(
+                                    (price * itemController.quantity!) + addonsCost,
+                                    textStyle: robotoMedium.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeSmall),
+                                  ),
+                                  Positioned(
+                                    left: 0,
+                                    right: 0,
+                                    child: Container(
+                                      height: 1.5,
+                                      color: Theme.of(context).disabledColor,
+                                    ),
+                                  ),
+                                ],
                               ) : const SizedBox(),
                               const SizedBox(width: Dimensions.paddingSizeExtraSmall),
 
@@ -529,7 +543,7 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                                   }else {
                                     CartModel cartModel = CartModel(
                                         null, price, priceWithDiscountAndAddons, variation != null ? [variation] : [], itemController.selectedVariations,
-                                        (price! - PriceConverter.convertWithDiscount(price, discount, discountType)!),
+                                        (price! - PriceConverter.convertWithDiscount(price, initialDiscount, discountType)!),
                                         itemController.quantity, addOnIdList, addOnsList, widget.isCampaign, stock, item,  item.quantityLimit
                                     );
 
@@ -543,7 +557,7 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                                     OnlineCart onlineCart = OnlineCart(
                                       (widget.cart != null || itemController.cartIndex != -1) ? widget.cart?.id ?? cartController.cartList[itemController.cartIndex].id : null,
                                       widget.isCampaign ? null : item.id, widget.isCampaign ? item.id : null,
-                                      priceWithDiscountAndAddons.toString(), '', variation != null ? [variation] : null,
+                                      priceWithDiscountAndAddons.toString(), variationType, variation != null ? [variation] : null,
                                       Get.find<SplashController>().getModuleConfig(item.moduleType).newVariation! ? variations : null,
                                       itemController.quantity, listOfAddOnId, addOnsList, listOfAddOnQty, 'Item', false,
                                     );
@@ -628,7 +642,7 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                                   }else {
                                     CartModel cartModel = CartModel(
                                         null, price, priceWithDiscountAndAddons, variation != null ? [variation] : [], itemController.selectedVariations,
-                                        (price! - PriceConverter.convertWithDiscount(price, discount, discountType)!),
+                                        (price! - PriceConverter.convertWithDiscount(price, initialDiscount, discountType)!),
                                         itemController.quantity, addOnIdList, addOnsList, widget.isCampaign, stock, item,  item.quantityLimit, isSubscribed: true,
                                     );
 
@@ -641,7 +655,7 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
 
                                     OnlineCart onlineCart = OnlineCart(
                                       null, widget.isCampaign ? null : item.id, widget.isCampaign ? item.id : null,
-                                      priceWithDiscountAndAddons.toString(), '', variation != null ? [variation] : null,
+                                      priceWithDiscountAndAddons.toString(), variationType, variation != null ? [variation] : null,
                                       Get.find<SplashController>().getModuleConfig(item.moduleType).newVariation! ? variations : null,
                                       itemController.quantity, listOfAddOnId, addOnsList, listOfAddOnQty, 'Item', true,
                                     );
@@ -1137,10 +1151,11 @@ class NewVariationView extends StatelessWidget {
 
                         const Spacer(),
 
-                        showOriginalPrice ? Text(
-                          '+${PriceConverter.convertPrice(item!.foodVariations![index].variationValues![i].optionPrice)}',
-                          maxLines: 1, overflow: TextOverflow.ellipsis, textDirection: TextDirection.ltr,
-                          style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor, decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid), textAlign: TextAlign.center,
+                        showOriginalPrice ? CustomLineThroughText(
+                          text: '+${PriceConverter.convertPrice(item!.foodVariations![index].variationValues![i].optionPrice)}',
+                          textDirection: TextDirection.ltr,
+                          style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor),
+                          textAlign: TextAlign.center,
                         ) : const SizedBox(),
                         SizedBox(width: showOriginalPrice ? Dimensions.paddingSizeExtraSmall : 0),
 

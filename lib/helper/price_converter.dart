@@ -102,3 +102,41 @@ class PriceConverter {
   }
 
 }
+
+class CustomLineThroughText extends StatelessWidget {
+  final String text;
+  final TextStyle? style;
+  final TextAlign? textAlign;
+  final TextDirection? textDirection;
+
+  const CustomLineThroughText({
+    super.key,
+    required this.text,
+    this.style,
+    this.textAlign,
+    this.textDirection,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Text(
+          text,
+          style: style?.copyWith(decoration: TextDecoration.none),
+          textAlign: textAlign,
+          textDirection: textDirection,
+        ),
+        Positioned(
+          left: 0,
+          right: 0,
+          child: Container(
+            height: 1.5,
+            color: style?.color ?? Theme.of(context).disabledColor,
+          ),
+        ),
+      ],
+    );
+  }
+}

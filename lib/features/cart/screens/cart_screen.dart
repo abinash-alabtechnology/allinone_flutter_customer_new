@@ -377,12 +377,11 @@ class _CartScreenState extends State<CartScreen> {
         Row(
           children: [
             if (originalPrice != null)
-              Text(
-                originalPrice,
+              CustomLineThroughText(
+                text: originalPrice,
                 style: robotoRegular.copyWith(
                   fontSize: 13,
                   color: Colors.grey,
-                  decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid,
                 ),
                 textAlign: TextAlign.center,
               ),

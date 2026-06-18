@@ -72,6 +72,9 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
             CartModel? cartModel;
             OnlineCart? cart;
             double priceWithAddons = 0;
+            double? discount = 0;
+            double? price = 0;
+            double addonsCost = 0;
             int? cartId = cartController.getCartId(itemController.cartIndex);
             if (item != null && itemController.variationIndex != null) {
               List<String> variationList = [];
@@ -97,7 +100,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                 }
               }
 
-              double? price = item.price;
+              price = item.price;
               Variation? variation;
               stock = item.stock ?? 0;
               for (Variation v in item.variations!) {
@@ -109,7 +112,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                 }
               }
 
-              double? discount = item.discount;
+              discount = item.discount;
               String? discountType = item.discountType;
               double priceWithDiscount = PriceConverter.convertWithDiscount(
                 price,
@@ -118,7 +121,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
               )!;
               double priceWithQuantity =
                   priceWithDiscount * itemController.quantity!;
-              double addonsCost = 0;
+              addonsCost = 0;
               List<AddOn> addOnIdList = [];
               List<AddOns> addOnsList = [];
               for (int index = 0; index < item.addOns!.length; index++) {
@@ -172,7 +175,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                 widget.itemId,
                 null,
                 priceWithDiscount.toString(),
-                '',
+                variationType,
                 variation != null ? [variation] : [],
                 null,
                 (itemController.cartIndex != -1  && itemController.cartIndex < cartController.cartList.length)
@@ -414,6 +417,20 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                                           width: Dimensions
                                                               .paddingSizeExtraSmall,
                                                         ),
+
+                                                        if (discount! > 0) ...[
+                                                          CustomLineThroughText(
+                                                            text: PriceConverter.convertPrice(
+                                                              (price! * itemController.quantity!) + addonsCost,
+                                                            ),
+                                                            textDirection: TextDirection.ltr,
+                                                            style: robotoMedium.copyWith(
+                                                              color: Theme.of(context).disabledColor,
+                                                              fontSize: Dimensions.fontSizeSmall,
+                                                            ),
+                                                          ),
+                                                          const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+                                                        ],
 
                                                         Text(
                                                           PriceConverter.convertPrice(

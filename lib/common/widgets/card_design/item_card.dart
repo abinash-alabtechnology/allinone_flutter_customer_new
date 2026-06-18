@@ -521,14 +521,13 @@ class MostSellItemCard extends StatelessWidget {
                                     ),
                                     if (discount != null && discount > 0) ...[
                                       SizedBox(width: 4.w),
-                                      Text(
-                                        PriceConverter.convertPrice(
+                                      CustomLineThroughText(
+                                        text: PriceConverter.convertPrice(
                                           Get.find<ItemController>().getStartingPrice(item),
                                         ),
                                         style: robotoMedium.copyWith(
                                           fontSize: 10.sp,
                                           color: Colors.grey,
-                                          decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid,
                                         ),
                                         textAlign: TextAlign.center,
                                       ),

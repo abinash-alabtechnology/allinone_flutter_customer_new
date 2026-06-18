@@ -1344,153 +1344,162 @@ class _StoreScreenState extends State<StoreScreen> {
                 Get.find<SplashController>().configModel!.prescriptionStatus! &&
                 AuthHelper.isLoggedIn();
 
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              if (showPrescription)
-                Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Theme.of(
-                          context,
-                        ).primaryColor.withOpacity(0.5),
-                        blurRadius: 10,
-                        offset: const Offset(2, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 800),
-                        width: storeController.currentState == true
-                            ? 0
-                            : ResponsiveHelper.isDesktop(context)
-                            ? 180
-                            : 150,
-                        height: 30,
-                        curve: Curves.linear,
-                        child: Center(
-                          child: Text(
-                            'prescription_order'.tr,
-                            textAlign: TextAlign.center,
-                            style: robotoMedium.copyWith(
-                              color: Theme.of(context).primaryColor,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ),
+          return GetBuilder<CartController>(
+            builder: (cartController) {
+              bool isCartVisible = cartController.cartList.isNotEmpty && !ResponsiveHelper.isDesktop(context);
 
-                      InkWell(
-                        onTap: () {
-                          Get.find<CheckoutController>().updateFirstTime();
-                          Get.toNamed(
-                            RouteHelper.getCheckoutRoute(
-                              'prescription',
-                              storeId: storeController.store!.id,
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  if (showPrescription)
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).cardColor,
+                        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Theme.of(
+                              context,
+                            ).primaryColor.withOpacity(0.5),
+                            blurRadius: 10,
+                            offset: const Offset(2, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 800),
+                            width: storeController.currentState == true
+                                ? 0
+                                : ResponsiveHelper.isDesktop(context)
+                                ? 180
+                                : 150,
+                            height: 30,
+                            curve: Curves.linear,
+                            child: Center(
+                              child: Text(
+                                'prescription_order'.tr,
+                                textAlign: TextAlign.center,
+                                style: robotoMedium.copyWith(
+                                  color: Theme.of(context).primaryColor,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                            arguments: CheckoutScreen(
-                              fromCart: false,
-                              cartList: null,
-                              storeId: storeController.store!.id,
+                          ),
+
+                          InkWell(
+                            onTap: () {
+                              Get.find<CheckoutController>().updateFirstTime();
+                              Get.toNamed(
+                                RouteHelper.getCheckoutRoute(
+                                  'prescription',
+                                  storeId: storeController.store!.id,
+                                ),
+                                arguments: CheckoutScreen(
+                                  fromCart: false,
+                                  cartList: null,
+                                  storeId: storeController.store!.id,
+                                ),
+                              );
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).primaryColor,
+                                borderRadius: BorderRadius.circular(
+                                  Dimensions.radiusSmall,
+                                ),
+                              ),
+                              padding: const EdgeInsets.all(
+                                Dimensions.paddingSizeSmall,
+                              ),
+                              child: Image.asset(
+                                Images.prescriptionIcon,
+                                height: 25,
+                                width: 25,
+                              ),
                             ),
-                          );
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  if (showPrescription) const SizedBox(height: Dimensions.paddingSizeSmall),
+
+                  Visibility(
+                    visible: storeController.showFavButton,
+                    child: GestureDetector(
+                      key: _menuKey,
+                      onTap: () => showCategoryPopup(
+                        context,
+                        storeController,
+                        _menuKey,
+                        onCategorySelected: (int categoryIndex) {
+                          // Always scroll to the category in the grouped "All" view
+                          scrollToCategoryByIndex(categoryIndex);
                         },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor,
-                            borderRadius: BorderRadius.circular(
-                              Dimensions.radiusSmall,
+                      ),
+
+                      child: Container(
+                        height: 65,
+                        width: 65,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [const Color(0xFF2D2D2D), Colors.black],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.4),
+                              blurRadius: 15,
+                              spreadRadius: 2,
+                              offset: const Offset(0, 8),
                             ),
-                          ),
-                          padding: const EdgeInsets.all(
-                            Dimensions.paddingSizeSmall,
-                          ),
-                          child: Image.asset(
-                            Images.prescriptionIcon,
-                            height: 25,
-                            width: 25,
-                          ),
+                          ],
+                          border: Border.all(color: Colors.white.withOpacity(0.1), width: 1.5),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              ((Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('meat') ?? false) || (Get.find<SplashController>().module?.moduleType?.toLowerCase() == 'meat'))
+                                  ? Icons.kebab_dining
+                                  : (Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('fish') ?? false)
+                                      ? Icons.set_meal
+                                      : Icons.restaurant_menu_rounded,
+                              color: Colors.white,
+                              size: 26,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              ((Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('meat') ?? false) || (Get.find<SplashController>().module?.moduleType?.toLowerCase() == 'meat'))
+                                  ? "CUTS"
+                                  : (Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('fish') ?? false)
+                                      ? "FRESH"
+                                      : "MENU",
+                              style: robotoBold.copyWith(
+                                color: Colors.white,
+                                fontSize: 10,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
-
-              if (showPrescription) const SizedBox(height: Dimensions.paddingSizeSmall),
-
-              Visibility(
-                visible: storeController.showFavButton,
-                child: GestureDetector(
-                  key: _menuKey,
-                  onTap: () => showCategoryPopup(
-                    context,
-                    storeController,
-                    _menuKey,
-                    onCategorySelected: (int categoryIndex) {
-                      // Always scroll to the category in the grouped "All" view
-                      scrollToCategoryByIndex(categoryIndex);
-                    },
-                  ),
-
-                  child: Container(
-                    height: 65,
-                    width: 65,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [const Color(0xFF2D2D2D), Colors.black],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.4),
-                          blurRadius: 15,
-                          spreadRadius: 2,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                      border: Border.all(color: Colors.white.withOpacity(0.1), width: 1.5),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          ((Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('meat') ?? false) || (Get.find<SplashController>().module?.moduleType?.toLowerCase() == 'meat'))
-                              ? Icons.kebab_dining
-                              : (Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('fish') ?? false)
-                                  ? Icons.set_meal
-                                  : Icons.restaurant_menu_rounded,
-                          color: Colors.white,
-                          size: 26,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          ((Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('meat') ?? false) || (Get.find<SplashController>().module?.moduleType?.toLowerCase() == 'meat'))
-                              ? "CUTS"
-                              : (Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('fish') ?? false)
-                                  ? "FRESH"
-                                  : "MENU",
-                          style: robotoBold.copyWith(
-                            color: Colors.white,
-                            fontSize: 10,
-                            letterSpacing: 1,
-                          ),
-                        ),
-                      ],
                     ),
                   ),
-                ),
-              ),
-            ],
+
+                  if (isCartVisible)
+                    SizedBox(height: 85.h),
+                ],
+              );
+            },
           );
         },
       ),

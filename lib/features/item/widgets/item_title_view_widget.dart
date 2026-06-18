@@ -414,7 +414,8 @@ class ItemTitleViewWidget extends StatelessWidget {
                               Row(
                                 children: [
                                   Text(
-                                    PriceConverter.convertPrice(startingPrice, discount: discount, discountType: discountType),
+                                    '${PriceConverter.convertPrice(startingPrice, discount: discount, discountType: discountType)}'
+                                    '${endingPrice != null ? ' - ${PriceConverter.convertPrice(endingPrice, discount: discount, discountType: discountType)}' : ''}',
                                     style: robotoBold.copyWith(
                                       color: Colors.black,
                                       fontSize: 26.sp,

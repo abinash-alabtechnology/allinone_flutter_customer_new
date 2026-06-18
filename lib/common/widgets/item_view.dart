@@ -1,4 +1,4 @@
-﻿import 'package:handy_allinone/util/app_constants.dart';
+import 'package:handy_allinone/util/app_constants.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:handy_allinone/common/widgets/card_design/store_card_with_distance.dart';
 import 'package:handy_allinone/common/widgets/custom_asset_image_widget.dart';
@@ -1091,12 +1091,11 @@ class _ItemsViewStoreState extends State<ItemsViewStore> {
                         ),
                         if (discount != null) ...[
                           const SizedBox(width: 6),
-                          Text(
-                            PriceConverter.convertPrice(price),
+                          CustomLineThroughText(
+                            text: PriceConverter.convertPrice(price),
                             style: robotoRegular.copyWith(
                               fontSize: 12,
                               color: Theme.of(context).disabledColor,
-                              decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid,
                             ),
                             textAlign: TextAlign.center,
                           ),
