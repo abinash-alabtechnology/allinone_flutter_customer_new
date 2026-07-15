@@ -59,13 +59,10 @@ class BannerRepository implements BannerRepositoryInterface {
 
   Future<BannerModel?> _getTaxiBannerList() async {
     BannerModel? bannerModel;
-    int? moduleId = Get.find<SplashController>().module?.id;
-    var response = await http.get(
-      Uri.parse('${AppConstants.baseUrl}${AppConstants.taxiBannerUri}'),
-    );
-    print("Taxi Banner API Response: ${response.body}");
+    Response response = await apiClient.getData(AppConstants.taxiBannerUri);
+    print("Taxi Banner API Response: ${response.statusCode} ${response.body}");
     if (response.statusCode == 200) {
-      dynamic body = jsonDecode(response.body);
+      dynamic body = response.body;
 
       if (body is List) {
         bannerModel = BannerModel(banners: [], campaigns: []);

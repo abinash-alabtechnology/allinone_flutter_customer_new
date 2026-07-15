@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:handy_allinone/common/widgets/custom_asset_image_widget.dart';
 import 'package:handy_allinone/common/widgets/custom_ink_well.dart';
@@ -131,11 +131,10 @@ class ItemThatYouLoveCard extends StatelessWidget {
 
                       Wrap(alignment: WrapAlignment.center, crossAxisAlignment: WrapCrossAlignment.center, children: [
 
-                        item.discount != null && item.discount! > 0 ? Text(
-                          PriceConverter.convertPrice(Get.find<ItemController>().getStartingPrice(item)),
+                        item.discount != null && item.discount! > 0 ? CustomLineThroughText(
+                          text: PriceConverter.convertPrice(Get.find<ItemController>().getStartingPrice(item)),
                           style: robotoMedium.copyWith(
                             fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor,
-                            decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid,
                           ),
                           textAlign: TextAlign.center, textDirection: TextDirection.ltr,
                         ) : const SizedBox(),

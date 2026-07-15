@@ -434,8 +434,8 @@ class SpecialOfferView extends StatelessWidget {
                                                                                             ).disabledColor,
                                                                                           ),
                                                                                         ),
-                                                                                        Text(
-                                                                                          PriceConverter.convertPrice(
+                                                                                        CustomLineThroughText(
+                                                                                          text: PriceConverter.convertPrice(
                                                                                             Get.find<
                                                                                                   ItemController
                                                                                                 >()
@@ -448,7 +448,6 @@ class SpecialOfferView extends StatelessWidget {
                                                                                             color: Theme.of(
                                                                                               context,
                                                                                             ).disabledColor,
-                                                                                            decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid,
                                                                                           ),
                                                                                           textAlign: TextAlign.center,
                                                                                           textDirection: TextDirection.ltr,

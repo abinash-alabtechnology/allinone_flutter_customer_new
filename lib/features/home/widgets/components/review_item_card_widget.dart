@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:icons_plus/icons_plus.dart';
@@ -100,11 +100,10 @@ class ReviewItemCard extends StatelessWidget {
                       ]) : const SizedBox(),
 
                       Wrap(crossAxisAlignment: WrapCrossAlignment.center, alignment: WrapAlignment.start, children: [
-                        item!.discount != null && item!.discount! > 0  ? Text(
-                          PriceConverter.convertPrice(Get.find<ItemController>().getStartingPrice(item!)),
+                        item!.discount != null && item!.discount! > 0  ? CustomLineThroughText(
+                          text: PriceConverter.convertPrice(Get.find<ItemController>().getStartingPrice(item!)),
                           style: robotoRegular.copyWith(
                             fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor,
-                            decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid,
                           ),
                           textAlign: TextAlign.center,
                         ) : const SizedBox(),
@@ -252,12 +251,12 @@ class ReviewItemCard extends StatelessWidget {
 
                   Column(mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                    discount != null && discount > 0 ? Text(
-                      PriceConverter.convertPrice(
+                    discount != null && discount > 0 ? CustomLineThroughText(
+                      text: PriceConverter.convertPrice(
                         Get.find<ItemController>().getStartingPrice(item!),
                       ),
                       style: robotoRegular.copyWith(
-                        fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor, decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid,
+                        fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor,
                       ),
                       textAlign: TextAlign.center,
                     ) : const SizedBox(),
@@ -319,12 +318,12 @@ class ReviewItemCard extends StatelessWidget {
                           mainAxisAlignment: .start,
                           crossAxisAlignment: .start,
                           children: [
-                            discount != null && discount > 0 ? Text(
-                              PriceConverter.convertPrice(
+                            discount != null && discount > 0 ? CustomLineThroughText(
+                              text: PriceConverter.convertPrice(
                                 Get.find<ItemController>().getStartingPrice(item!),
                               ),
                               style: robotoRegular.copyWith(
-                                fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor, decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid,
+                                fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor,
                               ),
                               textAlign: TextAlign.center,
                             ) : const SizedBox(),
@@ -484,14 +483,13 @@ class ReviewItemCardFood extends StatelessWidget {
                             ]),
 
                         item!.discount != null && item!.discount! > 0
-                            ? Text(
-                          PriceConverter.convertPrice(
+                            ? CustomLineThroughText(
+                          text: PriceConverter.convertPrice(
                               Get.find<ItemController>()
                                   .getStartingPrice(item!)),
                           style: robotoRegular.copyWith(
                             fontSize: Dimensions.fontSizeExtraSmall,
                             color: Theme.of(context).disabledColor,
-                            decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid,
                           ),
                           textAlign: TextAlign.center,
                         )
@@ -642,8 +640,8 @@ class ReviewItemCardFood extends StatelessWidget {
                                       MainAxisAlignment.start,
                                       children: [
                                         item!.discount! > 0
-                                            ? Text(
-                                          PriceConverter
+                                            ? CustomLineThroughText(
+                                          text: PriceConverter
                                               .convertPrice(
                                             Get.find<
                                                 ItemController>()
@@ -657,9 +655,6 @@ class ReviewItemCardFood extends StatelessWidget {
                                             color: Theme.of(
                                                 context)
                                                 .disabledColor,
-                                            decoration:
-                                            TextDecoration
-                                                .lineThrough,
                                           ),
                                         )
                                             : const SizedBox(),
@@ -812,8 +807,8 @@ class ReviewItemCardFood extends StatelessWidget {
                                   MainAxisAlignment.start,
                                   children: [
                                     item!.discount! > 0
-                                        ? Text(
-                                      PriceConverter
+                                        ? CustomLineThroughText(
+                                      text: PriceConverter
                                           .convertPrice(
                                         Get.find<
                                             ItemController>()
@@ -827,9 +822,6 @@ class ReviewItemCardFood extends StatelessWidget {
                                         color: Theme.of(
                                             context)
                                             .disabledColor,
-                                        decoration:
-                                        TextDecoration
-                                            .lineThrough,
                                       ),
                                     )
                                         : const SizedBox(),

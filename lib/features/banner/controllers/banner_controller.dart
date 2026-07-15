@@ -179,43 +179,51 @@ class BannerController extends GetxController implements GetxService {
     if (_taxiBannerImageList == null || reload) {
       _taxiBannerImageList = null;
       update(); // Show shimmer
-      BannerModel? bannerModel = await bannerServiceInterface
-          .getTaxiBannerList();
-      print("Taxi Banner Response: ${bannerModel?.toJson()}");
-      _taxiBannerImageList = [];
-      _taxiBannerDataList = [];
-      if (bannerModel != null) {
-        if (bannerModel.campaigns != null) {
-          for (var campaign in bannerModel.campaigns!) {
-            _taxiBannerImageList!.add(campaign.imageFullUrl);
-            _taxiBannerDataList!.add(campaign);
-          }
-        }
-        if (bannerModel.banners != null) {
-          for (var banner in bannerModel.banners!) {
-            _taxiBannerImageList!.add(banner.imageFullUrl);
-            if (banner.item != null) {
-              _taxiBannerDataList!.add(banner.item);
-            } else if (banner.store != null) {
-              _taxiBannerDataList!.add(banner.store);
-            } else if (banner.type == 'default' || banner.link != null) {
-              _taxiBannerDataList!.add(banner.link);
-            } else {
-              _taxiBannerDataList!.add(null);
+      try {
+        BannerModel? bannerModel = await bannerServiceInterface
+            .getTaxiBannerList();
+        print("Taxi Banner Response: ${bannerModel?.toJson()}");
+        _taxiBannerImageList = [];
+        _taxiBannerDataList = [];
+        if (bannerModel != null) {
+          if (bannerModel.campaigns != null) {
+            for (var campaign in bannerModel.campaigns!) {
+              _taxiBannerImageList!.add(campaign.imageFullUrl);
+              _taxiBannerDataList!.add(campaign);
             }
           }
+          if (bannerModel.banners != null) {
+            for (var banner in bannerModel.banners!) {
+              _taxiBannerImageList!.add(banner.imageFullUrl);
+              if (banner.item != null) {
+                _taxiBannerDataList!.add(banner.item);
+              } else if (banner.store != null) {
+                _taxiBannerDataList!.add(banner.store);
+              } else if (banner.type == 'default' || banner.link != null) {
+                _taxiBannerDataList!.add(banner.link);
+              } else {
+                _taxiBannerDataList!.add(null);
+              }
+            }
+          }
+          if (ResponsiveHelper.isDesktop(Get.context) &&
+              _taxiBannerImageList!.isNotEmpty &&
+              _taxiBannerImageList!.length % 2 != 0) {
+            _taxiBannerImageList!.add(_taxiBannerImageList![0]);
+            _taxiBannerDataList!.add(_taxiBannerDataList![0]);
+          }
         }
-        if (ResponsiveHelper.isDesktop(Get.context) &&
-            _taxiBannerImageList!.isNotEmpty &&
-            _taxiBannerImageList!.length % 2 != 0) {
-          _taxiBannerImageList!.add(_taxiBannerImageList![0]);
-          _taxiBannerDataList!.add(_taxiBannerDataList![0]);
-        }
+      } catch (e) {
+        print("Error fetching taxi banners: $e");
+        _taxiBannerImageList = [];
+        _taxiBannerDataList = [];
       }
-      // if (_taxiBannerImageList!.isEmpty) {
-      //   _taxiBannerImageList!.add("https://admin.gograbx.com/storage/app/public/banner/2026-05-07-69fc3534da4f8.png");
-      //   _taxiBannerDataList!.add(null);
-      // }
+      
+      if (_taxiBannerImageList!.isEmpty) {
+        _taxiBannerImageList!.add("https://admin.allinonego.in/storage/app/public/banner/2026-05-07-69fc3534da4f8.png");
+        _taxiBannerDataList!.add(null);
+      }
+      
       print("Taxi Banner Image List: $_taxiBannerImageList");
       update();
     }

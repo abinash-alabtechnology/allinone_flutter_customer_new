@@ -1,4 +1,4 @@
-﻿import 'package:handy_allinone/util/app_constants.dart';
+import 'package:handy_allinone/util/app_constants.dart';
 import 'package:handy_allinone/common/widgets/cart_count_view.dart';
 import 'package:handy_allinone/common/widgets/custom_favourite_widget.dart';
 import 'package:handy_allinone/common/widgets/hover/on_hover.dart';
@@ -197,12 +197,11 @@ class WebItemWidget extends StatelessWidget {
                                     ),
                                     SizedBox(width: discount! > 0 ? Dimensions.paddingSizeExtraSmall : 0),
 
-                                    discount > 0 ? Text(
-                                      PriceConverter.convertPrice(item!.price),
+                                    discount > 0 ? CustomLineThroughText(
+                                      text: PriceConverter.convertPrice(item!.price),
                                       style: robotoMedium.copyWith(
                                         fontSize: Dimensions.fontSizeOverSmall,
                                         color: Theme.of(context).disabledColor,
-                                        decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid,
                                       ),
                                       textAlign: TextAlign.center, textDirection: TextDirection.ltr,
                                     ) : const SizedBox(),

@@ -1,9 +1,10 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:handy_allinone/features/handyman/services/models/handyman_service_model.dart';
 import 'package:handy_allinone/features/handyman/services/controllers/handyman_home_controller.dart';
 import 'package:handy_allinone/util/styles.dart';
+import 'package:handy_allinone/helper/price_converter.dart';
 
 class ServiceOptionsBottomSheet extends StatelessWidget {
   final HandymanServiceModel service;
@@ -338,12 +339,11 @@ class ServiceOptionsBottomSheet extends StatelessWidget {
                                         ),
                                         if (option.originalPrice > option.discountedPrice) ...[
                                           const Gap(4),
-                                          Text(
-                                            '₹${option.originalPrice}',
+                                          CustomLineThroughText(
+                                            text: '₹${option.originalPrice}',
                                             style: robotoRegular.copyWith(
                                               fontSize: 12,
                                               color: Colors.black54,
-                                              decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid,
                                             ),
                                             textAlign: TextAlign.center,
                                           ),
@@ -603,12 +603,11 @@ class ServiceOptionsBottomSheet extends StatelessWidget {
                               ),
                               if (totalOriginal > totalDiscounted) ...[
                                 const Gap(4),
-                                Text(
-                                  '₹$totalOriginal',
+                                CustomLineThroughText(
+                                  text: '₹$totalOriginal',
                                   style: robotoRegular.copyWith(
                                     fontSize: 12,
                                     color: Colors.black54,
-                                    decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid,
                                   ),
                                   textAlign: TextAlign.center,
                                 ),

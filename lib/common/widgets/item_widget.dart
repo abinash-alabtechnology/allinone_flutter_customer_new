@@ -934,12 +934,11 @@ class ItemWidgetStore extends StatelessWidget {
                                           ),
                                           if (discount != null && discount > 0) ...[
                                             SizedBox(width: 4.w),
-                                            Text(
-                                              PriceConverter.convertPrice(item!.price),
+                                            CustomLineThroughText(
+                                              text: PriceConverter.convertPrice(item!.price),
                                               style: robotoMedium.copyWith(
                                                 fontSize: 10.sp,
                                                 color: Colors.grey,
-                                                decoration: TextDecoration.lineThrough, decorationThickness: 2.0, decorationStyle: TextDecorationStyle.solid,
                                               ),
                                               textAlign: TextAlign.center,
                                             ),
