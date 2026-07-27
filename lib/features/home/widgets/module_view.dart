@@ -170,6 +170,18 @@ class ModuleView extends StatelessWidget {
                     },
                   ];
 
+                  final displayModules = splashController.moduleList!.where((m) {
+                    String title = m.moduleName ?? '';
+                    String mType = m.moduleType ?? '';
+                    bool isTaxi = title.toLowerCase().contains('taxi') ||
+                        title.toLowerCase().contains('ride') ||
+                        title.toLowerCase().contains('cab') ||
+                        title.toLowerCase().contains('auto') ||
+                        mType == 'taxi' ||
+                        mType == AppConstants.taxi;
+                    return !isTaxi;
+                  }).toList();
+
                   return GridView.builder(
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
@@ -178,12 +190,12 @@ class ModuleView extends StatelessWidget {
                       mainAxisExtent: 85,
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    itemCount: splashController.moduleList!.length + extraModules.length,
+                    itemCount: displayModules.length + extraModules.length,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemBuilder: (context, index) {
-                      if (index < splashController.moduleList!.length) {
-                        final module = splashController.moduleList![index];
+                      if (index < displayModules.length) {
+                        final module = displayModules[index];
                         String title = module.moduleName ?? '';
                         String subtitle = '';
                         Color bgColor = Colors.white;
@@ -211,12 +223,6 @@ class ModuleView extends StatelessWidget {
                           iconColor = const Color(0xFFEA580C);
                           iconData = Icons.restaurant_outlined;
                           localAsset = 'assets/image/foodicon.png';
-                        } else if (title.toLowerCase().contains('taxi') || title.toLowerCase().contains('ride') || title.toLowerCase().contains('cab') || title.toLowerCase().contains('auto') || mType == 'taxi' || mType == AppConstants.taxi) {
-                          subtitle = 'Book Rides Instantly';
-                          bgColor = const Color(0xFF14B8A6); // Teal 500
-                          iconColor = const Color(0xFF0D9488);
-                          iconData = Icons.local_taxi_outlined;
-                          localAsset = 'assets/image/taxiicon1.png';
                         } else if (title.toLowerCase().contains('parcel') || mType == 'parcel') {
                           subtitle = 'Send & Track';
                           bgColor = const Color(0xFFEF4444); // Red 500
@@ -253,78 +259,15 @@ class ModuleView extends StatelessWidget {
                             splashController.showBottomNavBar();
                             scrollController.animateTo(0, duration: const Duration(milliseconds: 400), curve: Curves.easeIn);
                             
-                            bool isTaxiModule = mType == AppConstants.taxi || title.toLowerCase().contains('taxi') || title.toLowerCase().contains('ride');
-                            
-                            if (isTaxiModule) {
-                              // For taxi, manually set the module to avoid switchModule's navigation to index 0
-                              splashController.setModule(splashController.moduleList![index]);
-                            } else {
-                              splashController.switchModule(index, true);
-                            }
-                            
-                            // If it's a taxi module, implement the ride flow
-                            if (mType == AppConstants.taxi || title.toLowerCase().contains('taxi') || title.toLowerCase().contains('ride')) {
-                              var ongoingBooking = await SharedService.getOngoingBooking();
-                              // Fallback to basic booking info if ongoing (with driver) is null
-                              ongoingBooking ??= await SharedService.getBookingIdFromPrefs();
-
-                              if (ongoingBooking != null) {
-                                int bookingId = ongoingBooking['bookingId'];
-                                int? driverId = ongoingBooking['driverId']; // Can be null for pending
-                                int userId = ongoingBooking['userId'];
-                                String otp = ongoingBooking['otp'];
-
-                                final ref = FirebaseDatabase.instanceFor(
-                                  app: Firebase.app(),
-                                  databaseURL: AppConstants.firebaseDBURL,
-                                ).ref('bookings/$bookingId');
-                                
-                                final snapshot = await ref.get();
-                                if (snapshot.exists && snapshot.value is Map) {
-                                  final bookingData = snapshot.value as Map;
-                                  String status = bookingData['ride_status']?.toString() ?? '';
-                                  if (['accepted', 'arrived', 'in_progress', 'dropped'].contains(status)) {
-                                    int resolvedDriverId = 0;
-                                    final driverIdsMap = bookingData['driver_ids'];
-                                    if (driverIdsMap is Map && driverIdsMap.isNotEmpty) {
-                                      final rawDriverKey = driverIdsMap.keys.first;
-                                      resolvedDriverId = int.tryParse(
-                                        rawDriverKey.replaceAll(RegExp(r'[^0-9]'), ''),
-                                      ) ?? 0;
-                                    }
-                                    if (resolvedDriverId != 0) {
-                                      await SharedService.saveOngoingBooking(
-                                        bookingId,
-                                        resolvedDriverId,
-                                        userId,
-                                        otp,
-                                      );
-                                    }
-                                    Get.to(() => RideConfirmedScreen(
-                                      Bookingid: bookingId,
-                                      driverid: resolvedDriverId != 0 ? resolvedDriverId : (driverId ?? 0),
-                                      userId: userId,
-                                      otp: otp,
-                                    ));
-                                    return;
-                                  } else if (status == 'pending') {
-                                    Get.to(() => Taxihome(
-                                      showBottomSheet: true,
-                                      bookingId: bookingId,
-                                      userId: userId,
-                                      otp: otp,
-                                    ));
-                                    return;
-                                  }
-                                }
-                              }
-                              Get.offAllNamed(RouteHelper.getMainRoute('cart')); // 'cart' maps to index 2 in RouteHelper
+                            int originalIndex = splashController.moduleList!.indexOf(module);
+                            if (originalIndex != -1) {
+                              splashController.switchModule(originalIndex, true);
                             }
                           },
                         );
                       } else {
                         // Extra Modules Logic
-                        int extraIndex = index - splashController.moduleList!.length;
+                        int extraIndex = index - displayModules.length;
                         final extra = extraModules[extraIndex];
 
                         return _buildModuleCard(

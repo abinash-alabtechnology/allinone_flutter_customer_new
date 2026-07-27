@@ -144,9 +144,11 @@ class _ForgetPassScreenState extends State<ForgetPassScreen> {
                       return GetBuilder<AuthController>(builder: (authController) {
                         return CustomButton(
                           radius: Dimensions.radiusDefault,
-                          buttonText: 'request_otp'.tr,
+                          buttonText: authController.otpResendSeconds > 0
+                              ? '${'request_otp'.tr} (${authController.otpResendSeconds}s)'
+                              : 'request_otp'.tr,
                           isLoading: verificationController.isLoading || authController.isLoading,
-                          onPressed: () => _onPressedForgetPass(_countryDialCode!),
+                          onPressed: authController.otpResendSeconds > 0 ? null : () => _onPressedForgetPass(_countryDialCode!),
                         );
                       });
                     }),
@@ -230,6 +232,7 @@ class _ForgetPassScreenState extends State<ForgetPassScreen> {
       if (!phoneValid.isValid && !isEmail) {
         showCustomSnackBar('invalid_phone_number'.tr);
       } else {
+        Get.find<AuthController>().startOtpTimer(60);
         Get.find<VerificationController>().forgetPassword(email: email, phone: numberWithCountryCode).then((status) async {
           if (status.isSuccess) {
             if(Get.find<SplashController>().configModel!.centralizeLoginSetup!.phoneVerificationStatus! && Get.find<SplashController>().configModel!.firebaseOtpVerification!) {

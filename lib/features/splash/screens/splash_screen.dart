@@ -10,6 +10,7 @@ import 'package:handy_allinone/features/splash/controllers/splash_controller.dar
 import 'package:handy_allinone/features/notification/domain/models/notification_body_model.dart';
 import 'package:handy_allinone/helper/address_helper.dart';
 import 'package:handy_allinone/helper/auth_helper.dart';
+import 'package:handy_allinone/util/dimensions.dart';
 import 'package:handy_allinone/util/images.dart';
 import 'package:handy_allinone/common/widgets/no_internet_screen.dart';
 import 'package:flutter/material.dart';
@@ -192,102 +193,95 @@ class SplashScreenState extends State<SplashScreen> {
       // backgroundColor: backgroundColor,
       body: GetBuilder<SplashController>(
         builder: (splashController) {
-          return Center(
-            child: splashController.hasConnection
-                ? Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0.8, end: 1.0),
-                  duration: const Duration(seconds: 2),
-                  curve: Curves.easeInOut,
-                  builder: (context, scale, child) {
-                    return Transform.scale(
-                      scale: scale,
-                      child: Opacity(
-                        opacity: scale,
-                        child: child,
+          return splashController.hasConnection
+              ? Stack(
+                  children: [
+                    Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TweenAnimationBuilder<double>(
+                            tween: Tween(begin: 0.8, end: 1.0),
+                            duration: const Duration(seconds: 2),
+                            curve: Curves.easeInOut,
+                            builder: (context, scale, child) {
+                              return Transform.scale(
+                                scale: scale,
+                                child: Opacity(
+                                  opacity: scale,
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Center(
+                                  child: LayoutBuilder(
+                                    builder: (context, constraints) {
+                                      const double maxImageContainerWidth = 400;
+
+                                      final double effectiveWidth =
+                                      constraints.maxWidth > maxImageContainerWidth
+                                          ? maxImageContainerWidth
+                                          : constraints.maxWidth;
+
+                                      double imageWidth;
+                                      if (effectiveWidth <= 360) {
+                                        imageWidth = effectiveWidth * 0.70;
+                                      } else if (effectiveWidth <= 480) {
+                                        imageWidth = effectiveWidth * 0.75;
+                                      } else if (effectiveWidth <= 720) {
+                                        imageWidth = effectiveWidth * 0.80;
+                                      } else {
+                                        imageWidth = effectiveWidth * 0.85;
+                                      }
+
+                                      return ConstrainedBox(
+                                        constraints: const BoxConstraints(
+                                            maxWidth: maxImageContainerWidth),
+                                        child: CustomAssetImageWidget(
+                                          Images.logotransparent,
+                                          width: imageWidth,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  'Believe in yourself!',
+                                    style: robotoBold.copyWith(
+                                      fontSize: 18,
+                                      color: const Color(0xE6FFFFFF),
+                                      fontWeight: FontWeight.bold
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                    );
-                  },
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Center(
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            const double maxImageContainerWidth = 400;
-
-                            final double effectiveWidth =
-                            constraints.maxWidth > maxImageContainerWidth
-                                ? maxImageContainerWidth
-                                : constraints.maxWidth;
-
-                            double imageWidth;
-                            if (effectiveWidth <= 360) {
-                              imageWidth = effectiveWidth * 0.70;
-                            } else if (effectiveWidth <= 480) {
-                              imageWidth = effectiveWidth * 0.75;
-                            } else if (effectiveWidth <= 720) {
-                              imageWidth = effectiveWidth * 0.80;
-                            } else {
-                              imageWidth = effectiveWidth * 0.85;
-                            }
-
-                            return ConstrainedBox(
-                              constraints: const BoxConstraints(
-                                  maxWidth: maxImageContainerWidth),
-                              child: CustomAssetImageWidget(
-                                Images.logotransparent,
-                                width: imageWidth,
-                                // color:Colors.white
-                              ),
-                            );
-                          },
+                    ),
+                    Positioned(
+                      bottom: 25,
+                      left: 0,
+                      right: 0,
+                      child: Text(
+                        "App Version: ${AppConstants.devAppVersion}",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: Dimensions.fontSizeDefault,
+                          color: Theme.of(context).hintColor,
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      Text(
-                        'Believe in yourself!',
-                          style: robotoBold.copyWith(
-                            fontSize: 18,
-                            color: const Color(0xE6FFFFFF),
-                            fontWeight: FontWeight.bold
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      // Center(
-                      //   child: LayoutBuilder(
-                      //     builder: (context, constraints) {
-                      //       final maxWidth = constraints.maxWidth;
-                      //
-                      //       double imageWidth;
-                      //       if (maxWidth <= 360) {
-                      //         imageWidth = maxWidth * 0.70;
-                      //       } else if (maxWidth <= 480) {
-                      //         imageWidth = maxWidth * 0.75;
-                      //       } else if (maxWidth <= 720) {
-                      //         imageWidth = maxWidth * 0.80;
-                      //       } else {
-                      //         imageWidth = maxWidth * 0.85;
-                      //       }
-                      //
-                      //       return CustomAssetImageWidget(
-                      //         Images.logotransparent,
-                      //         width: imageWidth,
-                      //       );
-                      //     },
-                      //   ),
-                      // ),
-                    ],
-                  ),
-                ),
-              ],
-            )
-                : NoInternetScreen(
-              child: SplashScreen(body: widget.body),
-            ),
-          );
+                    ),
+                  ],
+                )
+              : NoInternetScreen(
+                  child: SplashScreen(body: widget.body),
+                );
         },
       ),
     );

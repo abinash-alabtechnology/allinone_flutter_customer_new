@@ -51,11 +51,13 @@ class OtpLoginWidget extends StatelessWidget {
           const SizedBox(height: Dimensions.paddingSizeLarge),
 
           CustomButton(
-            buttonText: 'get_otp'.tr,
+            buttonText: authController.otpResendSeconds > 0
+                ? '${'get_otp'.tr} (${authController.otpResendSeconds}s)'
+                : 'get_otp'.tr,
             radius: Dimensions.radiusDefault,
             isBold: isDesktop ? false : true,
             isLoading: authController.isLoading,
-            onPressed: onClickLoginButton,
+            onPressed: authController.otpResendSeconds > 0 ? null : onClickLoginButton,
             fontSize: isDesktop ? Dimensions.fontSizeSmall : Dimensions.fontSizeDefault,
           ),
           const SizedBox(height: Dimensions.paddingSizeLarge),
@@ -139,11 +141,13 @@ class OtpLoginWidgetApp extends StatelessWidget {
 
                 CustomButton(
                   color: Colors.black,
-                  buttonText: 'get_otp'.tr,
+                  buttonText: authController.otpResendSeconds > 0
+                      ? '${'get_otp'.tr} (${authController.otpResendSeconds}s)'
+                      : 'get_otp'.tr,
                   radius: Dimensions.radiusDefault,
                   isBold: isDesktop ? false : true,
                   isLoading: authController.isLoading,
-                  onPressed: onClickLoginButton,
+                  onPressed: authController.otpResendSeconds > 0 ? null : onClickLoginButton,
                   fontSize: isDesktop ? Dimensions.fontSizeSmall : Dimensions.fontSizeDefault,
                 ),
                 const SizedBox(height: Dimensions.paddingSizeLarge),

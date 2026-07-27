@@ -360,6 +360,7 @@ if(authController.acceptTerms){
         showCustomSnackBar('invalid_phone_number'.tr);
       } else {
 print("fresrff ${loginType.name} ");
+        authController.startOtpTimer(60);
         authController.otpLogin(phone: numberWithCountryCode, otp: '', loginType: loginType.name, verified: '', alreadyInApp: widget.backFromThis).then((response) {
           if (response.isSuccess) {
             _processOtpSuccessSetup(response, authController, phone, countryDialCode);

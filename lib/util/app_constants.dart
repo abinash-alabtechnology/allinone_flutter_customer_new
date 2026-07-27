@@ -35,6 +35,7 @@ class AppConstants {
 
   static const String appName = 'Handy';
   static const double appVersion = 3.3;
+  static const String devAppVersion = 'DEV -3.6.4';
   static const String searchimage = '/public/assets/admin/customer_search_img/';
   static const String fontFamily = 'Roboto';
   static const bool payInWevView = false;
