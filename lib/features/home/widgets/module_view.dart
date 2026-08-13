@@ -36,6 +36,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:handy_allinone/Taxi/Taxi_home.dart';
 import 'package:handy_allinone/Taxi/ridesummary.dart';
 import 'package:handy_allinone/Taxi/sharedservice.dart';
+import 'package:handy_allinone/features/handyman/services/screens/handyman_services_screen.dart';
 
 class ModuleView extends StatelessWidget {
   final ScrollController scrollController;
@@ -143,23 +144,30 @@ class ModuleView extends StatelessWidget {
           enabled: splashController.moduleList == null,
           child: (splashController.moduleList != null && splashController.moduleList!.isNotEmpty)
               ? (() {
+                  bool isHandymanActive = splashController.moduleList!.any((m) {
+                    String title = m.moduleName?.toLowerCase() ?? '';
+                    String mType = m.moduleType?.toLowerCase() ?? '';
+                    return title.contains('handyman') || mType.contains('handyman');
+                  });
+
                   final List<Map<String, dynamic>> extraModules = [
                     {
-                      'title': 'Rental',
+                      'title': 'Ride',
                       'subtitle': 'Cars, bikes & commercial...',
                       'imageAsset': Images.rentalIcon,
                       'color': const Color(0xFF3B82F6), // Blue 500
                       'iconColor': const Color(0xFF2563EB),
                       'isComingSoon': false,
                     },
-                    {
-                      'title': 'Handyman',
-                      'subtitle': 'Instant gratification, delivered to your door.',
-                      'imageAsset': Images.handymanIcon,
-                      'color': const Color(0xFF10B981), // Emerald 500
-                      'iconColor': const Color(0xFF059669),
-                      'isComingSoon': false,
-                    },
+                    if (isHandymanActive)
+                      {
+                        'title': 'Handyman',
+                        'subtitle': 'Instant gratification, delivered to your door.',
+                        'imageAsset': Images.handymanIcon,
+                        'color': const Color(0xFF10B981), // Emerald 500
+                        'iconColor': const Color(0xFF059669),
+                        'isComingSoon': false,
+                      },
                     {
                       'title': 'Utility',
                       'subtitle': 'Coming soon...',
@@ -171,15 +179,16 @@ class ModuleView extends StatelessWidget {
                   ];
 
                   final displayModules = splashController.moduleList!.where((m) {
-                    String title = m.moduleName ?? '';
-                    String mType = m.moduleType ?? '';
-                    bool isTaxi = title.toLowerCase().contains('taxi') ||
-                        title.toLowerCase().contains('ride') ||
-                        title.toLowerCase().contains('cab') ||
-                        title.toLowerCase().contains('auto') ||
+                    String title = m.moduleName?.toLowerCase() ?? '';
+                    String mType = m.moduleType?.toLowerCase() ?? '';
+                    bool isTaxi = title.contains('taxi') ||
+                        title.contains('ride') ||
+                        title.contains('cab') ||
+                        title.contains('auto') ||
                         mType == 'taxi' ||
                         mType == AppConstants.taxi;
-                    return !isTaxi;
+                    bool isHandyman = title.contains('handyman') || mType.contains('handyman');
+                    return !isTaxi && !isHandyman;
                   }).toList();
 
                   return GridView.builder(
@@ -278,7 +287,7 @@ class ModuleView extends StatelessWidget {
                           color: extra['color'],
                           iconColor: extra['iconColor'],
                           onTap: extra['title'] == 'Handyman'
-                              ? () => Get.toNamed(RouteHelper.getHandymanRoute())
+                              ? () => Get.to(() => const HandymanServicesScreen())
                               : extra['isComingSoon'] == true
                                   ? () {}
                                   : () async {

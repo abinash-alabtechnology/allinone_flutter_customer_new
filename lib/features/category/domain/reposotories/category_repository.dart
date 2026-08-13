@@ -32,34 +32,70 @@ class CategoryRepository implements CategoryRepositoryInterface {
 
   Future<List<CategoryModel>?> _getCategoryList(bool allCategory, DataSourceEnum source) async {
     List<CategoryModel>? categoryList;
-    Map<String, String>? header = allCategory ? {
-      'Content-Type': 'application/json; charset=UTF-8',
-      AppConstants.localizationKey: Get.find<LocalizationController>().locale.languageCode,
-    } : null;
+    Map<String, String> reqHeaders = Map.from(apiClient.getHeader());
+    reqHeaders['Content-Type'] = 'application/json; charset=UTF-8';
 
-    Map<String, String>? cacheHeader = header ?? apiClient.getHeader();
+    int? activeModuleId;
+    if (Get.find<SplashController>().module != null && Get.find<SplashController>().module!.id != null) {
+      activeModuleId = Get.find<SplashController>().module!.id;
+    } else {
+      final handymanMod = Get.find<SplashController>().moduleList?.firstWhereOrNull((m) {
+        String title = m.moduleName?.toLowerCase() ?? '';
+        String mType = m.moduleType?.toLowerCase() ?? '';
+        return title.contains('handyman') || mType.contains('handyman');
+      });
+      activeModuleId = handymanMod?.id;
+    }
 
-    String cacheId = AppConstants.categoryUri + Get.find<SplashController>().module!.id!.toString();
+    if (activeModuleId != null) {
+      reqHeaders[AppConstants.moduleId] = activeModuleId.toString();
+    }
+
+    String cacheId = '${AppConstants.categoryUri}_${activeModuleId ?? 0}';
 
     switch(source) {
       case DataSourceEnum.client:
-        Response response = await apiClient.getData(AppConstants.categoryUri, headers: header);
+        Response response = await apiClient.getData(AppConstants.categoryUri, headers: reqHeaders);
         if (response.statusCode == 200) {
           categoryList = [];
-          response.body.forEach((category) {
-            categoryList!.add(CategoryModel.fromJson(category));
-          });
-          LocalClient.organize(DataSourceEnum.client, cacheId, jsonEncode(response.body), cacheHeader);
-
+          dynamic rawData;
+          if (response.body is Map && response.body.containsKey('categories')) {
+            rawData = response.body['categories'];
+          } else if (response.body is List) {
+            rawData = response.body;
+          }
+          if (rawData is List) {
+            for (var category in rawData) {
+              CategoryModel cat = CategoryModel.fromJson(category);
+              if (activeModuleId == null || cat.moduleId == null || cat.moduleId == activeModuleId) {
+                categoryList.add(cat);
+              }
+            }
+          }
+          LocalClient.organize(DataSourceEnum.client, cacheId, jsonEncode(response.body), reqHeaders);
         }
 
       case DataSourceEnum.local:
         String? cacheResponseData = await LocalClient.organize(DataSourceEnum.local, cacheId, null, null);
         if(cacheResponseData != null) {
           categoryList = [];
-          jsonDecode(cacheResponseData).forEach((category) {
-            categoryList!.add(CategoryModel.fromJson(category));
-          });
+          try {
+            dynamic decoded = jsonDecode(cacheResponseData);
+            dynamic rawData;
+            if (decoded is Map && decoded.containsKey('categories')) {
+              rawData = decoded['categories'];
+            } else if (decoded is List) {
+              rawData = decoded;
+            }
+            if (rawData is List) {
+              for (var category in rawData) {
+                CategoryModel cat = CategoryModel.fromJson(category);
+                if (activeModuleId == null || cat.moduleId == null || cat.moduleId == activeModuleId) {
+                  categoryList.add(cat);
+                }
+              }
+            }
+          } catch (_) {}
         }
     }
 
@@ -78,7 +114,12 @@ class CategoryRepository implements CategoryRepositoryInterface {
 
   Future<ItemModel?> _getCategoryItemList(String? categoryID, int offset, String type) async {
     ItemModel? categoryItem;
-    Response response = await apiClient.getData('${AppConstants.categoryItemUri}$categoryID?limit=10&offset=$offset&type=$type');
+    Map<String, String> reqHeaders = Map.from(apiClient.getHeader());
+    reqHeaders['Content-Type'] = 'application/json; charset=UTF-8';
+    if (Get.find<SplashController>().module != null && Get.find<SplashController>().module!.id != null) {
+      reqHeaders[AppConstants.moduleId] = Get.find<SplashController>().module!.id!.toString();
+    }
+    Response response = await apiClient.getData('${AppConstants.categoryItemUri}$categoryID?limit=50&offset=$offset&type=$type', headers: reqHeaders);
     if (response.statusCode == 200) {
       categoryItem = ItemModel.fromJson(response.body);
     }

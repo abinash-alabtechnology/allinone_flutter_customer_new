@@ -21,6 +21,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:handy_allinone/features/dashboard/widgets/bottom_nav_item_widget.dart';
 import 'package:handy_allinone/features/handyman/services/screens/handyman_bookings_screen.dart';
 import 'package:handy_allinone/features/handyman/services/screens/handyman_checkout_screen.dart';
+import 'package:handy_allinone/features/home/widgets/banner_view.dart';
+import 'package:handy_allinone/features/banner/controllers/banner_controller.dart';
+import 'package:handy_allinone/features/category/controllers/category_controller.dart';
+import 'package:handy_allinone/common/widgets/custom_image.dart';
+import 'package:shimmer/shimmer.dart';
 
 
 class HandymanServicesScreen extends StatefulWidget {
@@ -147,25 +152,6 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
   double _scrollOffset = 0.0;
   int _currentBannerIndex = 0;
   Timer? _bannerTimer;
-
-  final List<Map<String, String>> _promoBanners = [
-    {
-      'title': '20% off on your\nfirst AC servicing',
-      'subtitle': 'Up to \u20B9100 off',
-      'image': Images.handymanAcMechanicNoBg,
-    },
-    {
-      'title': '20% off on your\nfirst Electrician service',
-      'subtitle': 'Up to \u20B9100 off',
-      'image': Images.handymanElectricianBanner,
-    },
-    {
-      'title': '20% off on your\nfirst Painting service',
-      'subtitle': 'Up to \u20B9100 off',
-      'image': Images.handymanPainterBanner,
-    },
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -174,11 +160,17 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
     if (!Get.isRegistered<HandymanHomeController>()) {
       Get.put(HandymanHomeController(), permanent: false);
     }
+    Get.find<BannerController>().getBannerList(true);
+    Get.find<CategoryController>().getCategoryList(true);
     _bannerTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
       if (mounted) {
-        setState(() {
-          _currentBannerIndex = (_currentBannerIndex + 1) % _promoBanners.length;
-        });
+        final bannerController = Get.find<BannerController>();
+        final bannerCount = bannerController.bannerList?.length ?? 0;
+        if (bannerCount > 0) {
+          setState(() {
+            _currentBannerIndex = (_currentBannerIndex + 1) % bannerCount;
+          });
+        }
       }
     });
   }
@@ -311,71 +303,37 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
               ),
             ),
             Expanded(
-              child: AnimatedTextKit(
-                repeatForever: true,
-                pause: const Duration(milliseconds: 1000),
-                animatedTexts: [
-                  TypewriterAnimatedText(
-                    "'AC service'",
-                    speed: const Duration(milliseconds: 80),
-                    cursor: '',
-                    textStyle: GoogleFonts.robotoMono(
-                      fontSize: 13,
-                      color: Colors.grey.shade600,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  TypewriterAnimatedText(
-                    "'Painting'",
-                    speed: const Duration(milliseconds: 80),
-                    cursor: '',
-                    textStyle: GoogleFonts.robotoMono(
-                      fontSize: 13,
-                      color: Colors.grey.shade600,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  TypewriterAnimatedText(
-                    "'Cleaning'",
-                    speed: const Duration(milliseconds: 80),
-                    cursor: '',
-                    textStyle: GoogleFonts.robotoMono(
-                      fontSize: 13,
-                      color: Colors.grey.shade600,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  TypewriterAnimatedText(
-                    "'Salon & Spa'",
-                    speed: const Duration(milliseconds: 80),
-                    cursor: '',
-                    textStyle: GoogleFonts.robotoMono(
-                      fontSize: 13,
-                      color: Colors.grey.shade600,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  TypewriterAnimatedText(
-                    "'Electrician'",
-                    speed: const Duration(milliseconds: 80),
-                    cursor: '',
-                    textStyle: GoogleFonts.robotoMono(
-                      fontSize: 13,
-                      color: Colors.grey.shade600,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  TypewriterAnimatedText(
-                    "'InstaHelp'",
-                    speed: const Duration(milliseconds: 80),
-                    cursor: '',
-                    textStyle: GoogleFonts.robotoMono(
-                      fontSize: 13,
-                      color: Colors.grey.shade600,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
+              child: GetBuilder<CategoryController>(
+                builder: (categoryController) {
+                  List<String> searchWords = [];
+                  if (categoryController.categoryList != null && categoryController.categoryList!.isNotEmpty) {
+                    searchWords = categoryController.categoryList!
+                        .map((c) => "'${c.name ?? ''}'")
+                        .where((name) => name.length > 2)
+                        .toList();
+                  }
+                  if (searchWords.isEmpty) {
+                    searchWords = ["'AC Service'", "'Beauty Salon'", "'Plumbing'", "'Electrical'", "'Cleaning'"];
+                  }
+
+                  return AnimatedTextKit(
+                    key: ValueKey(searchWords.join(',')),
+                    repeatForever: true,
+                    pause: const Duration(milliseconds: 1000),
+                    animatedTexts: searchWords.map((word) {
+                      return TypewriterAnimatedText(
+                        word,
+                        speed: const Duration(milliseconds: 80),
+                        cursor: '',
+                        textStyle: GoogleFonts.robotoMono(
+                          fontSize: 13,
+                          color: Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      );
+                    }).toList(),
+                  );
+                },
               ),
             ),
           ],
@@ -389,70 +347,6 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
   Widget build(BuildContext context) {
     final double maxHeaderHeight = MediaQuery.of(context).padding.top + 240;
     final double minHeaderHeight = MediaQuery.of(context).padding.top + 70;
-
-    final List<Map<String, dynamic>> handymanServices = [
-      {
-        'title': 'InstaHelp',
-        'image': Images.handymanInstaHelp,
-        'badge': null,
-      },
-      {
-        'title': "Women's\nSalon & Spa",
-        'image': Images.handymanWomenSalon,
-        'badge': null,
-      },
-      {
-        'title': "Men's Salon\n& Massage",
-        'image': Images.handymanMenSalon,
-        'badge': null,
-      },
-      {
-        'title': 'Cleaning &\nPest Control',
-        'image': Images.handymanCleaning,
-        'badge': null,
-      },
-      {
-        'title': 'Painting\n& Water - \nproofing',
-        'image': Images.handymanPainting,
-        'badge': null,
-      },
-      {
-        'title': 'AC &\nAppliance\nRepair',
-        'image': Images.handymanAcRepair,
-        'badge': null,
-      },
-      {
-        'title': 'Electrician,\nPlumber &\nCarpenter',
-        'image': Images.handymanTools,
-        'badge': null,
-      },
-      {
-        'title': 'CCTV &\nSmart Home',
-        'image': Images.handymanCctv,
-        'badge': null,
-      },
-
-      {
-        'title': 'Gardening &\nLawn Care',
-        'image': Images.handymanGardening,
-        'badge': null,
-      },
-      {
-        'title': 'Home\nRenovation',
-        'image': Images.handymanRenovation,
-        'badge': null,
-      },
-      {
-        'title': 'TV Mount\n& Setup',
-        'image': Images.handymanTvmount,
-        'badge': null,
-      },
-      {
-        'title': 'Locksmith &\nKey Maker',
-        'image': Images.handymanLocksmith,
-        'badge': null,
-      },
-    ];
 
     return Stack(
       children: [
@@ -472,93 +366,180 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Categories Title
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
-                        child: Text(
-                          'Categories',
-                          style: robotoRegular.copyWith(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF1F2937),
-                          ),
-                        ),
-                      ),
+                      // Dynamic API Categories Grid
+                      GetBuilder<CategoryController>(
+                        builder: (categoryController) {
+                          if (categoryController.categoryList == null || categoryController.isLoadingCategories) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+                                  child: Text(
+                                    'categories'.tr,
+                                    style: robotoRegular.copyWith(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                      color: const Color(0xFF1F2937),
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                                  child: GridView.builder(
+                                    shrinkWrap: true,
+                                    physics: const NeverScrollableScrollPhysics(),
+                                    itemCount: 8,
+                                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 4,
+                                      crossAxisSpacing: 10,
+                                      mainAxisSpacing: 10,
+                                      childAspectRatio: 0.85,
+                                    ),
+                                    itemBuilder: (context, index) {
+                                      return Shimmer.fromColors(
+                                        baseColor: Colors.grey[300]!,
+                                        highlightColor: Colors.grey[100]!,
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            );
+                          }
 
-                      // Responsive vertical grid (adapts to screen width)
-                      LayoutBuilder(
-                        builder: (context, constraints) {
-                          final double screenW = constraints.maxWidth;
-                          // Column count: 4 → 6 → 8 based on width
-                          final int cols = screenW >= 800
-                              ? 8
-                              : screenW >= 520
-                                  ? 6
-                                  : 4;
-                          const double hPad = 16.0;
-                          const double spacing = 10.0;
-                          final double cellW =
-                              (screenW - hPad * 2 - spacing * (cols - 1)) / cols;
-                          // Keep cells roughly square
-                          final double cellH = cellW * 1.15;
-                          final double imgSz = (cellW * 0.46).clamp(28.0, 56.0);
-                          final double fs = (cellW * 0.10).clamp(8.5, 11.5);
-                          final double radius = (cellW * 0.10).clamp(8.0, 14.0);
+                          if (categoryController.categoryList!.isEmpty) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+                                  child: Text(
+                                    'categories'.tr,
+                                    style: robotoRegular.copyWith(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                      color: const Color(0xFF1F2937),
+                                    ),
+                                  ),
+                                ),
+                                Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(24.0),
+                                    child: Text(
+                                      'no_category_found'.tr,
+                                      style: robotoRegular.copyWith(color: Theme.of(context).disabledColor),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          }
 
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: hPad),
-                            child: GridView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: handymanServices.length,
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: cols,
-                                crossAxisSpacing: spacing,
-                                mainAxisSpacing: spacing,
-                                childAspectRatio: cellW / cellH,
-                              ),
-                              itemBuilder: (context, index) {
-                                final service = handymanServices[index];
-                                final String title = service['title'];
-                                final String? imagePath = service['image'];
-                                final String? badgeText = service['badge'];
+                          final categories = categoryController.categoryList!;
+                          final int displayCount = categories.length > 12 ? 12 : categories.length;
 
-                                return InkWell(
-                                  onTap: () {
-                                    Get.toNamed(
-                                      RouteHelper.getHandymanSubCategoriesRoute(),
-                                      arguments: {
-                                        'category': title.replaceAll('\n', ' ')
-                                      },
-                                    );
-                                  },
-                                  borderRadius: BorderRadius.circular(radius),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFF9FAFB),
-                                      borderRadius:
-                                          BorderRadius.circular(radius),
-                                      border: Border.all(
-                                        color: const Color(0xFFF3F4F6),
-                                        width: 1,
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'categories'.tr,
+                                      style: robotoRegular.copyWith(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700,
+                                        color: const Color(0xFF1F2937),
                                       ),
                                     ),
-                                    child: Stack(
-                                      alignment: Alignment.center,
-                                      children: [
-                                        Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
+                                    if (categories.length > 12)
+                                      InkWell(
+                                        onTap: () => Get.toNamed(RouteHelper.getCategoryRoute()),
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                          child: Text(
+                                            'view_all'.tr,
+                                            style: robotoMedium.copyWith(
+                                              fontSize: 14,
+                                              color: Theme.of(context).primaryColor,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              LayoutBuilder(
+                                builder: (context, constraints) {
+                                  final double screenW = constraints.maxWidth;
+                                  final int cols = screenW >= 800
+                                      ? 8
+                                      : screenW >= 520
+                                          ? 6
+                                          : 4;
+                                  const double hPad = 16.0;
+                                  const double spacing = 10.0;
+                                  final double cellW = (screenW - hPad * 2 - spacing * (cols - 1)) / cols;
+                                  final double cellH = cellW * 1.15;
+                                  final double imgSz = (cellW * 0.46).clamp(28.0, 56.0);
+                                  final double fs = (cellW * 0.10).clamp(8.5, 11.5);
+                                  final double radius = (cellW * 0.10).clamp(8.0, 14.0);
+
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: hPad),
+                                    child: GridView.builder(
+                                      shrinkWrap: true,
+                                      physics: const NeverScrollableScrollPhysics(),
+                                      itemCount: displayCount,
+                                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: cols,
+                                        crossAxisSpacing: spacing,
+                                        mainAxisSpacing: spacing,
+                                        childAspectRatio: cellW / cellH,
+                                      ),
+                                  itemBuilder: (context, index) {
+                                    final category = categories[index];
+                                    final String title = category.name ?? '';
+                                    final String? imageUrl = category.imageFullUrl;
+
+                                    return InkWell(
+                                      onTap: () {
+                                        Get.toNamed(
+                                          RouteHelper.getHandymanAvailableServicesRoute(),
+                                          arguments: {
+                                            'category': title,
+                                            'categoryId': category.id,
+                                          },
+                                        );
+                                      },
+                                      borderRadius: BorderRadius.circular(radius),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFF9FAFB),
+                                          borderRadius: BorderRadius.circular(radius),
+                                          border: Border.all(
+                                            color: const Color(0xFFF3F4F6),
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
-                                            imagePath != null
-                                                ? Image.asset(
-                                                    imagePath,
+                                            imageUrl != null && imageUrl.isNotEmpty
+                                                ? CustomImage(
+                                                    image: imageUrl,
                                                     height: imgSz,
                                                     width: imgSz,
                                                     fit: BoxFit.contain,
-                                                    color: const Color(0xFFF9FAFB),
-                                                    colorBlendMode: BlendMode.multiply,
                                                   )
                                                 : Icon(
                                                     Icons.construction,
@@ -567,12 +548,11 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
                                                   ),
                                             SizedBox(height: cellW * 0.05),
                                             Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: cellW * 0.06),
+                                              padding: EdgeInsets.symmetric(horizontal: cellW * 0.06),
                                               child: Text(
                                                 title,
                                                 textAlign: TextAlign.center,
-                                                maxLines: 3,
+                                                maxLines: 2,
                                                 overflow: TextOverflow.ellipsis,
                                                 style: robotoRegular.copyWith(
                                                   fontSize: fs,
@@ -584,65 +564,25 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
                                             ),
                                           ],
                                         ),
-                                        if (badgeText != null)
-                                          Positioned(
-                                            bottom: cellW * 0.06,
-                                            child: Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 6,
-                                                      vertical: 1.5),
-                                              decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                borderRadius:
-                                                    BorderRadius.circular(6),
-                                                border: Border.all(
-                                                  color:
-                                                      const Color(0xFF16A34A),
-                                                  width: 0.8,
-                                                ),
-                                              ),
-                                              child: Text(
-                                                badgeText,
-                                                style: robotoRegular.copyWith(
-                                                  fontSize:
-                                                      (fs * 0.72).clamp(7.0, 9.0),
-                                                  fontWeight: FontWeight.w700,
-                                                  color:
-                                                      const Color(0xFF16A34A),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          );
-                        },
-                      ),
-                    ],
+                                      ),
+                                    );
+                                  },
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
-          ),
 
                 const Gap(12),
 
                 // Promotional Banner
-                Container(
-                  color: Colors.white,
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(
-                      Images.handymanPromoBanner,
-                      width: double.infinity,
-                      fit: BoxFit.fitWidth,
-                    ),
-                  ),
-                ),
+                const BannerView(isFeatured: false),
 
                 const Gap(12),
                 // Most Booked Services Section
@@ -650,99 +590,88 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
 
                 const Gap(12),
 
-                // Dynamic Category Services Sections
-                Obx(() {
-                  final controller = Get.find<HandymanHomeController>();
-                  final widgets = <Widget>[];
-                  for (final section in controller.categorySections) {
-                    widgets.add(Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: CategoryServicesWidget(section: section),
-                    ));
+                // Dynamic Category Services Sections (100% API Data)
+                GetBuilder<CategoryController>(
+                  builder: (categoryController) {
+                    final widgets = <Widget>[];
 
-                    // Add category-specific promo banner
-                    if (section.title == 'Salon for Women') {
-                      widgets.add(CategoryPromoBanner(
-                        tag: 'LUXURY SPA & SALON',
-                        title: 'Up to 30% Off Home Salon',
-                        subtitle: 'Threadings, Facials & Hair Services',
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFFF7E9D), Color(0xFF9B51E0)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        imageAsset: Images.handymanWomenSalonNoBg,
-                        onTap: () {
-                          Get.toNamed(
-                            RouteHelper.getHandymanSubCategoriesRoute(),
-                            arguments: {'category': 'Salon for Women'},
-                          );
-                        },
-                      ));
-                      widgets.add(const Gap(12));
-                    } else if (section.title == 'AC & Appliance Repair') {
-                      widgets.add(CategoryPromoBanner(
-                        tag: 'SUMMER SPECIALS',
-                        title: 'Flat ₹150 Off AC Repairs',
-                        subtitle: 'Certified expert repair & maintenance',
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF2193B0), Color(0xFF6DD5ED)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        imageAsset: Images.handymanAcMechanicNoBg,
-                        onTap: () {
-                          Get.toNamed(
-                            RouteHelper.getHandymanSubCategoriesRoute(),
-                            arguments: {'category': 'AC & Appliance Repair'},
-                          );
-                        },
-                      ));
-                      widgets.add(const Gap(12));
-                    } else if (section.title == 'Cleaning & Pest Control') {
-                      widgets.add(CategoryPromoBanner(
-                        tag: 'HYGIENE FIRST',
-                        title: 'Flat 20% Off Home Deep Clean',
-                        subtitle: 'Sofa, Kitchen & Bathroom sanitization',
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF1D976C), Color(0xFF93F9B9)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        imageAsset: Images.handymanCleaningNoBg,
-                        onTap: () {
-                          Get.toNamed(
-                            RouteHelper.getHandymanSubCategoriesRoute(),
-                            arguments: {'category': 'Cleaning & Pest Control'},
-                          );
-                        },
-                      ));
-                      widgets.add(const Gap(12));
-                    } else if (section.title == 'Electrician, Plumber & Carpenter') {
-                      widgets.add(CategoryPromoBanner(
-                        tag: 'INSTANT FIXES',
-                        title: 'Handyman Services from ₹149',
-                        subtitle: 'Quick home repair at transparent rates',
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFF2994A), Color(0xFFF2C94C)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        imageAsset: Images.handymanElectricianBanner,
-                        onTap: () {
-                          Get.toNamed(
-                            RouteHelper.getHandymanSubCategoriesRoute(),
-                            arguments: {'category': 'Electrician, Plumber & Carpenter'},
-                          );
-                        },
-                      ));
-                      widgets.add(const Gap(12));
+                    if (categoryController.categoryList != null && categoryController.categoryList!.isNotEmpty) {
+                      for (final category in categoryController.categoryList!) {
+                        final catIdStr = category.id.toString();
+                        final apiItems = categoryController.itemsByCategory[catIdStr];
+
+                        if (apiItems == null && category.id != null) {
+                          categoryController.fetchItemsForCategory(catIdStr, 1, 'all', false);
+                        }
+
+                        if (apiItems == null || apiItems.isEmpty) {
+                          continue; // Strictly skip categories without API items
+                        }
+
+                        final categoryServices = apiItems.map((item) => HandymanServiceModel.fromItem(item)).toList();
+
+                        final section = CategorySectionModel(
+                          categoryId: category.id,
+                          title: category.name ?? '',
+                          subtitle: 'Professional services at your doorstep',
+                          services: categoryServices,
+                        );
+
+                        widgets.add(Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: CategoryServicesWidget(section: section),
+                        ));
+
+                        // Add category-specific promo banners dynamically if category matches
+                        final titleLower = (category.name ?? '').toLowerCase();
+                        if (titleLower.contains('salon') || titleLower.contains('women')) {
+                          widgets.add(CategoryPromoBanner(
+                            tag: 'LUXURY SPA & SALON',
+                            title: 'Up to 30% Off Home Salon',
+                            subtitle: 'Threadings, Facials & Hair Services',
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFFFF7E9D), Color(0xFF9B51E0)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            imageAsset: Images.handymanWomenSalonNoBg,
+                            onTap: () {
+                              Get.toNamed(
+                                RouteHelper.getHandymanAvailableServicesRoute(),
+                                arguments: {'category': category.name, 'categoryId': category.id},
+                              );
+                            },
+                          ));
+                          widgets.add(const Gap(12));
+                        } else if (titleLower.contains('ac') || titleLower.contains('appliance')) {
+                          widgets.add(CategoryPromoBanner(
+                            tag: 'SUMMER SPECIALS',
+                            title: 'Flat ₹150 Off AC Repairs',
+                            subtitle: 'Certified expert repair & maintenance',
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF2193B0), Color(0xFF6DD5ED)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            imageAsset: Images.handymanAcMechanicNoBg,
+                            onTap: () {
+                              Get.toNamed(
+                                RouteHelper.getHandymanAvailableServicesRoute(),
+                                arguments: {'category': category.name, 'categoryId': category.id},
+                              );
+                            },
+                          ));
+                          widgets.add(const Gap(12));
+                        }
+                      }
                     }
-                  }
-                  return Column(
-                    children: widgets,
-                  );
-                }),
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: widgets,
+                    );
+                  },
+                ),
 
                 // Premium Promo / Information Banner
                 Padding(
@@ -1011,23 +940,33 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
                           _buildSearchBar(isScrolled: false),
                           const Gap(10),
 
-                          // AC Mechanic Promo Banner
+                          // Dynamic API Promo Banner Header
                           Expanded(
-                            child: AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 800),
-                              child: Row(
-                                key: ValueKey(_currentBannerIndex),
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Expanded(
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(bottom: 12),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            _promoBanners[_currentBannerIndex]['title']!,
+                            child: GetBuilder<BannerController>(
+                              builder: (bannerController) {
+                                final banners = bannerController.bannerList;
+                                if (banners == null || banners.isEmpty) {
+                                  return const SizedBox.shrink();
+                                }
+
+                                final int safeIndex = _currentBannerIndex % banners.length;
+                                final banner = banners[safeIndex];
+                                final String title = banner.title ?? '';
+                                final String? imageUrl = banner.imageFullUrl;
+
+                                return AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 800),
+                                  child: Row(
+                                    key: ValueKey('api_banner_$safeIndex'),
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Expanded(
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(bottom: 8),
+                                          child: Text(
+                                            title,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
                                             style: robotoRegular.copyWith(
                                               fontSize: 16,
                                               fontWeight: FontWeight.w800,
@@ -1035,27 +974,23 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
                                               height: 1.2,
                                             ),
                                           ),
-                                          const Gap(4),
-                                          Text(
-                                            _promoBanners[_currentBannerIndex]['subtitle']!,
-                                            style: robotoRegular.copyWith(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w500,
-                                              color: Colors.white.withOpacity(0.85),
-                                            ),
-                                          ),
-                                        ],
+                                        ),
                                       ),
-                                    ),
+                                      const Gap(10),
+                                      if (imageUrl != null && imageUrl.isNotEmpty)
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(10),
+                                          child: CustomImage(
+                                            image: imageUrl,
+                                            height: 95,
+                                            width: 130,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                    ],
                                   ),
-                                  Image.asset(
-                                    _promoBanners[_currentBannerIndex]['image']!,
-                                    height: 105,
-                                    fit: BoxFit.contain,
-                                    alignment: Alignment.bottomCenter,
-                                  ),
-                                ],
-                              ),
+                                );
+                              },
                             ),
                           ),
                         ],

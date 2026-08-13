@@ -7,6 +7,7 @@ import 'package:handy_allinone/features/handyman/services/controllers/handyman_h
 import 'package:handy_allinone/features/handyman/services/models/handyman_service_model.dart';
 import 'package:handy_allinone/features/handyman/services/widgets/service_options_bottom_sheet.dart';
 import 'package:handy_allinone/helper/route_helper.dart';
+import 'package:handy_allinone/common/widgets/custom_image.dart';
 
 class CategoryServicesWidget extends GetView<HandymanHomeController> {
   final CategorySectionModel section;
@@ -14,9 +15,13 @@ class CategoryServicesWidget extends GetView<HandymanHomeController> {
 
   @override
   Widget build(BuildContext context) {
+    if (section.services.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return Container(
       color: Colors.white,
-      padding: const EdgeInsets.only(bottom: 16, top: 8),
+      padding: const EdgeInsets.only(bottom: 8, top: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -55,8 +60,11 @@ class CategoryServicesWidget extends GetView<HandymanHomeController> {
                  child: GestureDetector(
                    onTap: () {
                      Get.toNamed(
-                       RouteHelper.getHandymanSubCategoriesRoute(),
-                       arguments: {'category': section.title},
+                       RouteHelper.getHandymanAvailableServicesRoute(),
+                       arguments: {
+                         'category': section.title,
+                         'categoryId': section.categoryId,
+                       },
                      );
                    },
                    child: Text(
@@ -73,18 +81,19 @@ class CategoryServicesWidget extends GetView<HandymanHomeController> {
           ),
         ),
         const Gap(10),
-        // List
+        // List (Capped at 5 items for home display)
         SizedBox(
-          height: 258,
+          height: 215,
           child: Obx(() {
             if (controller.isLoading.value) {
               return const Center(child: CircularProgressIndicator());
             }
+            final int displayCount = section.services.length > 5 ? 5 : section.services.length;
             return ListView.separated(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               scrollDirection: Axis.horizontal,
-              itemCount: section.services.length,
-              separatorBuilder: (context, index) => const Gap(16),
+              itemCount: displayCount,
+              separatorBuilder: (context, index) => const Gap(14),
               itemBuilder: (context, index) {
                 final service = section.services[index];
                 return _CategoryServiceCard(service: service);
@@ -120,21 +129,44 @@ class _CategoryServiceCard extends StatelessWidget {
         );
       },
       child: SizedBox(
-        width: 140,
+        width: 135,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
           // Image with favourite overlay
           Stack(
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
-                  service.imageAsset,
-                  width: 140,
-                  height: 140,
-                  fit: BoxFit.cover,
-                ),
+                child: service.imageUrl != null && service.imageUrl!.isNotEmpty
+                    ? CustomImage(
+                        image: service.imageUrl!,
+                        width: 135,
+                        height: 105,
+                        fit: BoxFit.cover,
+                      )
+                    : Image.asset(
+                        service.imageAsset,
+                        width: 135,
+                        height: 105,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            width: 135,
+                            height: 105,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF3F4F6),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.construction,
+                              size: 36,
+                              color: Color(0xFF9CA3AF),
+                            ),
+                          );
+                        },
+                      ),
               ),
               // Favourite heart icon
               Positioned(
@@ -184,7 +216,7 @@ class _CategoryServiceCard extends StatelessWidget {
               ),
             ],
           ),
-          const Gap(12),
+          const Gap(8),
           // Title
           Text(
             service.name,
@@ -212,7 +244,7 @@ class _CategoryServiceCard extends StatelessWidget {
               ),
             ],
           ),
-          const Gap(12),
+          const Gap(8),
           // Price and Add Button
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

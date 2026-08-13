@@ -4,11 +4,13 @@ import 'package:handy_allinone/features/handyman/services/models/handyman_bookin
 import 'package:handy_allinone/util/images.dart';
 
 class CategorySectionModel {
+  final int? categoryId;
   final String title;
   final String subtitle;
   final List<HandymanServiceModel> services;
 
   CategorySectionModel({
+    this.categoryId,
     required this.title,
     required this.subtitle,
     required this.services,

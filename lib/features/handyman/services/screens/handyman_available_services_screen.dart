@@ -10,6 +10,7 @@ import 'package:handy_allinone/util/images.dart';
 import 'package:handy_allinone/util/styles.dart';
 import 'package:handy_allinone/features/handyman/services/widgets/service_options_bottom_sheet.dart';
 import 'package:handy_allinone/features/handyman/services/models/handyman_service_model.dart';
+import 'package:handy_allinone/features/category/controllers/category_controller.dart';
 
 class HandymanServiceItem {
   final String id;
@@ -534,6 +535,8 @@ class _HandymanAvailableServicesScreenState extends State<HandymanAvailableServi
     ],
   };
 
+  int? _passedCategoryId;
+
   @override
   void initState() {
     super.initState();
@@ -542,6 +545,14 @@ class _HandymanAvailableServicesScreenState extends State<HandymanAvailableServi
     }
     final args = Get.arguments;
     if (args != null && args is Map) {
+      if (args.containsKey('categoryId') && args['categoryId'] != null) {
+        _passedCategoryId = int.tryParse(args['categoryId'].toString());
+        if (_passedCategoryId != null) {
+          Get.find<CategoryController>().fetchItemsForCategory(
+            _passedCategoryId.toString(), 1, 'all', true,
+          );
+        }
+      }
       if (args.containsKey('category')) {
         final String passedCategory = args['category']
             .toString()
@@ -653,23 +664,46 @@ class _HandymanAvailableServicesScreenState extends State<HandymanAvailableServi
           ),
         ],
       ),
-      body: activeServices.isEmpty
-          ? Center(
-              child: Text(
-                'No services available under this subcategory.',
-                style: robotoRegular.copyWith(color: Colors.grey),
-              ),
-            )
-          : ListView.separated(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-              itemCount: activeServices.length,
-              physics: const BouncingScrollPhysics(),
-              separatorBuilder: (context, index) => Padding(
-                padding: EdgeInsets.symmetric(vertical: 16.h),
-                child: const Divider(height: 1, color: Color(0xFFE5E7EB)),
-              ),
-              itemBuilder: (context, index) {
-                final service = activeServices[index];
+      body: GetBuilder<CategoryController>(builder: (categoryController) {
+        List<HandymanServiceItem> effectiveServices = List.from(activeServices);
+        if (_passedCategoryId != null) {
+          final catIdStr = _passedCategoryId.toString();
+          final apiItems = categoryController.itemsByCategory[catIdStr];
+          if (apiItems != null && apiItems.isNotEmpty) {
+            effectiveServices = apiItems.map((item) {
+              return HandymanServiceItem(
+                id: item.id.toString(),
+                title: item.name ?? '',
+                rating: item.avgRating ?? 4.8,
+                reviews: item.ratingCount != null ? item.ratingCount.toString() : '100+',
+                price: item.price?.toInt() ?? 0,
+                optionsCount: item.choiceOptions?.length ?? 1,
+                imageAsset: item.imageFullUrl ?? 'assets/image/placeholder.png',
+                description: item.description ?? '',
+              );
+            }).toList();
+          }
+        }
+
+        if (effectiveServices.isEmpty) {
+          return Center(
+            child: Text(
+              'No services available under this category.',
+              style: robotoRegular.copyWith(color: Colors.grey),
+            ),
+          );
+        }
+
+        return ListView.separated(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+          itemCount: effectiveServices.length,
+          physics: const BouncingScrollPhysics(),
+          separatorBuilder: (context, index) => Padding(
+            padding: EdgeInsets.symmetric(vertical: 16.h),
+            child: const Divider(height: 1, color: Color(0xFFE5E7EB)),
+          ),
+          itemBuilder: (context, index) {
+            final service = effectiveServices[index];
                 final homeController = Get.find<HandymanHomeController>();
 
                 void openBottomSheet() {
@@ -911,7 +945,8 @@ class _HandymanAvailableServicesScreenState extends State<HandymanAvailableServi
                   ),
                 );
               },
-            ),
+            );
+      }),
     );
   }
 

@@ -22,6 +22,7 @@ import 'package:handy_allinone/common/widgets/custom_app_bar.dart';
 import 'package:handy_allinone/common/widgets/custom_button.dart';
 import 'package:handy_allinone/common/widgets/custom_snackbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
@@ -238,6 +239,7 @@ class VerificationScreenState extends State<VerificationScreen> {
                   length: 6,
                   appContext: context,
                   keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   animationType: AnimationType.slide,
                   pinTheme: PinTheme(
                     shape: PinCodeFieldShape.box,

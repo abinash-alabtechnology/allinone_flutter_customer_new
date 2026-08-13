@@ -13,6 +13,9 @@ class BannerController extends GetxController implements GetxService {
   List<String?>? _bannerImageList;
   List<String?>? get bannerImageList => _bannerImageList;
 
+  List<Banner>? _bannerList;
+  List<Banner>? get bannerList => _bannerList;
+
   List<String?>? _taxiBannerImageList;
   List<String?>? get taxiBannerImageList => _taxiBannerImageList;
 
@@ -140,35 +143,40 @@ class BannerController extends GetxController implements GetxService {
 
   Future<void> _prepareBanner(BannerModel? bannerModel) async {
     if (bannerModel != null) {
+      _bannerList = bannerModel.banners;
       _bannerImageList = [];
       _bannerDataList = [];
-      for (var campaign in bannerModel.campaigns!) {
-        if (_bannerImageList!.contains(campaign.imageFullUrl)) {
-          _bannerImageList!.add(
-            '${campaign.imageFullUrl}${bannerModel.campaigns!.indexOf(campaign)}',
-          );
-        } else {
-          _bannerImageList!.add(campaign.imageFullUrl);
+      if (bannerModel.campaigns != null) {
+        for (var campaign in bannerModel.campaigns!) {
+          if (_bannerImageList!.contains(campaign.imageFullUrl)) {
+            _bannerImageList!.add(
+              '${campaign.imageFullUrl}${bannerModel.campaigns!.indexOf(campaign)}',
+            );
+          } else {
+            _bannerImageList!.add(campaign.imageFullUrl);
+          }
+          _bannerDataList!.add(campaign);
         }
-        _bannerDataList!.add(campaign);
       }
-      for (var banner in bannerModel.banners!) {
-        if (_bannerImageList!.contains(banner.imageFullUrl)) {
-          _bannerImageList!.add(
-            '${banner.imageFullUrl}${bannerModel.banners!.indexOf(banner)}',
-          );
-        } else {
-          _bannerImageList!.add(banner.imageFullUrl);
-        }
+      if (bannerModel.banners != null) {
+        for (var banner in bannerModel.banners!) {
+          if (_bannerImageList!.contains(banner.imageFullUrl)) {
+            _bannerImageList!.add(
+              '${banner.imageFullUrl}${bannerModel.banners!.indexOf(banner)}',
+            );
+          } else {
+            _bannerImageList!.add(banner.imageFullUrl);
+          }
 
-        if (banner.item != null) {
-          _bannerDataList!.add(banner.item);
-        } else if (banner.store != null) {
-          _bannerDataList!.add(banner.store);
-        } else if (banner.type == 'default') {
-          _bannerDataList!.add(banner.link);
-        } else {
-          _bannerDataList!.add(null);
+          if (banner.item != null) {
+            _bannerDataList!.add(banner.item);
+          } else if (banner.store != null) {
+            _bannerDataList!.add(banner.store);
+          } else if (banner.type == 'default') {
+            _bannerDataList!.add(banner.link);
+          } else {
+            _bannerDataList!.add(null);
+          }
         }
       }
     }

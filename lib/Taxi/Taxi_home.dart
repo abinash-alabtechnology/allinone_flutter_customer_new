@@ -31,6 +31,7 @@ import 'sharedservice.dart';
 import 'package:handy_allinone/features/banner/controllers/banner_controller.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:handy_allinone/common/widgets/custom_image.dart';
+import 'package:handy_allinone/common/widgets/custom_button.dart';
 
 class Taxihome extends StatefulWidget {
   final bool showBottomSheet;
@@ -85,6 +86,11 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
   final selectedRideIndex = (-1).obs;
   List<RecentLocation> recentLocations = [];
   Set<Polyline> _polylines = {};
+
+  bool _isCheckingPermission = false;
+  bool _permissionDenied = false;
+  bool _isDialogOpen = false;
+
   @override
   void initState() {
     super.initState();
@@ -114,6 +120,13 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _getCurrentLocation();
+    }
+  }
+
+  @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _pickupRotationTimer?.cancel();
@@ -132,44 +145,190 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
   }
 
   Future<void> _getCurrentLocation() async {
-    _startAllMarkersAnimation();
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      await Geolocator.openLocationSettings();
-      return;
-    }
+    if (_isCheckingPermission) return;
+    _isCheckingPermission = true;
 
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied ||
-        permission == LocationPermission.deniedForever) {
-      permission = await Geolocator.requestPermission();
-      if (permission != LocationPermission.whileInUse &&
-          permission != LocationPermission.always) {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (mounted) {
+          setState(() {
+            _permissionDenied = true;
+          });
+        }
+        _isCheckingPermission = false;
+        _showPermissionDialog(isServiceDisabled: true);
         return;
       }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      if (permission != LocationPermission.whileInUse &&
+          permission != LocationPermission.always) {
+        if (mounted) {
+          setState(() {
+            _permissionDenied = true;
+          });
+        }
+        _isCheckingPermission = false;
+        _showPermissionDialog(isServiceDisabled: false);
+        return;
+      }
+
+      if (mounted) {
+        setState(() {
+          _permissionDenied = false;
+        });
+      }
+
+      _startAllMarkersAnimation();
+
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      _currentPosition = LatLng(position.latitude, position.longitude);
+      _pickupLatLng = _currentPosition;
+
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+      if (placemarks.isNotEmpty) {
+        Placemark place = placemarks.first;
+        _pickupAddress = '${place.name}, ${place.subLocality}, ${place.locality}';
+      }
+
+      if (mounted) {
+        setState(() {
+          _currentAddress = _pickupAddress ?? '';
+          pickupController.text = _pickupAddress ?? '';
+          _updateMarkers();
+        });
+      }
+    } catch (e) {
+      debugPrint("Error getting location: $e");
+    } finally {
+      _isCheckingPermission = false;
     }
+  }
 
-    Position position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
+  void _showPermissionDialog({bool isServiceDisabled = false}) {
+    if (_isDialogOpen || !mounted) return;
+    _isDialogOpen = true;
 
-    _currentPosition = LatLng(position.latitude, position.longitude);
-    _pickupLatLng = _currentPosition;
-
-    List<Placemark> placemarks = await placemarkFromCoordinates(
-      position.latitude,
-      position.longitude,
-    );
-    if (placemarks.isNotEmpty) {
-      Placemark place = placemarks.first;
-      _pickupAddress = '${place.name}, ${place.subLocality}, ${place.locality}';
-    }
-
-    setState(() {
-      _currentAddress = _pickupAddress!;
-      pickupController.text = _pickupAddress!;
-      _updateMarkers();
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext ctx) {
+        return PopScope(
+          canPop: false,
+          child: Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+            ),
+            insetPadding: const EdgeInsets.all(30),
+            clipBehavior: Clip.antiAliasWithSaveLayer,
+            child: Padding(
+              padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
+              child: SizedBox(
+                width: 500,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.location_off_rounded,
+                      color: Theme.of(context).primaryColor,
+                      size: 80,
+                    ),
+                    const SizedBox(height: Dimensions.paddingSizeLarge),
+                    Text(
+                      isServiceDisabled
+                          ? 'location_services_disabled'.tr
+                          : 'you_denied_location_permission'.tr,
+                      textAlign: TextAlign.center,
+                      style: robotoMedium.copyWith(
+                        fontSize: Dimensions.fontSizeLarge,
+                      ),
+                    ),
+                    const SizedBox(height: Dimensions.paddingSizeSmall),
+                    Text(
+                      'Location permission is required to proceed with taxi booking'.tr,
+                      textAlign: TextAlign.center,
+                      style: robotoRegular.copyWith(
+                        fontSize: Dimensions.fontSizeSmall,
+                        color: Theme.of(context).disabledColor,
+                      ),
+                    ),
+                    const SizedBox(height: Dimensions.paddingSizeLarge),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextButton(
+                            style: TextButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                  Dimensions.radiusSmall,
+                                ),
+                                side: BorderSide(
+                                  width: 1.5,
+                                  color: Theme.of(context).primaryColor,
+                                ),
+                              ),
+                              minimumSize: const Size(1, 45),
+                            ),
+                            child: Text('Go back'.tr),
+                            onPressed: () {
+                              _isDialogOpen = false;
+                              Navigator.of(ctx).pop();
+                              _navigateAway();
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: Dimensions.paddingSizeSmall),
+                        Expanded(
+                          child: CustomButton(
+                            buttonText: 'settings'.tr,
+                            onPressed: () async {
+                              _isDialogOpen = false;
+                              Navigator.of(ctx).pop();
+                              if (isServiceDisabled) {
+                                await Geolocator.openLocationSettings();
+                              } else {
+                                await Geolocator.openAppSettings();
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    ).then((_) {
+      _isDialogOpen = false;
     });
+  }
+
+  void _navigateAway() {
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+    } else {
+      Get.find<SplashController>().showBottomNavBar();
+      Get.offAll(
+        () => DashboardScreen(
+          pageIndex: 0,
+          fromSplash: false,
+        ),
+      );
+    }
   }
 
   void _updateMarkers() {
@@ -1059,6 +1218,54 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    if (_permissionDenied) {
+      return Scaffold(
+        body: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.location_off_rounded,
+                    color: Theme.of(context).primaryColor,
+                    size: 100,
+                  ),
+                  const SizedBox(height: Dimensions.paddingSizeLarge),
+                  Text(
+                    'you_denied_location_permission'.tr,
+                    style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: Dimensions.paddingSizeSmall),
+                  Text(
+                    'location_permission_is_required_to_proceed_with_taxi_booking'.tr,
+                    style: robotoRegular.copyWith(color: Theme.of(context).disabledColor),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+                  CustomButton(
+                    buttonText: 'settings'.tr,
+                    onPressed: () async {
+                      await Geolocator.openAppSettings();
+                    },
+                  ),
+                  const SizedBox(height: Dimensions.paddingSizeSmall),
+                  TextButton(
+                    onPressed: _navigateAway,
+                    child: Text(
+                      'go_back'.tr,
+                      style: robotoMedium.copyWith(color: Theme.of(context).primaryColor),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     return Scaffold(
       body: GetBuilder<ProfileController>(
         builder: (profileController) {
@@ -1684,9 +1891,11 @@ class _TaxihomeState extends State<Taxihome> with WidgetsBindingObserver {
                           );
                         }).toList(),
                       ),
+                      const SizedBox(height: 100),
                     ],
                   )
                 : const SizedBox();
+                
           },
         ),
       ],

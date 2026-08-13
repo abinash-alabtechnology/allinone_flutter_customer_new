@@ -26,8 +26,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
   @override
   void initState() {
     super.initState();
-    Get.find<CategoryController>().getCategoryList(false);
-
+    Get.find<CategoryController>().getCategoryList(true);
   }
   @override
   Widget build(BuildContext context) {

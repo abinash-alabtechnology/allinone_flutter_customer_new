@@ -86,6 +86,7 @@ class CategoryController extends GetxController implements GetxService {
   bool isLoadingCategories = false;
 
   final Map<String, List<Item>> _itemsByCategory = {};
+  Map<String, List<Item>> get itemsByCategory => _itemsByCategory;
   List<Item>? getItemsForCategory(String categoryID) =>
       _itemsByCategory[categoryID];
 
@@ -182,6 +183,9 @@ class CategoryController extends GetxController implements GetxService {
       _categoryList!.addAll(categoryList);
       for(int i = 0; i < _categoryList!.length; i++) {
         _interestSelectedList!.add(false);
+        if (_categoryList![i].id != null) {
+          fetchItemsForCategory(_categoryList![i].id.toString(), 1, 'all', false);
+        }
       }
     }
     update();

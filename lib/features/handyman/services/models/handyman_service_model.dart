@@ -1,3 +1,5 @@
+import 'package:handy_allinone/features/item/domain/models/item_model.dart';
+
 class HandymanServiceOption {
   final String id;
   final String title;
@@ -33,6 +35,7 @@ class HandymanServiceModel {
   final int startingPrice;
   final int optionsCount;
   final String imageAsset;
+  final String? imageUrl;
   final String? coverImageAsset;
   final String? coverTitle;
   final String? coverDescription;
@@ -50,6 +53,7 @@ class HandymanServiceModel {
     required this.startingPrice,
     required this.optionsCount,
     required this.imageAsset,
+    this.imageUrl,
     this.coverImageAsset,
     this.coverTitle,
     this.coverDescription,
@@ -58,6 +62,38 @@ class HandymanServiceModel {
     this.isWishlisted = false,
     this.cartQuantity = 0,
   });
+
+  factory HandymanServiceModel.fromItem(Item item) {
+    return HandymanServiceModel(
+      id: item.id.toString(),
+      name: item.name ?? '',
+      category: item.categoryIds != null && item.categoryIds!.isNotEmpty
+          ? item.categoryIds![0].name ?? ''
+          : '',
+      rating: item.avgRating ?? 4.8,
+      reviewCount: item.ratingCount != null ? item.ratingCount.toString() : '100+',
+      startingPrice: item.price?.toInt() ?? 0,
+      optionsCount: item.choiceOptions?.length ?? 1,
+      imageAsset: '',
+      imageUrl: item.imageFullUrl,
+      options: [
+        HandymanServiceOption(
+          id: '${item.id}_opt1',
+          title: item.name ?? '',
+          originalPrice: item.price?.toInt() ?? 0,
+          discountedPrice: (item.price != null && item.discount != null && item.discount! > 0)
+              ? (item.price! - item.discount!).toInt()
+              : item.price?.toInt() ?? 0,
+          discountText: item.discount != null && item.discount! > 0
+              ? '${item.discount!.toInt()}% OFF'
+              : '',
+          subtitle: item.description ?? '',
+          rating: item.avgRating ?? 4.8,
+          reviewCount: item.ratingCount?.toString() ?? '100+',
+        ),
+      ],
+    );
+  }
 
   HandymanServiceModel copyWith({
     bool? isWishlisted,

@@ -7,6 +7,9 @@ import 'package:handy_allinone/features/handyman/services/controllers/handyman_h
 import 'package:handy_allinone/features/handyman/services/widgets/service_options_bottom_sheet.dart';
 import 'package:handy_allinone/features/handyman/services/models/handyman_service_model.dart';
 
+import 'package:handy_allinone/features/category/controllers/category_controller.dart';
+import 'package:handy_allinone/common/widgets/custom_image.dart';
+
 /// "Most Booked Services" horizontal scroll section.
 /// Uses [HandymanHomeController] (must be registered before use).
 class MostBookedServicesWidget extends StatelessWidget {
@@ -37,32 +40,42 @@ class MostBookedServicesWidget extends StatelessWidget {
         ),
 
         // ── Horizontal Card List ────────────────────────────────────────────
-        Obx(() {
-          if (controller.isLoading.value) {
-            return const SizedBox(
-              height: 280,
-              child: Center(
-                child: CircularProgressIndicator(color: Color(0xFF0091FF)),
+        GetBuilder<CategoryController>(
+          builder: (categoryController) {
+            List<HandymanServiceModel> dynamicMostBooked = [];
+            categoryController.itemsByCategory.forEach((catId, items) {
+              for (var item in items) {
+                dynamicMostBooked.add(HandymanServiceModel.fromItem(item));
+              }
+            });
+
+            final displayServices = dynamicMostBooked.isNotEmpty 
+                ? dynamicMostBooked 
+                : controller.mostBookedServices;
+
+            if (displayServices.isEmpty) {
+              return const SizedBox.shrink();
+            }
+
+            return SizedBox(
+              height: 248,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.only(left: 16, right: 16),
+                physics: const BouncingScrollPhysics(),
+                itemCount: displayServices.length > 6 ? 6 : displayServices.length,
+                separatorBuilder: (context, index) => const Gap(12),
+                itemBuilder: (context, index) {
+                  final service = displayServices[index];
+                  return _ServiceCard(
+                    service: service,
+                    controller: controller,
+                  );
+                },
               ),
             );
-          }
-          return SizedBox(
-            height: 248,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.only(left: 16, right: 8),
-              physics: const BouncingScrollPhysics(),
-              itemCount: controller.mostBookedServices.length,
-              itemBuilder: (context, index) {
-                final service = controller.mostBookedServices[index];
-                return _ServiceCard(
-                  service: service,
-                  controller: controller,
-                );
-              },
-            ),
-          );
-        }),
+          },
+        ),
 
         const Gap(4),
       ],
@@ -99,7 +112,7 @@ class _ServiceCard extends StatelessWidget {
       },
       child: Container(
         width: 162,
-        margin: const EdgeInsets.only(right: 12, bottom: 6),
+        margin: const EdgeInsets.only(bottom: 6),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
@@ -122,22 +135,29 @@ class _ServiceCard extends StatelessWidget {
                   topLeft: Radius.circular(14),
                   topRight: Radius.circular(14),
                 ),
-                child: Image.asset(
-                  service.imageAsset,
-                  width: 162,
-                  height: 120,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    width: 162,
-                    height: 120,
-                    color: const Color(0xFFEFF6FF),
-                    child: const Icon(
-                      Icons.build_rounded,
-                      color: Color(0xFF0091FF),
-                      size: 36,
-                    ),
-                  ),
-                ),
+                child: service.imageUrl != null && service.imageUrl!.isNotEmpty
+                    ? CustomImage(
+                        image: service.imageUrl!,
+                        width: 162,
+                        height: 120,
+                        fit: BoxFit.cover,
+                      )
+                    : Image.asset(
+                        service.imageAsset,
+                        width: 162,
+                        height: 120,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          width: 162,
+                          height: 120,
+                          color: const Color(0xFFEFF6FF),
+                          child: const Icon(
+                            Icons.build_rounded,
+                            color: Color(0xFF0091FF),
+                            size: 36,
+                          ),
+                        ),
+                      ),
               ),
               // Wishlist heart
               Positioned(

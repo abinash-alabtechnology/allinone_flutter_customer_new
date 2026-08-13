@@ -2,13 +2,19 @@ class CategoryModel {
   int? id;
   String? name;
   String? imageFullUrl;
+  String? slug;
+  int? moduleId;
 
-  CategoryModel({this.id, this.name, this.imageFullUrl});
+  CategoryModel({this.id, this.name, this.imageFullUrl, this.slug, this.moduleId});
 
   CategoryModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     name = json['name'];
     imageFullUrl = json['image_full_url'];
+    slug = json['slug'];
+    if (json['module_id'] != null) {
+      moduleId = int.tryParse(json['module_id'].toString());
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -16,6 +22,8 @@ class CategoryModel {
     data['id'] = id;
     data['name'] = name;
     data['image_full_url'] = imageFullUrl;
+    data['slug'] = slug;
+    data['module_id'] = moduleId;
     return data;
   }
 }

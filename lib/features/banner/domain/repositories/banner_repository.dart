@@ -12,6 +12,7 @@ import 'package:handy_allinone/features/banner/domain/models/taxi_banner_model.d
 import 'package:handy_allinone/features/banner/domain/repositories/banner_repository_interface.dart';
 import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
 import 'package:handy_allinone/helper/header_helper.dart';
+import 'package:handy_allinone/helper/address_helper.dart';
 import 'package:handy_allinone/util/app_constants.dart';
 
 class BannerRepository implements BannerRepositoryInterface {
@@ -35,24 +36,36 @@ class BannerRepository implements BannerRepositoryInterface {
 
   Future<BannerModel?> _getBannerList({required DataSourceEnum source}) async {
     BannerModel? bannerModel;
-    String cacheId = '${AppConstants.bannerUri}-${Get.find<SplashController>().module!.id!}';
+    Map<String, String> reqHeaders = Map.from(apiClient.getHeader());
+    reqHeaders['Content-Type'] = 'application/json; charset=UTF-8';
+
+    int activeModuleId = Get.find<SplashController>().module?.id ?? 10;
+    reqHeaders[AppConstants.moduleId] = activeModuleId.toString();
+
+    List<int>? zoneIds = AddressHelper.getUserAddressFromSharedPref()?.zoneIds;
+    if (zoneIds == null || zoneIds.isEmpty) {
+      zoneIds = [1];
+    }
+    reqHeaders[AppConstants.zoneId] = jsonEncode(zoneIds);
+
+    String cacheId = '${AppConstants.bannerUri}-$activeModuleId';
 
     switch(source) {
       case DataSourceEnum.client:
-        Response response = await apiClient.getData(AppConstants.bannerUri);
+        Response response = await apiClient.getData(
+          '${AppConstants.bannerUri}?limit=10&offset=1',
+          headers: reqHeaders,
+        );
         if (response.statusCode == 200) {
           bannerModel = BannerModel.fromJson(response.body);
-          LocalClient.organize(source, cacheId, jsonEncode(response.body), apiClient.getHeader());
-
+          LocalClient.organize(source, cacheId, jsonEncode(response.body), reqHeaders);
         }
       case DataSourceEnum.local:
-
         String? cacheResponseData = await LocalClient.organize(source, cacheId, null, null);
         if(cacheResponseData != null) {
           bannerModel = BannerModel.fromJson(jsonDecode(cacheResponseData));
         }
     }
-
 
     return bannerModel;
   }
