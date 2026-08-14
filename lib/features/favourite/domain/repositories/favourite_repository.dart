@@ -4,19 +4,40 @@ import 'package:handy_allinone/api/api_client.dart';
 import 'package:handy_allinone/features/favourite/domain/repositories/favourite_repository_interface.dart';
 import 'package:handy_allinone/util/app_constants.dart';
 
+import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
+
 class FavouriteRepository implements FavouriteRepositoryInterface<ResponseModel> {
   final ApiClient apiClient;
   FavouriteRepository({required this.apiClient});
 
+  Map<String, String> _getModuleHeaders() {
+    Map<String, String> reqHeaders = Map.from(apiClient.getHeader());
+    int? activeModuleId;
+    if (Get.find<SplashController>().module != null && Get.find<SplashController>().module!.id != null) {
+      activeModuleId = Get.find<SplashController>().module!.id;
+    } else {
+      final handymanMod = Get.find<SplashController>().moduleList?.firstWhereOrNull((m) {
+        String title = m.moduleName?.toLowerCase() ?? '';
+        String mType = m.moduleType?.toLowerCase() ?? '';
+        return title.contains('handyman') || mType.contains('handyman');
+      });
+      activeModuleId = handymanMod?.id;
+    }
+    if (activeModuleId != null) {
+      reqHeaders[AppConstants.moduleId] = activeModuleId.toString();
+    }
+    return reqHeaders;
+  }
+
   @override
   Future<Response> getList({int? offset}) async {
-    return await apiClient.getData(AppConstants.wishListGetUri);
+    return await apiClient.getData(AppConstants.wishListGetUri, headers: _getModuleHeaders());
   }
 
   @override
   Future<ResponseModel> add(dynamic a, {bool isStore = false, int? id}) async {
     ResponseModel responseModel;
-    Response response = await apiClient.postData('${AppConstants.addWishListUri}${isStore ? 'store_id=' : 'item_id='}$id', null, handleError: false);
+    Response response = await apiClient.postData('${AppConstants.addWishListUri}${isStore ? 'store_id=' : 'item_id='}$id', null, headers: _getModuleHeaders(), handleError: false);
     if (response.statusCode == 200) {
       responseModel = ResponseModel(true, response.body['message']);
     } else {
@@ -28,7 +49,7 @@ class FavouriteRepository implements FavouriteRepositoryInterface<ResponseModel>
   @override
   Future<ResponseModel> delete(int? id, {bool isStore = false}) async {
     ResponseModel responseModel;
-    Response response = await apiClient.deleteData('${AppConstants.removeWishListUri}${isStore ? 'store_id=' : 'item_id='}$id', handleError: false);
+    Response response = await apiClient.deleteData('${AppConstants.removeWishListUri}${isStore ? 'store_id=' : 'item_id='}$id', headers: _getModuleHeaders(), handleError: false);
     if (response.statusCode == 200) {
       responseModel = ResponseModel(true, response.body['message']);
     } else {

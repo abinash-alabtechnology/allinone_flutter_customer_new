@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:handy_allinone/features/handyman/services/models/handyman_service_model.dart';
 import 'package:handy_allinone/features/handyman/services/controllers/handyman_home_controller.dart';
 import 'package:handy_allinone/util/styles.dart';
 import 'package:handy_allinone/helper/price_converter.dart';
+import 'package:handy_allinone/features/item/domain/services/item_service_interface.dart';
+import 'package:handy_allinone/features/item/domain/models/item_model.dart';
+import 'package:handy_allinone/common/widgets/custom_image.dart';
 
 class ServiceOptionsBottomSheet extends StatelessWidget {
   final HandymanServiceModel service;
@@ -16,10 +20,42 @@ class ServiceOptionsBottomSheet extends StatelessWidget {
     required this.onOptionAdd,
   });
 
+  static Future<void> show(BuildContext context, HandymanServiceModel service) async {
+    HandymanHomeController controller = Get.find<HandymanHomeController>();
+    HandymanServiceModel activeService = service;
+
+    int? itemId = int.tryParse(service.id);
+    if (itemId != null) {
+      if (Get.isRegistered<ItemServiceInterface>()) {
+        try {
+          Item? fetchedItem = await Get.find<ItemServiceInterface>().getItemDetails(itemId);
+          if (fetchedItem != null) {
+            activeService = HandymanServiceModel.fromItem(fetchedItem);
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            print('Error fetching item details: $e');
+          }
+        }
+      }
+    }
+
+    Get.bottomSheet(
+      ServiceOptionsBottomSheet(
+        service: activeService,
+        onOptionAdd: (optionId) {
+          controller.addToCart(activeService.id);
+        },
+      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     bool hasDiscount = service.options.any((o) => o.discountText.isNotEmpty);
-    bool hasOptionImages = service.options.any((o) => o.imageAsset != null);
+    bool hasOptionImages = service.options.any((o) => o.imageAsset != null && o.imageAsset!.isNotEmpty);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -66,13 +102,39 @@ class ServiceOptionsBottomSheet extends StatelessWidget {
                   height: 180,
                   width: double.infinity,
                   color: const Color(0xFFF3F4F6),
-                  child: Image.asset(
-                    service.coverImageAsset ?? service.imageAsset,
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    height: double.infinity,
-                    alignment: Alignment.center,
-                  ),
+                  child: (service.imageUrl != null && service.imageUrl!.isNotEmpty)
+                      ? CustomImage(
+                          image: service.imageUrl!,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                        )
+                      : (service.coverImageAsset != null && service.coverImageAsset!.isNotEmpty && !service.coverImageAsset!.startsWith('http'))
+                          ? Image.asset(
+                              service.coverImageAsset!,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: double.infinity,
+                              errorBuilder: (context, error, stackTrace) => Container(
+                                color: const Color(0xFFF3F4F6),
+                                child: const Icon(Icons.build_rounded, size: 48, color: Color(0xFF6C63FF)),
+                              ),
+                            )
+                          : (service.imageAsset.isNotEmpty && !service.imageAsset.startsWith('http'))
+                              ? Image.asset(
+                                  service.imageAsset,
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  errorBuilder: (context, error, stackTrace) => Container(
+                                    color: const Color(0xFFF3F4F6),
+                                    child: const Icon(Icons.build_rounded, size: 48, color: Color(0xFF6C63FF)),
+                                  ),
+                                )
+                              : Container(
+                                  color: const Color(0xFFF3F4F6),
+                                  child: const Icon(Icons.build_rounded, size: 48, color: Color(0xFF6C63FF)),
+                                ),
                 ),
               ),
 
@@ -148,19 +210,7 @@ class ServiceOptionsBottomSheet extends StatelessWidget {
                       const Gap(16),
                       Obx(() {
                         final controller = Get.find<HandymanHomeController>();
-                        int qty = 0;
-                        final mbIdx = controller.mostBookedServices.indexWhere((s) => s.id == service.id);
-                        if (mbIdx != -1) {
-                          qty = controller.mostBookedServices[mbIdx].cartQuantity;
-                        } else {
-                          for (final section in controller.categorySections) {
-                            final sIdx = section.services.indexWhere((s) => s.id == service.id);
-                            if (sIdx != -1) {
-                              qty = section.services[sIdx].cartQuantity;
-                              break;
-                            }
-                          }
-                        }
+                        int qty = controller.getServiceQuantity(service.id);
 
                         if (qty == 0) {
                           return Container(
@@ -258,7 +308,7 @@ class ServiceOptionsBottomSheet extends StatelessWidget {
 
                 // Options List
                 SizedBox(
-                  height: hasOptionImages ? 280 : 165,
+                  height: hasOptionImages ? 280 : 190,
                   child: ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     scrollDirection: Axis.horizontal,
@@ -266,7 +316,7 @@ class ServiceOptionsBottomSheet extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final option = service.options[index];
                       return Container(
-                        width: 140,
+                        width: 145,
                         margin: const EdgeInsets.symmetric(horizontal: 4),
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -276,18 +326,30 @@ class ServiceOptionsBottomSheet extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            if (option.imageAsset != null)
+                            if (option.imageAsset != null && option.imageAsset!.isNotEmpty)
                               ClipRRect(
                                 borderRadius: const BorderRadius.only(
                                   topLeft: Radius.circular(11),
                                   topRight: Radius.circular(11),
                                 ),
-                                child: Image.asset(
-                                  option.imageAsset!,
-                                  height: 110,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                ),
+                                child: option.imageAsset!.startsWith('http')
+                                    ? CustomImage(
+                                        image: option.imageAsset!,
+                                        height: 100,
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Image.asset(
+                                        option.imageAsset!,
+                                        height: 100,
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) => Container(
+                                          height: 100,
+                                          color: const Color(0xFFF3F4F6),
+                                          child: const Icon(Icons.build_rounded, size: 24, color: Color(0xFF6C63FF)),
+                                        ),
+                                      ),
                               ),
                             Expanded(
                               child: Padding(
@@ -376,25 +438,17 @@ class ServiceOptionsBottomSheet extends StatelessWidget {
                                       final controller = Get.find<HandymanHomeController>();
                                       int optionQty = 0;
                                       
-                                      final mbIdx = controller.mostBookedServices.indexWhere((s) => s.id == service.id);
-                                      HandymanServiceModel? controllerService;
-                                      if (mbIdx != -1) {
-                                        controllerService = controller.mostBookedServices[mbIdx];
-                                      } else {
-                                        for (final section in controller.categorySections) {
-                                          final sIdx = section.services.indexWhere((s) => s.id == service.id);
-                                          if (sIdx != -1) {
-                                            controllerService = section.services[sIdx];
-                                            break;
-                                          }
-                                        }
-                                      }
-
+                                      final controllerService = controller.allServices[service.id];
                                       if (controllerService != null) {
                                         final opt = controllerService.options.firstWhereOrNull((o) => o.id == option.id);
                                         if (opt != null) {
                                           optionQty = opt.quantity;
+                                        } else if (controllerService.options.length <= 1) {
+                                          optionQty = controllerService.cartQuantity;
                                         }
+                                      }
+                                      if (optionQty == 0) {
+                                        optionQty = controller.getServiceQuantity(service.id);
                                       }
 
                                       return SizedBox(

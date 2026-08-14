@@ -21,8 +21,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:handy_allinone/features/dashboard/widgets/bottom_nav_item_widget.dart';
 import 'package:handy_allinone/features/handyman/services/screens/handyman_bookings_screen.dart';
 import 'package:handy_allinone/features/handyman/services/screens/handyman_checkout_screen.dart';
-import 'package:handy_allinone/features/home/widgets/banner_view.dart';
 import 'package:handy_allinone/features/banner/controllers/banner_controller.dart';
+import 'package:handy_allinone/features/favourite/controllers/favourite_controller.dart';
 import 'package:handy_allinone/features/category/controllers/category_controller.dart';
 import 'package:handy_allinone/common/widgets/custom_image.dart';
 import 'package:shimmer/shimmer.dart';
@@ -308,12 +308,20 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
                   List<String> searchWords = [];
                   if (categoryController.categoryList != null && categoryController.categoryList!.isNotEmpty) {
                     searchWords = categoryController.categoryList!
-                        .map((c) => "'${c.name ?? ''}'")
-                        .where((name) => name.length > 2)
+                        .map((c) => (c.name != null && c.name!.trim().isNotEmpty) ? "'${c.name!.trim()}'" : "")
+                        .where((name) => name.isNotEmpty)
                         .toList();
                   }
+
                   if (searchWords.isEmpty) {
-                    searchWords = ["'AC Service'", "'Beauty Salon'", "'Plumbing'", "'Electrical'", "'Cleaning'"];
+                    return Text(
+                      "services...",
+                      style: GoogleFonts.robotoMono(
+                        fontSize: 13,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    );
                   }
 
                   return AnimatedTextKit(
@@ -582,7 +590,7 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
                 const Gap(12),
 
                 // Promotional Banner
-                const BannerView(isFeatured: false),
+                // const BannerView(isFeatured: false),
 
                 const Gap(12),
                 // Most Booked Services Section
@@ -1086,9 +1094,20 @@ class HandymanWishlistScreen extends StatefulWidget {
   @override
   State<HandymanWishlistScreen> createState() => _HandymanWishlistScreenState();
 }
-
 class _HandymanWishlistScreenState extends State<HandymanWishlistScreen> {
   HandymanHomeController get _controller => Get.find<HandymanHomeController>();
+
+  @override
+  void initState() {
+    super.initState();
+    _onRefresh();
+  }
+
+  Future<void> _onRefresh() async {
+    if (Get.isRegistered<FavouriteController>()) {
+      await Get.find<FavouriteController>().getFavouriteList();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1111,93 +1130,101 @@ class _HandymanWishlistScreenState extends State<HandymanWishlistScreen> {
         ),
         centerTitle: true,
       ),
-      body: Obx(() {
-        _controller.allServices.value; // Force reactivity tracking
-        final wishlistedServices = _controller.wishlistedServices;
-        return wishlistedServices.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.favorite_border, size: 80, color: Colors.grey.shade300),
-                  const Gap(16),
-                  Text(
-                    'Your Wishlist is Empty',
-                    style: robotoRegular.copyWith(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.grey.shade700,
-                    ),
-                  ),
-                  const Gap(8),
-                  Text(
-                    'Bookmark your favorite services to book quickly.',
-                    style: robotoRegular.copyWith(
-                      fontSize: 13,
-                      color: Colors.grey.shade400,
-                    ),
-                  ),
-                  const Gap(24),
-                  ElevatedButton(
-                    onPressed: widget.onBackToHome,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF6C63FF),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    ),
-                    child: Text(
-                      'Explore Services',
-                      style: robotoRegular.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            )
-          : LayoutBuilder(
-              builder: (context, constraints) {
-                final screenW = constraints.maxWidth;
-                // Responsive column count
-                final int cols = screenW >= 900
-                    ? 4
-                    : screenW >= 600
-                        ? 3
-                        : 2;
-                final double spacing = 16.0;
-                final double padding = 16.0;
-                // Card width = (available width - padding*2 - spacing*(cols-1)) / cols
-                final double cardW =
-                    (screenW - padding * 2 - spacing * (cols - 1)) / cols;
-                // Image is a square matching the 1:1 aspect ratio of Category services card
-                final double imgH = cardW;
-                // Total card height = image + text area (matches the 140/258 ratio: 1.0 + 0.84)
-                final double cardH = imgH + cardW * 0.84;
+      body: RefreshIndicator(
+        color: const Color(0xFF6C63FF),
+        onRefresh: _onRefresh,
+        child: GetBuilder<FavouriteController>(
+          builder: (favouriteController) {
+            final List<HandymanServiceModel> wishlistedServices = _controller.wishlistedServices;
 
-                return GridView.builder(
-                  padding: EdgeInsets.all(padding),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: cols,
-                    crossAxisSpacing: spacing,
-                    mainAxisSpacing: spacing,
-                    childAspectRatio: cardW / cardH,
+            return wishlistedServices.isEmpty
+              ? SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Container(
+                    height: MediaQuery.of(context).size.height * 0.75,
+                    alignment: Alignment.center,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.favorite_border, size: 80, color: Colors.grey.shade300),
+                        const Gap(16),
+                        Text(
+                          'Your Wishlist is Empty',
+                          style: robotoRegular.copyWith(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                        const Gap(8),
+                        Text(
+                          'Bookmark your favorite services to book quickly.',
+                          style: robotoRegular.copyWith(
+                            fontSize: 13,
+                            color: Colors.grey.shade400,
+                          ),
+                        ),
+                        const Gap(24),
+                        ElevatedButton(
+                          onPressed: widget.onBackToHome,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF6C63FF),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          ),
+                          child: Text(
+                            'Explore Services',
+                            style: robotoRegular.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  itemCount: wishlistedServices.length,
-                  itemBuilder: (context, index) {
-                    final service = wishlistedServices[index];
-                    return _WishlistServiceCard(
-                      service: service,
-                      controller: _controller,
-                      cardWidth: cardW,
+                )
+              : LayoutBuilder(
+                  builder: (context, constraints) {
+                    final screenW = constraints.maxWidth;
+                    final int cols = screenW >= 900
+                        ? 4
+                        : screenW >= 600
+                            ? 3
+                            : 2;
+                    final double spacing = 16.0;
+                    final double padding = 16.0;
+                    final double cardW =
+                        (screenW - padding * 2 - spacing * (cols - 1)) / cols;
+                    final double imgH = cardW;
+                    final double cardH = imgH + cardW * 0.84;
+
+                    return GridView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                      padding: EdgeInsets.all(padding),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: cols,
+                        crossAxisSpacing: spacing,
+                        mainAxisSpacing: spacing,
+                        childAspectRatio: cardW / cardH,
+                      ),
+                      itemCount: wishlistedServices.length,
+                      itemBuilder: (context, index) {
+                        final service = wishlistedServices[index];
+                        return _WishlistServiceCard(
+                          service: service,
+                          controller: _controller,
+                          cardWidth: cardW,
+                        );
+                      },
                     );
                   },
                 );
-              },
-            );
-      }),
+          },
+        ),
+      ),
     );
   }
 }
@@ -1219,8 +1246,7 @@ class _WishlistServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Responsive sizing derived from real card width
-    final double imgH     = cardWidth; // 1:1 aspect ratio square image
+    final double imgH     = cardWidth;
     final double iconSize = (cardWidth * 0.065).clamp(11.0, 16.0);
     final double nameFs   = (cardWidth * 0.10).clamp(11.0, 15.0);
     final double ratingFs = (cardWidth * 0.085).clamp(9.0, 12.0);
@@ -1237,14 +1263,7 @@ class _WishlistServiceCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        Get.bottomSheet(
-          ServiceOptionsBottomSheet(
-            service: service,
-            onOptionAdd: (optionId) => controller.addToCart(service.id),
-          ),
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-        );
+        ServiceOptionsBottomSheet.show(context, service);
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1254,30 +1273,37 @@ class _WishlistServiceCard extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(radius),
-                child: Image.asset(
-                  service.imageAsset,
-                  width: double.infinity,
-                  height: imgH,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
-                    width: double.infinity,
-                    height: imgH,
-                    color: const Color(0xFFEFF6FF),
-                    child: Icon(
-                      Icons.build_rounded,
-                      color: const Color(0xFF6C63FF),
-                      size: imgH * 0.28,
-                    ),
-                  ),
-                ),
+                child: service.imageUrl != null && service.imageUrl!.isNotEmpty
+                    ? CustomImage(
+                        image: service.imageUrl!,
+                        width: double.infinity,
+                        height: imgH,
+                        fit: BoxFit.cover,
+                      )
+                    : Image.asset(
+                        service.imageAsset,
+                        width: double.infinity,
+                        height: imgH,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          width: double.infinity,
+                          height: imgH,
+                          color: const Color(0xFFEFF6FF),
+                          child: Icon(
+                            Icons.build_rounded,
+                            color: const Color(0xFF6C63FF),
+                            size: imgH * 0.28,
+                          ),
+                        ),
+                      ),
               ),
               // Favourite heart icon
               Positioned(
                 top: 6,
                 right: 6,
                 child: Obx(() {
-                  final wishlisted = controller.wishlistedServices
-                      .any((s) => s.id == service.id);
+                  controller.allServices.length;
+                  final wishlisted = controller.isServiceWishlisted(service.id);
                   return GestureDetector(
                     onTap: () => controller.toggleWishlist(service.id),
                     child: AnimatedSwitcher(
@@ -1584,12 +1610,27 @@ class _WishlistQuantityButton extends StatelessWidget {
 // TAB 2: CART SCREEN
 // ----------------------------------------------------
 
-class HandymanCartScreen extends StatelessWidget {
+class HandymanCartScreen extends StatefulWidget {
   final VoidCallback onBackToHome;
   const HandymanCartScreen({super.key, required this.onBackToHome});
 
+  @override
+  State<HandymanCartScreen> createState() => _HandymanCartScreenState();
+}
+
+class _HandymanCartScreenState extends State<HandymanCartScreen> {
   HandymanHomeController get _controller =>
       Get.find<HandymanHomeController>();
+
+  @override
+  void initState() {
+    super.initState();
+    if (Get.isRegistered<CartController>()) {
+      Get.find<CartController>().getCartDataOnline().then((_) {
+        _controller.syncWithCartController();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1600,7 +1641,7 @@ class HandymanCartScreen extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: onBackToHome,
+          onPressed: widget.onBackToHome,
         ),
         title: Text(
           'My Cart',
@@ -1661,67 +1702,94 @@ class HandymanCartScreen extends StatelessWidget {
           }),
         ],
       ),
-      body: Obx(() {
-        _controller.allServices.value; // Force reactivity tracking
+      body: GetBuilder<CartController>(builder: (cartController) {
+        _controller.syncWithCartController(notify: false);
         final cartItems = _controller.cartServices;
+
+        if (cartController.isLoading && cartItems.isEmpty) {
+          return const Center(
+            child: CircularProgressIndicator(color: Color(0xFF6C63FF)),
+          );
+        }
+
         if (cartItems.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.shopping_cart_outlined,
-                    size: 90, color: Colors.grey.shade300),
-                const Gap(16),
-                Text(
-                  'Your Cart is Empty',
-                  style: robotoRegular.copyWith(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.grey.shade700,
+          return RefreshIndicator(
+            onRefresh: () async {
+              await cartController.getCartDataOnline();
+              _controller.syncWithCartController();
+            },
+            color: const Color(0xFF6C63FF),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: SizedBox(
+                height: MediaQuery.of(context).size.height * 0.7,
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.shopping_cart_outlined,
+                          size: 90, color: Colors.grey.shade300),
+                      const Gap(16),
+                      Text(
+                        'Your Cart is Empty',
+                        style: robotoRegular.copyWith(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.grey.shade700,
+                        ),
+                      ),
+                      const Gap(8),
+                      Text(
+                        'Add services to get expert help at your doorstep.',
+                        textAlign: TextAlign.center,
+                        style: robotoRegular.copyWith(
+                          fontSize: 13,
+                          color: Colors.grey.shade400,
+                        ),
+                      ),
+                      const Gap(28),
+                      ElevatedButton.icon(
+                        onPressed: widget.onBackToHome,
+                        icon: const Icon(Icons.explore_outlined,
+                            size: 18, color: Colors.white),
+                        label: Text(
+                          'Explore Services',
+                          style: robotoRegular.copyWith(
+                              fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF6C63FF),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 28, vertical: 14),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const Gap(8),
-                Text(
-                  'Add services to get expert help at your doorstep.',
-                  textAlign: TextAlign.center,
-                  style: robotoRegular.copyWith(
-                    fontSize: 13,
-                    color: Colors.grey.shade400,
-                  ),
-                ),
-                const Gap(28),
-                ElevatedButton.icon(
-                  onPressed: onBackToHome,
-                  icon: const Icon(Icons.explore_outlined,
-                      size: 18, color: Colors.white),
-                  label: Text(
-                    'Explore Services',
-                    style: robotoRegular.copyWith(
-                        fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF6C63FF),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 28, vertical: 14),
-                  ),
-                ),
-              ],
+              ),
             ),
           );
         }
 
-        return Column(
-          children: [
-            // ── Cart item list ──────────────────────────────────────────
-            Expanded(
-              child: ListView.separated(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                itemCount: cartItems.length,
-                separatorBuilder: (_, __) => const Gap(12),
-                itemBuilder: (context, index) {
+        return RefreshIndicator(
+          onRefresh: () async {
+            await cartController.getCartDataOnline();
+            _controller.syncWithCartController();
+          },
+          color: const Color(0xFF6C63FF),
+          child: Column(
+            children: [
+              // ── Cart item list ──────────────────────────────────────────
+              Expanded(
+                child: ListView.separated(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  itemCount: cartItems.length,
+                  separatorBuilder: (_, __) => const Gap(12),
+                  itemBuilder: (context, index) {
                   final service = cartItems[index];
                   return _CartItemCard(
                     service: service,
@@ -1834,10 +1902,11 @@ class HandymanCartScreen extends StatelessWidget {
               ),
             ),
           ],
-        );
-      }),
-    );
-  }
+        ),
+      );
+    }),
+  );
+}
 }
 
 // ─── Single Cart Item Card ────────────────────────────────────────────────────
@@ -1869,18 +1938,37 @@ class _CartItemCard extends StatelessWidget {
           // Service image
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Image.asset(
-              service.imageAsset,
+            child: SizedBox(
               width: 70,
               height: 70,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                width: 70,
-                height: 70,
-                color: const Color(0xFFEFF6FF),
-                child: const Icon(Icons.build_rounded,
-                    color: const Color(0xFF6C63FF), size: 28),
-              ),
+              child: (service.imageUrl != null && service.imageUrl!.isNotEmpty)
+                  ? CustomImage(
+                      image: service.imageUrl!,
+                      fit: BoxFit.cover,
+                      width: 70,
+                      height: 70,
+                    )
+                  : (service.imageAsset.isNotEmpty && !service.imageAsset.startsWith('http'))
+                      ? Image.asset(
+                          service.imageAsset,
+                          fit: BoxFit.cover,
+                          width: 70,
+                          height: 70,
+                          errorBuilder: (_, __, ___) => Container(
+                            width: 70,
+                            height: 70,
+                            color: const Color(0xFFEFF6FF),
+                            child: const Icon(Icons.build_rounded,
+                                color: Color(0xFF6C63FF), size: 28),
+                          ),
+                        )
+                      : Container(
+                          width: 70,
+                          height: 70,
+                          color: const Color(0xFFEFF6FF),
+                          child: const Icon(Icons.build_rounded,
+                              color: Color(0xFF6C63FF), size: 28),
+                        ),
             ),
           ),
           const Gap(14),

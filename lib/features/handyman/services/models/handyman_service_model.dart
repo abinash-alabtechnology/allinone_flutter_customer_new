@@ -1,4 +1,6 @@
+import 'package:get/get.dart';
 import 'package:handy_allinone/features/item/domain/models/item_model.dart';
+import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
 
 class HandymanServiceOption {
   final String id;
@@ -64,34 +66,108 @@ class HandymanServiceModel {
   });
 
   factory HandymanServiceModel.fromItem(Item item) {
+    String? img = item.imageFullUrl ?? (item.image != null && item.image!.isNotEmpty
+        ? (item.image!.startsWith('http')
+            ? item.image
+            : '${Get.find<SplashController>().configModel?.baseUrls?.itemImageUrl}/${item.image}')
+        : null);
+
+    double originalPrice = item.price ?? 0;
+    double discountedPrice = originalPrice;
+    String discountText = '';
+    if (item.discount != null && item.discount! > 0) {
+      if (item.discountType == 'percent') {
+        discountedPrice = originalPrice - (originalPrice * item.discount! / 100);
+        discountText = '${item.discount!.toInt()}% OFF';
+      } else {
+        discountedPrice = originalPrice - item.discount!;
+        discountText = '₹${item.discount!.toInt()} OFF';
+      }
+    }
+
+    List<HandymanServiceOption> optionsList = [];
+    if (item.variations != null && item.variations!.isNotEmpty) {
+      for (var v in item.variations!) {
+        double vOriginal = v.price ?? originalPrice;
+        double vDiscounted = vOriginal;
+        if (item.discount != null && item.discount! > 0) {
+          if (item.discountType == 'percent') {
+            vDiscounted = vOriginal - (vOriginal * item.discount! / 100);
+          } else {
+            vDiscounted = vOriginal - item.discount!;
+          }
+        }
+        optionsList.add(HandymanServiceOption(
+          id: '${item.id}_${v.type ?? 'var'}',
+          title: v.type ?? item.name ?? '',
+          originalPrice: vOriginal.toInt(),
+          discountedPrice: vDiscounted.toInt(),
+          discountText: discountText,
+          subtitle: item.description ?? '',
+          imageAsset: img,
+          rating: item.avgRating ?? 0.0,
+          reviewCount: item.ratingCount?.toString() ?? '0',
+        ));
+      }
+    }
+
+    if (optionsList.isEmpty && item.foodVariations != null && item.foodVariations!.isNotEmpty) {
+      for (var fv in item.foodVariations!) {
+        if (fv.variationValues != null) {
+          for (var vv in fv.variationValues!) {
+            double vOriginal = vv.optionPrice ?? originalPrice;
+            double vDiscounted = vOriginal;
+            if (item.discount != null && item.discount! > 0) {
+              if (item.discountType == 'percent') {
+                vDiscounted = vOriginal - (vOriginal * item.discount! / 100);
+              } else {
+                vDiscounted = vOriginal - item.discount!;
+              }
+            }
+            optionsList.add(HandymanServiceOption(
+              id: '${item.id}_${vv.level ?? 'opt'}',
+              title: '${fv.name ?? ''} - ${vv.level ?? ''}',
+              originalPrice: vOriginal.toInt(),
+              discountedPrice: vDiscounted.toInt(),
+              discountText: discountText,
+              subtitle: item.description ?? '',
+              imageAsset: img,
+              rating: item.avgRating ?? 0.0,
+              reviewCount: item.ratingCount?.toString() ?? '0',
+            ));
+          }
+        }
+      }
+    }
+
+    if (optionsList.isEmpty) {
+      optionsList.add(HandymanServiceOption(
+        id: '${item.id}_opt1',
+        title: item.name ?? '',
+        originalPrice: originalPrice.toInt(),
+        discountedPrice: discountedPrice.toInt(),
+        discountText: discountText,
+        subtitle: item.description ?? '',
+        imageAsset: img,
+        rating: item.avgRating ?? 0.0,
+        reviewCount: item.ratingCount?.toString() ?? '0',
+      ));
+    }
+
     return HandymanServiceModel(
       id: item.id.toString(),
       name: item.name ?? '',
-      category: item.categoryIds != null && item.categoryIds!.isNotEmpty
-          ? item.categoryIds![0].name ?? ''
+      category: (item.categoryIds != null && item.categoryIds!.isNotEmpty && item.categoryIds![0].name != null)
+          ? item.categoryIds![0].name!
           : '',
-      rating: item.avgRating ?? 4.8,
-      reviewCount: item.ratingCount != null ? item.ratingCount.toString() : '100+',
-      startingPrice: item.price?.toInt() ?? 0,
-      optionsCount: item.choiceOptions?.length ?? 1,
+      rating: item.avgRating ?? 0.0,
+      reviewCount: item.ratingCount != null ? item.ratingCount.toString() : '0',
+      startingPrice: discountedPrice.toInt(),
+      optionsCount: optionsList.length > 1 ? optionsList.length : (item.choiceOptions?.length ?? 0),
       imageAsset: '',
-      imageUrl: item.imageFullUrl,
-      options: [
-        HandymanServiceOption(
-          id: '${item.id}_opt1',
-          title: item.name ?? '',
-          originalPrice: item.price?.toInt() ?? 0,
-          discountedPrice: (item.price != null && item.discount != null && item.discount! > 0)
-              ? (item.price! - item.discount!).toInt()
-              : item.price?.toInt() ?? 0,
-          discountText: item.discount != null && item.discount! > 0
-              ? '${item.discount!.toInt()}% OFF'
-              : '',
-          subtitle: item.description ?? '',
-          rating: item.avgRating ?? 4.8,
-          reviewCount: item.ratingCount?.toString() ?? '100+',
-        ),
-      ],
+      imageUrl: img,
+      coverDescription: item.description,
+      options: optionsList.length > 1 ? optionsList : [],
     );
   }
 
@@ -108,6 +184,7 @@ class HandymanServiceModel {
       startingPrice: startingPrice,
       optionsCount: optionsCount,
       imageAsset: imageAsset,
+      imageUrl: imageUrl,
       coverImageAsset: coverImageAsset,
       coverTitle: coverTitle,
       coverDescription: coverDescription,

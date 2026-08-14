@@ -71,6 +71,7 @@ class Item {
   int? id;
   String? name;
   String? description;
+  String? image;
   String? imageFullUrl;
   List<String>? imagesFullUrl;
   int? categoryId;
@@ -159,7 +160,12 @@ class Item {
     id = json['id'];
     name = json['name'];
     description = json['description'];
-    imageFullUrl = json['image_full_url'];
+    image = json['image'];
+    imageFullUrl = json['image_full_url'] ?? (json['image'] != null && json['image'].toString().isNotEmpty
+        ? (json['image'].toString().startsWith('http')
+            ? json['image'].toString()
+            : '${Get.find<SplashController>().configModel?.baseUrls?.itemImageUrl}/${json['image']}')
+        : null);
     if(json['images_full_url'] != null){
       imagesFullUrl = [];
       json['images_full_url'].forEach((v) {

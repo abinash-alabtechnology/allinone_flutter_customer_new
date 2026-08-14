@@ -90,6 +90,7 @@ class ConfigModel {
     String? deliverurl;
     bool? delivarBooking;
     double? expressCheckoutCharge;
+    BaseUrls? baseUrls;
 
   ConfigModel({
     this.businessName,
@@ -179,6 +180,7 @@ class ConfigModel {
     this.deliverurl,
     this.delivarBooking,
     this.expressCheckoutCharge,
+    this.baseUrls,
   });
 
   ConfigModel.fromJson(Map<String, dynamic> json) {
@@ -301,6 +303,7 @@ class ConfigModel {
             || (json['deliver_booking']?.toString().toLowerCase().trim() == '1' || json['deliver_booking']?.toString().toLowerCase().trim() == 'true' || json['deliver_booking']?.toString().toLowerCase().trim() == '1.0' || json['deliver_booking'] == 1 || json['deliver_booking'] == true)
             || (json['delivar_booking_status']?.toString().toLowerCase().trim() == '1' || json['delivar_booking_status']?.toString().toLowerCase().trim() == 'true' || json['delivar_booking_status']?.toString().toLowerCase().trim() == '1.0' || json['delivar_booking_status'] == 1 || json['delivar_booking_status'] == true);
     expressCheckoutCharge = json['express_checkout_charge']?.toDouble() ?? 150.0;
+    baseUrls = json['base_urls'] != null ? BaseUrls.fromJson(json['base_urls']) : null;
   }
 
   Map<String, dynamic> toJson() {

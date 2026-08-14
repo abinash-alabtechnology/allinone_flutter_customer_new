@@ -2,6 +2,12 @@ import 'package:get/get.dart';
 import 'package:handy_allinone/features/handyman/services/models/handyman_service_model.dart';
 import 'package:handy_allinone/features/handyman/services/models/handyman_booking_model.dart';
 import 'package:handy_allinone/util/images.dart';
+import 'package:handy_allinone/features/favourite/controllers/favourite_controller.dart';
+import 'package:handy_allinone/features/item/domain/models/item_model.dart';
+
+import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
+import 'package:handy_allinone/features/cart/controllers/cart_controller.dart';
+import 'package:handy_allinone/features/checkout/domain/models/place_order_body_model.dart';
 
 class CategorySectionModel {
   final int? categoryId;
@@ -45,6 +51,34 @@ class HandymanHomeController extends GetxController {
   }
 
   List<HandymanServiceModel> get wishlistedServices {
+    int? activeModuleId;
+    if (Get.find<SplashController>().module != null && Get.find<SplashController>().module!.id != null) {
+      activeModuleId = Get.find<SplashController>().module!.id;
+    } else {
+      final handymanMod = Get.find<SplashController>().moduleList?.firstWhereOrNull((m) {
+        String title = m.moduleName?.toLowerCase() ?? '';
+        String mType = m.moduleType?.toLowerCase() ?? '';
+        return title.contains('handyman') || mType.contains('handyman');
+      });
+      activeModuleId = handymanMod?.id;
+    }
+
+    if (Get.isRegistered<FavouriteController>()) {
+      final favController = Get.find<FavouriteController>();
+      if (favController.wishItemList != null && favController.wishItemList!.isNotEmpty) {
+        final apiWishList = <HandymanServiceModel>[];
+        for (var item in favController.wishItemList!) {
+          if (item != null) {
+            bool isHandymanModule = (activeModuleId != null && item.moduleId == activeModuleId) ||
+                (item.moduleType?.toLowerCase() == 'handyman');
+            if (isHandymanModule) {
+              apiWishList.add(HandymanServiceModel.fromItem(item));
+            }
+          }
+        }
+        return apiWishList;
+      }
+    }
     return allServices.values.where((s) => s.isWishlisted).toList();
   }
 
@@ -61,33 +95,178 @@ class HandymanHomeController extends GetxController {
   }
 
   // ─── Actions ─────────────────────────────────────────────────────────────────
+  bool isServiceWishlisted(String serviceId) {
+    int? itemId = int.tryParse(serviceId);
+    if (Get.isRegistered<FavouriteController>() && itemId != null) {
+      if (Get.find<FavouriteController>().wishItemIdList.contains(itemId)) {
+        return true;
+      }
+    }
+    final s = allServices[serviceId];
+    return s?.isWishlisted ?? false;
+  }
+
   void toggleWishlist(String serviceId) {
     final s = allServices[serviceId];
-    if (s != null) {
+    int? itemId = int.tryParse(serviceId);
+    if (Get.isRegistered<FavouriteController>() && itemId != null) {
+      final favController = Get.find<FavouriteController>();
+      bool currentlyWishlisted = favController.wishItemIdList.contains(itemId) || (s?.isWishlisted ?? false);
+      if (currentlyWishlisted) {
+        favController.removeFromFavouriteList(itemId, false, getXSnackBar: true);
+        if (s != null) s.isWishlisted = false;
+      } else {
+        favController.addToFavouriteList(Item(id: itemId), null, false, getXSnackBar: true);
+        if (s != null) s.isWishlisted = true;
+      }
+    } else if (s != null) {
       s.isWishlisted = !s.isWishlisted;
+    }
+    _refreshAll();
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    _loadData();
+    if (Get.isRegistered<CartController>()) {
+      Get.find<CartController>().getCartDataOnline().then((_) {
+        syncWithCartController();
+      });
+    }
+  }
+
+  void syncWithCartController({bool notify = true}) {
+    if (!Get.isRegistered<CartController>()) return;
+    final cartList = Get.find<CartController>().cartList;
+
+    for (var s in allServices.values) {
+      s.cartQuantity = 0;
+      for (var o in s.options) {
+        o.quantity = 0;
+      }
+    }
+
+    for (var cart in cartList) {
+      if (cart.item != null) {
+        String idStr = cart.item!.id.toString();
+        if (!allServices.containsKey(idStr)) {
+          allServices[idStr] = HandymanServiceModel.fromItem(cart.item!);
+        }
+        allServices[idStr]!.cartQuantity = cart.quantity ?? 0;
+        if (allServices[idStr]!.options.length == 1) {
+          allServices[idStr]!.options[0].quantity = cart.quantity ?? 0;
+        }
+      }
+    }
+    if (notify) {
       _refreshAll();
     }
   }
 
-  void addToCart(String serviceId) {
+  Future<void> addToCart(String serviceId) async {
     final s = allServices[serviceId];
-    if (s != null) {
-      s.cartQuantity++;
-      if (s.options.length == 1) {
-        s.options[0].quantity++;
+    int? itemId = int.tryParse(serviceId);
+    if (itemId == null) return;
+
+    if (Get.isRegistered<CartController>()) {
+      final cartController = Get.find<CartController>();
+      int cartIndex = cartController.cartList.indexWhere((c) => c.item?.id == itemId);
+
+      if (cartIndex != -1) {
+        final cartModel = cartController.cartList[cartIndex];
+        int newQty = (cartModel.quantity ?? 0) + 1;
+        if (s != null) {
+          s.cartQuantity = newQty;
+          if (s.options.length == 1) s.options[0].quantity = newQty;
+        }
+        _refreshAll();
+        if (cartModel.id != null) {
+          await cartController.updateCartQuantityOnline(
+            cartModel.id!,
+            (s?.startingPrice ?? cartModel.price?.toInt() ?? 0).toDouble(),
+            newQty,
+          );
+        }
+      } else {
+        double price = (s?.startingPrice ?? 0).toDouble();
+        if (s != null) {
+          s.cartQuantity = 1;
+          if (s.options.length == 1) s.options[0].quantity = 1;
+        }
+        _refreshAll();
+
+        OnlineCart onlineCart = OnlineCart(
+          null,
+          itemId,
+          null,
+          price.toString(),
+          '',
+          null,
+          [],
+          1,
+          [],
+          [],
+          [],
+          'Item',
+          false,
+        );
+        await cartController.addToCartOnline(onlineCart);
       }
-      _refreshAll();
+      syncWithCartController();
+    } else {
+      if (s != null) {
+        s.cartQuantity++;
+        if (s.options.length == 1) s.options[0].quantity++;
+        _refreshAll();
+      }
     }
   }
 
-  void removeFromCart(String serviceId) {
+  Future<void> removeFromCart(String serviceId) async {
     final s = allServices[serviceId];
-    if (s != null && s.cartQuantity > 0) {
-      s.cartQuantity--;
-      if (s.options.length == 1 && s.options[0].quantity > 0) {
-        s.options[0].quantity--;
+    int? itemId = int.tryParse(serviceId);
+    if (itemId == null) return;
+
+    if (Get.isRegistered<CartController>()) {
+      final cartController = Get.find<CartController>();
+      int cartIndex = cartController.cartList.indexWhere((c) => c.item?.id == itemId);
+
+      if (cartIndex != -1) {
+        final cartModel = cartController.cartList[cartIndex];
+        int currentQty = cartModel.quantity ?? 0;
+        if (currentQty > 1) {
+          int newQty = currentQty - 1;
+          if (s != null) {
+            s.cartQuantity = newQty;
+            if (s.options.length == 1) s.options[0].quantity = newQty;
+          }
+          _refreshAll();
+          if (cartModel.id != null) {
+            await cartController.updateCartQuantityOnline(
+              cartModel.id!,
+              (s?.startingPrice ?? cartModel.price?.toInt() ?? 0).toDouble(),
+              newQty,
+            );
+          }
+        } else {
+          if (s != null) {
+            s.cartQuantity = 0;
+            if (s.options.length == 1) s.options[0].quantity = 0;
+          }
+          _refreshAll();
+          if (cartModel.id != null) {
+            await cartController.removeCartItemOnline(cartModel.id!);
+          }
+        }
       }
-      _refreshAll();
+      syncWithCartController();
+    } else {
+      if (s != null && s.cartQuantity > 0) {
+        s.cartQuantity--;
+        if (s.options.length == 1 && s.options[0].quantity > 0) s.options[0].quantity--;
+        _refreshAll();
+      }
     }
   }
 
@@ -100,30 +279,14 @@ class HandymanHomeController extends GetxController {
   }
 
   void addOptionToCart(String serviceId, String optionId) {
-    final s = allServices[serviceId];
-    if (s != null) {
-      s.cartQuantity++;
-      final opt = s.options.firstWhereOrNull((o) => o.id == optionId);
-      if (opt != null) {
-        opt.quantity++;
-      }
-      _refreshAll();
-    }
+    addToCart(serviceId);
   }
 
   void removeOptionFromCart(String serviceId, String optionId) {
-    final s = allServices[serviceId];
-    if (s != null) {
-      final opt = s.options.firstWhereOrNull((o) => o.id == optionId);
-      if (opt != null && opt.quantity > 0) {
-        opt.quantity--;
-        if (s.cartQuantity > 0) s.cartQuantity--;
-      }
-      _refreshAll();
-    }
+    removeFromCart(serviceId);
   }
 
-  void clearCart() {
+  Future<void> clearCart() async {
     for (final s in allServices.values) {
       s.cartQuantity = 0;
       for (final o in s.options) {
@@ -131,6 +294,11 @@ class HandymanHomeController extends GetxController {
       }
     }
     _refreshAll();
+
+    if (Get.isRegistered<CartController>()) {
+      await Get.find<CartController>().clearCartOnline();
+      syncWithCartController();
+    }
   }
 
   void _refreshAll() {
@@ -139,12 +307,7 @@ class HandymanHomeController extends GetxController {
     categorySections.refresh();
   }
 
-  // ─── Lifecycle ────────────────────────────────────────────────────────────────
-  @override
-  void onInit() {
-    super.onInit();
-    _loadData();
-  }
+
 
   // ─── Data ────────────────────────────────────────────────────────────────────
   void _loadData() {

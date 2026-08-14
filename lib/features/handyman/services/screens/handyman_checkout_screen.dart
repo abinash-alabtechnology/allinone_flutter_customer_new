@@ -12,6 +12,10 @@ import 'package:handy_allinone/features/handyman/services/screens/handyman_servi
 import 'package:handy_allinone/helper/address_helper.dart';
 import 'package:handy_allinone/helper/price_converter.dart';
 import 'package:handy_allinone/util/styles.dart';
+import 'package:handy_allinone/features/checkout/controllers/checkout_controller.dart';
+import 'package:handy_allinone/features/checkout/domain/models/place_order_body_model.dart';
+import 'package:handy_allinone/helper/auth_helper.dart';
+import 'package:handy_allinone/helper/module_helper.dart';
 
 class HandymanCheckoutScreen extends StatefulWidget {
   const HandymanCheckoutScreen({super.key});
@@ -692,6 +696,59 @@ class _HandymanCheckoutScreenState extends State<HandymanCheckoutScreen> {
 
                   const Gap(24),
 
+                  // 5.5 Payment Method (COD for Handyman)
+                  _buildSectionTitle('Payment Method'),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color(0xFF6C63FF).withOpacity(0.3), width: 1.5),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEFF6FF),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(Icons.money_rounded, color: Color(0xFF6C63FF), size: 24),
+                          ),
+                          const Gap(14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Cash On Delivery (COD)',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFF1F2937),
+                                  ),
+                                ),
+                                const Gap(2),
+                                Text(
+                                  'Pay with cash after service completion',
+                                  style: robotoRegular.copyWith(
+                                    fontSize: 11.5.sp,
+                                    color: Colors.grey.shade500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Icon(Icons.check_circle_rounded, color: Color(0xFF6C63FF), size: 22),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const Gap(24),
+
                   // 6. Cart Summary List
                   _buildSectionTitle('Cart Summary'),
                   Container(
@@ -901,7 +958,7 @@ class _HandymanCheckoutScreenState extends State<HandymanCheckoutScreen> {
                     width: 170.w,
                     height: 48.h,
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (!_agreeToTerms) {
                           Get.snackbar(
                             'Validation Error',
@@ -923,6 +980,73 @@ class _HandymanCheckoutScreenState extends State<HandymanCheckoutScreen> {
                             margin: const EdgeInsets.all(16),
                           );
                           return;
+                        }
+
+                        // Build PlaceOrderBodyModel for API checkout via COD
+                        List<OnlineCart> onlineCarts = [];
+                        for (var item in cartItems) {
+                          int? itemId = int.tryParse(item.id);
+                          onlineCarts.add(OnlineCart(
+                            null,
+                            itemId,
+                            null,
+                            item.startingPrice.toString(),
+                            '',
+                            null,
+                            [],
+                            item.cartQuantity,
+                            [],
+                            [],
+                            [],
+                            'Item',
+                            false,
+                          ));
+                        }
+
+                        PlaceOrderBodyModel placeOrderBody = PlaceOrderBodyModel(
+                          cart: onlineCarts,
+                          couponDiscountAmount: 0.0,
+                          couponCode: '',
+                          orderAmount: grandTotal,
+                          orderType: 'delivery',
+                          paymentMethod: 'cash_on_delivery',
+                          storeId: null,
+                          distance: 0.0,
+                          scheduleAt: _preferableTime == 'ASAP' ? null : _preferableTime,
+                          discountAmount: discount,
+                          taxAmount: vat,
+                          orderNote: '',
+                          address: userAddress?.address ?? '',
+                          receiverDetails: null,
+                          latitude: userAddress?.latitude ?? '',
+                          longitude: userAddress?.longitude ?? '',
+                          contactPersonName: _contactName,
+                          contactPersonNumber: _contactPhone,
+                          addressType: userAddress?.addressType ?? 'home',
+                          parcelCategoryId: null,
+                          chargePayer: null,
+                          dmTips: '0',
+                          unavailableItemNote: '',
+                          cutlery: 0,
+                          partialPayment: 0,
+                          guestId: AuthHelper.isLoggedIn() ? 0 : (AuthHelper.getGuestId() != null ? int.tryParse(AuthHelper.getGuestId()!) ?? 0 : 0),
+                          isBuyNow: 0,
+                          extraPackagingAmount: 0.0,
+                          createNewUser: 0,
+                          password: '',
+                        );
+
+                        if (Get.isRegistered<CheckoutController>()) {
+                          int? zoneId = userAddress?.zoneId ?? (ModuleHelper.getModule()?.id);
+                          await Get.find<CheckoutController>().placeOrder(
+                            placeOrderBody,
+                            zoneId,
+                            grandTotal,
+                            0.0,
+                            true,
+                            true,
+                            [],
+                          );
                         }
 
                         // Order placement logic

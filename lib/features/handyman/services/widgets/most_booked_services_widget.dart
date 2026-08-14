@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:handy_allinone/util/styles.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:handy_allinone/features/handyman/services/controllers/handyman_home_controller.dart';
 import 'package:handy_allinone/features/handyman/services/widgets/service_options_bottom_sheet.dart';
 import 'package:handy_allinone/features/handyman/services/models/handyman_service_model.dart';
@@ -99,16 +98,7 @@ class _ServiceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Get.bottomSheet(
-          ServiceOptionsBottomSheet(
-            service: service,
-            onOptionAdd: (optionId) {
-              controller.addToCart(service.id);
-            },
-          ),
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-        );
+        ServiceOptionsBottomSheet.show(context, service);
       },
       child: Container(
         width: 162,
@@ -164,10 +154,8 @@ class _ServiceCard extends StatelessWidget {
                 top: 8,
                 right: 8,
                 child: Obx(() {
-                  final wishlisted = controller
-                      .mostBookedServices
-                      .firstWhereOrNull((s) => s.id == service.id)
-                      ?.isWishlisted ?? false;
+                  controller.allServices.length;
+                  final wishlisted = controller.isServiceWishlisted(service.id);
                   return GestureDetector(
                     onTap: () => controller.toggleWishlist(service.id),
                     child: AnimatedSwitcher(
@@ -305,16 +293,7 @@ class _ServiceCard extends StatelessWidget {
                                       duration: const Duration(seconds: 2),
                                     );
                                   } else {
-                                    Get.bottomSheet(
-                                      ServiceOptionsBottomSheet(
-                                        service: service,
-                                        onOptionAdd: (optionId) {
-                                          controller.addToCart(service.id);
-                                        },
-                                      ),
-                                      isScrollControlled: true,
-                                      backgroundColor: Colors.transparent,
-                                    );
+                                     ServiceOptionsBottomSheet.show(context, service);
                                   }
                                 },
                               )

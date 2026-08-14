@@ -49,7 +49,23 @@ class ItemRepository implements ItemRepositoryInterface {
 
   Future<Item?> _getItemDetails(int? itemID) async {
     Item? item;
-    Response response = await apiClient.getData('${AppConstants.itemDetailsUri}$itemID');
+    Map<String, String> reqHeaders = Map.from(apiClient.getHeader());
+    reqHeaders['Content-Type'] = 'application/json; charset=UTF-8';
+    int? activeModuleId;
+    if (Get.find<SplashController>().module != null && Get.find<SplashController>().module!.id != null) {
+      activeModuleId = Get.find<SplashController>().module!.id;
+    } else {
+      final handymanMod = Get.find<SplashController>().moduleList?.firstWhereOrNull((m) {
+        String title = m.moduleName?.toLowerCase() ?? '';
+        String mType = m.moduleType?.toLowerCase() ?? '';
+        return title.contains('handyman') || mType.contains('handyman');
+      });
+      activeModuleId = handymanMod?.id;
+    }
+    if (activeModuleId != null) {
+      reqHeaders[AppConstants.moduleId] = activeModuleId.toString();
+    }
+    Response response = await apiClient.getData('${AppConstants.itemDetailsUri}$itemID', headers: reqHeaders);
     if (response.statusCode == 200) {
       item = Item.fromJson(response.body);
     }
