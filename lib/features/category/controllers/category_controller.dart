@@ -211,6 +211,19 @@ class CategoryController extends GetxController implements GetxService {
     _loadingStatusByCategory[categoryID] = false;
     update();
   }
+
+  void clearCategoryCache() {
+    _itemsByCategory.clear();
+    _loadingStatusByCategory.clear();
+    if (_categoryList != null && _categoryList!.isNotEmpty) {
+      for (var cat in _categoryList!) {
+        if (cat.id != null) {
+          fetchItemsForCategory(cat.id.toString(), 1, 'all', true);
+        }
+      }
+    }
+    update();
+  }
   void getSubCategoryList(String? categoryID) async {
     _subCategoryIndex = 0;
     _subCategoryList = null;

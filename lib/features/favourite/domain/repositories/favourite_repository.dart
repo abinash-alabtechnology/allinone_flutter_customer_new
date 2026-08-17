@@ -5,6 +5,7 @@ import 'package:handy_allinone/features/favourite/domain/repositories/favourite_
 import 'package:handy_allinone/util/app_constants.dart';
 
 import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
+import 'package:handy_allinone/features/handyman/services/controllers/handyman_home_controller.dart';
 
 class FavouriteRepository implements FavouriteRepositoryInterface<ResponseModel> {
   final ApiClient apiClient;
@@ -31,7 +32,14 @@ class FavouriteRepository implements FavouriteRepositoryInterface<ResponseModel>
 
   @override
   Future<Response> getList({int? offset}) async {
-    return await apiClient.getData(AppConstants.wishListGetUri, headers: _getModuleHeaders());
+    String? serviceType = Get.isRegistered<HandymanHomeController>()
+        ? Get.find<HandymanHomeController>().selectedServiceType
+        : null;
+    String url = AppConstants.wishListGetUri;
+    if (serviceType != null && serviceType.isNotEmpty) {
+      url = '$url${url.contains('?') ? '&' : '?'}service_type=$serviceType';
+    }
+    return await apiClient.getData(url, headers: _getModuleHeaders());
   }
 
   @override

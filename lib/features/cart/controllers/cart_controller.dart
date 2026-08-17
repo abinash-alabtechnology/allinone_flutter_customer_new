@@ -15,6 +15,7 @@ import 'package:handy_allinone/helper/auth_helper.dart';
 import 'package:handy_allinone/helper/date_converter.dart';
 import 'package:handy_allinone/helper/module_helper.dart';
 import 'package:handy_allinone/helper/price_converter.dart';
+import 'package:handy_allinone/features/handyman/services/controllers/handyman_home_controller.dart';
 
 class CartController extends GetxController implements GetxService {
   final CartServiceInterface cartServiceInterface;
@@ -125,7 +126,39 @@ class CartController extends GetxController implements GetxService {
     }
   }
 
+  void filterCartByCurrentModule() {
+    final activeModule = ModuleHelper.getModule() ?? ModuleHelper.getCacheModule();
+    if (activeModule == null) return;
+
+    _cartList.removeWhere((cartModel) {
+      if (cartModel.item == null) return true;
+
+      bool matches = false;
+
+      if (activeModule.id != null && activeModule.id! > 0 &&
+          cartModel.item!.moduleId != null && cartModel.item!.moduleId! > 0) {
+        if (cartModel.item!.moduleId == activeModule.id) {
+          matches = true;
+        }
+      }
+
+      if (activeModule.moduleType != null && activeModule.moduleType!.isNotEmpty &&
+          cartModel.item!.moduleType != null && cartModel.item!.moduleType!.isNotEmpty) {
+        if (cartModel.item!.moduleType!.toLowerCase() == activeModule.moduleType!.toLowerCase()) {
+          matches = true;
+        }
+      }
+
+      if (activeModule.id == null && (activeModule.moduleType == null || activeModule.moduleType!.isEmpty)) {
+        matches = true;
+      }
+
+      return !matches;
+    });
+  }
+
   double calculationCart() {
+    filterCartByCurrentModule();
     _addOnsList = [];
     _availableList = [];
     _itemPrice = 0;
@@ -183,6 +216,9 @@ class CartController extends GetxController implements GetxService {
     await cartServiceInterface.addSharedPrefCartList(_cartList);
 
     calculationCart();
+    if (Get.isRegistered<HandymanHomeController>()) {
+      Get.find<HandymanHomeController>().syncWithCartController();
+    }
     update();
   }
 
@@ -226,6 +262,10 @@ class CartController extends GetxController implements GetxService {
     }
 
     cartItem.quantity = newQty;
+    calculationCart();
+    if (Get.isRegistered<HandymanHomeController>()) {
+      Get.find<HandymanHomeController>().syncWithCartController();
+    }
     update();
 
     unawaited(() async {
@@ -240,11 +280,13 @@ class CartController extends GetxController implements GetxService {
         hasNewVariation,
       );
 
-      await updateCartQuantityOnline(
-        cartItem.id!,
-        discountedPrice,
-        newQty,
-      );
+      if (cartItem.id != null) {
+        await updateCartQuantityOnline(
+          cartItem.id!,
+          discountedPrice,
+          newQty,
+        );
+      }
 
       if (hasNewVariation) {
         await Get.find<ItemController>()
@@ -282,6 +324,10 @@ class CartController extends GetxController implements GetxService {
     int cartId = _cartList[index].id!;
     _loadingItemId = _cartList[index].item?.id;
     _cartList.removeAt(index);
+    calculationCart();
+    if (Get.isRegistered<HandymanHomeController>()) {
+      Get.find<HandymanHomeController>().syncWithCartController();
+    }
     update();
     Get.find<ItemController>().cartIndexSet();
     await removeCartItemOnline(cartId, item: item);
@@ -295,6 +341,9 @@ class CartController extends GetxController implements GetxService {
   Future<void> clearCartList({bool canRemoveOnline = true}) async {
     _cartList = [];
     calculationCart();
+    if (Get.isRegistered<HandymanHomeController>()) {
+      Get.find<HandymanHomeController>().syncWithCartController();
+    }
     update();
     if((AuthHelper.isLoggedIn() || AuthHelper.isGuestLoggedIn()) && (ModuleHelper.getModule() != null || ModuleHelper.getCacheModule() != null) && canRemoveOnline) {
       clearCartOnline();
@@ -331,6 +380,8 @@ class CartController extends GetxController implements GetxService {
       _cartList.addAll(cartServiceInterface.formatOnlineCartToLocalCart(onlineCartModel: onlineCartList));
       calculationCart();
       success = true;
+    } else {
+      await getCartDataOnline();
     }
     _isLoading = false;
     _isSubscriptionLoading = false;
@@ -386,6 +437,9 @@ class CartController extends GetxController implements GetxService {
         _cartList = [];
         _cartList.addAll(cartServiceInterface.formatOnlineCartToLocalCart(onlineCartModel: onlineCartList));
         calculationCart();
+        if (Get.isRegistered<HandymanHomeController>()) {
+          Get.find<HandymanHomeController>().syncWithCartController();
+        }
       }
       _isLoading = false;
       _isSubscriptionLoading = false;
@@ -398,6 +452,14 @@ class CartController extends GetxController implements GetxService {
     _isLoading = true;
     if (item != null) {
       _loadingItemId = item.id;
+    }
+    int index = _cartList.indexWhere((element) => element.id == cartId);
+    if (index != -1) {
+      _cartList.removeAt(index);
+      calculationCart();
+      if (Get.isRegistered<HandymanHomeController>()) {
+        Get.find<HandymanHomeController>().syncWithCartController();
+      }
     }
     update();
     bool success = await cartServiceInterface.removeCartItemOnline(cartId);
@@ -418,6 +480,11 @@ class CartController extends GetxController implements GetxService {
       _isSubscriptionLoading = true;
     } else {
       _isLoading = true;
+    }
+    _cartList = [];
+    calculationCart();
+    if (Get.isRegistered<HandymanHomeController>()) {
+      Get.find<HandymanHomeController>().syncWithCartController();
     }
     update();
     bool success = await cartServiceInterface.clearCartOnline();

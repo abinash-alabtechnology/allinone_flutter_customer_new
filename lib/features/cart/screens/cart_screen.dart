@@ -46,9 +46,7 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Future<void> initCall() async {
-    if(Get.find<CartController>().cartList.isEmpty) {
-      await Get.find<CartController>().getCartDataOnline();
-    }
+    await Get.find<CartController>().getCartDataOnline();
     if(Get.find<CartController>().cartList.isNotEmpty){
       Get.find<CartController>().setAvailableIndex(-1, willUpdate: false);
       Get.find<StoreController>().getCartStoreSuggestedItemList(Get.find<CartController>().cartList[0].item!.storeId);
@@ -60,43 +58,40 @@ class _CartScreenState extends State<CartScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      appBar: CustomAppBar3(
-        backButton: true,
-        onBackPressed: () => Get.back(),
-        bgcolor: Colors.white,
-        textcolor: Colors.black,
-        iconcolor: Colors.black,
-        title: "Your Cart (${Get.find<CartController>().cartList.length} Items)",
-      ),
-      endDrawer: const MenuDrawer(),
-      endDrawerEnableOpenDragGesture: false,
-      body: GetBuilder<CartController>(builder: (cartController) {
-        if (cartController.cartList.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const NoDataScreen(isCart: true, text: '', showFooter: true),
-                const SizedBox(height: Dimensions.paddingSizeLarge),
-                CustomButton(
-                  buttonText: 'Shop Now'.tr,
-                  width: 200,
-                  onPressed: () => Get.offAllNamed(RouteHelper.getInitialRoute()),
+    bool isPharmacy = Get.find<SplashController>().module?.moduleType == 'pharmacy';
+    bool isFood = Get.find<SplashController>().module != null && Get.find<SplashController>().module!.moduleType.toString() == AppConstants.food;
+
+    return GetBuilder<CartController>(builder: (cartController) {
+      return Scaffold(
+        backgroundColor: const Color(0xFFF8FAFC),
+        appBar: CustomAppBar3(
+          backButton: true,
+          onBackPressed: () => Get.back(),
+          bgcolor: Colors.white,
+          textcolor: Colors.black,
+          iconcolor: Colors.black,
+          title: "Your Cart (${cartController.cartList.length} Items)",
+        ),
+        endDrawer: const MenuDrawer(),
+        endDrawerEnableOpenDragGesture: false,
+        body: cartController.cartList.isEmpty
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const NoDataScreen(isCart: true, text: '', showFooter: true),
+                    const SizedBox(height: Dimensions.paddingSizeLarge),
+                    CustomButton(
+                      buttonText: 'Shop Now'.tr,
+                      width: 200,
+                      onPressed: () => Get.offAllNamed(RouteHelper.getInitialRoute()),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          );
-        }
-
-
-        bool isPharmacy = Get.find<SplashController>().module?.moduleType == 'pharmacy';
-        bool isFood = Get.find<SplashController>().module != null && Get.find<SplashController>().module!.moduleType.toString() == AppConstants.food;
-
-        return Column(
-          children: [
-            Expanded(
+              )
+            : Column(
+                children: [
+                  Expanded(
               child: SingleChildScrollView(
                 controller: scrollController,
                 child: Center(
@@ -309,9 +304,9 @@ class _CartScreenState extends State<CartScreen> {
               ),
             ),
           ],
-        );
-      }),
-    );
+        ),
+      );
+    });
   }
 
   void _showInstructionsBottomSheet(BuildContext context, CheckoutController checkoutController) {

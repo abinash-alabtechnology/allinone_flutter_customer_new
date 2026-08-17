@@ -5,9 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:handy_allinone/features/handyman/services/controllers/handyman_home_controller.dart';
-import 'package:handy_allinone/features/handyman/services/models/handyman_service_model.dart';
-import 'package:handy_allinone/features/handyman/services/models/handyman_booking_model.dart';
-import 'package:handy_allinone/features/handyman/services/screens/handyman_bookings_screen.dart';
 import 'package:handy_allinone/features/handyman/services/screens/handyman_services_screen.dart';
 import 'package:handy_allinone/helper/address_helper.dart';
 import 'package:handy_allinone/helper/price_converter.dart';
@@ -15,7 +12,14 @@ import 'package:handy_allinone/util/styles.dart';
 import 'package:handy_allinone/features/checkout/controllers/checkout_controller.dart';
 import 'package:handy_allinone/features/checkout/domain/models/place_order_body_model.dart';
 import 'package:handy_allinone/helper/auth_helper.dart';
+import 'package:handy_allinone/features/cart/controllers/cart_controller.dart';
 import 'package:handy_allinone/helper/module_helper.dart';
+import 'package:handy_allinone/features/profile/controllers/profile_controller.dart';
+import 'package:handy_allinone/features/address/domain/models/address_model.dart';
+import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
+import 'package:handy_allinone/api/api_client.dart';
+import 'package:handy_allinone/util/app_constants.dart';
+import 'package:handy_allinone/helper/date_converter.dart';
 
 class HandymanCheckoutScreen extends StatefulWidget {
   const HandymanCheckoutScreen({super.key});
@@ -26,7 +30,8 @@ class HandymanCheckoutScreen extends StatefulWidget {
 
 class _HandymanCheckoutScreenState extends State<HandymanCheckoutScreen> {
   // State variables
-  String _preferableTime = 'ASAP';
+  late String _preferableTime;
+  late DateTime _scheduledDateTime;
   bool _isProviderLocation = true;
   String _contactName = '';
   String _contactPhone = '';
@@ -34,6 +39,42 @@ class _HandymanCheckoutScreenState extends State<HandymanCheckoutScreen> {
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _isProviderLocation = false;
+    final now = DateTime.now();
+    _scheduledDateTime = DateTime(now.year, now.month, now.day + 1, 10, 0);
+    final formattedDate = intl.DateFormat('MMM dd, yyyy').format(_scheduledDateTime);
+    final formattedTime = intl.DateFormat('hh:mm a').format(_scheduledDateTime);
+    _preferableTime = '$formattedDate at $formattedTime';
+    _initCustomerDetailsAndAddress();
+  }
+
+  void _initCustomerDetailsAndAddress() {
+    if (Get.isRegistered<ProfileController>()) {
+      final user = Get.find<ProfileController>().userInfoModel;
+      if (user != null) {
+        String name = '${user.fName ?? ''} ${user.lName ?? ''}'.trim();
+        if (name.isNotEmpty) _contactName = name;
+        if (user.phone != null && user.phone!.isNotEmpty) _contactPhone = user.phone!;
+      }
+    }
+
+    final AddressModel? savedAddress = AddressHelper.getUserAddressFromSharedPref();
+    if (savedAddress != null) {
+      if (_contactName.isEmpty && savedAddress.contactPersonName != null && savedAddress.contactPersonName!.isNotEmpty) {
+        _contactName = savedAddress.contactPersonName!;
+      }
+      if (_contactPhone.isEmpty && savedAddress.contactPersonNumber != null && savedAddress.contactPersonNumber!.isNotEmpty) {
+        _contactPhone = savedAddress.contactPersonNumber!;
+      }
+    }
+
+    _nameController.text = _contactName;
+    _phoneController.text = _contactPhone;
+  }
 
   @override
   void dispose() {
@@ -194,76 +235,53 @@ class _HandymanCheckoutScreenState extends State<HandymanCheckoutScreen> {
     );
   }
 
-  void _showTimePickerBottomSheet() {
-    Get.bottomSheet(
-      Container(
-        padding: const EdgeInsets.all(20),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Select Preferable Time',
-              style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const Gap(16),
-            ListTile(
-              leading: const Icon(Icons.flash_on, color: Colors.amber),
-              title: const Text('ASAP (As Soon As Possible)'),
-              onTap: () {
-                setState(() {
-                  _preferableTime = 'ASAP';
-                });
-                Get.back();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.calendar_month, color: Color(0xFF6C63FF)),
-              title: const Text('Schedule for Later'),
-              onTap: () async {
-                Get.back();
-                final DateTime? pickedDate = await showDatePicker(
-                  context: context,
-                  initialDate: DateTime.now(),
-                  firstDate: DateTime.now(),
-                  lastDate: DateTime.now().add(const Duration(days: 30)),
-                  builder: (context, child) {
-                    return Theme(
-                      data: Theme.of(context).copyWith(
-                        colorScheme: const ColorScheme.light(
-                          primary: Color(0xFF6C63FF),
-                        ),
-                      ),
-                      child: child!,
-                    );
-                  },
-                );
+  void _showTimePickerBottomSheet() async {
+    final DateTime now = DateTime.now();
+    final DateTime initialDate = _scheduledDateTime.isAfter(now) ? _scheduledDateTime : now.add(const Duration(days: 1));
 
-                if (pickedDate != null) {
-                  final TimeOfDay? pickedTime = await showTimePicker(
-                    context: context,
-                    initialTime: TimeOfDay.now(),
-                  );
-
-                  if (pickedTime != null) {
-                    final formattedDate = intl.DateFormat('MMM dd, yyyy').format(pickedDate);
-                    final formattedTime = pickedTime.format(context);
-                    setState(() {
-                      _preferableTime = '$formattedDate at $formattedTime';
-                    });
-                  }
-                }
-              },
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: now,
+      lastDate: now.add(const Duration(days: 30)),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFF6C63FF),
             ),
-          ],
-        ),
-      ),
-      backgroundColor: Colors.transparent,
+          ),
+          child: child!,
+        );
+      },
     );
+
+    if (pickedDate != null) {
+      if (!mounted) return;
+      final TimeOfDay initialTime = TimeOfDay(hour: _scheduledDateTime.hour, minute: _scheduledDateTime.minute);
+      final TimeOfDay? pickedTime = await showTimePicker(
+        context: context,
+        initialTime: initialTime,
+      );
+
+      if (pickedTime != null) {
+        final DateTime selectedDateTime = DateTime(
+          pickedDate.year,
+          pickedDate.month,
+          pickedDate.day,
+          pickedTime.hour,
+          pickedTime.minute,
+        );
+
+        final formattedDate = intl.DateFormat('MMM dd, yyyy').format(selectedDateTime);
+        final formattedTime = intl.DateFormat('hh:mm a').format(selectedDateTime);
+
+        setState(() {
+          _scheduledDateTime = selectedDateTime;
+          _preferableTime = '$formattedDate at $formattedTime';
+        });
+      }
+    }
   }
 
   @override
@@ -374,11 +392,11 @@ class _HandymanCheckoutScreenState extends State<HandymanCheckoutScreen> {
                               ),
                             ),
                             Text(
-                              'Payment',
+                              'Confirm Order',
                               style: GoogleFonts.inter(
                                 fontSize: 11.sp,
-                                fontWeight: FontWeight.w500,
-                                color: const Color(0xFF9CA3AF),
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF6C63FF),
                               ),
                             ),
                             Text(
@@ -397,8 +415,8 @@ class _HandymanCheckoutScreenState extends State<HandymanCheckoutScreen> {
 
                   const Gap(24),
 
-                  // 2. Preferable Time
-                  _buildSectionTitle('Preferable Time'),
+                  // 2. Schedule Order
+                  _buildSectionTitle('Schedule Order'),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: InkWell(
@@ -432,83 +450,7 @@ class _HandymanCheckoutScreenState extends State<HandymanCheckoutScreen> {
                     ),
                   ),
 
-                  const Gap(20),
 
-                  // 3. Getting Service at
-                  Row(
-                    children: [
-                      _buildSectionTitle('Getting Service at'),
-                      const Gap(4),
-                      Icon(Icons.help_outline_rounded, color: const Color(0xFF6C63FF), size: 16.sp),
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: const Color(0xFFE5E7EB), width: 1.2),
-                      ),
-                      child: Row(
-                        children: [
-                          // My Location option
-                          Expanded(
-                            child: InkWell(
-                              onTap: () => setState(() => _isProviderLocation = false),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    _isProviderLocation
-                                        ? Icons.radio_button_off_rounded
-                                        : Icons.radio_button_on_rounded,
-                                    color: _isProviderLocation ? const Color(0xFF9CA3AF) : const Color(0xFF6C63FF),
-                                    size: 22.sp,
-                                  ),
-                                  const Gap(8),
-                                  Text(
-                                    'My Location',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 13.5.sp,
-                                      fontWeight: FontWeight.w500,
-                                      color: const Color(0xFF1F2937),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          // Provider Location option
-                          Expanded(
-                            child: InkWell(
-                              onTap: () => setState(() => _isProviderLocation = true),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    _isProviderLocation
-                                        ? Icons.radio_button_on_rounded
-                                        : Icons.radio_button_off_rounded,
-                                    color: _isProviderLocation ? const Color(0xFF6C63FF) : const Color(0xFF9CA3AF),
-                                    size: 22.sp,
-                                  ),
-                                  const Gap(8),
-                                  Text(
-                                    'Provider Location',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 13.5.sp,
-                                      fontWeight: FontWeight.w500,
-                                      color: const Color(0xFF1F2937),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
 
                   const Gap(20),
 
@@ -985,7 +927,7 @@ class _HandymanCheckoutScreenState extends State<HandymanCheckoutScreen> {
                         // Build PlaceOrderBodyModel for API checkout via COD
                         List<OnlineCart> onlineCarts = [];
                         for (var item in cartItems) {
-                          int? itemId = int.tryParse(item.id);
+                          int itemId = int.tryParse(item.id) ?? (item.id.hashCode & 0x7FFFFFFF);
                           onlineCarts.add(OnlineCart(
                             null,
                             itemId,
@@ -1003,6 +945,28 @@ class _HandymanCheckoutScreenState extends State<HandymanCheckoutScreen> {
                           ));
                         }
 
+                        int? providerStoreId;
+                        if (Get.isRegistered<CartController>()) {
+                          final cartList = Get.find<CartController>().cartList;
+                          for (var c in cartList) {
+                            if (c.item != null && c.item!.storeId != null && c.item!.storeId! > 0) {
+                              providerStoreId = c.item!.storeId;
+                              break;
+                            }
+                          }
+                        }
+                        if (providerStoreId == null && cartItems.isNotEmpty) {
+                          for (var item in cartItems) {
+                            if (item.storeId != null && item.storeId! > 0) {
+                              providerStoreId = item.storeId;
+                              break;
+                            }
+                          }
+                        }
+                        providerStoreId ??= ModuleHelper.getModule()?.id ?? 1;
+
+                        String formattedScheduleAt = DateConverter.dateToDateAndTime(_scheduledDateTime);
+
                         PlaceOrderBodyModel placeOrderBody = PlaceOrderBodyModel(
                           cart: onlineCarts,
                           couponDiscountAmount: 0.0,
@@ -1010,9 +974,9 @@ class _HandymanCheckoutScreenState extends State<HandymanCheckoutScreen> {
                           orderAmount: grandTotal,
                           orderType: 'delivery',
                           paymentMethod: 'cash_on_delivery',
-                          storeId: null,
+                          storeId: providerStoreId,
                           distance: 0.0,
-                          scheduleAt: _preferableTime == 'ASAP' ? null : _preferableTime,
+                          scheduleAt: formattedScheduleAt,
                           discountAmount: discount,
                           taxAmount: vat,
                           orderNote: '',
@@ -1029,16 +993,50 @@ class _HandymanCheckoutScreenState extends State<HandymanCheckoutScreen> {
                           unavailableItemNote: '',
                           cutlery: 0,
                           partialPayment: 0,
-                          guestId: AuthHelper.isLoggedIn() ? 0 : (AuthHelper.getGuestId() != null ? int.tryParse(AuthHelper.getGuestId()!) ?? 0 : 0),
+                          guestId: AuthHelper.isLoggedIn() ? 0 : (int.tryParse(AuthHelper.getGuestId()) ?? 0),
                           isBuyNow: 0,
                           extraPackagingAmount: 0.0,
                           createNewUser: 0,
                           password: '',
                         );
 
+                        int? handymanModuleId;
+                        if (Get.isRegistered<CartController>()) {
+                          for (var c in Get.find<CartController>().cartList) {
+                            if (c.item?.moduleId != null && c.item!.moduleId! > 0 && c.item?.moduleType?.toLowerCase() == 'handyman') {
+                              handymanModuleId = c.item!.moduleId;
+                              break;
+                            }
+                          }
+                        }
+                        if (handymanModuleId == null && Get.isRegistered<SplashController>()) {
+                          final hMod = Get.find<SplashController>().moduleList?.firstWhereOrNull((m) {
+                            String name = m.moduleName?.toLowerCase() ?? '';
+                            String type = m.moduleType?.toLowerCase() ?? '';
+                            return name.contains('handyman') || type.contains('handyman');
+                          });
+                          if (hMod != null && hMod.id != null) {
+                            handymanModuleId = hMod.id;
+                          }
+                        }
+                        handymanModuleId ??= 10;
+
+                        if (Get.isRegistered<ApiClient>()) {
+                          Get.find<ApiClient>().updateHeader(
+                            Get.find<ApiClient>().token,
+                            userAddress?.zoneIds,
+                            userAddress?.areaIds,
+                            Get.find<ApiClient>().sharedPreferences.getString(AppConstants.languageCode),
+                            handymanModuleId,
+                            userAddress?.latitude,
+                            userAddress?.longitude,
+                          );
+                        }
+
+                        String apiOrderId = '';
                         if (Get.isRegistered<CheckoutController>()) {
                           int? zoneId = userAddress?.zoneId ?? (ModuleHelper.getModule()?.id);
-                          await Get.find<CheckoutController>().placeOrder(
+                          apiOrderId = await Get.find<CheckoutController>().placeOrder(
                             placeOrderBody,
                             zoneId,
                             grandTotal,
@@ -1049,90 +1047,91 @@ class _HandymanCheckoutScreenState extends State<HandymanCheckoutScreen> {
                           );
                         }
 
-                        // Order placement logic
-                        final String firstServiceName = cartItems.isNotEmpty ? cartItems[0].name : 'Handyman Service';
-                        
-                        final List<String> tasks = [];
-                        for (var item in cartItems) {
-                          tasks.add('${item.name} (${item.cartQuantity}x)');
-                        }
+                        // ONLY proceed with booking confirmation popup IF apiOrderId is valid (200 success response)!
+                        if (apiOrderId.isNotEmpty && apiOrderId != '-1') {
+                          final String firstServiceName = cartItems.isNotEmpty ? cartItems[0].name : 'Handyman Service';
 
-                        // Use placeBooking method on controller
-                        homeController.placeBooking(
-                          serviceName: firstServiceName,
-                          price: grandTotal,
-                          serviceDate: DateTime.now().add(const Duration(days: 1)),
-                          tasks: tasks,
-                          timeSlot: _preferableTime,
-                        );
-                        final String bookingId = homeController.bookings.isNotEmpty 
-                            ? homeController.bookings.first.id 
-                            : '100139';
+                          final List<String> tasks = [];
+                          for (var item in cartItems) {
+                            tasks.add('${item.name} (${item.cartQuantity}x)');
+                          }
 
-                        homeController.clearCart();
+                          homeController.placeBooking(
+                            serviceName: firstServiceName,
+                            price: grandTotal,
+                            serviceDate: _scheduledDateTime,
+                            tasks: tasks,
+                            timeSlot: _preferableTime,
+                          );
 
-                        Get.dialog(
-                          AlertDialog(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                            contentPadding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
-                            content: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.check_circle_rounded,
-                                  color: Color(0xFF22C55E),
-                                  size: 64,
-                                ),
-                                const Gap(16),
-                                Text(
-                                  'Booking Confirmed!',
-                                  style: GoogleFonts.inter(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18.sp,
-                                    color: const Color(0xFF1F2937),
+                          homeController.clearCart();
+                          if (Get.isRegistered<CartController>()) {
+                            Get.find<CartController>().clearCartOnline();
+                          }
+
+                          Get.dialog(
+                            AlertDialog(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              contentPadding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.check_circle_rounded,
+                                    color: Color(0xFF22C55E),
+                                    size: 64,
                                   ),
-                                ),
-                                const Gap(10),
-                                Text(
-                                  'Your booking #$bookingId is confirmed. A service provider will contact you soon.',
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.inter(
-                                    fontSize: 13.sp,
-                                    fontWeight: FontWeight.w400,
-                                    color: const Color(0xFF4B5563),
-                                    height: 1.4,
-                                  ),
-                                ),
-                                const Gap(24),
-                                SizedBox(
-                                  width: double.infinity,
-                                  height: 46,
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      Get.offAll(() => const HandymanServicesScreen(initialPageIndex: 2));
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF6C63FF),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      elevation: 0,
-                                    ),
-                                    child: Text(
-                                      'View Bookings',
-                                      style: GoogleFonts.inter(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 14.sp,
-                                      ),
+                                  const Gap(16),
+                                  Text(
+                                    'Booking Confirmed!',
+                                    style: GoogleFonts.inter(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18.sp,
+                                      color: const Color(0xFF1F2937),
                                     ),
                                   ),
-                                ),
-                              ],
+                                  const Gap(10),
+                                  Text(
+                                    'Your booking #$apiOrderId is confirmed. A service provider will contact you soon.',
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 13.sp,
+                                      fontWeight: FontWeight.w400,
+                                      color: const Color(0xFF4B5563),
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                  const Gap(24),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    height: 46,
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        Get.offAll(() => const HandymanServicesScreen(initialPageIndex: 2));
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(0xFF6C63FF),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        elevation: 0,
+                                      ),
+                                      child: Text(
+                                        'View Bookings',
+                                        style: GoogleFonts.inter(
+                                          fontSize: 15.sp,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          barrierDismissible: false,
-                        );
+                            barrierDismissible: false,
+                          );
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF6C63FF),
@@ -1142,7 +1141,7 @@ class _HandymanCheckoutScreenState extends State<HandymanCheckoutScreen> {
                         elevation: 0,
                       ),
                       child: Text(
-                        'Make Payment',
+                        'Place Order',
                         style: GoogleFonts.inter(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w700,

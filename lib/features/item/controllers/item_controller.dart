@@ -982,6 +982,7 @@ class ItemController extends GetxController implements GetxService {
             },
           ), barrierDismissible: false);
         } else {
+          cartController.addToCart(cartModel, null);
           cartController.addToCartOnline(onlineCart);
           // showCartSnackBar();
         }

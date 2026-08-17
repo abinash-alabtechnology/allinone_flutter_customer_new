@@ -1,12 +1,13 @@
 import 'dart:convert';
 
-import 'package:get/get_connect.dart';
+import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:handy_allinone/api/api_client.dart';
 import 'package:handy_allinone/features/cart/domain/models/cart_model.dart';
 import 'package:handy_allinone/features/cart/domain/models/online_cart_model.dart';
 import 'package:handy_allinone/features/cart/domain/repositories/cart_repository_interface.dart';
 import 'package:handy_allinone/features/checkout/domain/models/place_order_body_model.dart';
+import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
 import 'package:handy_allinone/helper/auth_helper.dart';
 import 'package:handy_allinone/helper/module_helper.dart';
 import 'package:handy_allinone/util/app_constants.dart';
@@ -15,6 +16,29 @@ class CartRepository implements CartRepositoryInterface<OnlineCart> {
   final ApiClient apiClient;
   final SharedPreferences sharedPreferences;
   CartRepository({required this.apiClient, required this.sharedPreferences});
+
+  Map<String, String> _getCartHeader() {
+    Map<String, String> reqHeaders = Map.from(apiClient.getHeader());
+    int? modId = ModuleHelper.getModule()?.id ?? ModuleHelper.getCacheModule()?.id;
+    if (modId == null || modId == 0) {
+      if (Get.isRegistered<SplashController>()) {
+        final splash = Get.find<SplashController>();
+        modId = splash.module?.id ?? splash.cacheModule?.id;
+        if ((modId == null || modId == 0) && splash.moduleList != null && splash.moduleList!.isNotEmpty) {
+          final handymanMod = splash.moduleList!.firstWhereOrNull((m) {
+            String name = (m.moduleName ?? '').toLowerCase();
+            String type = (m.moduleType ?? '').toLowerCase();
+            return name.contains('handy') || type.contains('handy') || name.contains('service');
+          });
+          modId = handymanMod?.id ?? splash.moduleList!.first.id;
+        }
+      }
+    }
+    if (modId != null && modId > 0) {
+      reqHeaders[AppConstants.moduleId] = modId.toString();
+    }
+    return reqHeaders;
+  }
 
   @override
   Future<void> addSharedPrefCartList(List<CartModel> cartProductList) async {
@@ -46,7 +70,11 @@ class CartRepository implements CartRepositoryInterface<OnlineCart> {
 
   Future<List<OnlineCartModel>?> _addToCartOnline(OnlineCart cart) async {
     List<OnlineCartModel>? onlineCartList;
-    Response response = await apiClient.postData('${AppConstants.addCartUri}${!AuthHelper.isLoggedIn() ? '?guest_id=${AuthHelper.getGuestId()}' : ''}', cart.toJson());
+    Response response = await apiClient.postData(
+      '${AppConstants.addCartUri}${!AuthHelper.isLoggedIn() ? '?guest_id=${AuthHelper.getGuestId()}' : ''}',
+      cart.toJson(),
+      headers: _getCartHeader(),
+    );
     if(response.statusCode == 200) {
       onlineCartList = [];
       response.body.forEach((cart) => onlineCartList!.add(OnlineCartModel.fromJson(cart)));
@@ -64,12 +92,18 @@ class CartRepository implements CartRepositoryInterface<OnlineCart> {
   }
 
   Future<bool> _removeCartItemOnline(int cartId) async {
-    Response response = await apiClient.deleteData('${AppConstants.removeItemCartUri}?cart_id=$cartId${!AuthHelper.isLoggedIn() ? '&guest_id=${AuthHelper.getGuestId()}' : ''}');
+    Response response = await apiClient.deleteData(
+      '${AppConstants.removeItemCartUri}?cart_id=$cartId${!AuthHelper.isLoggedIn() ? '&guest_id=${AuthHelper.getGuestId()}' : ''}',
+      headers: _getCartHeader(),
+    );
     return (response.statusCode == 200);
   }
 
   Future<bool> _clearCartOnline() async {
-    Response response = await apiClient.deleteData('${AppConstants.removeAllCartUri}${!AuthHelper.isLoggedIn() ? '?guest_id=${AuthHelper.getGuestId()}' : ''}');
+    Response response = await apiClient.deleteData(
+      '${AppConstants.removeAllCartUri}${!AuthHelper.isLoggedIn() ? '?guest_id=${AuthHelper.getGuestId()}' : ''}',
+      headers: _getCartHeader(),
+    );
     return (response.statusCode == 200);
   }
 
@@ -85,16 +119,9 @@ class CartRepository implements CartRepositoryInterface<OnlineCart> {
 
   Future<List<OnlineCartModel>?> _getCartDataOnline() async {
     List<OnlineCartModel>? onlineCartList;
-    Map<String, String>? header ={
-      'Content-Type': 'application/json; charset=UTF-8',
-      AppConstants.localizationKey: AppConstants.languages[0].languageCode!,
-      AppConstants.moduleId: '${ModuleHelper.getCacheModule()?.id}',
-      'Authorization': 'Bearer ${sharedPreferences.getString(AppConstants.token)}'
-    };
-
     Response response = await apiClient.getData(
       '${AppConstants.getCartListUri}${!AuthHelper.isLoggedIn() ? '?guest_id=${AuthHelper.getGuestId()}' : ''}',
-      headers: ModuleHelper.getModule()?.id == null ? header : null,
+      headers: _getCartHeader(),
     );
     if(response.statusCode == 200) {
       onlineCartList = [];
@@ -114,7 +141,11 @@ class CartRepository implements CartRepositoryInterface<OnlineCart> {
 
   Future<List<OnlineCartModel>?> _updateCartOnline(Map<String, dynamic> body) async {
     List<OnlineCartModel>? onlineCartList;
-    Response response = await apiClient.postData('${AppConstants.updateCartUri}${!AuthHelper.isLoggedIn() ? '?guest_id=${AuthHelper.getGuestId()}' : ''}', body);
+    Response response = await apiClient.postData(
+      '${AppConstants.updateCartUri}${!AuthHelper.isLoggedIn() ? '?guest_id=${AuthHelper.getGuestId()}' : ''}',
+      body,
+      headers: _getCartHeader(),
+    );
     if(response.statusCode == 200) {
       onlineCartList = [];
       response.body.forEach((cart) => onlineCartList!.add(OnlineCartModel.fromJson(cart)));
@@ -128,7 +159,11 @@ class CartRepository implements CartRepositoryInterface<OnlineCart> {
       "price": price,
       "quantity": quantity,
     };
-    Response response = await apiClient.postData('${AppConstants.updateCartUri}${!AuthHelper.isLoggedIn() ? '?guest_id=${AuthHelper.getGuestId()}' : ''}', data);
+    Response response = await apiClient.postData(
+      '${AppConstants.updateCartUri}${!AuthHelper.isLoggedIn() ? '?guest_id=${AuthHelper.getGuestId()}' : ''}',
+      data,
+      headers: _getCartHeader(),
+    );
     return (response.statusCode == 200);
   }
 }

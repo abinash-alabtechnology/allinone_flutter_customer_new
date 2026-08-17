@@ -12,6 +12,7 @@ import 'package:handy_allinone/features/handyman/services/widgets/service_option
 import 'package:handy_allinone/features/handyman/services/models/handyman_service_model.dart';
 import 'package:handy_allinone/features/category/controllers/category_controller.dart';
 import 'package:handy_allinone/common/widgets/custom_image.dart';
+import 'package:handy_allinone/common/widgets/cart_count_view.dart';
 import 'package:shimmer/shimmer.dart';
 
 class HandymanServiceItem {
@@ -565,87 +566,18 @@ class _HandymanAvailableServicesScreenState extends State<HandymanAvailableServi
   }
 
   Widget _buildAddButton(HandymanServiceItem service) {
-    final homeController = Get.find<HandymanHomeController>();
-
-    return Obx(() {
-      final int currentQty = homeController.getServiceQuantity(service.id);
-
-      if (currentQty > 0) {
-        return Container(
-          height: 32.h,
-          width: 75.w,
-          decoration: BoxDecoration(
-            color: const Color(0xFF6C63FF),
-            borderRadius: BorderRadius.circular(8.r),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF6C63FF).withOpacity(0.25),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          alignment: Alignment.center,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              InkWell(
-                onTap: () => homeController.removeServiceFromCart(service.id),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
-                  child: Icon(Icons.remove, size: 14.sp, color: Colors.white),
-                ),
-              ),
-              Text(
-                '$currentQty',
-                style: robotoRegular.copyWith(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              InkWell(
-                onTap: () => homeController.addServiceToCart(service.id),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
-                  child: Icon(Icons.add, size: 14.sp, color: Colors.white),
-                ),
-              ),
-            ],
-          ),
-        );
-      }
-
-      return Container(
-        height: 32.h,
-        width: 75.w,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8.r),
-          border: Border.all(color: const Color(0xFFE5E7EB), width: 1.2),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 4,
-              offset: const Offset(0, 1),
-            ),
-          ],
-        ),
-        child: InkWell(
-          onTap: () => homeController.addServiceToCart(service.id),
-          borderRadius: BorderRadius.circular(8.r),
-          child: Center(
-            child: Text(
-              'Add',
-              style: robotoRegular.copyWith(
-                fontSize: 13.sp,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF6C63FF),
-              ),
-            ),
-          ),
-        ),
-      );
-    });
+    return CartCountViewHandyman(
+      service: HandymanServiceModel(
+        id: service.id,
+        name: service.title,
+        category: _activeCategoryTitle,
+        rating: service.rating,
+        reviewCount: service.reviews,
+        startingPrice: service.price,
+        optionsCount: service.optionsCount,
+        imageAsset: service.imageAsset,
+        options: [],
+      ),
+    );
   }
 }

@@ -5,9 +5,9 @@ import 'package:get/get.dart';
 import 'package:handy_allinone/features/handyman/services/controllers/handyman_home_controller.dart';
 import 'package:handy_allinone/features/handyman/services/widgets/service_options_bottom_sheet.dart';
 import 'package:handy_allinone/features/handyman/services/models/handyman_service_model.dart';
-
 import 'package:handy_allinone/features/category/controllers/category_controller.dart';
 import 'package:handy_allinone/common/widgets/custom_image.dart';
+import 'package:handy_allinone/common/widgets/cart_count_view.dart';
 
 /// "Most Booked Services" horizontal scroll section.
 /// Uses [HandymanHomeController] (must be registered before use).
@@ -273,39 +273,7 @@ class _ServiceCard extends StatelessWidget {
                       ),
                       const Spacer(),
                       // Add / Quantity button
-                      Obx(() {
-                        final qty = controller.mostBookedServices
-                            .firstWhereOrNull((s) => s.id == service.id)
-                            ?.cartQuantity ?? 0;
-                        return qty == 0
-                            ? _AddButton(
-                                optionsCount: service.optionsCount,
-                                onTap: () {
-                                  if (service.optionsCount == 0) {
-                                    controller.addToCart(service.id);
-                                    Get.snackbar(
-                                      'Added',
-                                      '${service.name} added to cart',
-                                      snackPosition: SnackPosition.TOP,
-                                      backgroundColor: Colors.black87,
-                                      colorText: Colors.white,
-                                      margin: const EdgeInsets.all(16),
-                                      duration: const Duration(seconds: 2),
-                                    );
-                                  } else {
-                                     ServiceOptionsBottomSheet.show(context, service);
-                                  }
-                                },
-                              )
-                            : _QuantityButton(
-                                quantity: qty,
-                                optionsCount: service.optionsCount,
-                                onAdd: () =>
-                                    controller.addToCart(service.id),
-                                onRemove: () =>
-                                    controller.removeFromCart(service.id),
-                              );
-                      }),
+                      CartCountViewHandyman(service: service),
                     ],
                   ),
                 ],
@@ -315,139 +283,6 @@ class _ServiceCard extends StatelessWidget {
         ],
       ),
      ),
-    );
-  }
-}
-
-// ─── Add Button ───────────────────────────────────────────────────────────────
-
-class _AddButton extends StatelessWidget {
-  final int optionsCount;
-  final VoidCallback onTap;
-  const _AddButton({required this.optionsCount, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.bottomCenter,
-        children: [
-          Container(
-            width: 72,
-            height: 34,
-            margin: EdgeInsets.only(bottom: optionsCount > 0 ? 6 : 0),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.02),
-                  blurRadius: 2,
-                  offset: const Offset(0, 1),
-                ),
-              ],
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              'Add',
-              style: robotoRegular.copyWith(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF6C63FF),
-              ),
-            ),
-          ),
-          if (optionsCount > 0)
-            Positioned(
-              bottom: 0,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                color: Colors.white,
-                child: Text(
-                  '$optionsCount options',
-                  style: robotoRegular.copyWith(
-                    fontSize: 9.5,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF9CA3AF),
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Quantity Stepper Button ──────────────────────────────────────────────────
-
-class _QuantityButton extends StatelessWidget {
-  final int quantity;
-  final int optionsCount;
-  final VoidCallback onAdd;
-  final VoidCallback onRemove;
-
-  const _QuantityButton({
-    required this.quantity,
-    required this.optionsCount,
-    required this.onAdd,
-    required this.onRemove,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 72,
-      height: 34,
-      decoration: BoxDecoration(
-        color: const Color(0xFF6C63FF),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          // Minus
-          GestureDetector(
-            onTap: onRemove,
-            behavior: HitTestBehavior.opaque,
-            child: const SizedBox(
-              width: 24,
-              height: 34,
-              child: Icon(
-                Icons.remove_rounded,
-                color: Colors.white,
-                size: 16,
-              ),
-            ),
-          ),
-          // Count
-          Text(
-            '$quantity',
-            style: robotoRegular.copyWith(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-            ),
-          ),
-          // Plus
-          GestureDetector(
-            onTap: onAdd,
-            behavior: HitTestBehavior.opaque,
-            child: const SizedBox(
-              width: 24,
-              height: 34,
-              child: Icon(
-                Icons.add_rounded,
-                color: Colors.white,
-                size: 16,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

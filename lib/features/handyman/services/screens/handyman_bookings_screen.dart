@@ -5,6 +5,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:handy_allinone/features/handyman/services/controllers/handyman_home_controller.dart';
 import 'package:handy_allinone/features/handyman/services/models/handyman_booking_model.dart';
 import 'package:handy_allinone/features/handyman/services/screens/handyman_booking_details_screen.dart';
+import 'package:handy_allinone/features/order/controllers/order_controller.dart';
+import 'package:handy_allinone/features/order/domain/models/order_model.dart';
+import 'package:handy_allinone/helper/date_converter.dart';
 import 'package:handy_allinone/util/styles.dart';
 
 class HandymanBookingsScreen extends StatefulWidget {
@@ -18,10 +21,11 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
   final List<String> _statuses = [
     'All',
     'Pending',
-    'Accepted',
-    'Ongoing',
-    'Completed',
-    'Cancelled'
+    'Confirmed',
+    'Processing',
+    'Handover',
+    'Delivered',
+    'Cancelled',
   ];
   int _selectedStatusIndex = 0;
 
@@ -30,6 +34,10 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
     super.initState();
     if (!Get.isRegistered<HandymanHomeController>()) {
       Get.put(HandymanHomeController());
+    }
+    if (Get.isRegistered<OrderController>()) {
+      Get.find<OrderController>().getRunningOrders(1);
+      Get.find<OrderController>().getHistoryOrders(1);
     }
   }
 
@@ -42,10 +50,15 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
         return Icons.grid_view_rounded;
       case 'Pending':
         return Icons.access_time_filled_rounded;
+      case 'Confirmed':
       case 'Accepted':
         return Icons.verified_rounded;
+      case 'Processing':
       case 'Ongoing':
         return Icons.autorenew_rounded;
+      case 'Handover':
+        return Icons.local_shipping_rounded;
+      case 'Delivered':
       case 'Completed':
         return Icons.check_circle_rounded;
       case 'Cancelled':
@@ -62,10 +75,15 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
         return const Color(0xFF6C63FF);
       case 'Pending':
         return const Color(0xFFF59E0B);
+      case 'Confirmed':
       case 'Accepted':
         return const Color(0xFF6C63FF);
+      case 'Processing':
       case 'Ongoing':
         return const Color(0xFF3B82F6);
+      case 'Handover':
+        return const Color(0xFF8B5CF6);
+      case 'Delivered':
       case 'Completed':
         return const Color(0xFF10B981);
       case 'Cancelled':
@@ -103,10 +121,15 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
     switch (status) {
       case 'Pending':
         return const Color(0xFFFFFBEB);
+      case 'Confirmed':
       case 'Accepted':
         return const Color(0xFFEEF2FF);
+      case 'Processing':
       case 'Ongoing':
         return const Color(0xFFEFF6FF);
+      case 'Handover':
+        return const Color(0xFFF3E8FF);
+      case 'Delivered':
       case 'Completed':
         return const Color(0xFFECFDF5);
       case 'Cancelled':
@@ -120,10 +143,15 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
     switch (status) {
       case 'Pending':
         return const Color(0xFFF59E0B);
+      case 'Confirmed':
       case 'Accepted':
         return const Color(0xFF6C63FF);
+      case 'Processing':
       case 'Ongoing':
         return const Color(0xFF3B82F6);
+      case 'Handover':
+        return const Color(0xFF8B5CF6);
+      case 'Delivered':
       case 'Completed':
         return const Color(0xFF10B981);
       case 'Cancelled':
@@ -131,6 +159,45 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
       default:
         return Colors.grey;
     }
+  }
+
+  HandymanBookingModel _convertOrderToBooking(OrderModel order) {
+    String statusName = 'Pending';
+    String os = (order.orderStatus ?? '').toLowerCase();
+    if (os == 'pending') {
+      statusName = 'Pending';
+    } else if (os == 'accepted' || os == 'confirmed') {
+      statusName = 'Confirmed';
+    } else if (os == 'processing' || os == 'ongoing') {
+      statusName = 'Processing';
+    } else if (os == 'handover' || os == 'picked_up') {
+      statusName = 'Handover';
+    } else if (os == 'delivered' || os == 'completed') {
+      statusName = 'Delivered';
+    } else if (os == 'canceled' || os == 'failed') {
+      statusName = 'Cancelled';
+    }
+
+    DateTime bookingDt = DateTime.tryParse(order.createdAt ?? '') ?? DateTime.now();
+    DateTime serviceDt = DateTime.tryParse(order.scheduleAt ?? '') ?? bookingDt;
+
+    return HandymanBookingModel(
+      id: order.id.toString(),
+      serviceName: order.store?.name ?? 'Handyman Service',
+      bookingDate: bookingDt,
+      serviceDate: serviceDt,
+      price: order.orderAmount ?? 0.0,
+      status: statusName,
+      tasks: ['Booking #${order.id}'],
+      timeSlot: DateConverter.dateTimeStringToDateTime(order.scheduleAt ?? order.createdAt ?? ''),
+      address: order.deliveryAddress?.address ?? '',
+      paymentMethod: order.paymentMethod == 'cash_on_delivery' ? 'Cash after service' : (order.paymentMethod ?? 'Online Payment'),
+      paymentStatus: (order.paymentStatus ?? '').toLowerCase() == 'paid' ? 'Paid' : 'Unpaid',
+      subTotal: (order.orderAmount ?? 0.0) - (order.totalTaxAmount ?? 0.0) - (order.deliveryCharge ?? 0.0),
+      discount: (order.storeDiscountAmount ?? 0.0) + (order.couponDiscountAmount ?? 0.0),
+      vat: order.totalTaxAmount ?? 0.0,
+      fee: order.deliveryCharge ?? 0.0,
+    );
   }
 
   void _showBookingDetailsSheet(HandymanBookingModel booking) {
@@ -472,62 +539,100 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
 
           // Bookings list
           Expanded(
-            child: Obx(() {
-              final allBookings = _controller.bookings;
-              final selectedStatus = _statuses[_selectedStatusIndex];
+            child: GetBuilder<OrderController>(
+              builder: (orderController) {
+                List<OrderModel> apiOrders = [];
+                if (orderController.runningOrderModel?.orders != null) {
+                  apiOrders.addAll(orderController.runningOrderModel!.orders!);
+                }
+                if (orderController.historyOrderModel?.orders != null) {
+                  apiOrders.addAll(orderController.historyOrderModel!.orders!);
+                }
 
-              // Filter bookings based on selected status
-              final filteredBookings = selectedStatus == 'All'
-                  ? allBookings
-                  : allBookings
-                      .where((b) =>
-                          b.status.toLowerCase() == selectedStatus.toLowerCase())
-                      .toList();
+                List<HandymanBookingModel> allBookings = [];
+                if (apiOrders.isNotEmpty) {
+                  for (var o in apiOrders) {
+                    allBookings.add(_convertOrderToBooking(o));
+                  }
+                } else {
+                  allBookings = _controller.bookings;
+                }
 
-              if (filteredBookings.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.receipt_long_outlined,
-                        size: 80,
-                        color: Colors.grey.shade300,
-                      ),
-                      const Gap(16),
-                      Text(
-                        'No Bookings Found',
-                        style: GoogleFonts.inter(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.grey.shade700,
+                final selectedStatus = _statuses[_selectedStatusIndex];
+                final filteredBookings = selectedStatus == 'All'
+                    ? allBookings
+                    : allBookings.where((b) {
+                        if (selectedStatus == 'Confirmed') {
+                          return b.status.toLowerCase() == 'confirmed' || b.status.toLowerCase() == 'accepted';
+                        }
+                        if (selectedStatus == 'Processing') {
+                          return b.status.toLowerCase() == 'processing' || b.status.toLowerCase() == 'ongoing';
+                        }
+                        if (selectedStatus == 'Handover') {
+                          return b.status.toLowerCase() == 'handover' || b.status.toLowerCase() == 'picked_up';
+                        }
+                        if (selectedStatus == 'Delivered') {
+                          return b.status.toLowerCase() == 'delivered' || b.status.toLowerCase() == 'completed';
+                        }
+                        return b.status.toLowerCase() == selectedStatus.toLowerCase();
+                      }).toList();
+
+                if (filteredBookings.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.receipt_long_outlined,
+                          size: 80,
+                          color: Colors.grey.shade300,
                         ),
-                      ),
-                      const Gap(8),
-                      Text(
-                        'You don\'t have any bookings in $selectedStatus category.',
-                        style: robotoRegular.copyWith(
-                          fontSize: 13,
-                          color: Colors.grey.shade400,
+                        const Gap(16),
+                        Text(
+                          'No Bookings Found',
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.grey.shade700,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                );
-              }
+                        const Gap(8),
+                        Text(
+                          'You don\'t have any bookings in $selectedStatus category.',
+                          style: robotoRegular.copyWith(
+                            fontSize: 13,
+                            color: Colors.grey.shade400,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
 
-              return ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: filteredBookings.length,
-                itemBuilder: (context, index) {
-                  final booking = filteredBookings[index];
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    if (Get.isRegistered<OrderController>()) {
+                      await Get.find<OrderController>().getRunningOrders(1);
+                      await Get.find<OrderController>().getHistoryOrders(1);
+                    }
+                  },
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: filteredBookings.length,
+                    itemBuilder: (context, index) {
+                      final booking = filteredBookings[index];
+                      final OrderModel? matchingOrder = apiOrders.firstWhereOrNull((o) => o.id.toString() == booking.id);
 
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: InkWell(
-                      onTap: () {
-                        Get.to(() => HandymanBookingDetailsScreen(booking: booking));
-                      },
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: InkWell(
+                          onTap: () {
+                            Get.to(() => HandymanBookingDetailsScreen(
+                              orderId: booking.id,
+                              orderModel: matchingOrder,
+                              booking: booking,
+                            ));
+                          },
                       borderRadius: BorderRadius.circular(16),
                       child: Container(
                         padding: const EdgeInsets.all(16),
@@ -646,10 +751,12 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
                 ),
               );
             },
-              );
-            }),
           ),
-        ],
+        );
+      },
+    ),
+  ),
+],
       ),
     );
   }

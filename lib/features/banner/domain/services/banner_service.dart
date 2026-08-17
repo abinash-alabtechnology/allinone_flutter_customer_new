@@ -37,6 +37,11 @@ class BannerService implements BannerServiceInterface {
   }
 
   @override
+  Future<BannerModel?> getSpotlightBannerList({required DataSourceEnum source}) async {
+    return await bannerRepositoryInterface.getList(isSpotlightBanner: true, source: source);
+  }
+
+  @override
   List<int?> moduleIdList() {
     List<int?> moduleIdList = [];
     for (ZoneData zone in AddressHelper.getUserAddressFromSharedPref()!.zoneData!) {

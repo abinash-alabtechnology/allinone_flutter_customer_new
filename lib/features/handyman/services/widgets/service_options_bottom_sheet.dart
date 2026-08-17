@@ -44,7 +44,7 @@ class ServiceOptionsBottomSheet extends StatelessWidget {
       ServiceOptionsBottomSheet(
         service: activeService,
         onOptionAdd: (optionId) {
-          controller.addToCart(activeService.id);
+          controller.addToCart(activeService.id, serviceModel: activeService);
         },
       ),
       isScrollControlled: true,
@@ -217,17 +217,19 @@ class ServiceOptionsBottomSheet extends StatelessWidget {
                             width: 80,
                             height: 36,
                             child: OutlinedButton(
-                              onPressed: () {
-                                controller.addToCart(service.id);
-                                Get.snackbar(
-                                  'Added',
-                                  '${service.name} added to cart',
-                                  snackPosition: SnackPosition.TOP,
-                                  backgroundColor: Colors.black87,
-                                  colorText: Colors.white,
-                                  margin: const EdgeInsets.all(16),
-                                  duration: const Duration(seconds: 2),
-                                );
+                              onPressed: () async {
+                                bool added = await controller.addToCart(service.id, serviceModel: service);
+                                if (added) {
+                                  Get.snackbar(
+                                    'Added',
+                                    '${service.name} added to cart',
+                                    snackPosition: SnackPosition.TOP,
+                                    backgroundColor: Colors.black87,
+                                    colorText: Colors.white,
+                                    margin: const EdgeInsets.all(16),
+                                    duration: const Duration(seconds: 2),
+                                  );
+                                }
                               },
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: const Color(0xFF6C63FF),
@@ -279,7 +281,7 @@ class ServiceOptionsBottomSheet extends StatelessWidget {
                                   ),
                                 ),
                                 GestureDetector(
-                                  onTap: () => controller.addToCart(service.id),
+                                  onTap: () => controller.addToCart(service.id, serviceModel: service),
                                   behavior: HitTestBehavior.opaque,
                                   child: const SizedBox(
                                     width: 24,
@@ -456,17 +458,19 @@ class ServiceOptionsBottomSheet extends StatelessWidget {
                                         height: 36,
                                         child: optionQty == 0
                                             ? OutlinedButton(
-                                                onPressed: () {
-                                                  controller.addOptionToCart(service.id, option.id);
-                                                  Get.snackbar(
-                                                    'Added',
-                                                    '${option.title} added to cart',
-                                                    snackPosition: SnackPosition.TOP,
-                                                    backgroundColor: Colors.black87,
-                                                    colorText: Colors.white,
-                                                    margin: const EdgeInsets.all(16),
-                                                    duration: const Duration(seconds: 2),
-                                                  );
+                                                onPressed: () async {
+                                                  bool added = await controller.addOptionToCart(service.id, option.id, serviceModel: service);
+                                                  if (added) {
+                                                    Get.snackbar(
+                                                      'Added',
+                                                      '${option.title} added to cart',
+                                                      snackPosition: SnackPosition.TOP,
+                                                      backgroundColor: Colors.black87,
+                                                      colorText: Colors.white,
+                                                      margin: const EdgeInsets.all(16),
+                                                      duration: const Duration(seconds: 2),
+                                                    );
+                                                  }
                                                 },
                                                 style: OutlinedButton.styleFrom(
                                                   foregroundColor: const Color(0xFF6366F1),
@@ -514,7 +518,7 @@ class ServiceOptionsBottomSheet extends StatelessWidget {
                                                       ),
                                                     ),
                                                     GestureDetector(
-                                                      onTap: () => controller.addOptionToCart(service.id, option.id),
+                                                      onTap: () => controller.addOptionToCart(service.id, option.id, serviceModel: service),
                                                       behavior: HitTestBehavior.opaque,
                                                       child: const SizedBox(
                                                         width: 24,

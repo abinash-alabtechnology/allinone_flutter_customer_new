@@ -179,6 +179,7 @@
   "if_you_change_location": "You have some items in your cart. If you change your location, your cart and other data related to your current delivery location will be reset.",
   "if_you_change_category": "You have some items in your cart. If you change your module, your cart and other data related to your current module will be reset.",
   "if_you_continue": "You have item from another restaurant in cart. If you continue, your all previous item from cart will be removed.",
+  "if_you_continue_from_another_provider": "You have item from another provider in cart. If you continue, your all previous item from cart will be removed.",
   "if_you_continue_without_another_store": "If you want to change store type it will reset your cart and other related cache data.",
   "yes_and_continue": "Yes and Continue",
   "total_order": "Total Order",

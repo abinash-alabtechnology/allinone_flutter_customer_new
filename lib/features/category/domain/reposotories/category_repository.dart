@@ -7,10 +7,10 @@ import 'package:handy_allinone/features/category/domain/models/category_model.da
 import 'package:handy_allinone/features/item/domain/models/item_model.dart';
 import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
 import 'package:handy_allinone/features/store/domain/models/store_model.dart';
-import 'package:handy_allinone/features/language/controllers/language_controller.dart';
 import 'package:handy_allinone/api/api_client.dart';
 import 'package:handy_allinone/util/app_constants.dart';
 import 'package:handy_allinone/features/category/domain/reposotories/category_repository_interface.dart';
+import 'package:handy_allinone/features/handyman/services/controllers/handyman_home_controller.dart';
 
 class CategoryRepository implements CategoryRepositoryInterface {
   final ApiClient apiClient;
@@ -31,15 +31,21 @@ class CategoryRepository implements CategoryRepositoryInterface {
   }
 
   int? _getActiveModuleId() {
-    if (Get.find<SplashController>().module != null && Get.find<SplashController>().module!.id != null) {
-      return Get.find<SplashController>().module!.id;
+    if (Get.isRegistered<SplashController>()) {
+      final splashController = Get.find<SplashController>();
+      final handymanMod = splashController.moduleList?.firstWhereOrNull((m) {
+        String title = m.moduleName?.toLowerCase() ?? '';
+        String mType = m.moduleType?.toLowerCase() ?? '';
+        return title.contains('handyman') || mType.contains('handyman');
+      });
+      if (handymanMod != null && handymanMod.id != null) {
+        return handymanMod.id;
+      }
+      if (splashController.module != null && (splashController.module!.moduleType?.toLowerCase() == 'handyman' || splashController.module!.moduleName?.toLowerCase().contains('handyman') == true)) {
+        return splashController.module!.id;
+      }
     }
-    final handymanMod = Get.find<SplashController>().moduleList?.firstWhereOrNull((m) {
-      String title = m.moduleName?.toLowerCase() ?? '';
-      String mType = m.moduleType?.toLowerCase() ?? '';
-      return title.contains('handyman') || mType.contains('handyman');
-    });
-    return handymanMod?.id;
+    return 10;
   }
 
   Future<List<CategoryModel>?> _getCategoryList(bool allCategory, DataSourceEnum source) async {
@@ -128,7 +134,13 @@ class CategoryRepository implements CategoryRepositoryInterface {
     if (activeModuleId != null) {
       reqHeaders[AppConstants.moduleId] = activeModuleId.toString();
     }
-    Response response = await apiClient.getData('${AppConstants.categoryItemUri}$categoryID?limit=50&offset=$offset&type=$type', headers: reqHeaders);
+    String? serviceType = Get.isRegistered<HandymanHomeController>()
+        ? Get.find<HandymanHomeController>().selectedServiceType
+        : null;
+    String serviceTypeParam = (serviceType != null && serviceType.isNotEmpty)
+        ? '&service_type=$serviceType'
+        : '';
+    Response response = await apiClient.getData('${AppConstants.categoryItemUri}$categoryID?limit=50&offset=$offset&type=$type$serviceTypeParam', headers: reqHeaders);
     if (response.statusCode == 200) {
       categoryItem = ItemModel.fromJson(response.body);
     }

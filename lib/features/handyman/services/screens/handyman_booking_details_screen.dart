@@ -4,11 +4,23 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:handy_allinone/features/handyman/services/models/handyman_booking_model.dart';
+import 'package:handy_allinone/features/order/controllers/order_controller.dart';
+import 'package:handy_allinone/features/order/domain/models/order_model.dart';
+import 'package:handy_allinone/features/order/domain/models/order_details_model.dart';
+import 'package:handy_allinone/helper/date_converter.dart';
 import 'package:handy_allinone/util/styles.dart';
 
 class HandymanBookingDetailsScreen extends StatefulWidget {
-  final HandymanBookingModel booking;
-  const HandymanBookingDetailsScreen({super.key, required this.booking});
+  final HandymanBookingModel? booking;
+  final String? orderId;
+  final OrderModel? orderModel;
+
+  const HandymanBookingDetailsScreen({
+    super.key,
+    this.booking,
+    this.orderId,
+    this.orderModel,
+  });
 
   @override
   State<HandymanBookingDetailsScreen> createState() => _HandymanBookingDetailsScreenState();
@@ -22,6 +34,11 @@ class _HandymanBookingDetailsScreenState extends State<HandymanBookingDetailsScr
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    String? targetId = widget.orderId ?? widget.orderModel?.id.toString() ?? widget.booking?.id;
+    if (targetId != null && targetId.isNotEmpty && Get.isRegistered<OrderController>()) {
+      Get.find<OrderController>().trackOrder(targetId, widget.orderModel, false);
+      Get.find<OrderController>().getOrderDetails(targetId);
+    }
   }
 
   @override
@@ -83,6 +100,91 @@ class _HandymanBookingDetailsScreenState extends State<HandymanBookingDetailsScr
     }
   }
 
+  HandymanBookingModel _getEffectiveBooking(OrderController orderController) {
+    final OrderModel? trackModel = orderController.trackModel ?? widget.orderModel;
+    final List<OrderDetailsModel>? detailsList = orderController.orderDetails;
+
+    if (trackModel != null) {
+      String os = (trackModel.orderStatus ?? '').toLowerCase();
+      String statusName = 'Pending';
+      if (os == 'pending') {
+        statusName = 'Pending';
+      } else if (os == 'accepted' || os == 'confirmed') {
+        statusName = 'Accepted';
+      } else if (os == 'processing' || os == 'ongoing') {
+        statusName = 'Ongoing';
+      } else if (os == 'handover' || os == 'picked_up') {
+        statusName = 'Ongoing';
+      } else if (os == 'delivered' || os == 'completed') {
+        statusName = 'Completed';
+      } else if (os == 'canceled' || os == 'failed') {
+        statusName = 'Cancelled';
+      }
+
+      DateTime bookingDt = DateTime.tryParse(trackModel.createdAt ?? '') ?? widget.booking?.bookingDate ?? DateTime.now();
+      DateTime serviceDt = DateTime.tryParse(trackModel.scheduleAt ?? '') ?? widget.booking?.serviceDate ?? bookingDt;
+
+      List<HandymanBookingItem> bookingItems = [];
+      if (detailsList != null && detailsList.isNotEmpty) {
+        for (var d in detailsList) {
+          bookingItems.add(HandymanBookingItem(
+            title: d.itemDetails?.name ?? 'Handyman Service',
+            variantName: (d.itemDetails?.description != null && d.itemDetails!.description!.isNotEmpty)
+                ? d.itemDetails!.description!
+                : (d.itemDetails?.name ?? 'Standard'),
+            quantity: d.quantity ?? 1,
+            unitPrice: d.price ?? 0.0,
+          ));
+        }
+      } else if (widget.booking != null && widget.booking!.items.isNotEmpty) {
+        bookingItems = widget.booking!.items;
+      }
+
+      double storeDiscount = trackModel.storeDiscountAmount ?? 0.0;
+      double couponDiscount = trackModel.couponDiscountAmount ?? 0.0;
+      double totalDiscount = storeDiscount + couponDiscount;
+      double totalTax = trackModel.totalTaxAmount ?? 0.0;
+      double deliveryCharge = trackModel.deliveryCharge ?? 0.0;
+      double orderAmount = trackModel.orderAmount ?? widget.booking?.price ?? 0.0;
+      double subTotal = orderAmount - totalTax - deliveryCharge + totalDiscount;
+
+      return HandymanBookingModel(
+        id: trackModel.id.toString(),
+        serviceName: (detailsList != null && detailsList.isNotEmpty && detailsList[0].itemDetails?.name != null)
+            ? detailsList[0].itemDetails!.name!
+            : (widget.booking?.serviceName ?? 'Handyman Service'),
+        bookingDate: bookingDt,
+        serviceDate: serviceDt,
+        price: orderAmount,
+        status: statusName,
+        tasks: (detailsList != null && detailsList.isNotEmpty)
+            ? detailsList.map((d) => '${d.itemDetails?.name ?? "Service"} (${d.quantity ?? 1}x)').toList()
+            : (widget.booking?.tasks ?? ['Handyman Service']),
+        timeSlot: DateConverter.dateTimeStringToDateTime(trackModel.scheduleAt ?? trackModel.createdAt ?? ''),
+        address: trackModel.deliveryAddress?.address ?? widget.booking?.address ?? '',
+        paymentMethod: trackModel.paymentMethod == 'cash_on_delivery' ? 'Cash after service' : (trackModel.paymentMethod ?? 'Online Payment'),
+        paymentStatus: (trackModel.paymentStatus ?? '').toLowerCase() == 'paid' ? 'Paid' : 'Unpaid',
+        items: bookingItems,
+        subTotal: subTotal > 0 ? subTotal : orderAmount,
+        discount: totalDiscount,
+        vat: totalTax,
+        fee: deliveryCharge,
+      );
+    }
+
+    return widget.booking ?? HandymanBookingModel(
+      id: widget.orderId ?? '000000',
+      serviceName: 'Handyman Service',
+      bookingDate: DateTime.now(),
+      serviceDate: DateTime.now(),
+      price: 0.0,
+      status: 'Pending',
+      tasks: [],
+      timeSlot: '',
+      address: '',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final brandColor = const Color(0xFF6C63FF);
@@ -106,70 +208,80 @@ class _HandymanBookingDetailsScreenState extends State<HandymanBookingDetailsScr
         ),
         centerTitle: true,
       ),
-      body: Column(
-        children: [
-          // Premium Floating Pill Tab Bar Selector
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            color: brandColor,
-            child: Container(
-              height: 46,
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(23),
-              ),
-              child: TabBar(
-                controller: _tabController,
-                indicator: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 5,
-                      offset: const Offset(0, 2),
+      body: GetBuilder<OrderController>(
+        builder: (orderController) {
+          final effectiveBooking = _getEffectiveBooking(orderController);
+
+          return Column(
+            children: [
+              // Premium Floating Pill Tab Bar Selector
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                color: brandColor,
+                child: Container(
+                  height: 46,
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(23),
+                  ),
+                  child: TabBar(
+                    controller: _tabController,
+                    indicator: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 5,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
+                    labelColor: brandColor,
+                    unselectedLabelColor: Colors.white.withOpacity(0.9),
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    dividerColor: Colors.transparent,
+                    labelStyle: GoogleFonts.inter(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w800,
+                    ),
+                    unselectedLabelStyle: GoogleFonts.inter(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    tabs: const [
+                      Tab(text: 'Booking Details'),
+                      Tab(text: 'Status'),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Main contents
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildBookingDetailsTab(effectiveBooking),
+                    _buildStatusTab(effectiveBooking),
                   ],
                 ),
-                labelColor: brandColor,
-                unselectedLabelColor: Colors.white.withOpacity(0.9),
-                indicatorSize: TabBarIndicatorSize.tab,
-                dividerColor: Colors.transparent,
-                labelStyle: GoogleFonts.inter(
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.w800,
-                ),
-                unselectedLabelStyle: GoogleFonts.inter(
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.w600,
-                ),
-                tabs: const [
-                  Tab(text: 'Booking Details'),
-                  Tab(text: 'Status'),
-                ],
               ),
-            ),
-          ),
-
-          // Main contents
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildBookingDetailsTab(),
-                _buildStatusTab(),
-              ],
-            ),
-          ),
-        ],
+            ],
+          );
+        },
       ),
-      bottomNavigationBar: _buildProviderActions(),
+      bottomNavigationBar: GetBuilder<OrderController>(
+        builder: (orderController) {
+          final effectiveBooking = _getEffectiveBooking(orderController);
+          return _buildProviderActions(effectiveBooking);
+        },
+      ),
     );
   }
 
-  Widget _buildBookingDetailsTab() {
-    final booking = widget.booking;
+  Widget _buildBookingDetailsTab(HandymanBookingModel booking) {
     final brandColor = const Color(0xFF6C63FF);
 
     return Stack(
@@ -615,8 +727,7 @@ class _HandymanBookingDetailsScreenState extends State<HandymanBookingDetailsScr
     );
   }
 
-  Widget _buildStatusTab() {
-    final booking = widget.booking;
+  Widget _buildStatusTab(HandymanBookingModel booking) {
     final brandColor = const Color(0xFF6C63FF);
 
     // Determine steps status
@@ -795,8 +906,7 @@ class _HandymanBookingDetailsScreenState extends State<HandymanBookingDetailsScr
     );
   }
 
-  Widget _buildProviderActions() {
-    final booking = widget.booking;
+  Widget _buildProviderActions(HandymanBookingModel booking) {
     if (booking.status != 'Accepted' && booking.status != 'Ongoing') {
       return const SizedBox.shrink();
     }

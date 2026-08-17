@@ -29,6 +29,7 @@ import 'package:handy_allinone/features/item/controllers/item_controller.dart';
 import 'package:handy_allinone/features/store/controllers/store_controller.dart';
 import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
 import 'package:handy_allinone/features/profile/controllers/profile_controller.dart';
+import 'package:handy_allinone/features/cart/controllers/cart_controller.dart';
 import 'package:handy_allinone/features/address/controllers/address_controller.dart';
 import 'package:handy_allinone/features/home/screens/modules/food_home_screen.dart';
 import 'package:handy_allinone/features/home/screens/modules/grocery_home_screen.dart';
@@ -100,6 +101,9 @@ class HomeScreen extends StatefulWidget {
       List<Future> authGroup = [];
       if (AuthHelper.isLoggedIn()) {
         authGroup.add(store.getVisitAgainStoreList(fromModule: fromModule));
+      }
+      if (AuthHelper.isLoggedIn() || AuthHelper.isGuestLoggedIn()) {
+        authGroup.add(Get.find<CartController>().getCartDataOnline());
       }
 
       List<Future> generalModuleGroup = [];

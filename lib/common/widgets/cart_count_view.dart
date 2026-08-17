@@ -4,6 +4,10 @@ import 'package:get/get.dart';
 import 'package:handy_allinone/features/cart/controllers/cart_controller.dart';
 import 'package:handy_allinone/features/item/controllers/item_controller.dart';
 import 'package:handy_allinone/features/item/domain/models/item_model.dart';
+import 'package:handy_allinone/features/handyman/services/models/handyman_service_model.dart';
+import 'package:handy_allinone/features/handyman/services/controllers/handyman_home_controller.dart';
+import 'package:handy_allinone/features/handyman/services/widgets/service_options_bottom_sheet.dart';
+import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
 import 'package:handy_allinone/util/dimensions.dart';
 import 'package:handy_allinone/util/styles.dart';
 
@@ -15,6 +19,13 @@ class CartCountView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (item.moduleType == 'handyman' || (Get.isRegistered<SplashController>() && Get.find<SplashController>().module?.moduleType == 'handyman')) {
+      return CartCountViewHandyman(
+        service: HandymanServiceModel.fromItem(item),
+        child: child,
+        index: index,
+      );
+    }
     return GetBuilder<CartController>(builder: (cartController) {
       int cartQty = cartController.cartQuantity(item.id!);
       int cartIndex = cartController.isExistInCart(item.id, cartController.cartVariant(item.id!), false, null);
@@ -536,6 +547,159 @@ class CartCountViewPharmacy extends StatelessWidget {
                 )),
               ),
       );
+    });
+  }
+}
+
+class CartCountViewHandyman extends StatelessWidget {
+  final HandymanServiceModel service;
+  final Widget? child;
+  final int? index;
+  const CartCountViewHandyman({super.key, required this.service, this.child, this.index = -1});
+
+  @override
+  Widget build(BuildContext context) {
+    return GetBuilder<CartController>(builder: (cartController) {
+      return GetBuilder<HandymanHomeController>(builder: (controller) {
+        int qty = controller.getServiceQuantity(service.id);
+        
+        if (qty == 0 && cartController.cartList.isNotEmpty) {
+          int? sId = int.tryParse(service.id);
+          String sName = service.name.toLowerCase().trim();
+          final cartItem = cartController.cartList.firstWhereOrNull((c) {
+            if (sId != null && c.item?.id == sId) return true;
+            if (c.item?.name != null) {
+              String cName = c.item!.name!.toLowerCase().trim();
+              if (cName.isNotEmpty && (sName.contains(cName) || cName.contains(sName))) return true;
+            }
+            return false;
+          });
+          if (cartItem != null && (cartItem.quantity ?? 0) > 0) {
+            qty = cartItem.quantity!;
+            service.cartQuantity = qty;
+          }
+        }
+
+        return qty != 0
+            ? Container(
+                width: 76,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF6C63FF),
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF6C63FF).withOpacity(0.25),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    GestureDetector(
+                      onTap: () => controller.removeFromCart(service.id),
+                      behavior: HitTestBehavior.opaque,
+                      child: const SizedBox(
+                        width: 24,
+                        height: 34,
+                        child: Icon(
+                          Icons.remove_rounded,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      '$qty',
+                      style: robotoRegular.copyWith(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        if (service.optionsCount > 0) {
+                          ServiceOptionsBottomSheet.show(context, service);
+                        } else {
+                          controller.addToCart(service.id, serviceModel: service);
+                        }
+                      },
+                      behavior: HitTestBehavior.opaque,
+                      child: const SizedBox(
+                        width: 24,
+                        height: 34,
+                        child: Icon(
+                          Icons.add_rounded,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : GestureDetector(
+                onTap: () {
+                  if (service.optionsCount == 0) {
+                    controller.addToCart(service.id, serviceModel: service);
+                  } else {
+                    ServiceOptionsBottomSheet.show(context, service);
+                  }
+                },
+                child: child ??
+                    Stack(
+                      clipBehavior: Clip.none,
+                      alignment: Alignment.bottomCenter,
+                      children: [
+                        Container(
+                          width: 76,
+                          height: 34,
+                          margin: EdgeInsets.only(bottom: service.optionsCount > 0 ? 6 : 0),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: const Color(0xFFD1D5DB), width: 1.2),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.03),
+                                blurRadius: 4,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            'Add',
+                            style: robotoRegular.copyWith(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF6C63FF),
+                            ),
+                          ),
+                        ),
+                        if (service.optionsCount > 0)
+                          Positioned(
+                            bottom: 0,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                              color: Colors.white,
+                              child: Text(
+                                '${service.optionsCount} options',
+                                style: robotoRegular.copyWith(
+                                  fontSize: 9.5,
+                                  fontWeight: FontWeight.w500,
+                                  color: const Color(0xFF9CA3AF),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+              );
+      });
     });
   }
 }

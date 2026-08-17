@@ -13,6 +13,7 @@ import 'package:handy_allinone/features/banner/domain/repositories/banner_reposi
 import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
 import 'package:handy_allinone/helper/header_helper.dart';
 import 'package:handy_allinone/helper/address_helper.dart';
+import 'package:handy_allinone/helper/module_helper.dart';
 import 'package:handy_allinone/util/app_constants.dart';
 
 class BannerRepository implements BannerRepositoryInterface {
@@ -20,7 +21,7 @@ class BannerRepository implements BannerRepositoryInterface {
   BannerRepository({required this.apiClient});
 
   @override
-  Future getList({int? offset, bool isBanner = false, bool isTaxiBanner = false, bool isFeaturedBanner = false, bool isParcelOtherBanner = false, bool isPromotionalBanner = false, DataSourceEnum? source}) async {
+  Future getList({int? offset, bool isBanner = false, bool isTaxiBanner = false, bool isFeaturedBanner = false, bool isParcelOtherBanner = false, bool isPromotionalBanner = false, bool isSpotlightBanner = false, DataSourceEnum? source}) async {
     if (isBanner) {
       return await _getBannerList(source: source!);
     } else if (isTaxiBanner) {
@@ -31,7 +32,61 @@ class BannerRepository implements BannerRepositoryInterface {
       return await _getParcelOtherBannerList();
     } else if (isPromotionalBanner) {
       return await _getPromotionalBannerList();
+    } else if (isSpotlightBanner) {
+      return await _getSpotlightBannerList(source: source!);
     }
+  }
+
+  Future<BannerModel?> _getSpotlightBannerList({required DataSourceEnum source}) async {
+    BannerModel? bannerModel;
+    Map<String, String> reqHeaders = Map.from(apiClient.getHeader());
+    reqHeaders['Content-Type'] = 'application/json; charset=UTF-8';
+
+    int? activeModuleId = ModuleHelper.getModule()?.id ?? ModuleHelper.getCacheModule()?.id;
+    if (activeModuleId == null || activeModuleId == 0) {
+      if (Get.isRegistered<SplashController>()) {
+        final splash = Get.find<SplashController>();
+        activeModuleId = splash.module?.id ?? splash.cacheModule?.id;
+        if ((activeModuleId == null || activeModuleId == 0) && splash.moduleList != null && splash.moduleList!.isNotEmpty) {
+          final handymanMod = splash.moduleList!.firstWhereOrNull((m) {
+            String name = (m.moduleName ?? '').toLowerCase();
+            String type = (m.moduleType ?? '').toLowerCase();
+            return name.contains('handy') || type.contains('handy') || name.contains('service');
+          });
+          activeModuleId = handymanMod?.id ?? splash.moduleList!.first.id;
+        }
+      }
+    }
+    if (activeModuleId != null && activeModuleId > 0) {
+      reqHeaders[AppConstants.moduleId] = activeModuleId.toString();
+    }
+
+    List<int>? zoneIds = AddressHelper.getUserAddressFromSharedPref()?.zoneIds;
+    if (zoneIds == null || zoneIds.isEmpty) {
+      zoneIds = [1];
+    }
+    reqHeaders[AppConstants.zoneId] = jsonEncode(zoneIds);
+
+    String cacheId = '${AppConstants.spotlightBannerUri}-$activeModuleId';
+
+    switch (source) {
+      case DataSourceEnum.client:
+        Response response = await apiClient.getData(
+          '${AppConstants.spotlightBannerUri}?limit=10&offset=1',
+          headers: reqHeaders,
+        );
+        if (response.statusCode == 200) {
+          bannerModel = BannerModel.fromJson(response.body);
+          LocalClient.organize(source, cacheId, jsonEncode(response.body), reqHeaders);
+        }
+      case DataSourceEnum.local:
+        String? cacheResponseData = await LocalClient.organize(source, cacheId, null, null);
+        if (cacheResponseData != null) {
+          bannerModel = BannerModel.fromJson(jsonDecode(cacheResponseData));
+        }
+    }
+
+    return bannerModel;
   }
 
   Future<BannerModel?> _getBannerList({required DataSourceEnum source}) async {

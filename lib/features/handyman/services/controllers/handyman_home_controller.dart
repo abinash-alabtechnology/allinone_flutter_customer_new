@@ -1,13 +1,19 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:handy_allinone/features/cart/domain/models/cart_model.dart';
 import 'package:handy_allinone/features/handyman/services/models/handyman_service_model.dart';
 import 'package:handy_allinone/features/handyman/services/models/handyman_booking_model.dart';
-import 'package:handy_allinone/util/images.dart';
 import 'package:handy_allinone/features/favourite/controllers/favourite_controller.dart';
 import 'package:handy_allinone/features/item/domain/models/item_model.dart';
+import 'package:handy_allinone/features/item/domain/services/item_service_interface.dart';
 
 import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
 import 'package:handy_allinone/features/cart/controllers/cart_controller.dart';
+import 'package:handy_allinone/features/category/controllers/category_controller.dart';
 import 'package:handy_allinone/features/checkout/domain/models/place_order_body_model.dart';
+import 'package:handy_allinone/util/images.dart';
+import 'package:handy_allinone/common/widgets/confirmation_dialog.dart';
 
 class CategorySectionModel {
   final int? categoryId;
@@ -37,6 +43,29 @@ class HandymanHomeController extends GetxController {
 
   final RxBool isLoading = false.obs;
 
+  // ─── Service Type Selection (home_service / store_visit) ───────────────────
+  String _selectedServiceType = 'home_service';
+  bool hasPromptedServiceTypeSelection = false;
+  String get selectedServiceType => _selectedServiceType;
+
+  void updateServiceType(String type, {bool reload = true}) {
+    _selectedServiceType = type;
+    update();
+    if (reload) {
+      clearAndRefetchServices();
+    }
+  }
+
+  void clearAndRefetchServices() {
+    if (Get.isRegistered<CategoryController>()) {
+      Get.find<CategoryController>().clearCategoryCache();
+    }
+    if (Get.isRegistered<FavouriteController>()) {
+      Get.find<FavouriteController>().getFavouriteList();
+    }
+    update();
+  }
+
   // ─── Derived ─────────────────────────────────────────────────────────────────
   int get totalCartItems {
     int total = 0;
@@ -47,21 +76,69 @@ class HandymanHomeController extends GetxController {
   }
 
   int getServiceQuantity(String serviceId) {
-    return allServices[serviceId]?.cartQuantity ?? 0;
+    int? itemId = int.tryParse(serviceId);
+
+    if (allServices.containsKey(serviceId) && allServices[serviceId]!.cartQuantity > 0) {
+      return allServices[serviceId]!.cartQuantity;
+    }
+
+    for (var section in categorySections) {
+      final match = section.services.firstWhereOrNull((s) => s.id == serviceId || (itemId != null && int.tryParse(s.id) == itemId));
+      if (match != null && match.cartQuantity > 0) {
+        return match.cartQuantity;
+      }
+    }
+
+    final mb = mostBookedServices.firstWhereOrNull((s) => s.id == serviceId || (itemId != null && int.tryParse(s.id) == itemId));
+    if (mb != null && mb.cartQuantity > 0) {
+      return mb.cartQuantity;
+    }
+
+    if (Get.isRegistered<CartController>()) {
+      final cartList = Get.find<CartController>().cartList;
+      for (var c in cartList) {
+        if (c.item != null) {
+          if (itemId != null && c.item!.id == itemId) {
+            return c.quantity ?? 0;
+          }
+          String idStr = c.item!.id.toString();
+          if (idStr == serviceId) {
+            return c.quantity ?? 0;
+          }
+        }
+      }
+    }
+
+    return 0;
   }
 
-  List<HandymanServiceModel> get wishlistedServices {
-    int? activeModuleId;
-    if (Get.find<SplashController>().module != null && Get.find<SplashController>().module!.id != null) {
-      activeModuleId = Get.find<SplashController>().module!.id;
-    } else {
-      final handymanMod = Get.find<SplashController>().moduleList?.firstWhereOrNull((m) {
+  int getHandymanModuleId() {
+    if (Get.isRegistered<SplashController>()) {
+      final splashController = Get.find<SplashController>();
+      final handymanMod = splashController.moduleList?.firstWhereOrNull((m) {
         String title = m.moduleName?.toLowerCase() ?? '';
         String mType = m.moduleType?.toLowerCase() ?? '';
         return title.contains('handyman') || mType.contains('handyman');
       });
-      activeModuleId = handymanMod?.id;
+      if (handymanMod != null && handymanMod.id != null) {
+        return handymanMod.id!;
+      }
+      if (splashController.module != null &&
+          (splashController.module!.moduleType?.toLowerCase() == 'handyman' ||
+           splashController.module!.moduleName?.toLowerCase().contains('handyman') == true)) {
+        return splashController.module!.id!;
+      }
+      if (splashController.cacheModule != null &&
+          (splashController.cacheModule!.moduleType?.toLowerCase() == 'handyman' ||
+           splashController.cacheModule!.moduleName?.toLowerCase().contains('handyman') == true)) {
+        return splashController.cacheModule!.id!;
+      }
     }
+    return 10;
+  }
+
+  List<HandymanServiceModel> get wishlistedServices {
+    int activeModuleId = getHandymanModuleId();
 
     if (Get.isRegistered<FavouriteController>()) {
       final favController = Get.find<FavouriteController>();
@@ -69,7 +146,7 @@ class HandymanHomeController extends GetxController {
         final apiWishList = <HandymanServiceModel>[];
         for (var item in favController.wishItemList!) {
           if (item != null) {
-            bool isHandymanModule = (activeModuleId != null && item.moduleId == activeModuleId) ||
+            bool isHandymanModule = item.moduleId == activeModuleId ||
                 (item.moduleType?.toLowerCase() == 'handyman');
             if (isHandymanModule) {
               apiWishList.add(HandymanServiceModel.fromItem(item));
@@ -146,116 +223,354 @@ class HandymanHomeController extends GetxController {
         o.quantity = 0;
       }
     }
+    for (var m in mostBookedServices) {
+      m.cartQuantity = 0;
+    }
+    for (var section in categorySections) {
+      for (var s in section.services) {
+        s.cartQuantity = 0;
+      }
+    }
+
+    int handymanModuleId = getHandymanModuleId();
 
     for (var cart in cartList) {
       if (cart.item != null) {
+        bool isHandymanModule = cart.item!.moduleId == handymanModuleId ||
+            (cart.item!.moduleType?.toLowerCase() == 'handyman');
+
+        if (!isHandymanModule) {
+          continue;
+        }
+
         String idStr = cart.item!.id.toString();
+        String itemName = cart.item!.name?.toLowerCase().trim() ?? '';
+        int cartQty = cart.quantity ?? 0;
+
         if (!allServices.containsKey(idStr)) {
           allServices[idStr] = HandymanServiceModel.fromItem(cart.item!);
         }
-        allServices[idStr]!.cartQuantity = cart.quantity ?? 0;
+        allServices[idStr]!.cartQuantity = cartQty;
         if (allServices[idStr]!.options.length == 1) {
-          allServices[idStr]!.options[0].quantity = cart.quantity ?? 0;
+          allServices[idStr]!.options[0].quantity = cartQty;
+        }
+
+        for (var m in mostBookedServices) {
+          String mName = m.name.toLowerCase().trim();
+          if (m.id == idStr || (itemName.isNotEmpty && (mName.contains(itemName) || itemName.contains(mName)))) {
+            m.cartQuantity = cartQty;
+            allServices[m.id]?.cartQuantity = cartQty;
+          }
+        }
+
+        for (var section in categorySections) {
+          for (var s in section.services) {
+            String sName = s.name.toLowerCase().trim();
+            if (s.id == idStr || (itemName.isNotEmpty && (sName.contains(itemName) || itemName.contains(sName)))) {
+              s.cartQuantity = cartQty;
+              allServices[s.id]?.cartQuantity = cartQty;
+            }
+          }
         }
       }
     }
+
     if (notify) {
-      _refreshAll();
+      allServices.refresh();
+      mostBookedServices.refresh();
+      categorySections.refresh();
+      update();
     }
   }
 
-  Future<void> addToCart(String serviceId) async {
-    final s = allServices[serviceId];
-    int? itemId = int.tryParse(serviceId);
-    if (itemId == null) return;
+  Future<bool> addToCart(String serviceId, {HandymanServiceModel? serviceModel}) async {
+    if (serviceModel != null) {
+      allServices[serviceId] = serviceModel;
+    }
+
+    HandymanServiceModel? s = allServices[serviceId];
+
+    if (s == null) {
+      for (final section in categorySections) {
+        final match = section.services.firstWhereOrNull((element) => element.id == serviceId);
+        if (match != null) {
+          s = match;
+          allServices[serviceId] = match;
+          break;
+        }
+      }
+    }
+    if (s == null) {
+      final match = mostBookedServices.firstWhereOrNull((element) => element.id == serviceId);
+      if (match != null) {
+        s = match;
+        allServices[serviceId] = match;
+      }
+    }
+
+    int? parsedId = int.tryParse(serviceId);
+    int itemId = parsedId ?? (serviceId.hashCode & 0x7FFFFFFF);
+
+    if (parsedId != null && (s == null || s.startingPrice <= 0 || s.storeId == null) && Get.isRegistered<ItemServiceInterface>()) {
+      try {
+        Item? fetchedItem = await Get.find<ItemServiceInterface>().getItemDetails(parsedId);
+        if (fetchedItem != null) {
+          s = HandymanServiceModel.fromItem(fetchedItem);
+          allServices[serviceId] = s;
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('Error fetching item details for cart: $e');
+        }
+      }
+    }
 
     if (Get.isRegistered<CartController>()) {
       final cartController = Get.find<CartController>();
-      int cartIndex = cartController.cartList.indexWhere((c) => c.item?.id == itemId);
+      int cartIndex = cartController.cartList.indexWhere((c) {
+        if (c.item?.id == itemId) return true;
+        if (s != null && c.item?.name != null && c.item!.name!.toLowerCase().trim() == s.name.toLowerCase().trim()) return true;
+        return false;
+      });
+
+      double calculatedPrice = 0.0;
+      if (s != null && s.startingPrice > 0) {
+        calculatedPrice = s.startingPrice.toDouble();
+      } else if (s != null && s.options.isNotEmpty) {
+        final firstOpt = s.options.first;
+        calculatedPrice = (firstOpt.discountedPrice > 0 ? firstOpt.discountedPrice : firstOpt.originalPrice).toDouble();
+      }
 
       if (cartIndex != -1) {
         final cartModel = cartController.cartList[cartIndex];
         int newQty = (cartModel.quantity ?? 0) + 1;
+        cartModel.quantity = newQty;
         if (s != null) {
           s.cartQuantity = newQty;
           if (s.options.length == 1) s.options[0].quantity = newQty;
         }
         _refreshAll();
-        if (cartModel.id != null) {
-          await cartController.updateCartQuantityOnline(
-            cartModel.id!,
-            (s?.startingPrice ?? cartModel.price?.toInt() ?? 0).toDouble(),
-            newQty,
-          );
-        }
-      } else {
-        double price = (s?.startingPrice ?? 0).toDouble();
-        if (s != null) {
-          s.cartQuantity = 1;
-          if (s.options.length == 1) s.options[0].quantity = 1;
-        }
-        _refreshAll();
+        cartController.calculationCart();
+        cartController.update();
 
-        OnlineCart onlineCart = OnlineCart(
-          null,
-          itemId,
-          null,
-          price.toString(),
-          '',
-          null,
-          [],
-          1,
-          [],
-          [],
-          [],
-          'Item',
-          false,
-        );
-        await cartController.addToCartOnline(onlineCart);
+        if (parsedId != null && cartModel.id != null) {
+          double finalPrice = calculatedPrice > 0 ? calculatedPrice : (cartModel.price ?? 0.0);
+          unawaited(cartController.updateCartQuantityOnline(
+            cartModel.id!,
+            finalPrice,
+            newQty,
+          ));
+        }
+        return true;
+      } else {
+        int? targetStoreId = s?.storeId;
+        int activeModuleId = getHandymanModuleId();
+
+        bool isAnotherStore = false;
+        final handymanCartItems = cartController.cartList.where((cartModel) {
+          if (cartModel.item == null) return false;
+          bool isHandyman = cartModel.item!.moduleId == activeModuleId ||
+              (cartModel.item!.moduleType?.toLowerCase() == 'handyman');
+          return isHandyman;
+        }).toList();
+
+        if (handymanCartItems.isNotEmpty) {
+          for (var cartModel in handymanCartItems) {
+            if (cartModel.item != null && targetStoreId != null && cartModel.item!.storeId != null) {
+              if (cartModel.item!.storeId != targetStoreId) {
+                isAnotherStore = true;
+                break;
+              }
+            }
+          }
+        }
+
+        if (isAnotherStore) {
+          Completer<bool> completer = Completer<bool>();
+          Get.dialog(
+            ConfirmationDialog(
+              icon: Images.warning,
+              title: 'are_you_sure_to_reset'.tr,
+              description: 'if_you_continue_from_another_provider'.tr,
+              onYesPressed: () async {
+                Get.back();
+                await clearCart();
+                _performAddToCart(
+                  s: s,
+                  serviceId: serviceId,
+                  itemId: itemId,
+                  parsedId: parsedId,
+                  calculatedPrice: calculatedPrice,
+                  cartController: cartController,
+                );
+                completer.complete(true);
+              },
+              onNoPressed: () {
+                Get.back();
+                completer.complete(false);
+              },
+            ),
+            barrierDismissible: false,
+          );
+          return completer.future;
+        } else {
+          _performAddToCart(
+            s: s,
+            serviceId: serviceId,
+            itemId: itemId,
+            parsedId: parsedId,
+            calculatedPrice: calculatedPrice,
+            cartController: cartController,
+          );
+          return true;
+        }
       }
-      syncWithCartController();
     } else {
       if (s != null) {
         s.cartQuantity++;
         if (s.options.length == 1) s.options[0].quantity++;
         _refreshAll();
       }
+      return true;
+    }
+  }
+
+  void _performAddToCart({
+    required HandymanServiceModel? s,
+    required String serviceId,
+    required int itemId,
+    required int? parsedId,
+    required double calculatedPrice,
+    required CartController cartController,
+  }) {
+    if (s != null) {
+      s.cartQuantity = 1;
+      if (s.options.length == 1) s.options[0].quantity = 1;
+    }
+
+    int activeModuleId = getHandymanModuleId();
+
+    int existingIndex = cartController.cartList.indexWhere((c) => c.item?.id == itemId || (s != null && c.item?.name != null && c.item!.name!.toLowerCase().trim() == s.name.toLowerCase().trim()));
+
+    if (existingIndex != -1) {
+      final existingCart = cartController.cartList[existingIndex];
+      int newQty = (existingCart.quantity ?? 0) + 1;
+      existingCart.quantity = newQty;
+      if (s != null) {
+        s.cartQuantity = newQty;
+        if (s.options.length == 1) s.options[0].quantity = newQty;
+      }
+      _refreshAll();
+      cartController.calculationCart();
+      cartController.update();
+
+      if (existingCart.id != null) {
+        unawaited(cartController.updateCartQuantityOnline(
+          existingCart.id!,
+          calculatedPrice > 0 ? calculatedPrice : (existingCart.price ?? 0.0),
+          newQty,
+        ));
+      }
+      return;
+    }
+
+    Item itemObj = Item(
+      id: itemId,
+      name: s?.name ?? 'Service',
+      price: calculatedPrice,
+      moduleType: 'handyman',
+      moduleId: activeModuleId,
+      storeId: s?.storeId,
+    );
+    CartModel localCartModel = CartModel(
+      null, calculatedPrice, 0, [], [], calculatedPrice, 1, [], [], false,
+      100, itemObj, 99,
+    );
+    cartController.cartList.add(localCartModel);
+
+    _refreshAll();
+    cartController.calculationCart();
+    cartController.update();
+
+    if (parsedId != null) {
+      OnlineCart onlineCart = OnlineCart(
+        null,
+        itemId,
+        null,
+        calculatedPrice.toString(),
+        '',
+        null,
+        [],
+        1,
+        [],
+        [],
+        [],
+        'Item',
+        false,
+      );
+      unawaited(cartController.addToCartOnline(onlineCart).then((_) {
+        syncWithCartController();
+      }));
     }
   }
 
   Future<void> removeFromCart(String serviceId) async {
-    final s = allServices[serviceId];
-    int? itemId = int.tryParse(serviceId);
-    if (itemId == null) return;
+    HandymanServiceModel? s = allServices[serviceId];
+    if (s == null) {
+      for (final section in categorySections) {
+        final match = section.services.firstWhereOrNull((element) => element.id == serviceId);
+        if (match != null) {
+          s = match;
+          break;
+        }
+      }
+    }
+    if (s == null) {
+      s = mostBookedServices.firstWhereOrNull((element) => element.id == serviceId);
+    }
+    
+    int? parsedId = int.tryParse(serviceId);
+    int itemId = parsedId ?? (serviceId.hashCode & 0x7FFFFFFF);
 
     if (Get.isRegistered<CartController>()) {
       final cartController = Get.find<CartController>();
-      int cartIndex = cartController.cartList.indexWhere((c) => c.item?.id == itemId);
+      int cartIndex = cartController.cartList.indexWhere((c) {
+        if (c.item?.id == itemId) return true;
+        if (s != null && c.item?.name != null && c.item!.name!.toLowerCase().trim() == s.name.toLowerCase().trim()) return true;
+        return false;
+      });
 
       if (cartIndex != -1) {
         final cartModel = cartController.cartList[cartIndex];
         int currentQty = cartModel.quantity ?? 0;
         if (currentQty > 1) {
           int newQty = currentQty - 1;
+          cartModel.quantity = newQty;
           if (s != null) {
             s.cartQuantity = newQty;
             if (s.options.length == 1) s.options[0].quantity = newQty;
           }
           _refreshAll();
-          if (cartModel.id != null) {
-            await cartController.updateCartQuantityOnline(
+          cartController.calculationCart();
+          cartController.update();
+
+          if (parsedId != null && cartModel.id != null) {
+            unawaited(cartController.updateCartQuantityOnline(
               cartModel.id!,
               (s?.startingPrice ?? cartModel.price?.toInt() ?? 0).toDouble(),
               newQty,
-            );
+            ));
           }
         } else {
           if (s != null) {
             s.cartQuantity = 0;
             if (s.options.length == 1) s.options[0].quantity = 0;
           }
+          cartController.cartList.removeAt(cartIndex);
           _refreshAll();
-          if (cartModel.id != null) {
+          cartController.calculationCart();
+          cartController.update();
+          if (parsedId != null && cartModel.id != null) {
             await cartController.removeCartItemOnline(cartModel.id!);
           }
         }
@@ -270,16 +585,16 @@ class HandymanHomeController extends GetxController {
     }
   }
 
-  void addServiceToCart(String serviceId) {
-    addToCart(serviceId);
+  Future<bool> addServiceToCart(String serviceId, {HandymanServiceModel? serviceModel}) async {
+    return await addToCart(serviceId, serviceModel: serviceModel);
   }
 
   void removeServiceFromCart(String serviceId) {
     removeFromCart(serviceId);
   }
 
-  void addOptionToCart(String serviceId, String optionId) {
-    addToCart(serviceId);
+  Future<bool> addOptionToCart(String serviceId, String optionId, {HandymanServiceModel? serviceModel}) async {
+    return await addToCart(serviceId, serviceModel: serviceModel);
   }
 
   void removeOptionFromCart(String serviceId, String optionId) {
@@ -320,751 +635,15 @@ class HandymanHomeController extends GetxController {
   }
 
   void _initializeMasterServices() {
-    final Map<String, HandymanServiceModel> master = {};
-
-    void add(HandymanServiceModel s) {
-      master[s.id] = s;
-    }
-
-    // 1. Home / popular services
-    add(HandymanServiceModel(
-      id: 'ac_repair',
-      name: 'Foam-jet AC service',
-      category: 'AC & Appliance',
-      rating: 4.76,
-      reviewCount: '2.6M',
-      startingPrice: 699,
-      optionsCount: 3,
-      options: [
-        HandymanServiceOption(
-          id: 'ac_1',
-          title: '1 AC',
-          originalPrice: 699,
-          discountedPrice: 699,
-          discountText: '',
-          subtitle: '',
-        ),
-        HandymanServiceOption(
-          id: 'ac_2',
-          title: '2 ACs',
-          originalPrice: 1398,
-          discountedPrice: 1298,
-          discountText: '7% off',
-          subtitle: '(₹649/AC)',
-        ),
-        HandymanServiceOption(
-          id: 'ac_3',
-          title: '3 ACs',
-          originalPrice: 2097,
-          discountedPrice: 1797,
-          discountText: '14% off',
-          subtitle: '(₹599/AC)',
-        ),
-      ],
-      imageAsset: Images.handymanAc,
-      coverImageAsset: Images.handymanAcRepair,
-      coverTitle: 'AC Repair',
-      coverDescription: 'Hassle-free fixes\nfor all AC issues',
-    ));
-
-    add(HandymanServiceModel(
-      id: 'women_salon',
-      name: "Women's Salon Classic",
-      category: "Women's Salon & Spa",
-      rating: 4.76,
-      reviewCount: '1.8M',
-      startingPrice: 449,
-      optionsCount: 0,
-      imageAsset: Images.handymanWomenSalon,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'cleaning',
-      name: 'Home Deep Cleaning',
-      category: 'Cleaning & Pest',
-      rating: 4.72,
-      reviewCount: '1.2M',
-      startingPrice: 349,
-      optionsCount: 2,
-      options: [
-        HandymanServiceOption(
-          id: 'clean_1',
-          title: '1 BHK',
-          originalPrice: 349,
-          discountedPrice: 349,
-          discountText: '',
-          subtitle: '',
-        ),
-        HandymanServiceOption(
-          id: 'clean_2',
-          title: '2 BHK',
-          originalPrice: 698,
-          discountedPrice: 599,
-          discountText: '14% off',
-          subtitle: '',
-        ),
-      ],
-      imageAsset: Images.handymanCleaning,
-      coverImageAsset: Images.handymanCleaning,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'tools_plumb',
-      name: 'Plumbing Service',
-      category: 'Electrician & Plumber',
-      rating: 4.65,
-      reviewCount: '890K',
-      startingPrice: 199,
-      optionsCount: 0,
-      imageAsset: Images.kitchenSink,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'men_salon',
-      name: "Men's Haircut & Massage",
-      category: "Men's Salon",
-      rating: 4.71,
-      reviewCount: '760K',
-      startingPrice: 299,
-      optionsCount: 1,
-      options: [
-        HandymanServiceOption(
-          id: 'haircut_1',
-          title: 'Haircut',
-          originalPrice: 299,
-          discountedPrice: 299,
-          discountText: '',
-          subtitle: '',
-        ),
-      ],
-      imageAsset: Images.handymanMenSalon,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'painting',
-      name: 'Home Painting',
-      category: 'Painting & Waterproofing',
-      rating: 4.58,
-      reviewCount: '540K',
-      startingPrice: 599,
-      optionsCount: 0,
-      imageAsset: Images.handymanPainting,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'cctv',
-      name: 'CCTV Installation',
-      category: 'CCTV & Smart Home',
-      rating: 4.81,
-      reviewCount: '320K',
-      startingPrice: 899,
-      optionsCount: 2,
-      options: [
-        HandymanServiceOption(
-          id: 'cctv_1',
-          title: '1 Camera',
-          originalPrice: 899,
-          discountedPrice: 899,
-          discountText: '',
-          subtitle: '',
-        ),
-        HandymanServiceOption(
-          id: 'cctv_2',
-          title: '2 Cameras',
-          originalPrice: 1798,
-          discountedPrice: 1599,
-          discountText: '11% off',
-          subtitle: '',
-        ),
-      ],
-      imageAsset: Images.handymanCctv,
-    ));
-
-    // 2. Category specific services
-    add(HandymanServiceModel(
-      id: 'threading',
-      name: 'Threading',
-      category: "Women's Salon & Spa",
-      rating: 4.85,
-      reviewCount: '2.8M',
-      startingPrice: 29,
-      optionsCount: 3,
-      coverTitle: 'Precise threading for a smooth,\nhair-free finish',
-      isCoverTextDark: false,
-      options: [
-        HandymanServiceOption(
-          id: 'thread_1',
-          title: 'Eyebrow',
-          originalPrice: 59,
-          discountedPrice: 59,
-          discountText: '',
-          subtitle: '',
-          rating: 4.85,
-          reviewCount: '1.5M',
-          imageAsset: Images.handymanThreading,
-        ),
-        HandymanServiceOption(
-          id: 'thread_2',
-          title: 'Upper lip',
-          originalPrice: 59,
-          discountedPrice: 59,
-          discountText: '',
-          subtitle: '',
-          rating: 4.85,
-          reviewCount: '723K',
-          imageAsset: Images.handymanUpperLip,
-        ),
-        HandymanServiceOption(
-          id: 'thread_3',
-          title: 'Chin',
-          originalPrice: 29,
-          discountedPrice: 29,
-          discountText: '',
-          subtitle: '',
-          rating: 4.86,
-          reviewCount: '161K',
-          imageAsset: Images.handymanChin,
-        ),
-      ],
-      imageAsset: Images.handymanThreading,
-      coverImageAsset: Images.handymanWomenSalon,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'head_massage',
-      name: 'Head massage',
-      category: "Women's Salon & Spa",
-      rating: 4.87,
-      reviewCount: '194K',
-      startingPrice: 199,
-      optionsCount: 0,
-      imageAsset: Images.handymanHeadMassage,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'facial',
-      name: 'Facial',
-      category: "Women's Salon & Spa",
-      rating: 4.75,
-      reviewCount: '1.2M',
-      startingPrice: 399,
-      optionsCount: 5,
-      imageAsset: Images.handymanFacial,
-      coverImageAsset: Images.handymanWomenSalon,
-      options: [
-        HandymanServiceOption(
-          id: 'facial_1',
-          title: 'Fruit Facial',
-          originalPrice: 399,
-          discountedPrice: 399,
-          discountText: '',
-          subtitle: '',
-          rating: 4.75,
-          reviewCount: '450K',
-          imageAsset: Images.facialFruit,
-        ),
-        HandymanServiceOption(
-          id: 'facial_2',
-          title: 'Gold Facial',
-          originalPrice: 599,
-          discountedPrice: 599,
-          discountText: '',
-          subtitle: '',
-          rating: 4.80,
-          reviewCount: '320K',
-          imageAsset: Images.facialGold,
-        ),
-        HandymanServiceOption(
-          id: 'facial_3',
-          title: 'De-tan Facial',
-          originalPrice: 499,
-          discountedPrice: 499,
-          discountText: '',
-          subtitle: '',
-          rating: 4.72,
-          reviewCount: '190K',
-          imageAsset: Images.facialDetan,
-        ),
-        HandymanServiceOption(
-          id: 'facial_4',
-          title: 'Herbal Facial',
-          originalPrice: 449,
-          discountedPrice: 449,
-          discountText: '',
-          subtitle: '',
-          rating: 4.78,
-          reviewCount: '120K',
-          imageAsset: Images.facialHerbal,
-        ),
-        HandymanServiceOption(
-          id: 'facial_5',
-          title: 'Glow Facial',
-          originalPrice: 549,
-          discountedPrice: 549,
-          discountText: '',
-          subtitle: '',
-          rating: 4.82,
-          reviewCount: '210K',
-          imageAsset: Images.facialGlow,
-        ),
-      ],
-    ));
-
-    add(HandymanServiceModel(
-      id: 'full_arms_waxing',
-      name: 'Full Arms Waxing',
-      category: "Women's Salon & Spa",
-      rating: 4.82,
-      reviewCount: '980K',
-      startingPrice: 149,
-      optionsCount: 0,
-      imageAsset: Images.handymanWaxing,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'ac_service',
-      name: 'AC Service',
-      category: "AC Repair",
-      rating: 4.80,
-      reviewCount: '2.6M',
-      startingPrice: 499,
-      optionsCount: 0,
-      imageAsset: Images.handymanAc,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'ac_deep_clean',
-      name: 'AC Deep Clean',
-      category: "AC Repair",
-      rating: 4.72,
-      reviewCount: '890K',
-      startingPrice: 899,
-      optionsCount: 0,
-      imageAsset: Images.acDeepClean,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'ac_install',
-      name: 'AC Installation',
-      category: "AC Repair",
-      rating: 4.68,
-      reviewCount: '340K',
-      startingPrice: 1500,
-      optionsCount: 0,
-      imageAsset: Images.acInstallation,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'geyser_repair',
-      name: 'Geyser Repair',
-      category: "Appliance Repair",
-      rating: 4.65,
-      reviewCount: '210K',
-      startingPrice: 399,
-      optionsCount: 0,
-      imageAsset: Images.geyserRepair,
-    ));
-
-    // 3. Additional services from subcategories screen
-    add(HandymanServiceModel(
-      id: 'emergency_electrician',
-      name: 'Emergency Electrician',
-      category: 'InstaHelp',
-      rating: 4.85,
-      reviewCount: '1.2K',
-      startingPrice: 399,
-      optionsCount: 0,
-      imageAsset: Images.handymanElectricianBanner,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'urgent_lockout',
-      name: 'Urgent Lockout Service',
-      category: 'InstaHelp',
-      rating: 4.90,
-      reviewCount: '800',
-      startingPrice: 599,
-      optionsCount: 0,
-      imageAsset: Images.handymanLocksmith,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'threading_waxing_eyebrow',
-      name: 'Eyebrow & Upper Lip Threading',
-      category: "Women's Salon & Spa",
-      rating: 4.85,
-      reviewCount: '2.8M',
-      startingPrice: 59,
-      optionsCount: 0,
-      imageAsset: Images.handymanThreading,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'skin_brightening_facial',
-      name: 'Skin Brightening Facial',
-      category: "Women's Salon & Spa",
-      rating: 4.74,
-      reviewCount: '17K',
-      startingPrice: 1399,
-      optionsCount: 0,
-      imageAsset: Images.handymanFacial,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'men_haircut_styling',
-      name: "Men's Haircut & Styling",
-      category: "Men's Salon & Massage",
-      rating: 4.71,
-      reviewCount: '760K',
-      startingPrice: 299,
-      optionsCount: 0,
-      imageAsset: Images.handymanMenSalon,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'beard_styling_trim',
-      name: 'Beard Styling & Trim',
-      category: "Men's Salon & Massage",
-      rating: 4.65,
-      reviewCount: '120K',
-      startingPrice: 149,
-      optionsCount: 0,
-      imageAsset: Images.handymanMenSalon,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'stress_relief_massage',
-      name: 'Stress Relief Head Massage',
-      category: "Men's Salon & Massage",
-      rating: 4.80,
-      reviewCount: '90K',
-      startingPrice: 199,
-      optionsCount: 0,
-      imageAsset: Images.handymanMenSalon,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'intense_bathroom_cleaning',
-      name: 'Intense bathroom cleaning',
-      category: 'Cleaning & Pest Control',
-      rating: 4.80,
-      reviewCount: '6.7M',
-      startingPrice: 549,
-      optionsCount: 0,
-      imageAsset: Images.intenseBathroom,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'bathroom_kitchen_cleaning',
-      name: 'Bathroom & kitchen cleaning',
-      category: 'Cleaning & Pest Control',
-      rating: 4.75,
-      reviewCount: '1.2M',
-      startingPrice: 899,
-      optionsCount: 0,
-      imageAsset: Images.bathroomSink,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'complete_kitchen_cleaning',
-      name: 'Complete kitchen cleaning',
-      category: 'Cleaning & Pest Control',
-      rating: 4.85,
-      reviewCount: '450K',
-      startingPrice: 1299,
-      optionsCount: 0,
-      imageAsset: Images.kitchenCleaning,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'kitchen_sink_cleaning',
-      name: 'Kitchen sink cleaning',
-      category: 'Cleaning & Pest Control',
-      rating: 4.65,
-      reviewCount: '89K',
-      startingPrice: 199,
-      optionsCount: 0,
-      imageAsset: Images.kitchenSink,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'sofa_deep_cleaning',
-      name: 'Sofa deep cleaning',
-      category: 'Cleaning & Pest Control',
-      rating: 4.76,
-      reviewCount: '2.6M',
-      startingPrice: 699,
-      optionsCount: 0,
-      imageAsset: Images.sofaClean,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'carpet_deep_cleaning',
-      name: 'Carpet deep cleaning',
-      category: 'Cleaning & Pest Control',
-      rating: 4.72,
-      reviewCount: '890K',
-      startingPrice: 499,
-      optionsCount: 0,
-      imageAsset: Images.sofaClean,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'furnished_apartment_deep_cleaning',
-      name: 'Furnished apartment deep clean',
-      category: 'Cleaning & Pest Control',
-      rating: 4.80,
-      reviewCount: '571K',
-      startingPrice: 3499,
-      optionsCount: 0,
-      imageAsset: Images.furnishedApartment,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'unfurnished_home_deep_clean',
-      name: 'Unfurnished home deep clean',
-      category: 'Cleaning & Pest Control',
-      rating: 4.70,
-      reviewCount: '120K',
-      startingPrice: 2499,
-      optionsCount: 0,
-      imageAsset: Images.houseClean,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'ant_control_kitchen_bathroom',
-      name: 'Ant control – kitchen/bathroom',
-      category: 'Cleaning & Pest Control',
-      rating: 5.0,
-      reviewCount: '22',
-      startingPrice: 1249,
-      optionsCount: 0,
-      imageAsset: Images.antControl,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'cockroach_pest_control',
-      name: 'Cockroach & general pest control',
-      category: 'Cleaning & Pest Control',
-      rating: 4.82,
-      reviewCount: '140K',
-      startingPrice: 999,
-      optionsCount: 0,
-      imageAsset: Images.antControl,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'painting_wall_touchups',
-      name: 'Wall Touch-ups',
-      category: 'Painting & Water - proofing',
-      rating: 4.58,
-      reviewCount: '540K',
-      startingPrice: 599,
-      optionsCount: 0,
-      imageAsset: Images.handymanPainting,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'painting_full_room',
-      name: 'Full Room Painting',
-      category: 'Painting & Water - proofing',
-      rating: 4.75,
-      reviewCount: '85K',
-      startingPrice: 2999,
-      optionsCount: 0,
-      imageAsset: Images.handymanPainting,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'waterproofing_wall',
-      name: 'Wall Waterproofing',
-      category: 'Painting & Water - proofing',
-      rating: 4.60,
-      reviewCount: '30K',
-      startingPrice: 1499,
-      optionsCount: 0,
-      imageAsset: Images.handymanPainting,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'sink_repair',
-      name: 'Sink Repair',
-      category: 'Electrician, Plumber & Carpenter',
-      rating: 4.70,
-      reviewCount: '50K',
-      startingPrice: 299,
-      optionsCount: 0,
-      imageAsset: Images.bathroomSink,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'switchboard_install',
-      name: 'Switchboard Installation',
-      category: 'Electrician, Plumber & Carpenter',
-      rating: 4.80,
-      reviewCount: '120K',
-      startingPrice: 149,
-      optionsCount: 0,
-      imageAsset: Images.handymanElectricianBanner,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'furniture_assembly',
-      name: 'Furniture Assembly',
-      category: 'Electrician, Plumber & Carpenter',
-      rating: 4.75,
-      reviewCount: '95K',
-      startingPrice: 399,
-      optionsCount: 0,
-      imageAsset: Images.handymanTools,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'cctv_install',
-      name: 'CCTV Installation',
-      category: 'CCTV & Smart Home',
-      rating: 4.81,
-      reviewCount: '320K',
-      startingPrice: 899,
-      optionsCount: 0,
-      imageAsset: Images.handymanCctv,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'smart_lock_setup',
-      name: 'Smart Lock Setup',
-      category: 'CCTV & Smart Home',
-      rating: 4.85,
-      reviewCount: '12K',
-      startingPrice: 1299,
-      optionsCount: 0,
-      imageAsset: Images.handymanCctv,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'lawn_mowing_trim',
-      name: 'Lawn Mowing & Trim',
-      category: 'Gardening & Lawn Care',
-      rating: 4.82,
-      reviewCount: '2K',
-      startingPrice: 349,
-      optionsCount: 0,
-      imageAsset: Images.handymanGardening,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'weed_removal',
-      name: 'Weed Removal',
-      category: 'Gardening & Lawn Care',
-      rating: 4.75,
-      reviewCount: '1.5K',
-      startingPrice: 299,
-      optionsCount: 0,
-      imageAsset: Images.handymanGardening,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'bathroom_renovation',
-      name: 'Bathroom Renovation',
-      category: 'Home Renovation',
-      rating: 4.90,
-      reviewCount: '800',
-      startingPrice: 9999,
-      optionsCount: 0,
-      imageAsset: Images.handymanRenovation,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'modular_kitchen',
-      name: 'Modular Kitchen Setup',
-      category: 'Home Renovation',
-      rating: 4.85,
-      reviewCount: '500',
-      startingPrice: 14999,
-      optionsCount: 0,
-      imageAsset: Images.handymanRenovation,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'tv_installation',
-      name: 'Wall Mount TV Installation',
-      category: 'TV Mount & Setup',
-      rating: 4.80,
-      reviewCount: '8K',
-      startingPrice: 299,
-      optionsCount: 0,
-      imageAsset: Images.handymanTvmount,
-    ));
-
-    add(HandymanServiceModel(
-      id: 'key_duplication',
-      name: 'Key Duplication',
-      category: 'Locksmith & Key Maker',
-      rating: 4.78,
-      reviewCount: '1.5K',
-      startingPrice: 99,
-      optionsCount: 0,
-      imageAsset: Images.handymanLocksmith,
-    ));
-
-    allServices.assignAll(master);
+    allServices.clear();
   }
 
   void _loadMostBookedServices() {
-    mostBookedServices.assignAll([
-      allServices['ac_repair']!,
-      allServices['women_salon']!,
-      allServices['cleaning']!,
-      allServices['tools_plumb']!,
-      allServices['men_salon']!,
-      allServices['painting']!,
-      allServices['cctv']!,
-    ]);
+    mostBookedServices.clear();
   }
 
   void _loadCategoryServices() {
-    categorySections.assignAll([
-      CategorySectionModel(
-        title: 'Salon for Women',
-        subtitle: 'Pamper yourself at home',
-        services: [
-          allServices['threading']!,
-          allServices['head_massage']!,
-          allServices['facial']!,
-          allServices['full_arms_waxing']!,
-        ],
-      ),
-      CategorySectionModel(
-        title: 'AC & Appliance Repair',
-        subtitle: 'Expert technicians at your doorstep',
-        services: [
-          allServices['ac_service']!,
-          allServices['ac_deep_clean']!,
-          allServices['ac_install']!,
-          allServices['geyser_repair']!,
-        ],
-      ),
-      CategorySectionModel(
-        title: 'Cleaning & Pest Control',
-        subtitle: 'Professional cleaning & sanitization',
-        services: [
-          allServices['complete_kitchen_cleaning']!,
-          allServices['sofa_deep_cleaning']!,
-          allServices['intense_bathroom_cleaning']!,
-          allServices['cockroach_pest_control']!,
-        ],
-      ),
-      CategorySectionModel(
-        title: 'Electrician, Plumber & Carpenter',
-        subtitle: 'Expert home repair & installation',
-        services: [
-          allServices['tools_plumb']!,
-          allServices['sink_repair']!,
-          allServices['switchboard_install']!,
-          allServices['furniture_assembly']!,
-        ],
-      ),
-    ]);
+    categorySections.clear();
   }
 
   void _loadBookings() {

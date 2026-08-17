@@ -111,6 +111,7 @@ class Item {
   String? manufactureDate;
   String? packageDate;
   String? expiryDate;
+  List<String>? serviceType;
 
   Item({
     this.id,
@@ -154,6 +155,7 @@ class Item {
     this.manufactureDate,
     this.packageDate,
     this.expiryDate,
+    this.serviceType,
   });
 
   Item.fromJson(Map<String, dynamic> json) {
@@ -242,6 +244,13 @@ class Item {
     manufactureDate = json['manufacture_date'];
     packageDate = json['package_date'];
     expiryDate = json['expiry_date'] ?? json['expery_date'];
+    if (json['service_type'] != null) {
+      if (json['service_type'] is List) {
+        serviceType = (json['service_type'] as List).map((e) => e.toString()).toList();
+      } else {
+        serviceType = [json['service_type'].toString()];
+      }
+    }
   }
 
   Map<String, dynamic> toJson() {

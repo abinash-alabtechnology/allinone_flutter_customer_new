@@ -16,6 +16,7 @@ import 'package:handy_allinone/common/widgets/item_view.dart';
 import 'package:handy_allinone/common/widgets/menu_drawer.dart';
 import 'package:handy_allinone/common/widgets/veg_filter_widget.dart';
 import 'package:handy_allinone/common/widgets/web_menu_bar.dart';
+import 'package:handy_allinone/features/cart/controllers/cart_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -162,7 +163,10 @@ class CategoryItemScreenState extends State<CategoryItemScreen> {
               ) : const SizedBox(),
 
               IconButton(
-                onPressed: () => Get.toNamed(RouteHelper.getCartRoute()),
+                onPressed: () {
+                  Get.find<CartController>().getCartDataOnline();
+                  Get.toNamed(RouteHelper.getCartRoute());
+                },
                 icon: CartWidget(color:Theme.of(context).cardColor, size: 25),
               ),
 

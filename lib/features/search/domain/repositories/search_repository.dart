@@ -6,6 +6,7 @@ import 'package:handy_allinone/features/search/domain/models/popular_categories_
 import 'package:handy_allinone/features/search/domain/models/search_suggestion_model.dart';
 import 'package:handy_allinone/features/search/domain/repositories/search_repository_interface.dart';
 import 'package:handy_allinone/util/app_constants.dart';
+import 'package:handy_allinone/features/handyman/services/controllers/handyman_home_controller.dart';
 
 class SearchRepository implements SearchRepositoryInterface {
   final ApiClient apiClient;
@@ -62,7 +63,13 @@ class SearchRepository implements SearchRepositoryInterface {
   }
 
   Future<Response> _getSearchData(String? query, bool isStore) async {
-    return await apiClient.getData('${AppConstants.searchUri}${isStore ? 'stores' : 'items'}/search?name=$query&offset=1&limit=50');
+    String? serviceType = Get.isRegistered<HandymanHomeController>()
+        ? Get.find<HandymanHomeController>().selectedServiceType
+        : null;
+    String serviceTypeParam = (serviceType != null && serviceType.isNotEmpty)
+        ? '&service_type=$serviceType'
+        : '';
+    return await apiClient.getData('${AppConstants.searchUri}${isStore ? 'stores' : 'items'}/search?name=$query&offset=1&limit=50$serviceTypeParam');
   }
 
   @override

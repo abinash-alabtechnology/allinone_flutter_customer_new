@@ -9,7 +9,6 @@ import 'package:handy_allinone/features/handyman/services/models/handyman_servic
 import 'package:handy_allinone/features/handyman/services/widgets/most_booked_services_widget.dart';
 import 'package:handy_allinone/features/handyman/services/widgets/category_services_widget.dart';
 import 'package:handy_allinone/features/handyman/services/widgets/service_options_bottom_sheet.dart';
-import 'package:handy_allinone/features/handyman/services/widgets/category_promo_banner.dart';
 import 'package:handy_allinone/features/location/controllers/location_controller.dart';
 import 'package:handy_allinone/helper/address_helper.dart';
 import 'dart:async';
@@ -24,6 +23,7 @@ import 'package:handy_allinone/features/handyman/services/screens/handyman_check
 import 'package:handy_allinone/features/banner/controllers/banner_controller.dart';
 import 'package:handy_allinone/features/favourite/controllers/favourite_controller.dart';
 import 'package:handy_allinone/features/category/controllers/category_controller.dart';
+import 'package:handy_allinone/features/handyman/services/widgets/spotlight_banner_widget.dart';
 import 'package:handy_allinone/common/widgets/custom_image.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -160,7 +160,15 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
     if (!Get.isRegistered<HandymanHomeController>()) {
       Get.put(HandymanHomeController(), permanent: false);
     }
+    if (Get.isRegistered<CartController>()) {
+      Get.find<CartController>().getCartDataOnline().then((_) {
+        if (Get.isRegistered<HandymanHomeController>()) {
+          Get.find<HandymanHomeController>().syncWithCartController();
+        }
+      });
+    }
     Get.find<BannerController>().getBannerList(true);
+    Get.find<BannerController>().getSpotlightBannerList(true);
     Get.find<CategoryController>().getCategoryList(true);
     _bannerTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
       if (mounted) {
@@ -170,6 +178,16 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
           setState(() {
             _currentBannerIndex = (_currentBannerIndex + 1) % bannerCount;
           });
+        }
+      }
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Get.isRegistered<HandymanHomeController>()) {
+        final handymanController = Get.find<HandymanHomeController>();
+        if (!handymanController.hasPromptedServiceTypeSelection) {
+          handymanController.hasPromptedServiceTypeSelection = true;
+          _showServiceTypeBottomSheet(context, isInitial: true);
         }
       }
     });
@@ -198,7 +216,10 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
 
   Widget _buildCartButton({required bool isScrolled}) {
     return InkWell(
-      onTap: widget.onCartTap ?? () => Get.toNamed(RouteHelper.getCartRoute()),
+      onTap: widget.onCartTap ?? () {
+        Get.find<CartController>().getCartDataOnline();
+        Get.toNamed(RouteHelper.getCartRoute());
+      },
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(8),
@@ -216,50 +237,333 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
                   ),
                 ],
         ),
-        child: Obx(() {
-          final handymanController = Get.find<HandymanHomeController>();
-          final int handymanQty = handymanController.totalCartItems;
-          int normalQty = 0;
-          if (Get.isRegistered<CartController>()) {
-            normalQty = Get.find<CartController>().cartList.length;
-          }
-          final int totalQty = handymanQty + normalQty;
-          
-          return Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Image.asset(
-                Images.shoppingCart,
-                height: 24,
-                width: 24,
-                color: Colors.black87,
-              ),
-              if (totalQty > 0)
-                Positioned(
-                  top: -5,
-                  right: -5,
-                  child: Container(
-                    height: 14,
-                    width: 14,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Theme.of(context).colorScheme.error,
-                      border: Border.all(width: 1, color: Colors.white),
+        child: GetBuilder<CartController>(
+          builder: (cartController) {
+            return GetBuilder<HandymanHomeController>(
+              builder: (handymanController) {
+                int totalQty = handymanController.totalCartItems;
+
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Image.asset(
+                      Images.shoppingCart,
+                      height: 24,
+                      width: 24,
+                      color: Colors.black87,
                     ),
-                    child: Text(
-                      totalQty.toString(),
-                      style: robotoRegular.copyWith(
-                        fontSize: 9,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                    if (totalQty > 0)
+                      Positioned(
+                        top: -6,
+                        right: -6,
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          constraints: const BoxConstraints(
+                            minWidth: 18,
+                            minHeight: 18,
+                          ),
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Color(0xFFEF4444),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            totalQty > 99 ? '99+' : totalQty.toString(),
+                            style: robotoBold.copyWith(
+                              fontSize: 10,
+                              color: Colors.white,
+                              height: 1,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchBarRow({required bool isScrolled}) {
+    return Row(
+      children: [
+        Expanded(child: _buildSearchBar(isScrolled: isScrolled)),
+        const Gap(8),
+        _buildServiceTypeFilterButton(isScrolled: isScrolled),
+      ],
+    );
+  }
+
+  Widget _buildServiceTypeFilterButton({required bool isScrolled}) {
+    return InkWell(
+      onTap: () => _showServiceTypeBottomSheet(context),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        height: 46,
+        width: 46,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: isScrolled ? Border.all(color: Colors.grey.shade200, width: 1.5) : null,
+          boxShadow: isScrolled
+              ? []
+              : [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            const Icon(
+              Icons.tune_rounded,
+              color: Color(0xFF6C63FF),
+              size: 22,
+            ),
+            Positioned(
+              top: 8,
+              right: 8,
+              child: Container(
+                width: 7,
+                height: 7,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0xFF6C63FF),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showServiceTypeBottomSheet(BuildContext context, {bool isInitial = false}) {
+    final handymanController = Get.find<HandymanHomeController>();
+    String tempSelected = handymanController.selectedServiceType;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              padding: const EdgeInsets.all(24),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(2),
                       ),
                     ),
                   ),
+                  const Gap(16),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF6C63FF).withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.home_repair_service_rounded,
+                          color: Color(0xFF6C63FF),
+                          size: 24,
+                        ),
+                      ),
+                      const Gap(12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              isInitial ? 'Select Service Type' : 'Filter Services',
+                              style: robotoBold.copyWith(
+                                fontSize: 18,
+                                color: const Color(0xFF1F2937),
+                              ),
+                            ),
+                            const Gap(2),
+                            Text(
+                              'Choose how you would like to book services',
+                              style: robotoRegular.copyWith(
+                                fontSize: 13,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Gap(20),
+
+                  // Option 1: Home Visit Services
+                  _buildServiceTypeOptionCard(
+                    title: 'Home Visit Services',
+                    subtitle: 'Get expert services delivered right at your doorstep',
+                    icon: Icons.home_rounded,
+                    iconBg: const Color(0xFFEFF6FF),
+                    iconColor: const Color(0xFF2563EB),
+                    value: 'home_service',
+                    selectedValue: tempSelected,
+                    onTap: () {
+                      setModalState(() {
+                        tempSelected = 'home_service';
+                      });
+                    },
+                  ),
+
+                  const Gap(12),
+
+                  // Option 2: Store Visit Services
+                  _buildServiceTypeOptionCard(
+                    title: 'Store Visit Services',
+                    subtitle: 'Visit our nearest verified service centers and stores',
+                    icon: Icons.storefront_rounded,
+                    iconBg: const Color(0xFFFFF7ED),
+                    iconColor: const Color(0xFFEA580C),
+                    value: 'store_visit',
+                    selectedValue: tempSelected,
+                    onTap: () {
+                      setModalState(() {
+                        tempSelected = 'store_visit';
+                      });
+                    },
+                  ),
+
+                  const Gap(24),
+
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Get.back();
+                        handymanController.updateServiceType(tempSelected, reload: true);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF6C63FF),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        'Apply & Continue',
+                        style: robotoBold.copyWith(
+                          fontSize: 15,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Gap(12),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildServiceTypeOptionCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color iconBg,
+    required Color iconColor,
+    required String value,
+    required String selectedValue,
+    required VoidCallback onTap,
+  }) {
+    final isSelected = value == selectedValue;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF6C63FF).withOpacity(0.06) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF6C63FF) : Colors.grey.shade200,
+            width: isSelected ? 2.0 : 1.0,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: iconBg,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: iconColor, size: 22),
+            ),
+            const Gap(14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: robotoBold.copyWith(
+                      fontSize: 15,
+                      color: isSelected ? const Color(0xFF6C63FF) : const Color(0xFF1F2937),
+                    ),
+                  ),
+                  const Gap(4),
+                  Text(
+                    subtitle,
+                    style: robotoRegular.copyWith(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Gap(10),
+            Container(
+              width: 22,
+              height: 22,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isSelected ? const Color(0xFF6C63FF) : Colors.transparent,
+                border: Border.all(
+                  color: isSelected ? const Color(0xFF6C63FF) : Colors.grey.shade400,
+                  width: 2,
                 ),
-            ],
-          );
-        }),
+              ),
+              child: isSelected
+                  ? const Icon(Icons.check, size: 14, color: Colors.white)
+                  : null,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -598,85 +902,67 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
 
                 const Gap(12),
 
-                // Dynamic Category Services Sections (100% API Data)
-                GetBuilder<CategoryController>(
-                  builder: (categoryController) {
-                    final widgets = <Widget>[];
+                // Dynamic Category Services Sections (with dynamic Spotlight Banners in between)
+                GetBuilder<BannerController>(
+                  builder: (bannerController) {
+                    final spotlightBanners = bannerController.spotlightBannerList;
+                    return GetBuilder<CategoryController>(
+                      builder: (categoryController) {
+                        final widgets = <Widget>[];
 
-                    if (categoryController.categoryList != null && categoryController.categoryList!.isNotEmpty) {
-                      for (final category in categoryController.categoryList!) {
-                        final catIdStr = category.id.toString();
-                        final apiItems = categoryController.itemsByCategory[catIdStr];
+                        if (categoryController.categoryList != null && categoryController.categoryList!.isNotEmpty) {
+                          int categoryIndex = 0;
+                          for (final category in categoryController.categoryList!) {
+                            final catIdStr = category.id.toString();
+                            final apiItems = categoryController.itemsByCategory[catIdStr];
 
-                        if (apiItems == null && category.id != null) {
-                          categoryController.fetchItemsForCategory(catIdStr, 1, 'all', false);
+                            if (apiItems == null && category.id != null) {
+                              categoryController.fetchItemsForCategory(catIdStr, 1, 'all', false);
+                            }
+
+                            if (apiItems == null || apiItems.isEmpty) {
+                              continue;
+                            }
+
+                            final categoryServices = apiItems.map((item) => HandymanServiceModel.fromItem(item)).toList();
+
+                            final section = CategorySectionModel(
+                              categoryId: category.id,
+                              title: category.name ?? '',
+                              subtitle: 'Professional services at your doorstep',
+                              services: categoryServices,
+                            );
+
+                            widgets.add(Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: CategoryServicesWidget(section: section),
+                            ));
+
+                            // Single Spotlight Banner dynamically between categories
+                            if (spotlightBanners != null && spotlightBanners.isNotEmpty) {
+                              final banner = spotlightBanners[categoryIndex % spotlightBanners.length];
+                              widgets.add(SpotlightBannerWidget(
+                                banner: banner,
+                                categoryName: category.name,
+                                categoryId: category.id,
+                                onTap: () {
+                                  Get.toNamed(
+                                    RouteHelper.getHandymanAvailableServicesRoute(),
+                                    arguments: {'category': category.name, 'categoryId': category.id},
+                                  );
+                                },
+                              ));
+                              widgets.add(const Gap(12));
+                            }
+                            categoryIndex++;
+                          }
                         }
 
-                        if (apiItems == null || apiItems.isEmpty) {
-                          continue; // Strictly skip categories without API items
-                        }
-
-                        final categoryServices = apiItems.map((item) => HandymanServiceModel.fromItem(item)).toList();
-
-                        final section = CategorySectionModel(
-                          categoryId: category.id,
-                          title: category.name ?? '',
-                          subtitle: 'Professional services at your doorstep',
-                          services: categoryServices,
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: widgets,
                         );
-
-                        widgets.add(Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: CategoryServicesWidget(section: section),
-                        ));
-
-                        // Add category-specific promo banners dynamically if category matches
-                        final titleLower = (category.name ?? '').toLowerCase();
-                        if (titleLower.contains('salon') || titleLower.contains('women')) {
-                          widgets.add(CategoryPromoBanner(
-                            tag: 'LUXURY SPA & SALON',
-                            title: 'Up to 30% Off Home Salon',
-                            subtitle: 'Threadings, Facials & Hair Services',
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFFFF7E9D), Color(0xFF9B51E0)],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            imageAsset: Images.handymanWomenSalonNoBg,
-                            onTap: () {
-                              Get.toNamed(
-                                RouteHelper.getHandymanAvailableServicesRoute(),
-                                arguments: {'category': category.name, 'categoryId': category.id},
-                              );
-                            },
-                          ));
-                          widgets.add(const Gap(12));
-                        } else if (titleLower.contains('ac') || titleLower.contains('appliance')) {
-                          widgets.add(CategoryPromoBanner(
-                            tag: 'SUMMER SPECIALS',
-                            title: 'Flat ₹150 Off AC Repairs',
-                            subtitle: 'Certified expert repair & maintenance',
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF2193B0), Color(0xFF6DD5ED)],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            imageAsset: Images.handymanAcMechanicNoBg,
-                            onTap: () {
-                              Get.toNamed(
-                                RouteHelper.getHandymanAvailableServicesRoute(),
-                                arguments: {'category': category.name, 'categoryId': category.id},
-                              );
-                            },
-                          ));
-                          widgets.add(const Gap(12));
-                        }
-                      }
-                    }
-
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: widgets,
+                      },
                     );
                   },
                 ),
@@ -808,6 +1094,36 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
                       ],
                     ),
                   ),
+                ),
+
+                // Spotlight Banners Carousel Slider at the bottom of the screen
+                GetBuilder<BannerController>(
+                  builder: (bannerController) {
+                    final spotlightBanners = bannerController.spotlightBannerList;
+                    if (spotlightBanners == null || spotlightBanners.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 8, bottom: 24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Text(
+                              'Special Spotlights',
+                              style: robotoBold.copyWith(
+                                fontSize: 16,
+                                color: const Color(0xFF1E293B),
+                              ),
+                            ),
+                          ),
+                          const Gap(12),
+                          SpotlightCarouselWidget(banners: spotlightBanners),
+                        ],
+                      ),
+                    );
+                  },
                 ),
 
                 // Highlights Section
@@ -945,7 +1261,7 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
                           const Gap(10),
 
                           // Search Controller Row
-                          _buildSearchBar(isScrolled: false),
+                          _buildSearchBarRow(isScrolled: false),
                           const Gap(10),
 
                           // Dynamic API Promo Banner Header
@@ -1019,7 +1335,7 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
                           padding: const EdgeInsets.only(bottom: 12),
                           child: Row(
                             children: [
-                              Expanded(child: _buildSearchBar(isScrolled: true)),
+                              Expanded(child: _buildSearchBarRow(isScrolled: true)),
                               const Gap(12),
                               _buildCartButton(isScrolled: true),
                             ],
@@ -1423,24 +1739,26 @@ class _WishlistServiceCard extends StatelessWidget {
                         btnHeight: btnH,
                         labelFs: iconSize,
                         optionFs: ratingFs * 0.82,
-                        onTap: () {
+                        onTap: () async {
                           if (service.optionsCount == 0) {
-                            controller.addToCart(service.id);
-                            Get.snackbar(
-                              'Added',
-                              '${service.name} added to cart',
-                              snackPosition: SnackPosition.TOP,
-                              backgroundColor: Colors.black87,
-                              colorText: Colors.white,
-                              margin: const EdgeInsets.all(16),
-                              duration: const Duration(seconds: 2),
-                            );
+                            bool added = await controller.addToCart(service.id, serviceModel: service);
+                            if (added) {
+                              Get.snackbar(
+                                'Added',
+                                '${service.name} added to cart',
+                                snackPosition: SnackPosition.TOP,
+                                backgroundColor: Colors.black87,
+                                colorText: Colors.white,
+                                margin: const EdgeInsets.all(16),
+                                duration: const Duration(seconds: 2),
+                              );
+                            }
                           } else {
                             Get.bottomSheet(
                               ServiceOptionsBottomSheet(
                                 service: service,
                                 onOptionAdd: (optionId) {
-                                  controller.addToCart(service.id);
+                                  controller.addToCart(service.id, serviceModel: service);
                                 },
                               ),
                               isScrollControlled: true,
@@ -1454,7 +1772,7 @@ class _WishlistServiceCard extends StatelessWidget {
                         btnWidth: btnW,
                         btnHeight: btnH,
                         countFs: ratingFs,
-                        onAdd: () => controller.addToCart(service.id),
+                        onAdd: () => controller.addToCart(service.id, serviceModel: service),
                         onRemove: () => controller.removeFromCart(service.id),
                       );
               }),
@@ -2072,7 +2390,7 @@ class _CartItemCard extends StatelessWidget {
                     ),
                   ),
                   GestureDetector(
-                    onTap: () => controller.addToCart(service.id),
+                    onTap: () => controller.addToCart(service.id, serviceModel: service),
                     behavior: HitTestBehavior.opaque,
                     child: const SizedBox(
                       width: 34,

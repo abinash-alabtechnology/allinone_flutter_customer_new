@@ -45,6 +45,8 @@ class HandymanServiceModel {
   final List<HandymanServiceOption> options;
   bool isWishlisted;
   int cartQuantity;
+  final int? storeId;
+  final List<String>? serviceType;
 
   HandymanServiceModel({
     required this.id,
@@ -63,6 +65,8 @@ class HandymanServiceModel {
     this.options = const [],
     this.isWishlisted = false,
     this.cartQuantity = 0,
+    this.storeId,
+    this.serviceType,
   });
 
   factory HandymanServiceModel.fromItem(Item item) {
@@ -168,6 +172,8 @@ class HandymanServiceModel {
       imageUrl: img,
       coverDescription: item.description,
       options: optionsList.length > 1 ? optionsList : [],
+      storeId: item.storeId,
+      serviceType: item.serviceType,
     );
   }
 
@@ -192,6 +198,8 @@ class HandymanServiceModel {
       options: options,
       isWishlisted: isWishlisted ?? this.isWishlisted,
       cartQuantity: cartQuantity ?? this.cartQuantity,
+      storeId: storeId,
+      serviceType: serviceType,
     );
   }
 }

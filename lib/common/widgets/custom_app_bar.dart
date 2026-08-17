@@ -5,6 +5,7 @@ import 'package:handy_allinone/util/styles.dart';
 import 'package:handy_allinone/common/widgets/cart_widget.dart';
 import 'package:handy_allinone/common/widgets/veg_filter_widget.dart';
 import 'package:handy_allinone/common/widgets/web_menu_bar.dart';
+import 'package:handy_allinone/features/cart/controllers/cart_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -39,7 +40,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: 2,
       actions: showCart || onVegFilterTap != null ? [
         showCart ? IconButton(
-          onPressed: () => Get.toNamed(RouteHelper.getCartRoute()),
+          onPressed: () {
+            Get.find<CartController>().getCartDataOnline();
+            Get.toNamed(RouteHelper.getCartRoute());
+          },
           icon: CartWidget(color: Theme.of(context).textTheme.bodyLarge!.color, size: 25),
         ) : const SizedBox(),
 
@@ -106,8 +110,10 @@ class CustomAppBar2 extends StatelessWidget implements PreferredSizeWidget {
           ? [
         showCart
             ? IconButton(
-          onPressed: () =>
-              Get.toNamed(RouteHelper.getCartRoute()),
+          onPressed: () {
+            Get.find<CartController>().getCartDataOnline();
+            Get.toNamed(RouteHelper.getCartRoute());
+          },
           icon: CartWidget(
               color: Theme.of(context)
                   .textTheme
@@ -197,8 +203,10 @@ class CustomAppBar3 extends StatelessWidget implements PreferredSizeWidget {
           ? [
         showCart
             ? IconButton(
-          onPressed: () =>
-              Get.toNamed(RouteHelper.getCartRoute()),
+          onPressed: () {
+            Get.find<CartController>().getCartDataOnline();
+            Get.toNamed(RouteHelper.getCartRoute());
+          },
           icon: CartWidget(
               color: Theme.of(context)
                   .textTheme

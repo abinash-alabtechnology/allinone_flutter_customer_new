@@ -68,7 +68,10 @@ class _BottomCartWidgetState extends State<BottomCartWidget>
                   ? ClipRRect(
                 borderRadius: const BorderRadius.all(Radius.circular(15)),
                 child: InkWell(
-                  onTap: () => Get.toNamed(RouteHelper.getCartRoute()),
+                  onTap: () {
+                    Get.find<CartController>().getCartDataOnline();
+                    Get.toNamed(RouteHelper.getCartRoute());
+                  },
                   child: Container(
                     width: Get.width * 0.93,
                     padding: EdgeInsets.symmetric(horizontal: 5.w),
@@ -274,7 +277,10 @@ class _BottomCartWidgetStoreState extends State<BottomCartWidgetStore>
         if (cartController.cartList.isEmpty) return const SizedBox();
 
         return InkWell(
-          onTap: () => Get.toNamed(RouteHelper.getCartRoute()),
+          onTap: () {
+            Get.find<CartController>().getCartDataOnline();
+            Get.toNamed(RouteHelper.getCartRoute());
+          },
           child: Container(
             width: double.infinity,
             padding: EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: 4.h),

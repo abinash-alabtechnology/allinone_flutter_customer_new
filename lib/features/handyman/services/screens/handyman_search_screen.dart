@@ -7,6 +7,7 @@ import 'package:handy_allinone/features/handyman/services/controllers/handyman_h
 import 'package:handy_allinone/features/handyman/services/controllers/handyman_search_controller.dart';
 import 'package:handy_allinone/features/handyman/services/models/handyman_service_model.dart';
 import 'package:handy_allinone/helper/route_helper.dart';
+import 'package:handy_allinone/common/widgets/cart_count_view.dart';
 
 class HandymanSearchScreen extends StatefulWidget {
   const HandymanSearchScreen({super.key});
@@ -462,89 +463,7 @@ class _HandymanSearchScreenState extends State<HandymanSearchScreen> {
               ],
             ),
           ),
-
-          // Add / Quantity Controller Button & Options Badge
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                height: 32.h,
-                width: 76.w,
-                alignment: Alignment.center,
-                child: currentQty > 0
-                    ? Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8.r),
-                          border: Border.all(color: const Color(0xFF6B4EFF), width: 1.2),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            InkWell(
-                              onTap: () {
-                                homeController.removeFromCart(service.id);
-                              },
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 6.w),
-                                child: Icon(Icons.remove, size: 14.sp, color: const Color(0xFF6B4EFF)),
-                              ),
-                            ),
-                            Text(
-                              '$currentQty',
-                              style: robotoRegular.copyWith(
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF6B4EFF),
-                              ),
-                            ),
-                            InkWell(
-                              onTap: () {
-                                homeController.addToCart(service.id);
-                              },
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 6.w),
-                                child: Icon(Icons.add, size: 14.sp, color: const Color(0xFF6B4EFF)),
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : OutlinedButton(
-                        onPressed: () {
-                          homeController.addToCart(service.id);
-                        },
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF6B4EFF),
-                          side: BorderSide(color: Colors.grey.shade300, width: 1.2),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.r),
-                          ),
-                          padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 18.w),
-                        ),
-                        child: Text(
-                          'Add',
-                          style: robotoRegular.copyWith(
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF6B4EFF),
-                          ),
-                        ),
-                      ),
-              ),
-              if (service.optionsCount > 0) ...[
-                const Gap(4),
-                Text(
-                  '${service.optionsCount} options',
-                  style: robotoRegular.copyWith(
-                    fontSize: 10.sp,
-                    color: Colors.grey.shade500,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ],
-          ),
+          CartCountViewHandyman(service: service),
         ],
       );
     });

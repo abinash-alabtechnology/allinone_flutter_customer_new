@@ -220,7 +220,7 @@ class SplashController extends GetxController implements GetxService {
         _configModel!.moduleConfig!.module = Module.fromJson(_data!['module_config'][module.moduleType]);
       }
       _cacheModule = await splashServiceInterface.setCacheModule(module);
-      if((AuthHelper.isLoggedIn() || AuthHelper.isGuestLoggedIn()) && cacheModule != null) {
+      if((AuthHelper.isLoggedIn() || AuthHelper.isGuestLoggedIn()) && (cacheModule != null || _module != null)) {
         Get.find<CartController>().getCartDataOnline();
       }
     }

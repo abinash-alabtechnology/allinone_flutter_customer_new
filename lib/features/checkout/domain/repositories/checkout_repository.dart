@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:get/get_connect/connect.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:handy_allinone/api/api_client.dart';
@@ -7,6 +7,8 @@ import 'package:handy_allinone/features/checkout/domain/models/surge_price_model
 import 'package:handy_allinone/features/payment/domain/models/offline_method_model.dart';
 import 'package:handy_allinone/features/checkout/domain/models/place_order_body_model.dart';
 import 'package:handy_allinone/features/checkout/domain/repositories/checkout_repository_interface.dart';
+import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
+import 'package:handy_allinone/features/cart/controllers/cart_controller.dart';
 import 'package:handy_allinone/util/app_constants.dart';
 
 class CheckoutRepository implements CheckoutRepositoryInterface {
@@ -56,12 +58,39 @@ class CheckoutRepository implements CheckoutRepositoryInterface {
   @override
   Future<Response> placeOrder(PlaceOrderBodyModel orderBody, List<MultipartBody>? orderAttachment) async {
     debugPrint("====> Place Order Request: ${orderBody.toJson()}");
+
+    Map<String, String> reqHeaders = Map.from(apiClient.getHeader());
+    reqHeaders['Content-Type'] = 'application/json; charset=UTF-8';
+
+    int? activeModuleId;
+    if (Get.isRegistered<CartController>()) {
+      for (var c in Get.find<CartController>().cartList) {
+        if (c.item?.moduleId != null && c.item!.moduleId! > 0) {
+          activeModuleId = c.item!.moduleId;
+          break;
+        }
+      }
+    }
+    if (activeModuleId == null && Get.isRegistered<SplashController>()) {
+      final hMod = Get.find<SplashController>().moduleList?.firstWhereOrNull((m) {
+        String name = m.moduleName?.toLowerCase() ?? '';
+        String type = m.moduleType?.toLowerCase() ?? '';
+        return name.contains('handyman') || type.contains('handyman');
+      });
+      if (hMod != null && hMod.id != null) {
+        activeModuleId = hMod.id;
+      }
+    }
+    activeModuleId ??= 10;
+    reqHeaders[AppConstants.moduleId] = activeModuleId.toString();
+
     if (orderBody.paymentMethod == 'digital_payment'&&!kIsWeb) {
       print("digitalpayment api works");
       return await apiClient.postMultipartData(
         AppConstants.tempplaceOrderUri,
         orderBody.toJson(),
         orderAttachment ?? [],
+        headers: reqHeaders,
         handleError: false,
       );
     } else {
@@ -69,12 +98,12 @@ class CheckoutRepository implements CheckoutRepositoryInterface {
         AppConstants.placeOrderUri,
         orderBody.toJson(),
         orderAttachment ?? [],
+        headers: reqHeaders,
         handleError: false,
       );
     }
-
-    // return await apiClient.postMultipartData(AppConstants.placeOrderUri, orderBody.toJson(), orderAttachment ?? [], handleError: false);
   }
+
   @override
   Future<Response> placePrescriptionOrder(int? storeId, double? distance, String address, String longitude, String latitude, String note,
       List<MultipartBody> orderAttachment, String dmTips, String deliveryInstruction) async {

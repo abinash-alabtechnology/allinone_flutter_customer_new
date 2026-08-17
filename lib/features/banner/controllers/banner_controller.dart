@@ -279,6 +279,39 @@ class BannerController extends GetxController implements GetxService {
     }
   }
 
+  List<Banner>? _spotlightBannerList;
+  List<Banner>? get spotlightBannerList => _spotlightBannerList;
+
+  Future<void> getSpotlightBannerList(
+    bool reload, {
+    DataSourceEnum dataSource = DataSourceEnum.local,
+    bool fromRecall = false,
+  }) async {
+    if (_spotlightBannerList == null || reload || fromRecall) {
+      if (reload) {
+        _spotlightBannerList = null;
+      }
+      BannerModel? bannerModel;
+      if (dataSource == DataSourceEnum.local) {
+        bannerModel = await bannerServiceInterface.getSpotlightBannerList(source: DataSourceEnum.local);
+        if (bannerModel != null && bannerModel.banners != null) {
+          _spotlightBannerList = bannerModel.banners;
+        }
+        getSpotlightBannerList(
+          false,
+          dataSource: DataSourceEnum.client,
+          fromRecall: true,
+        );
+      } else {
+        bannerModel = await bannerServiceInterface.getSpotlightBannerList(source: DataSourceEnum.client);
+        if (bannerModel != null && bannerModel.banners != null) {
+          _spotlightBannerList = bannerModel.banners;
+        }
+      }
+      update();
+    }
+  }
+
   void setCurrentIndex(int index, bool notify) {
     _currentIndex = index;
     if (notify) {

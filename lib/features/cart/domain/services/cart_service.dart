@@ -73,11 +73,13 @@ class CartService implements CartServiceInterface {
   @override
   List<AddOns> prepareAddonList(CartModel cartModel) {
     List<AddOns> addOnList = [];
-    for (var addOnId in cartModel.addOnIds!) {
-      for(AddOns addOns in cartModel.item!.addOns!) {
-        if(addOns.id == addOnId.id) {
-          addOnList.add(addOns);
-          break;
+    if (cartModel.addOnIds != null && cartModel.item != null && cartModel.item!.addOns != null) {
+      for (var addOnId in cartModel.addOnIds!) {
+        for(AddOns addOns in cartModel.item!.addOns!) {
+          if(addOns.id == addOnId.id) {
+            addOnList.add(addOns);
+            break;
+          }
         }
       }
     }
@@ -87,8 +89,12 @@ class CartService implements CartServiceInterface {
   @override
   double calculateAddonPrice(double addOns, List<AddOns> addOnList, CartModel cartModel) {
     double addonPrice = addOns;
-    for(int index=0; index<addOnList.length; index++) {
-      addonPrice = addonPrice + (addOnList[index].price! * cartModel.addOnIds![index].quantity!);
+    if (cartModel.addOnIds != null) {
+      for(int index=0; index<addOnList.length; index++) {
+        if (index < cartModel.addOnIds!.length) {
+          addonPrice = addonPrice + ((addOnList[index].price ?? 0) * (cartModel.addOnIds![index].quantity ?? 1));
+        }
+      }
     }
     return addonPrice;
   }
@@ -96,25 +102,34 @@ class CartService implements CartServiceInterface {
   @override
   double calculateVariationPrice(bool isFoodVariation, CartModel cartModel, double? discount, String? discountType, double variationPrice) {
     double price = variationPrice;
+    if (cartModel.item == null) return price;
+
     if(isFoodVariation) {
-      for(int index = 0; index< cartModel.item!.foodVariations!.length; index++) {
-        for(int i=0; i<cartModel.item!.foodVariations![index].variationValues!.length; i++) {
-          if(cartModel.foodVariations![index][i]!) {
-            price += (PriceConverter.convertWithDiscount(cartModel.item!.foodVariations![index].variationValues![i].optionPrice!, discount, discountType, isFoodVariation: true)! * cartModel.quantity!);
+      if (cartModel.item!.foodVariations != null && cartModel.foodVariations != null) {
+        for(int index = 0; index < cartModel.item!.foodVariations!.length; index++) {
+          if (index < cartModel.foodVariations!.length) {
+            for(int i = 0; i < cartModel.item!.foodVariations![index].variationValues!.length; i++) {
+              if(i < cartModel.foodVariations![index].length && (cartModel.foodVariations![index][i] ?? false)) {
+                price += (PriceConverter.convertWithDiscount(cartModel.item!.foodVariations![index].variationValues![i].optionPrice!, discount, discountType, isFoodVariation: true)! * (cartModel.quantity ?? 1));
+              }
+            }
           }
         }
       }
     } else {
-
       String variationType = '';
-      for(int i=0; i<cartModel.variation!.length; i++) {
-        variationType = cartModel.variation![i].type!;
+      if (cartModel.variation != null) {
+        for(int i = 0; i < cartModel.variation!.length; i++) {
+          variationType = cartModel.variation![i].type ?? '';
+        }
       }
 
-      for (item_variation.Variation variation in cartModel.item!.variations!) {
-        if (variation.type == variationType) {
-          price = (PriceConverter.convertWithDiscount(variation.price!, discount, discountType)! * cartModel.quantity!);
-          break;
+      if (cartModel.item!.variations != null) {
+        for (item_variation.Variation variation in cartModel.item!.variations!) {
+          if (variation.type == variationType && variation.price != null) {
+            price = (PriceConverter.convertWithDiscount(variation.price!, discount, discountType)! * (cartModel.quantity ?? 1));
+            break;
+          }
         }
       }
     }
@@ -124,22 +139,32 @@ class CartService implements CartServiceInterface {
   @override
   double calculateVariationWithoutDiscountPrice(bool isFoodVariation, CartModel cartModel, double variationWithoutDiscount) {
     double variationWithoutDiscountPrice = variationWithoutDiscount;
+    if (cartModel.item == null) return variationWithoutDiscountPrice;
+
     if(!isFoodVariation) {
       String variationType = '';
-      for(int i=0; i<cartModel.variation!.length; i++) {
-        variationType = cartModel.variation![i].type!;
+      if (cartModel.variation != null) {
+        for(int i = 0; i < cartModel.variation!.length; i++) {
+          variationType = cartModel.variation![i].type ?? '';
+        }
       }
-      for (item_variation.Variation variation in cartModel.item!.variations!) {
-        if (variation.type == variationType) {
-          variationWithoutDiscountPrice = (variation.price! * cartModel.quantity!);
-          break;
+      if (cartModel.item!.variations != null) {
+        for (item_variation.Variation variation in cartModel.item!.variations!) {
+          if (variation.type == variationType && variation.price != null) {
+            variationWithoutDiscountPrice = (variation.price! * (cartModel.quantity ?? 1));
+            break;
+          }
         }
       }
     } else {
-      for(int index = 0; index< cartModel.item!.foodVariations!.length; index++) {
-        for(int i=0; i<cartModel.item!.foodVariations![index].variationValues!.length; i++) {
-          if(cartModel.foodVariations![index][i]!) {
-            variationWithoutDiscountPrice += (cartModel.item!.foodVariations![index].variationValues![i].optionPrice! * cartModel.quantity!);
+      if (cartModel.item!.foodVariations != null && cartModel.foodVariations != null) {
+        for(int index = 0; index < cartModel.item!.foodVariations!.length; index++) {
+          if (index < cartModel.foodVariations!.length) {
+            for(int i = 0; i < cartModel.item!.foodVariations![index].variationValues!.length; i++) {
+              if(i < cartModel.foodVariations![index].length && (cartModel.foodVariations![index][i] ?? false)) {
+                variationWithoutDiscountPrice += ((cartModel.item!.foodVariations![index].variationValues![i].optionPrice ?? 0) * (cartModel.quantity ?? 1));
+              }
+            }
           }
         }
       }
@@ -150,15 +175,21 @@ class CartService implements CartServiceInterface {
   @override
   bool checkVariation(bool isFoodVariation, CartModel cartModel) {
     bool haveVariation = false;
+    if (cartModel.item == null) return false;
+
     if(!isFoodVariation) {
       String variationType = '';
-      for(int i=0; i<cartModel.variation!.length; i++) {
-        variationType = cartModel.variation![i].type!;
+      if (cartModel.variation != null) {
+        for(int i = 0; i < cartModel.variation!.length; i++) {
+          variationType = cartModel.variation![i].type ?? '';
+        }
       }
-      for (item_variation.Variation variation in cartModel.item!.variations!) {
-        if (variation.type == variationType) {
-          haveVariation = true;
-          break;
+      if (cartModel.item!.variations != null) {
+        for (item_variation.Variation variation in cartModel.item!.variations!) {
+          if (variation.type == variationType) {
+            haveVariation = true;
+            break;
+          }
         }
       }
     }
@@ -237,6 +268,9 @@ class CartService implements CartServiceInterface {
   List<CartModel> formatOnlineCartToLocalCart({required List<OnlineCartModel> onlineCartModel}) {
     List<CartModel> cartList = [];
     for (OnlineCartModel cart in onlineCartModel) {
+      if (cart.item != null && cart.moduleId != null) {
+        cart.item!.moduleId = cart.moduleId;
+      }
       double price = cart.item!.price!;
       double? discount = cart.item!.discount;
       String? discountType = cart.item!.discountType;
