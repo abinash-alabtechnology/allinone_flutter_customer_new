@@ -31,6 +31,8 @@ class HandymanBookingModel {
   final double campaignDiscount;
   final double vat;
   final double fee;
+  final String? startOtp;
+  final String? endOtp;
 
   HandymanBookingModel({
     required this.id,
@@ -51,6 +53,8 @@ class HandymanBookingModel {
     this.campaignDiscount = 0.0,
     this.vat = 0.0,
     this.fee = 0.0,
+    this.startOtp,
+    this.endOtp,
   });
 }
 

@@ -1,6 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:handy_allinone/api/api_client.dart';
+import 'package:handy_allinone/features/address/domain/models/address_model.dart';
+import 'package:handy_allinone/helper/address_helper.dart';
+import 'package:handy_allinone/util/app_constants.dart';
 import 'package:handy_allinone/features/cart/domain/models/cart_model.dart';
 import 'package:handy_allinone/features/handyman/services/models/handyman_service_model.dart';
 import 'package:handy_allinone/features/handyman/services/models/handyman_booking_model.dart';
@@ -57,6 +62,7 @@ class HandymanHomeController extends GetxController {
   }
 
   void clearAndRefetchServices() {
+    fetchMostBookedServicesFromApi();
     if (Get.isRegistered<CategoryController>()) {
       Get.find<CategoryController>().clearCategoryCache();
     }
@@ -114,25 +120,7 @@ class HandymanHomeController extends GetxController {
 
   int getHandymanModuleId() {
     if (Get.isRegistered<SplashController>()) {
-      final splashController = Get.find<SplashController>();
-      final handymanMod = splashController.moduleList?.firstWhereOrNull((m) {
-        String title = m.moduleName?.toLowerCase() ?? '';
-        String mType = m.moduleType?.toLowerCase() ?? '';
-        return title.contains('handyman') || mType.contains('handyman');
-      });
-      if (handymanMod != null && handymanMod.id != null) {
-        return handymanMod.id!;
-      }
-      if (splashController.module != null &&
-          (splashController.module!.moduleType?.toLowerCase() == 'handyman' ||
-           splashController.module!.moduleName?.toLowerCase().contains('handyman') == true)) {
-        return splashController.module!.id!;
-      }
-      if (splashController.cacheModule != null &&
-          (splashController.cacheModule!.moduleType?.toLowerCase() == 'handyman' ||
-           splashController.cacheModule!.moduleName?.toLowerCase().contains('handyman') == true)) {
-        return splashController.cacheModule!.id!;
-      }
+      return Get.find<SplashController>().getHandymanModuleId();
     }
     return 10;
   }
@@ -216,23 +204,38 @@ class HandymanHomeController extends GetxController {
   void syncWithCartController({bool notify = true}) {
     if (!Get.isRegistered<CartController>()) return;
     final cartList = Get.find<CartController>().cartList;
+    int handymanModuleId = getHandymanModuleId();
 
     for (var s in allServices.values) {
-      s.cartQuantity = 0;
-      for (var o in s.options) {
-        o.quantity = 0;
-      }
-    }
-    for (var m in mostBookedServices) {
-      m.cartQuantity = 0;
-    }
-    for (var section in categorySections) {
-      for (var s in section.services) {
+      bool itemInCart = cartList.any((c) {
+        if (c.item == null) return false;
+        bool isHandyman = c.item!.moduleId == handymanModuleId || (c.item!.moduleType?.toLowerCase() == 'handyman');
+        if (!isHandyman) return false;
+        String idStr = c.item!.id.toString();
+        String itemName = c.item!.name?.toLowerCase().trim() ?? '';
+        String sName = s.name.toLowerCase().trim();
+        return idStr == s.id || (itemName.isNotEmpty && (sName.contains(itemName) || itemName.contains(sName)));
+      });
+
+      if (!itemInCart) {
         s.cartQuantity = 0;
+        for (var o in s.options) {
+          o.quantity = 0;
+        }
       }
     }
 
-    int handymanModuleId = getHandymanModuleId();
+    for (var m in mostBookedServices) {
+      bool itemInCart = cartList.any((c) => c.item?.id.toString() == m.id);
+      if (!itemInCart) m.cartQuantity = 0;
+    }
+
+    for (var section in categorySections) {
+      for (var s in section.services) {
+        bool itemInCart = cartList.any((c) => c.item?.id.toString() == s.id);
+        if (!itemInCart) s.cartQuantity = 0;
+      }
+    }
 
     for (var cart in cartList) {
       if (cart.item != null) {
@@ -250,16 +253,21 @@ class HandymanHomeController extends GetxController {
         if (!allServices.containsKey(idStr)) {
           allServices[idStr] = HandymanServiceModel.fromItem(cart.item!);
         }
-        allServices[idStr]!.cartQuantity = cartQty;
-        if (allServices[idStr]!.options.length == 1) {
-          allServices[idStr]!.options[0].quantity = cartQty;
+
+        final targetService = allServices[idStr]!;
+        targetService.cartQuantity = cartQty;
+
+        int optionsSum = targetService.options.fold(0, (sum, o) => sum + o.quantity);
+        if (targetService.options.length == 1) {
+          targetService.options[0].quantity = cartQty;
+        } else if (optionsSum == 0 && targetService.options.isNotEmpty) {
+          targetService.options[0].quantity = cartQty;
         }
 
         for (var m in mostBookedServices) {
           String mName = m.name.toLowerCase().trim();
           if (m.id == idStr || (itemName.isNotEmpty && (mName.contains(itemName) || itemName.contains(mName)))) {
             m.cartQuantity = cartQty;
-            allServices[m.id]?.cartQuantity = cartQty;
           }
         }
 
@@ -268,7 +276,6 @@ class HandymanHomeController extends GetxController {
             String sName = s.name.toLowerCase().trim();
             if (s.id == idStr || (itemName.isNotEmpty && (sName.contains(itemName) || itemName.contains(sName)))) {
               s.cartQuantity = cartQty;
-              allServices[s.id]?.cartQuantity = cartQty;
             }
           }
         }
@@ -594,11 +601,67 @@ class HandymanHomeController extends GetxController {
   }
 
   Future<bool> addOptionToCart(String serviceId, String optionId, {HandymanServiceModel? serviceModel}) async {
-    return await addToCart(serviceId, serviceModel: serviceModel);
+    if (serviceModel != null && !allServices.containsKey(serviceId)) {
+      allServices[serviceId] = serviceModel;
+    }
+
+    HandymanServiceModel? s = allServices[serviceId] ?? serviceModel;
+    if (s == null) {
+      s = mostBookedServices.firstWhereOrNull((element) => element.id == serviceId);
+    }
+    if (s == null) {
+      for (final section in categorySections) {
+        final match = section.services.firstWhereOrNull((element) => element.id == serviceId);
+        if (match != null) {
+          s = match;
+          break;
+        }
+      }
+    }
+
+    if (s != null) {
+      final opt = s.options.firstWhereOrNull((o) => o.id == optionId);
+      if (opt != null) {
+        opt.quantity++;
+      } else if (s.options.isNotEmpty) {
+        s.options.first.quantity++;
+      }
+      s.cartQuantity = s.options.fold(0, (sum, item) => sum + item.quantity);
+      if (s.cartQuantity == 0) s.cartQuantity = 1;
+    }
+
+    bool added = await addToCart(serviceId, serviceModel: s);
+    _refreshAll();
+    return added;
   }
 
   void removeOptionFromCart(String serviceId, String optionId) {
+    HandymanServiceModel? s = allServices[serviceId];
+    if (s == null) {
+      s = mostBookedServices.firstWhereOrNull((element) => element.id == serviceId);
+    }
+    if (s == null) {
+      for (final section in categorySections) {
+        final match = section.services.firstWhereOrNull((element) => element.id == serviceId);
+        if (match != null) {
+          s = match;
+          break;
+        }
+      }
+    }
+
+    if (s != null) {
+      final opt = s.options.firstWhereOrNull((o) => o.id == optionId);
+      if (opt != null && opt.quantity > 0) {
+        opt.quantity--;
+      } else if (s.options.isNotEmpty && s.options.first.quantity > 0) {
+        s.options.first.quantity--;
+      }
+      s.cartQuantity = s.options.fold(0, (sum, item) => sum + item.quantity);
+    }
+
     removeFromCart(serviceId);
+    _refreshAll();
   }
 
   Future<void> clearCart() async {
@@ -640,6 +703,56 @@ class HandymanHomeController extends GetxController {
 
   void _loadMostBookedServices() {
     mostBookedServices.clear();
+    fetchMostBookedServicesFromApi();
+  }
+
+  Future<void> fetchMostBookedServicesFromApi() async {
+    try {
+      final apiClient = Get.find<ApiClient>();
+      int activeModuleId = getHandymanModuleId();
+
+      Map<String, String> reqHeaders = Map.from(apiClient.getHeader());
+      reqHeaders['Content-Type'] = 'application/json; charset=UTF-8';
+      reqHeaders[AppConstants.moduleId] = activeModuleId.toString();
+
+      final AddressModel? userAddress = AddressHelper.getUserAddressFromSharedPref();
+      if (userAddress != null) {
+        if (userAddress.zoneIds != null && userAddress.zoneIds!.isNotEmpty) {
+          reqHeaders['zoneId'] = jsonEncode(userAddress.zoneIds);
+        } else if (userAddress.zoneId != null) {
+          reqHeaders['zoneId'] = jsonEncode([userAddress.zoneId]);
+        }
+      }
+
+      String uri = '${AppConstants.popularItemUri}?offset=1&limit=10&type=all';
+      if (_selectedServiceType.isNotEmpty) {
+        uri += '&service_type=$_selectedServiceType';
+      }
+
+      Response response = await apiClient.getData(uri, headers: reqHeaders);
+
+      if (response.statusCode == 200 && response.body != null) {
+        ItemModel itemModel = ItemModel.fromJson(response.body);
+        if (itemModel.items != null && itemModel.items!.isNotEmpty) {
+          final Map<int, HandymanServiceModel> uniqueMap = {};
+          for (var item in itemModel.items!) {
+            if (item.id != null && !uniqueMap.containsKey(item.id)) {
+              final serviceModel = HandymanServiceModel.fromItem(item);
+              allServices[serviceModel.id] = serviceModel;
+              uniqueMap[item.id!] = serviceModel;
+            }
+          }
+          mostBookedServices.assignAll(uniqueMap.values);
+          syncWithCartController(notify: false);
+          mostBookedServices.refresh();
+          update();
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error fetching popular/most booked items from API: $e');
+      }
+    }
   }
 
   void _loadCategoryServices() {

@@ -72,14 +72,7 @@ class CheckoutRepository implements CheckoutRepositoryInterface {
       }
     }
     if (activeModuleId == null && Get.isRegistered<SplashController>()) {
-      final hMod = Get.find<SplashController>().moduleList?.firstWhereOrNull((m) {
-        String name = m.moduleName?.toLowerCase() ?? '';
-        String type = m.moduleType?.toLowerCase() ?? '';
-        return name.contains('handyman') || type.contains('handyman');
-      });
-      if (hMod != null && hMod.id != null) {
-        activeModuleId = hMod.id;
-      }
+      activeModuleId = Get.find<SplashController>().getHandymanModuleId();
     }
     activeModuleId ??= 10;
     reqHeaders[AppConstants.moduleId] = activeModuleId.toString();

@@ -475,6 +475,7 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => DeliverymanRegistrationController(deliverymanRegistrationServiceInterface: Get.find()));
   Get.lazyPut(() => StoreRegistrationController(storeRegistrationServiceInterface: Get.find(), locationServiceInterface: locationServiceInterface));
   Get.lazyPut(() => ProfileController(profileServiceInterface: Get.find()));
+  Get.lazyPut(() => HandymanHomeController(), fenix: true);
   Get.lazyPut(() => BannerController(bannerServiceInterface: Get.find()));
   Get.lazyPut(() => CategoryController(categoryServiceInterface: Get.find()));
   Get.lazyPut(() => ItemController(itemServiceInterface: Get.find()));

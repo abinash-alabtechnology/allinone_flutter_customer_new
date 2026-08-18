@@ -32,18 +32,7 @@ class CategoryRepository implements CategoryRepositoryInterface {
 
   int? _getActiveModuleId() {
     if (Get.isRegistered<SplashController>()) {
-      final splashController = Get.find<SplashController>();
-      final handymanMod = splashController.moduleList?.firstWhereOrNull((m) {
-        String title = m.moduleName?.toLowerCase() ?? '';
-        String mType = m.moduleType?.toLowerCase() ?? '';
-        return title.contains('handyman') || mType.contains('handyman');
-      });
-      if (handymanMod != null && handymanMod.id != null) {
-        return handymanMod.id;
-      }
-      if (splashController.module != null && (splashController.module!.moduleType?.toLowerCase() == 'handyman' || splashController.module!.moduleName?.toLowerCase().contains('handyman') == true)) {
-        return splashController.module!.id;
-      }
+      return Get.find<SplashController>().getHandymanModuleId();
     }
     return 10;
   }

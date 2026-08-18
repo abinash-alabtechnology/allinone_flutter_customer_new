@@ -8,6 +8,7 @@ import 'package:handy_allinone/features/handyman/services/controllers/handyman_s
 import 'package:handy_allinone/features/handyman/services/models/handyman_service_model.dart';
 import 'package:handy_allinone/helper/route_helper.dart';
 import 'package:handy_allinone/common/widgets/cart_count_view.dart';
+import 'package:handy_allinone/common/widgets/custom_image.dart';
 
 class HandymanSearchScreen extends StatefulWidget {
   const HandymanSearchScreen({super.key});
@@ -262,7 +263,14 @@ class _HandymanSearchScreenState extends State<HandymanSearchScreen> {
                       const Gap(12),
 
                       // Services Results List
-                      if (results.isEmpty)
+                      if (_searchControllerObx.isLoading.value)
+                        Padding(
+                          padding: EdgeInsets.symmetric(vertical: 40.h),
+                          child: const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                      else if (results.isEmpty)
                         Padding(
                           padding: EdgeInsets.symmetric(vertical: 40.h),
                           child: Center(
@@ -302,71 +310,96 @@ class _HandymanSearchScreenState extends State<HandymanSearchScreen> {
     );
   }
 
+
+
   Widget _buildTrendingSearches() {
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Trending searches',
-            style: robotoRegular.copyWith(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-          const Gap(16),
-          Wrap(
-            spacing: 8.w,
-            runSpacing: 8.h,
-            children: _searchControllerObx.trendingSearches.map((term) {
-              return InkWell(
-                onTap: () {
-                  _searchController.text = term;
-                  _searchControllerObx.updateQuery(term);
-                  _focusNode.unfocus();
-                },
-                borderRadius: BorderRadius.circular(10.r),
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10.r),
-                    border: Border.all(color: Colors.grey.shade200, width: 1.2),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.trending_up,
-                        size: 16.sp,
-                        color: Colors.grey.shade400,
-                      ),
-                      const Gap(6),
-                      Text(
-                        term,
-                        style: robotoRegular.copyWith(
-                          fontSize: 13.sp,
-                          color: const Color(0xFF374151),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
+    return Obx(() {
+      final recentList = _searchControllerObx.recentSearches;
+      final displayList = recentList.isNotEmpty ? recentList : _searchControllerObx.trendingSearches;
+      final isRecent = recentList.isNotEmpty;
+
+      return SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  isRecent ? 'Recent searches' : 'Trending searches',
+                  style: robotoRegular.copyWith(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
                   ),
                 ),
-              );
-            }).toList(),
-          ),
-        ],
-      ),
-    );
+                if (isRecent)
+                  InkWell(
+                    onTap: () => _searchControllerObx.clearRecentSearches(),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+                      child: Text(
+                        'Clear all',
+                        style: robotoMedium.copyWith(
+                          fontSize: 13.sp,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const Gap(16),
+            Wrap(
+              spacing: 8.w,
+              runSpacing: 8.h,
+              children: displayList.map((term) {
+                return InkWell(
+                  onTap: () {
+                    _searchController.text = term;
+                    _searchControllerObx.updateQuery(term);
+                    _focusNode.unfocus();
+                  },
+                  borderRadius: BorderRadius.circular(10.r),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10.r),
+                      border: Border.all(color: Colors.grey.shade200, width: 1.2),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isRecent ? Icons.history : Icons.trending_up,
+                          size: 16.sp,
+                          color: Colors.grey.shade400,
+                        ),
+                        const Gap(6),
+                        Text(
+                          term,
+                          style: robotoRegular.copyWith(
+                            fontSize: 13.sp,
+                            color: const Color(0xFF374151),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildServiceItemCard(HandymanServiceModel service) {
-    final homeController = Get.find<HandymanHomeController>();
-
     String formatPrice(int price) {
       if (price >= 1000) {
         final String str = price.toString();
@@ -375,97 +408,87 @@ class _HandymanSearchScreenState extends State<HandymanSearchScreen> {
       return price.toString();
     }
 
-    return Obx(() {
-      // Find the live quantity of this item in the home controller cart (or fallback to service default)
-      int currentQty = 0;
-      final liveMostBooked = homeController.mostBookedServices.firstWhereOrNull((s) => s.id == service.id);
-      if (liveMostBooked != null) {
-        currentQty = liveMostBooked.cartQuantity;
-      } else {
-        for (var section in homeController.categorySections) {
-          final liveSec = section.services.firstWhereOrNull((s) => s.id == service.id);
-          if (liveSec != null) {
-            currentQty = liveSec.cartQuantity;
-            break;
-          }
-        }
-      }
+    final bool isSink = service.id == 'kitchen_sink_cleaning';
+    final String pricePrefix = isSink ? '' : 'Starts at ';
+    final String priceText = '$pricePrefix₹${formatPrice(service.startingPrice)}';
 
-      final bool isSink = service.id == 'kitchen_sink_cleaning';
-      final String pricePrefix = isSink ? '' : 'Starts at ';
-      final String priceText = '$pricePrefix₹${formatPrice(service.startingPrice)}';
-
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Service Image
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12.r),
-            child: service.imageAsset.isNotEmpty
-                ? Image.asset(
-                    service.imageAsset,
-                    width: 72.w,
-                    height: 72.h,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Service Image
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12.r),
+          child: service.imageUrl != null && service.imageUrl!.isNotEmpty
+              ? CustomImage(
+                  image: service.imageUrl!,
+                  width: 72.w,
+                  height: 72.h,
+                  fit: BoxFit.cover,
+                )
+              : service.imageAsset.isNotEmpty
+                  ? Image.asset(
+                      service.imageAsset,
+                      width: 72.w,
+                      height: 72.h,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        width: 72.w,
+                        height: 72.h,
+                        color: Colors.grey.shade100,
+                        child: const Icon(Icons.broken_image, color: Colors.grey),
+                      ),
+                    )
+                  : Container(
                       width: 72.w,
                       height: 72.h,
                       color: Colors.grey.shade100,
-                      child: const Icon(Icons.broken_image, color: Colors.grey),
+                      child: const Icon(Icons.construction, color: Colors.grey),
                     ),
-                  )
-                : Container(
-                    width: 72.w,
-                    height: 72.h,
-                    color: Colors.grey.shade100,
-                    child: const Icon(Icons.construction, color: Colors.grey),
-                  ),
-          ),
-          const Gap(12),
+        ),
+        const Gap(12),
 
-          // Details (Title, Rating, Price)
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  service.name,
-                  style: robotoRegular.copyWith(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF1F2937),
-                  ),
+        // Details (Title, Rating, Price)
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                service.name,
+                style: robotoRegular.copyWith(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF1F2937),
                 ),
-                const Gap(4),
-                Row(
-                  children: [
-                    Icon(Icons.star, color: Colors.amber, size: 14.sp),
-                    const Gap(2),
-                    Text(
-                      '${service.rating} (${service.reviewCount})',
-                      style: robotoRegular.copyWith(
-                        fontSize: 12.sp,
-                        color: Colors.grey.shade600,
-                        fontWeight: FontWeight.w500,
-                      ),
+              ),
+              const Gap(4),
+              Row(
+                children: [
+                  Icon(Icons.star, color: Colors.amber, size: 14.sp),
+                  const Gap(2),
+                  Text(
+                    '${service.rating} (${service.reviewCount})',
+                    style: robotoRegular.copyWith(
+                      fontSize: 12.sp,
+                      color: Colors.grey.shade600,
+                      fontWeight: FontWeight.w500,
                     ),
-                  ],
-                ),
-                const Gap(6),
-                Text(
-                  priceText,
-                  style: robotoRegular.copyWith(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
                   ),
+                ],
+              ),
+              const Gap(6),
+              Text(
+                priceText,
+                style: robotoRegular.copyWith(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          CartCountViewHandyman(service: service),
-        ],
-      );
-    });
+        ),
+        CartCountViewHandyman(service: service),
+      ],
+    );
   }
 }

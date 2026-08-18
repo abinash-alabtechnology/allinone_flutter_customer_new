@@ -180,7 +180,13 @@ class CategoryController extends GetxController implements GetxService {
     if (categoryList != null) {
       _categoryList = [];
       _interestSelectedList = [];
-      _categoryList!.addAll(categoryList);
+      final Map<int, CategoryModel> uniqueCatMap = {};
+      for (var cat in categoryList) {
+        if (cat.id != null) {
+          uniqueCatMap[cat.id!] = cat;
+        }
+      }
+      _categoryList!.addAll(uniqueCatMap.values);
       for(int i = 0; i < _categoryList!.length; i++) {
         _interestSelectedList!.add(false);
         if (_categoryList![i].id != null) {
@@ -195,15 +201,24 @@ class CategoryController extends GetxController implements GetxService {
     if (_loadingStatusByCategory[categoryID] == true) return;
 
     _loadingStatusByCategory[categoryID] = true;
-    if (offset == 1) {
+    if (offset == 1 || !_itemsByCategory.containsKey(categoryID)) {
       _itemsByCategory[categoryID] = [];
     }
 
     // Fetch items from the service
     ItemModel? fetchedItems = await categoryServiceInterface
         .getCategoryItemList(categoryID, offset, type);
-    if (fetchedItems != null) {
-      _itemsByCategory[categoryID]!.addAll(fetchedItems.items!);
+    if (fetchedItems != null && fetchedItems.items != null) {
+      for (var item in fetchedItems.items!) {
+        if (item.id != null) {
+          int existingIndex = _itemsByCategory[categoryID]!.indexWhere((i) => i.id == item.id);
+          if (existingIndex != -1) {
+            _itemsByCategory[categoryID]![existingIndex] = item;
+          } else {
+            _itemsByCategory[categoryID]!.add(item);
+          }
+        }
+      }
       _totalPageSize = fetchedItems.totalSize;
       _isOverallLoading = false;
     }

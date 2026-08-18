@@ -20,6 +20,9 @@ import 'package:handy_allinone/features/splash/controllers/splash_controller.dar
 import 'package:handy_allinone/api/api_client.dart';
 import 'package:handy_allinone/util/app_constants.dart';
 import 'package:handy_allinone/helper/date_converter.dart';
+import 'package:handy_allinone/features/address/controllers/address_controller.dart';
+import 'package:handy_allinone/features/address/screens/add_address_screen.dart';
+import 'package:handy_allinone/features/location/screens/pick_map_screen.dart';
 
 class HandymanCheckoutScreen extends StatefulWidget {
   const HandymanCheckoutScreen({super.key});
@@ -30,12 +33,14 @@ class HandymanCheckoutScreen extends StatefulWidget {
 
 class _HandymanCheckoutScreenState extends State<HandymanCheckoutScreen> {
   // State variables
-  late String _preferableTime;
-  late DateTime _scheduledDateTime;
+  String _preferableTime = 'Select the timing for the service';
+  DateTime? _scheduledDateTime;
   bool _isProviderLocation = true;
   String _contactName = '';
   String _contactPhone = '';
   bool _agreeToTerms = false;
+
+  AddressModel? _selectedAddress;
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
@@ -44,11 +49,8 @@ class _HandymanCheckoutScreenState extends State<HandymanCheckoutScreen> {
   void initState() {
     super.initState();
     _isProviderLocation = false;
-    final now = DateTime.now();
-    _scheduledDateTime = DateTime(now.year, now.month, now.day + 1, 10, 0);
-    final formattedDate = intl.DateFormat('MMM dd, yyyy').format(_scheduledDateTime);
-    final formattedTime = intl.DateFormat('hh:mm a').format(_scheduledDateTime);
-    _preferableTime = '$formattedDate at $formattedTime';
+    _scheduledDateTime = null;
+    _preferableTime = 'Select the timing for the service';
     _initCustomerDetailsAndAddress();
   }
 
@@ -63,6 +65,7 @@ class _HandymanCheckoutScreenState extends State<HandymanCheckoutScreen> {
     }
 
     final AddressModel? savedAddress = AddressHelper.getUserAddressFromSharedPref();
+    _selectedAddress = savedAddress;
     if (savedAddress != null) {
       if (_contactName.isEmpty && savedAddress.contactPersonName != null && savedAddress.contactPersonName!.isNotEmpty) {
         _contactName = savedAddress.contactPersonName!;
@@ -235,53 +238,661 @@ class _HandymanCheckoutScreenState extends State<HandymanCheckoutScreen> {
     );
   }
 
-  void _showTimePickerBottomSheet() async {
-    final DateTime now = DateTime.now();
-    final DateTime initialDate = _scheduledDateTime.isAfter(now) ? _scheduledDateTime : now.add(const Duration(days: 1));
+  void _showAddressSelectionBottomSheet() {
+    if (Get.isRegistered<AddressController>()) {
+      Get.find<AddressController>().getAddressList();
+    }
 
-    final DateTime? pickedDate = await showDatePicker(
+    showModalBottomSheet(
       context: context,
-      initialDate: initialDate,
-      firstDate: now,
-      lastDate: now.add(const Duration(days: 30)),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: Color(0xFF6C63FF),
-            ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.85,
           ),
-          child: child!,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const Gap(16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Select Service Location',
+                    style: GoogleFonts.inter(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF1F2937),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: Colors.grey),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const Gap(12),
+
+              // Action Buttons: Select on Map & Add New Address
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Get.to(() => PickMapScreen(
+                          fromSignUp: false,
+                          fromAddAddress: false,
+                          canRoute: false,
+                          route: '',
+                          onPicked: (AddressModel pickedAddress) {
+                            setState(() {
+                              _selectedAddress = pickedAddress;
+                            });
+                            AddressHelper.saveUserAddressInSharedPref(pickedAddress);
+                          },
+                        ));
+                      },
+                      icon: const Icon(Icons.map_rounded, color: Color(0xFF6C63FF), size: 18),
+                      label: Text(
+                        'Select on Map',
+                        style: GoogleFonts.inter(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF6C63FF),
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Color(0xFF6C63FF), width: 1.2),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
+                  ),
+                  const Gap(10),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Get.to(() => const AddAddressScreen(fromCheckout: true, fromRide: false))?.then((_) {
+                          if (Get.isRegistered<AddressController>()) {
+                            Get.find<AddressController>().getAddressList();
+                          }
+                          setState(() {
+                            _selectedAddress = AddressHelper.getUserAddressFromSharedPref();
+                          });
+                        });
+                      },
+                      icon: const Icon(Icons.add_location_alt_rounded, color: Colors.white, size: 18),
+                      label: Text(
+                        'Add Address',
+                        style: GoogleFonts.inter(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF6C63FF),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        elevation: 0,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const Gap(16),
+              const Divider(color: Color(0xFFF3F4F6)),
+              const Gap(8),
+
+              Text(
+                'Saved Addresses',
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF374151),
+                ),
+              ),
+              const Gap(10),
+
+              // Saved Addresses List
+              Expanded(
+                child: GetBuilder<AddressController>(
+                  builder: (addressController) {
+                    final addressList = addressController.addressList;
+
+                    if (addressList == null) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    if (addressList.isEmpty) {
+                      return Center(
+                        child: Text(
+                          'No saved addresses found.\nTap "Select on Map" or "Add Address" above.',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(fontSize: 13.sp, color: Colors.grey),
+                        ),
+                      );
+                    }
+
+                    final currentPrefAddress = _selectedAddress ?? AddressHelper.getUserAddressFromSharedPref();
+
+                    return ListView.separated(
+                      shrinkWrap: true,
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: addressList.length,
+                      separatorBuilder: (context, index) => const Gap(10),
+                      itemBuilder: (context, index) {
+                        final address = addressList[index];
+                        final bool isSelected = currentPrefAddress != null &&
+                            ((currentPrefAddress.id != null && currentPrefAddress.id == address.id) ||
+                             (currentPrefAddress.address == address.address));
+
+                        IconData typeIcon = Icons.location_on_rounded;
+                        if (address.addressType?.toLowerCase() == 'home') {
+                          typeIcon = Icons.home_rounded;
+                        } else if (address.addressType?.toLowerCase() == 'office') {
+                          typeIcon = Icons.work_rounded;
+                        }
+
+                        return InkWell(
+                          onTap: () {
+                            setState(() {
+                              _selectedAddress = address;
+                            });
+                            AddressHelper.saveUserAddressInSharedPref(address);
+                            Navigator.pop(context);
+                          },
+                          borderRadius: BorderRadius.circular(14),
+                          child: Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: isSelected ? const Color(0xFF6C63FF).withOpacity(0.06) : const Color(0xFFF9FAFB),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: isSelected ? const Color(0xFF6C63FF) : const Color(0xFFE5E7EB),
+                                width: isSelected ? 1.8 : 1.0,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: isSelected ? const Color(0xFF6C63FF).withOpacity(0.12) : Colors.white,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    typeIcon,
+                                    color: isSelected ? const Color(0xFF6C63FF) : const Color(0xFF6B7280),
+                                    size: 20,
+                                  ),
+                                ),
+                                const Gap(12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        address.addressType?.capitalizeFirst ?? 'Address',
+                                        style: GoogleFonts.inter(
+                                          fontSize: 14.sp,
+                                          fontWeight: FontWeight.bold,
+                                          color: isSelected ? const Color(0xFF6C63FF) : const Color(0xFF1F2937),
+                                        ),
+                                      ),
+                                      const Gap(3),
+                                      Text(
+                                        address.address ?? '',
+                                        style: robotoRegular.copyWith(
+                                          fontSize: 12.sp,
+                                          color: Colors.grey.shade600,
+                                        ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const Gap(4),
+                                IconButton(
+                                  icon: const Icon(Icons.edit_note_rounded, color: Color(0xFF6C63FF), size: 22),
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    _showEditAddressDialog(address);
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         );
       },
     );
+  }
 
-    if (pickedDate != null) {
-      if (!mounted) return;
-      final TimeOfDay initialTime = TimeOfDay(hour: _scheduledDateTime.hour, minute: _scheduledDateTime.minute);
-      final TimeOfDay? pickedTime = await showTimePicker(
-        context: context,
-        initialTime: initialTime,
-      );
+  void _showEditAddressDialog(AddressModel address) {
+    final TextEditingController addressEditController = TextEditingController(text: address.address ?? '');
+    final TextEditingController houseController = TextEditingController(text: address.house ?? '');
+    final TextEditingController floorController = TextEditingController(text: address.floor ?? '');
 
-      if (pickedTime != null) {
-        final DateTime selectedDateTime = DateTime(
-          pickedDate.year,
-          pickedDate.month,
-          pickedDate.day,
-          pickedTime.hour,
-          pickedTime.minute,
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(
+            'Edit Address',
+            style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16.sp),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: addressEditController,
+                maxLines: 3,
+                style: GoogleFonts.inter(fontSize: 13.sp),
+                decoration: InputDecoration(
+                  labelText: 'Address Details',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const Gap(12),
+              TextField(
+                controller: houseController,
+                style: GoogleFonts.inter(fontSize: 13.sp),
+                decoration: InputDecoration(
+                  labelText: 'House / Flat No (Optional)',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const Gap(12),
+              TextField(
+                controller: floorController,
+                style: GoogleFonts.inter(fontSize: 13.sp),
+                decoration: InputDecoration(
+                  labelText: 'Floor (Optional)',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF6C63FF),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              onPressed: () {
+                final updatedAddress = AddressModel(
+                  id: address.id,
+                  addressType: address.addressType,
+                  contactPersonName: address.contactPersonName,
+                  contactPersonNumber: address.contactPersonNumber,
+                  address: addressEditController.text.trim(),
+                  latitude: address.latitude,
+                  longitude: address.longitude,
+                  zoneId: address.zoneId,
+                  zoneIds: address.zoneIds,
+                  house: houseController.text.trim(),
+                  floor: floorController.text.trim(),
+                );
+                setState(() {
+                  _selectedAddress = updatedAddress;
+                });
+                AddressHelper.saveUserAddressInSharedPref(updatedAddress);
+                Navigator.pop(context);
+              },
+              child: const Text('Save Address', style: TextStyle(color: Colors.white)),
+            ),
+          ],
         );
+      },
+    );
+  }
 
-        final formattedDate = intl.DateFormat('MMM dd, yyyy').format(selectedDateTime);
-        final formattedTime = intl.DateFormat('hh:mm a').format(selectedDateTime);
+  void _showTimePickerBottomSheet() {
+    final now = DateTime.now();
+    DateTime tempSelectedDate = _scheduledDateTime ?? DateTime(now.year, now.month, now.day + 1);
+    TimeOfDay tempSelectedTime = _scheduledDateTime != null
+        ? TimeOfDay(hour: _scheduledDateTime!.hour, minute: _scheduledDateTime!.minute)
+        : const TimeOfDay(hour: 10, minute: 0);
 
-        setState(() {
-          _scheduledDateTime = selectedDateTime;
-          _preferableTime = '$formattedDate at $formattedTime';
-        });
-      }
-    }
+    final List<DateTime> dates = List.generate(14, (i) => DateTime(now.year, now.month, now.day + i));
+
+    final List<TimeOfDay> timeSlots = [
+      const TimeOfDay(hour: 9, minute: 0),
+      const TimeOfDay(hour: 10, minute: 0),
+      const TimeOfDay(hour: 11, minute: 0),
+      const TimeOfDay(hour: 12, minute: 0),
+      const TimeOfDay(hour: 13, minute: 0),
+      const TimeOfDay(hour: 14, minute: 0),
+      const TimeOfDay(hour: 15, minute: 0),
+      const TimeOfDay(hour: 16, minute: 0),
+      const TimeOfDay(hour: 17, minute: 0),
+      const TimeOfDay(hour: 18, minute: 0),
+      const TimeOfDay(hour: 19, minute: 0),
+      const TimeOfDay(hour: 20, minute: 0),
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setBottomSheetState) {
+            bool isSameDay(DateTime a, DateTime b) {
+              return a.year == b.year && a.month == b.month && a.day == b.day;
+            }
+
+            List<TimeOfDay> availableSlots = timeSlots.where((slot) {
+              if (isSameDay(tempSelectedDate, now)) {
+                if (slot.hour <= now.hour) return false;
+              }
+              return true;
+            }).toList();
+
+            String formatSlotTime(TimeOfDay slot) {
+              final dt = DateTime(2026, 1, 1, slot.hour, slot.minute);
+              return intl.DateFormat('hh:mm a').format(dt);
+            }
+
+            return Container(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.85,
+              ),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const Gap(16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Select Schedule Order Time',
+                        style: GoogleFonts.inter(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF1F2937),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, color: Colors.grey),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const Gap(12),
+
+                  // 1. Date Selection Carousel
+                  Text(
+                    'Select Date',
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF374151),
+                    ),
+                  ),
+                  const Gap(10),
+                  SizedBox(
+                    height: 68.h,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: dates.length,
+                      separatorBuilder: (context, index) => const Gap(8),
+                      itemBuilder: (context, index) {
+                        final date = dates[index];
+                        final isSelected = isSameDay(date, tempSelectedDate);
+
+                        String dayLabel;
+                        if (index == 0) {
+                          dayLabel = 'Today';
+                        } else if (index == 1) {
+                          dayLabel = 'Tomorrow';
+                        } else {
+                          dayLabel = intl.DateFormat('EEE').format(date);
+                        }
+                        final dayNum = intl.DateFormat('MMM dd').format(date);
+
+                        return InkWell(
+                          onTap: () {
+                            setBottomSheetState(() {
+                              tempSelectedDate = date;
+                            });
+                          },
+                          borderRadius: BorderRadius.circular(14),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            width: 80.w,
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            decoration: BoxDecoration(
+                              color: isSelected ? const Color(0xFF6C63FF) : const Color(0xFFF9FAFB),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: isSelected ? const Color(0xFF6C63FF) : const Color(0xFFE5E7EB),
+                                width: 1.2,
+                              ),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  dayLabel,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12.sp,
+                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                    color: isSelected ? Colors.white : const Color(0xFF6B7280),
+                                  ),
+                                ),
+                                const Gap(2),
+                                Text(
+                                  dayNum,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 11.sp,
+                                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                                    color: isSelected ? Colors.white.withValues(alpha: 0.9) : const Color(0xFF374151),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+
+                  const Gap(20),
+
+                  // 2. Available Time Slots Header
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Available Time Slots',
+                        style: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF374151),
+                        ),
+                      ),
+                      TextButton.icon(
+                        onPressed: () async {
+                          final TimeOfDay? customTime = await showTimePicker(
+                            context: context,
+                            initialTime: tempSelectedTime,
+                          );
+                          if (customTime != null) {
+                            setBottomSheetState(() {
+                              tempSelectedTime = customTime;
+                            });
+                          }
+                        },
+                        icon: const Icon(Icons.access_time_rounded, size: 16, color: Color(0xFF6C63FF)),
+                        label: Text(
+                          'Custom Time',
+                          style: GoogleFonts.inter(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF6C63FF),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Gap(10),
+
+                  // Time Slots Grid
+                  Expanded(
+                    child: availableSlots.isEmpty
+                        ? Center(
+                            child: Text(
+                              'No more available slots for today.\nPlease select another date.',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.inter(fontSize: 13.sp, color: Colors.grey),
+                            ),
+                          )
+                        : GridView.builder(
+                            physics: const BouncingScrollPhysics(),
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              childAspectRatio: 2.5,
+                              crossAxisSpacing: 10,
+                              mainAxisSpacing: 10,
+                            ),
+                            itemCount: availableSlots.length,
+                            itemBuilder: (context, index) {
+                              final slot = availableSlots[index];
+                              final isSelected = tempSelectedTime.hour == slot.hour && tempSelectedTime.minute == slot.minute;
+                              final timeText = formatSlotTime(slot);
+
+                              return InkWell(
+                                onTap: () {
+                                  setBottomSheetState(() {
+                                    tempSelectedTime = slot;
+                                  });
+                                },
+                                borderRadius: BorderRadius.circular(10),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: isSelected ? const Color(0xFF6C63FF) : const Color(0xFFF9FAFB),
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: isSelected ? const Color(0xFF6C63FF) : const Color(0xFFE5E7EB),
+                                      width: 1.2,
+                                    ),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    timeText,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12.sp,
+                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                      color: isSelected ? Colors.white : const Color(0xFF374151),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                  ),
+
+                  const Gap(16),
+
+                  // Confirm Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50.h,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        final selectedDateTime = DateTime(
+                          tempSelectedDate.year,
+                          tempSelectedDate.month,
+                          tempSelectedDate.day,
+                          tempSelectedTime.hour,
+                          tempSelectedTime.minute,
+                        );
+
+                        final formattedDate = intl.DateFormat('MMM dd, yyyy').format(selectedDateTime);
+                        final formattedTime = intl.DateFormat('hh:mm a').format(selectedDateTime);
+
+                        setState(() {
+                          _scheduledDateTime = selectedDateTime;
+                          _preferableTime = '$formattedDate at $formattedTime';
+                        });
+
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF6C63FF),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        'Confirm Schedule',
+                        style: GoogleFonts.inter(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -301,7 +912,7 @@ class _HandymanCheckoutScreenState extends State<HandymanCheckoutScreen> {
     const double serviceFee = 10.00;
     final double grandTotal = subTotal + vat + serviceFee;
 
-    final userAddress = AddressHelper.getUserAddressFromSharedPref();
+    final userAddress = _selectedAddress ?? AddressHelper.getUserAddressFromSharedPref();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
@@ -432,11 +1043,11 @@ class _HandymanCheckoutScreenState extends State<HandymanCheckoutScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              _preferableTime,
+                              _scheduledDateTime != null ? _preferableTime : 'Select the timing for the service',
                               style: GoogleFonts.inter(
                                 fontSize: 14.sp,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF1F2937),
+                                fontWeight: _scheduledDateTime != null ? FontWeight.w600 : FontWeight.w400,
+                                color: _scheduledDateTime != null ? const Color(0xFF1F2937) : const Color(0xFF9CA3AF),
                               ),
                             ),
                             const Icon(
@@ -515,59 +1126,84 @@ class _HandymanCheckoutScreenState extends State<HandymanCheckoutScreen> {
                               ),
                             ],
                           )
-                        : Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(14),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: const Color(0xFFE5E7EB), width: 1.2),
+                        : InkWell(
+                            onTap: _showAddressSelectionBottomSheet,
+                            borderRadius: BorderRadius.circular(10),
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(14),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: const Color(0xFFE5E7EB), width: 1.2),
+                              ),
+                              child: userAddress != null
+                                  ? Row(
+                                      children: [
+                                        const Icon(Icons.location_on_rounded, color: Color(0xFF6C63FF), size: 24),
+                                        const Gap(12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Text(
+                                                    userAddress.addressType?.capitalizeFirst ?? 'Selected Address',
+                                                    style: GoogleFonts.inter(
+                                                      fontSize: 13.5.sp,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: const Color(0xFF1F2937),
+                                                    ),
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      Text(
+                                                        'Change',
+                                                        style: GoogleFonts.inter(
+                                                          fontSize: 12.sp,
+                                                          fontWeight: FontWeight.w600,
+                                                          color: const Color(0xFF6C63FF),
+                                                        ),
+                                                      ),
+                                                      const Icon(Icons.chevron_right, color: Color(0xFF6C63FF), size: 18),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                              const Gap(2),
+                                              Text(
+                                                userAddress.address ?? '',
+                                                style: robotoRegular.copyWith(
+                                                  fontSize: 12.sp,
+                                                  color: Colors.grey.shade600,
+                                                ),
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : Row(
+                                      children: [
+                                        const Icon(Icons.location_off_rounded, color: Colors.grey, size: 24),
+                                        const Gap(12),
+                                        Expanded(
+                                          child: Text(
+                                            'No address selected. Tap to add or select from map.',
+                                            style: robotoRegular.copyWith(
+                                              fontSize: 13.sp,
+                                              color: Colors.grey.shade500,
+                                            ),
+                                          ),
+                                        ),
+                                        const Icon(Icons.add_circle_outline, color: Color(0xFF6C63FF), size: 20),
+                                      ],
+                                    ),
                             ),
-                            child: userAddress != null
-                                ? Row(
-                                    children: [
-                                      const Icon(Icons.location_on_rounded, color: Color(0xFF6C63FF), size: 24),
-                                      const Gap(12),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              userAddress.addressType?.capitalizeFirst ?? 'Selected Address',
-                                              style: GoogleFonts.inter(
-                                                fontSize: 13.5.sp,
-                                                fontWeight: FontWeight.bold,
-                                                color: const Color(0xFF1F2937),
-                                              ),
-                                            ),
-                                            const Gap(2),
-                                            Text(
-                                              userAddress.address ?? '',
-                                              style: robotoRegular.copyWith(
-                                                fontSize: 12.sp,
-                                                color: Colors.grey.shade600,
-                                              ),
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  )
-                                : Row(
-                                    children: [
-                                      const Icon(Icons.location_off_rounded, color: Colors.grey, size: 24),
-                                      const Gap(12),
-                                      Text(
-                                        'No address selected. Tap to add.',
-                                        style: robotoRegular.copyWith(
-                                          fontSize: 13.sp,
-                                          color: Colors.grey.shade500,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
                           ),
                   ),
 
@@ -912,6 +1548,18 @@ class _HandymanCheckoutScreenState extends State<HandymanCheckoutScreen> {
                           );
                           return;
                         }
+                        if (_scheduledDateTime == null) {
+                          Get.snackbar(
+                            'Validation Error',
+                            'Please select the timing for the service to proceed.',
+                            snackPosition: SnackPosition.TOP,
+                            backgroundColor: Colors.black87,
+                            colorText: Colors.white,
+                            margin: const EdgeInsets.all(16),
+                          );
+                          return;
+                        }
+
                         if (_contactName.isEmpty || _contactPhone.isEmpty) {
                           Get.snackbar(
                             'Validation Error',
@@ -965,7 +1613,7 @@ class _HandymanCheckoutScreenState extends State<HandymanCheckoutScreen> {
                         }
                         providerStoreId ??= ModuleHelper.getModule()?.id ?? 1;
 
-                        String formattedScheduleAt = DateConverter.dateToDateAndTime(_scheduledDateTime);
+                        String formattedScheduleAt = DateConverter.dateToDateAndTime(_scheduledDateTime!);
 
                         PlaceOrderBodyModel placeOrderBody = PlaceOrderBodyModel(
                           cart: onlineCarts,
@@ -1044,6 +1692,7 @@ class _HandymanCheckoutScreenState extends State<HandymanCheckoutScreen> {
                             true,
                             true,
                             [],
+                            skipOrderSuccessRoute: true,
                           );
                         }
 
@@ -1059,7 +1708,7 @@ class _HandymanCheckoutScreenState extends State<HandymanCheckoutScreen> {
                           homeController.placeBooking(
                             serviceName: firstServiceName,
                             price: grandTotal,
-                            serviceDate: _scheduledDateTime,
+                            serviceDate: _scheduledDateTime!,
                             tasks: tasks,
                             timeSlot: _preferableTime,
                           );

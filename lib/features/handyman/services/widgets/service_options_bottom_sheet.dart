@@ -310,7 +310,7 @@ class ServiceOptionsBottomSheet extends StatelessWidget {
 
                 // Options List
                 SizedBox(
-                  height: hasOptionImages ? 280 : 190,
+                  height: hasOptionImages ? 305 : 210,
                   child: ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     scrollDirection: Axis.horizontal,
@@ -355,14 +355,14 @@ class ServiceOptionsBottomSheet extends StatelessWidget {
                               ),
                             Expanded(
                               child: Padding(
-                                padding: const EdgeInsets.all(12),
+                                padding: const EdgeInsets.all(10),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       option.title,
                                       style: robotoRegular.copyWith(
-                                        fontSize: 16,
+                                        fontSize: 15,
                                         fontWeight: FontWeight.w700,
                                         color: Colors.black87,
                                       ),
@@ -370,7 +370,7 @@ class ServiceOptionsBottomSheet extends StatelessWidget {
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                     if (option.rating != null && option.reviewCount != null) ...[
-                                      const Gap(4),
+                                      const Gap(3),
                                       Row(
                                         children: [
                                           const Icon(Icons.star, size: 12, color: Colors.black54),
@@ -389,7 +389,7 @@ class ServiceOptionsBottomSheet extends StatelessWidget {
                                         ],
                                       ),
                                     ],
-                                    const Gap(10),
+                                    const Gap(6),
                                     Row(
                                       crossAxisAlignment: CrossAxisAlignment.end,
                                       children: [
@@ -422,6 +422,8 @@ class ServiceOptionsBottomSheet extends StatelessWidget {
                                           fontSize: 11,
                                           color: Colors.black54,
                                         ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ],
                                     if (option.discountText.isNotEmpty) ...[
@@ -439,18 +441,13 @@ class ServiceOptionsBottomSheet extends StatelessWidget {
                                     Obx(() {
                                       final controller = Get.find<HandymanHomeController>();
                                       int optionQty = 0;
-                                      
-                                      final controllerService = controller.allServices[service.id];
-                                      if (controllerService != null) {
-                                        final opt = controllerService.options.firstWhereOrNull((o) => o.id == option.id);
-                                        if (opt != null) {
-                                          optionQty = opt.quantity;
-                                        } else if (controllerService.options.length <= 1) {
-                                          optionQty = controllerService.cartQuantity;
-                                        }
-                                      }
-                                      if (optionQty == 0) {
-                                        optionQty = controller.getServiceQuantity(service.id);
+
+                                      final controllerService = controller.allServices[service.id] ?? service;
+                                      final opt = controllerService.options.firstWhereOrNull((o) => o.id == option.id);
+                                      if (opt != null) {
+                                        optionQty = opt.quantity;
+                                      } else if (controllerService.options.length <= 1) {
+                                        optionQty = controllerService.cartQuantity;
                                       }
 
                                       return SizedBox(
@@ -580,31 +577,27 @@ class ServiceOptionsBottomSheet extends StatelessWidget {
                 int totalDiscounted = 0;
                 int totalOriginal = 0;
 
+                HandymanServiceModel controllerService = controller.allServices[service.id] ?? service;
                 final mbIdx = controller.mostBookedServices.indexWhere((s) => s.id == service.id);
-                HandymanServiceModel? controllerService;
                 if (mbIdx != -1) {
                   controllerService = controller.mostBookedServices[mbIdx];
-                } else {
-                  for (final section in controller.categorySections) {
-                    final sIdx = section.services.indexWhere((s) => s.id == service.id);
-                    if (sIdx != -1) {
-                      controllerService = section.services[sIdx];
-                      break;
-                    }
-                  }
                 }
 
-                if (controllerService != null) {
-                  if (controllerService.options.isEmpty) {
+                if (controllerService.options.isEmpty) {
+                  totalQty = controllerService.cartQuantity;
+                  totalDiscounted = controllerService.startingPrice * totalQty;
+                  totalOriginal = totalDiscounted;
+                } else {
+                  for (final opt in controllerService.options) {
+                    totalQty += opt.quantity;
+                    totalDiscounted += opt.discountedPrice * opt.quantity;
+                    totalOriginal += opt.originalPrice * opt.quantity;
+                  }
+                  if (totalQty == 0 && controllerService.cartQuantity > 0) {
                     totalQty = controllerService.cartQuantity;
-                    totalDiscounted = controllerService.startingPrice * totalQty;
-                    totalOriginal = totalDiscounted;
-                  } else {
-                    for (final opt in controllerService.options) {
-                      totalQty += opt.quantity;
-                      totalDiscounted += opt.discountedPrice * opt.quantity;
-                      totalOriginal += opt.originalPrice * opt.quantity;
-                    }
+                    final firstOpt = controllerService.options.first;
+                    totalDiscounted = (firstOpt.discountedPrice > 0 ? firstOpt.discountedPrice : controllerService.startingPrice) * totalQty;
+                    totalOriginal = (firstOpt.originalPrice > 0 ? firstOpt.originalPrice : controllerService.startingPrice) * totalQty;
                   }
                 }
 

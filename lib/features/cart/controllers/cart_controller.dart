@@ -426,7 +426,7 @@ class CartController extends GetxController implements GetxService {
   }
 
   Future<void> getCartDataOnline({bool isSubscription = false}) async {
-    if(ModuleHelper.getModule() != null || ModuleHelper.getCacheModule() != null) {
+    if(ModuleHelper.getModule() != null || ModuleHelper.getCacheModule() != null || Get.isRegistered<HandymanHomeController>() || Get.isRegistered<SplashController>()) {
       if (isSubscription) {
         _isSubscriptionLoading = true;
       } else {

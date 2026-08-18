@@ -8,6 +8,7 @@ import 'package:handy_allinone/features/cart/domain/models/online_cart_model.dar
 import 'package:handy_allinone/features/cart/domain/repositories/cart_repository_interface.dart';
 import 'package:handy_allinone/features/checkout/domain/models/place_order_body_model.dart';
 import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
+import 'package:handy_allinone/features/handyman/services/controllers/handyman_home_controller.dart';
 import 'package:handy_allinone/helper/auth_helper.dart';
 import 'package:handy_allinone/helper/module_helper.dart';
 import 'package:handy_allinone/util/app_constants.dart';
@@ -17,20 +18,26 @@ class CartRepository implements CartRepositoryInterface<OnlineCart> {
   final SharedPreferences sharedPreferences;
   CartRepository({required this.apiClient, required this.sharedPreferences});
 
-  Map<String, String> _getCartHeader() {
+  Map<String, String> _getCartHeader([int? customModuleId]) {
     Map<String, String> reqHeaders = Map.from(apiClient.getHeader());
-    int? modId = ModuleHelper.getModule()?.id ?? ModuleHelper.getCacheModule()?.id;
+    int? modId = customModuleId;
     if (modId == null || modId == 0) {
-      if (Get.isRegistered<SplashController>()) {
-        final splash = Get.find<SplashController>();
-        modId = splash.module?.id ?? splash.cacheModule?.id;
-        if ((modId == null || modId == 0) && splash.moduleList != null && splash.moduleList!.isNotEmpty) {
-          final handymanMod = splash.moduleList!.firstWhereOrNull((m) {
-            String name = (m.moduleName ?? '').toLowerCase();
-            String type = (m.moduleType ?? '').toLowerCase();
-            return name.contains('handy') || type.contains('handy') || name.contains('service');
-          });
-          modId = handymanMod?.id ?? splash.moduleList!.first.id;
+      if (Get.isRegistered<HandymanHomeController>()) {
+        if (Get.isRegistered<SplashController>()) {
+          modId = Get.find<SplashController>().getHandymanModuleId();
+        } else {
+          modId = 10;
+        }
+      } else {
+        modId = ModuleHelper.getModule()?.id ?? ModuleHelper.getCacheModule()?.id;
+        if (modId == null || modId == 0) {
+          if (Get.isRegistered<SplashController>()) {
+            final splash = Get.find<SplashController>();
+            modId = splash.module?.id ?? splash.cacheModule?.id;
+            if (modId == null || modId == 0) {
+              modId = splash.getHandymanModuleId();
+            }
+          }
         }
       }
     }
@@ -70,14 +77,41 @@ class CartRepository implements CartRepositoryInterface<OnlineCart> {
 
   Future<List<OnlineCartModel>?> _addToCartOnline(OnlineCart cart) async {
     List<OnlineCartModel>? onlineCartList;
+    int? itemModId;
+    if (Get.isRegistered<HandymanHomeController>()) {
+      if (Get.isRegistered<SplashController>()) {
+        itemModId = Get.find<SplashController>().getHandymanModuleId();
+      } else {
+        itemModId = 10;
+      }
+    }
     Response response = await apiClient.postData(
       '${AppConstants.addCartUri}${!AuthHelper.isLoggedIn() ? '?guest_id=${AuthHelper.getGuestId()}' : ''}',
       cart.toJson(),
-      headers: _getCartHeader(),
+      headers: _getCartHeader(itemModId),
     );
     if(response.statusCode == 200) {
       onlineCartList = [];
-      response.body.forEach((cart) => onlineCartList!.add(OnlineCartModel.fromJson(cart)));
+      response.body.forEach((c) => onlineCartList!.add(OnlineCartModel.fromJson(c)));
+    } else if (response.statusCode == 403 || (response.body is Map && response.body.toString().contains('Item already exists'))) {
+      // Remove stale duplicate item in backend cart and re-add with current module ID
+      if (cart.itemId != null) {
+        await apiClient.deleteData(
+          '${AppConstants.removeItemCartUri}?cart_id=${cart.itemId}${!AuthHelper.isLoggedIn() ? '&guest_id=${AuthHelper.getGuestId()}' : ''}',
+          headers: _getCartHeader(itemModId),
+        );
+      }
+      response = await apiClient.postData(
+        '${AppConstants.addCartUri}${!AuthHelper.isLoggedIn() ? '?guest_id=${AuthHelper.getGuestId()}' : ''}',
+        cart.toJson(),
+        headers: _getCartHeader(itemModId),
+      );
+      if (response.statusCode == 200) {
+        onlineCartList = [];
+        response.body.forEach((c) => onlineCartList!.add(OnlineCartModel.fromJson(c)));
+      } else {
+        onlineCartList = await _getCartDataOnline();
+      }
     }
     return onlineCartList;
   }

@@ -1,7 +1,13 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:handy_allinone/api/api_client.dart';
+import 'package:handy_allinone/features/item/domain/models/item_model.dart';
+import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
 import 'package:handy_allinone/features/handyman/services/controllers/handyman_home_controller.dart';
 import 'package:handy_allinone/features/handyman/services/models/handyman_service_model.dart';
-import 'package:handy_allinone/util/images.dart';
+import 'package:handy_allinone/util/app_constants.dart';
 
 class HandymanSearchCategory {
   final String title;
@@ -11,11 +17,17 @@ class HandymanSearchCategory {
 
 class HandymanSearchController extends GetxController {
   final RxString searchQuery = ''.obs;
+  final RxString selectedFilter = ''.obs; // '', 'top_rated', 'popular', 'discounted', 'high', 'low'
+  final RxString selectedCategoryId = ''.obs;
+  final RxBool isLoading = false.obs;
   final RxList<String> suggestions = <String>[].obs;
   final RxList<HandymanServiceModel> searchResults = <HandymanServiceModel>[].obs;
   final RxList<HandymanSearchCategory> searchCategoryResults = <HandymanSearchCategory>[].obs;
+  final RxList<String> recentSearches = <String>[].obs;
 
-  // Trending search terms matching the first UI
+  Timer? _debounceTimer;
+
+  // Fallback trending search terms if no recent search exists yet
   final List<String> trendingSearches = [
     'Professional bathroom cleaning',
     'Salon',
@@ -29,31 +41,82 @@ class HandymanSearchController extends GetxController {
     'Tv repair',
   ];
 
-  // Specific mock suggestions mapping for visual excellence (matching the 2nd UI for "FACIAL")
-  final Map<String, List<String>> _presetSuggestions = {
-    'facial': [
-      "Women's facial",
-      "Men's facial",
-      "Women's facial consultation",
-    ],
-    'clean': [
-      'Bathroom deep cleaning',
-      'Kitchen cleaning',
-      'Full home deep cleaning',
-      'Sofa cleaning',
-    ],
-    'salon': [
-      "Women's salon classic",
-      "Men's haircut & massage",
-      "Threading",
-      "Full arms waxing",
-    ],
-    'ac': [
-      'AC service',
-      'AC deep clean',
-      'AC installation',
-    ],
+  // Filter options mapping: label -> filter key
+  final Map<String, String> filterOptions = {
+    'All': '',
+    'Top Rated': 'top_rated',
+    'Popular': 'popular',
+    'Discounted': 'discounted',
+    'Price: High to Low': 'high',
+    'Price: Low to High': 'low',
   };
+
+  @override
+  void onInit() {
+    super.onInit();
+    loadRecentSearches();
+  }
+
+  void loadRecentSearches() {
+    if (Get.isRegistered<SharedPreferences>()) {
+      final sp = Get.find<SharedPreferences>();
+      final list = sp.getStringList(AppConstants.searchHistory);
+      if (list != null && list.isNotEmpty) {
+        recentSearches.assignAll(list);
+      }
+    }
+  }
+
+  void saveRecentSearch(String text) {
+    final query = text.trim();
+    if (query.isEmpty) return;
+
+    recentSearches.removeWhere((item) => item.toLowerCase() == query.toLowerCase());
+    recentSearches.insert(0, query);
+    if (recentSearches.length > 10) {
+      recentSearches.removeRange(10, recentSearches.length);
+    }
+
+    if (Get.isRegistered<SharedPreferences>()) {
+      Get.find<SharedPreferences>().setStringList(AppConstants.searchHistory, recentSearches);
+    }
+  }
+
+  void clearRecentSearches() {
+    recentSearches.clear();
+    if (Get.isRegistered<SharedPreferences>()) {
+      Get.find<SharedPreferences>().setStringList(AppConstants.searchHistory, []);
+    }
+  }
+
+  void removeRecentSearch(String item) {
+    recentSearches.remove(item);
+    if (Get.isRegistered<SharedPreferences>()) {
+      Get.find<SharedPreferences>().setStringList(AppConstants.searchHistory, recentSearches);
+    }
+  }
+
+  void setFilter(String filterKey) {
+    if (selectedFilter.value == filterKey) {
+      selectedFilter.value = '';
+    } else {
+      selectedFilter.value = filterKey;
+    }
+    if (searchQuery.value.trim().isNotEmpty) {
+      fetchSearchResults();
+    }
+  }
+
+  void setCategoryFilter(String catId) {
+    if (selectedCategoryId.value == catId) {
+      selectedCategoryId.value = '';
+    } else {
+      selectedCategoryId.value = catId;
+    }
+    if (searchQuery.value.trim().isNotEmpty) {
+      fetchSearchResults();
+    }
+  }
 
   void updateQuery(String query) {
     searchQuery.value = query;
@@ -61,134 +124,99 @@ class HandymanSearchController extends GetxController {
       suggestions.clear();
       searchResults.clear();
       searchCategoryResults.clear();
+      isLoading.value = false;
       return;
     }
 
-    final lowercaseQuery = query.toLowerCase().trim();
-
-    // 1. Generate Autocomplete Suggestions
-    List<String> matchedSuggestions = [];
-    
-    // Check preset mappings first
-    _presetSuggestions.forEach((key, list) {
-      if (lowercaseQuery.contains(key) || key.contains(lowercaseQuery)) {
-        matchedSuggestions.addAll(list);
-      }
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+      fetchSearchResults();
     });
+  }
 
-    // Also dynamically scan existing services/options
-    final homeController = Get.find<HandymanHomeController>();
-    for (var service in homeController.mostBookedServices) {
-      if (service.name.toLowerCase().contains(lowercaseQuery) && !matchedSuggestions.contains(service.name)) {
-        matchedSuggestions.add(service.name);
+  Future<void> fetchSearchResults() async {
+    final query = searchQuery.value.trim();
+    if (query.isEmpty) return;
+
+    saveRecentSearch(query);
+
+    isLoading.value = true;
+    try {
+      final apiClient = Get.find<ApiClient>();
+
+      int activeModuleId = 10;
+      if (Get.isRegistered<SplashController>()) {
+        activeModuleId = Get.find<SplashController>().getHandymanModuleId();
       }
-    }
-    for (var section in homeController.categorySections) {
-      for (var service in section.services) {
-        if (service.name.toLowerCase().contains(lowercaseQuery) && !matchedSuggestions.contains(service.name)) {
-          matchedSuggestions.add(service.name);
+
+      Map<String, String> reqHeaders = Map.from(apiClient.getHeader());
+      reqHeaders['Content-Type'] = 'application/json; charset=UTF-8';
+      reqHeaders[AppConstants.moduleId] = activeModuleId.toString();
+
+      String? serviceType = Get.isRegistered<HandymanHomeController>()
+          ? Get.find<HandymanHomeController>().selectedServiceType
+          : null;
+
+      String uri = '${AppConstants.searchUri}items/search?name=${Uri.encodeComponent(query)}&offset=1&limit=50';
+      if (serviceType != null && serviceType.isNotEmpty) {
+        uri += '&service_type=$serviceType';
+      }
+      if (selectedCategoryId.value.isNotEmpty) {
+        uri += '&category_ids=${selectedCategoryId.value}';
+      }
+      if (selectedFilter.value.isNotEmpty) {
+        uri += '&filter=${selectedFilter.value}';
+      }
+
+      Response response = await apiClient.getData(uri, headers: reqHeaders);
+
+      List<HandymanServiceModel> matchedResults = [];
+
+      if (response.statusCode == 200 && response.body != null) {
+        ItemModel itemModel = ItemModel.fromJson(response.body);
+        if (itemModel.items != null && itemModel.items!.isNotEmpty) {
+          final Map<int, HandymanServiceModel> uniqueMap = {};
+          for (var item in itemModel.items!) {
+            if (item.id != null && !uniqueMap.containsKey(item.id)) {
+              uniqueMap[item.id!] = HandymanServiceModel.fromItem(item);
+            }
+          }
+          matchedResults.addAll(uniqueMap.values);
         }
-        for (var option in service.options) {
-          if (option.title.toLowerCase().contains(lowercaseQuery) && !matchedSuggestions.contains(option.title)) {
-            matchedSuggestions.add(option.title);
+      }
+
+      // If live API returns empty results or offline, fallback to local match
+      if (matchedResults.isEmpty) {
+        final homeController = Get.isRegistered<HandymanHomeController>() ? Get.find<HandymanHomeController>() : null;
+        if (homeController != null) {
+          final lowercaseQuery = query.toLowerCase();
+          for (var service in homeController.mostBookedServices) {
+            if (_matches(service, lowercaseQuery)) {
+              if (!matchedResults.any((item) => item.id == service.id)) {
+                matchedResults.add(service);
+              }
+            }
+          }
+          for (var section in homeController.categorySections) {
+            for (var service in section.services) {
+              if (_matches(service, lowercaseQuery)) {
+                if (!matchedResults.any((item) => item.id == service.id)) {
+                  matchedResults.add(service);
+                }
+              }
+            }
           }
         }
       }
-    }
 
-    suggestions.assignAll(matchedSuggestions.take(5).toList());
-
-    // 2. Filter Search Results
-    List<HandymanServiceModel> matchedResults = [];
-
-    searchCategoryResults.clear();
-    if (lowercaseQuery.contains('clean') || lowercaseQuery.contains('bathroom') || lowercaseQuery.contains('professional')) {
-      searchCategoryResults.assignAll([
-        HandymanSearchCategory(title: 'Bathroom\n& Kitchen\nCleaning', imageAsset: Images.bathroomSink),
-        HandymanSearchCategory(title: 'Geyser\nService &\nRepair', imageAsset: Images.geyserClean),
-        HandymanSearchCategory(title: 'Sofa &\nCarpet\nCleaning', imageAsset: Images.sofaClean),
-        HandymanSearchCategory(title: 'Full Home/\nBy Room\nCleaning', imageAsset: Images.houseClean),
-      ]);
-    }
-
-    // If query is "facial", inject the exact items shown in the 2nd UI screenshot for premium fidelity
-    if (lowercaseQuery.contains('facial')) {
-      matchedResults.addAll([
-        HandymanServiceModel(
-          id: 'skin_brightening_facial',
-          name: 'Skin brightening facial',
-          category: "Women's Salon & Spa",
-          rating: 4.74,
-          reviewCount: '17K',
-          startingPrice: 1399,
-          optionsCount: 0,
-          imageAsset: Images.handymanFacial,
-        ),
-        HandymanServiceModel(
-          id: 'face_care_beyond',
-          name: 'Face care & beyond',
-          category: "Women's Salon & Spa",
-          rating: 4.05,
-          reviewCount: '1M',
-          startingPrice: 659,
-          optionsCount: 0,
-          imageAsset: Images.handymanWomenSalon,
-        ),
-      ]);
-    } else if (lowercaseQuery.contains('clean') || lowercaseQuery.contains('bathroom') || lowercaseQuery.contains('professional')) {
-      matchedResults.addAll([
-        HandymanServiceModel(
-          id: 'intense_bathroom_cleaning',
-          name: 'Intense bathroom cleaning',
-          category: 'Cleaning',
-          rating: 4.80,
-          reviewCount: '6.7M',
-          startingPrice: 549,
-          optionsCount: 0,
-          imageAsset: Images.intenseBathroom,
-        ),
-        HandymanServiceModel(
-          id: 'ant_control_kitchen_bathroom',
-          name: 'Ant control – kitchen/bathroom (with utensil removal)',
-          category: 'Cleaning',
-          rating: 5.00,
-          reviewCount: '22',
-          startingPrice: 1249,
-          optionsCount: 6,
-          imageAsset: Images.antControl,
-        ),
-        HandymanServiceModel(
-          id: 'furnished_apartment_deep_cleaning',
-          name: 'Furnished apartment - Home deep cleaning',
-          category: 'Cleaning',
-          rating: 4.80,
-          reviewCount: '571K',
-          startingPrice: 3499,
-          optionsCount: 0,
-          imageAsset: Images.furnishedApartment,
-        ),
-      ]);
-    }
-
-    // Filter normal handyman services
-    for (var service in homeController.mostBookedServices) {
-      if (_matches(service, lowercaseQuery)) {
-        if (!matchedResults.any((item) => item.id == service.id)) {
-          matchedResults.add(service);
-        }
+      searchResults.assignAll(matchedResults);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error during search API call: $e');
       }
+    } finally {
+      isLoading.value = false;
     }
-    for (var section in homeController.categorySections) {
-      for (var service in section.services) {
-        if (_matches(service, lowercaseQuery)) {
-          if (!matchedResults.any((item) => item.id == service.id)) {
-            matchedResults.add(service);
-          }
-        }
-      }
-    }
-
-    searchResults.assignAll(matchedResults);
   }
 
   bool _matches(HandymanServiceModel service, String query) {
@@ -202,8 +230,17 @@ class HandymanSearchController extends GetxController {
 
   void clearSearch() {
     searchQuery.value = '';
+    selectedFilter.value = '';
+    selectedCategoryId.value = '';
     suggestions.clear();
     searchResults.clear();
     searchCategoryResults.clear();
+    isLoading.value = false;
+  }
+
+  @override
+  void onClose() {
+    _debounceTimer?.cancel();
+    super.onClose();
   }
 }

@@ -252,6 +252,29 @@ class SplashController extends GetxController implements GetxService {
     return module;
   }
 
+  int getHandymanModuleId() {
+    if (_configModel?.handymanModule?.moduleId != null && _configModel!.handymanModule!.moduleId! > 0) {
+      return _configModel!.handymanModule!.moduleId!;
+    }
+    if (_moduleList != null) {
+      final handymanMod = _moduleList!.firstWhereOrNull((m) {
+        String name = m.moduleName?.toLowerCase() ?? '';
+        String type = m.moduleType?.toLowerCase() ?? '';
+        return name.contains('handyman') || type.contains('handyman');
+      });
+      if (handymanMod != null && handymanMod.id != null) {
+        return handymanMod.id!;
+      }
+    }
+    if (_module != null && (_module!.moduleType?.toLowerCase() == 'handyman' || _module!.moduleName?.toLowerCase().contains('handyman') == true)) {
+      return _module!.id!;
+    }
+    if (_cacheModule != null && (_cacheModule!.moduleType?.toLowerCase() == 'handyman' || _cacheModule!.moduleName?.toLowerCase().contains('handyman') == true)) {
+      return _cacheModule!.id!;
+    }
+    return 10;
+  }
+
 
   Future<void> getModules({Map<String, String>? headers, DataSourceEnum dataSource = DataSourceEnum.local}) async {
     _moduleIndex = 0;

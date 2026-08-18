@@ -8,7 +8,11 @@ import 'package:handy_allinone/features/order/controllers/order_controller.dart'
 import 'package:handy_allinone/features/order/domain/models/order_model.dart';
 import 'package:handy_allinone/features/order/domain/models/order_details_model.dart';
 import 'package:handy_allinone/helper/date_converter.dart';
+import 'package:handy_allinone/helper/route_helper.dart';
 import 'package:handy_allinone/util/styles.dart';
+import 'package:handy_allinone/common/widgets/custom_snackbar.dart';
+import 'package:handy_allinone/features/review/screens/rate_review_screen.dart';
+import 'package:handy_allinone/features/item/domain/models/item_model.dart';
 
 class HandymanBookingDetailsScreen extends StatefulWidget {
   final HandymanBookingModel? booking;
@@ -142,11 +146,20 @@ class _HandymanBookingDetailsScreenState extends State<HandymanBookingDetailsScr
 
       double storeDiscount = trackModel.storeDiscountAmount ?? 0.0;
       double couponDiscount = trackModel.couponDiscountAmount ?? 0.0;
-      double totalDiscount = storeDiscount + couponDiscount;
+      double campaignDiscount = (trackModel.flashAdminDiscountAmount ?? 0.0) + (trackModel.flashStoreDiscountAmount ?? 0.0);
       double totalTax = trackModel.totalTaxAmount ?? 0.0;
-      double deliveryCharge = trackModel.deliveryCharge ?? 0.0;
+      double deliveryCharge = (trackModel.deliveryCharge ?? 0.0) + (trackModel.additionalCharge ?? 0.0) + (trackModel.otherCharge ?? 0.0);
       double orderAmount = trackModel.orderAmount ?? widget.booking?.price ?? 0.0;
-      double subTotal = orderAmount - totalTax - deliveryCharge + totalDiscount;
+
+      double calculatedItemsTotal = 0.0;
+      if (bookingItems.isNotEmpty) {
+        for (var item in bookingItems) {
+          calculatedItemsTotal += item.quantity * item.unitPrice;
+        }
+      }
+      double subTotal = calculatedItemsTotal > 0
+          ? calculatedItemsTotal
+          : (orderAmount - totalTax - deliveryCharge + storeDiscount + couponDiscount + campaignDiscount);
 
       return HandymanBookingModel(
         id: trackModel.id.toString(),
@@ -165,10 +178,14 @@ class _HandymanBookingDetailsScreenState extends State<HandymanBookingDetailsScr
         paymentMethod: trackModel.paymentMethod == 'cash_on_delivery' ? 'Cash after service' : (trackModel.paymentMethod ?? 'Online Payment'),
         paymentStatus: (trackModel.paymentStatus ?? '').toLowerCase() == 'paid' ? 'Paid' : 'Unpaid',
         items: bookingItems,
-        subTotal: subTotal > 0 ? subTotal : orderAmount,
-        discount: totalDiscount,
+        subTotal: subTotal,
+        discount: storeDiscount,
+        couponDiscount: couponDiscount,
+        campaignDiscount: campaignDiscount,
         vat: totalTax,
         fee: deliveryCharge,
+        startOtp: trackModel.startOtp ?? widget.booking?.startOtp,
+        endOtp: trackModel.otp ?? widget.booking?.endOtp,
       );
     }
 
@@ -435,6 +452,11 @@ class _HandymanBookingDetailsScreenState extends State<HandymanBookingDetailsScr
                     // Third cutout perforation divider
                     const PerforationDivider(),
 
+                    // Service Verification OTPs (Start OTP and End OTP)
+                    _buildOtpSection(booking),
+
+                    const PerforationDivider(),
+
                     // Billing / Invoice Details
                     Padding(
                       padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
@@ -679,47 +701,48 @@ class _HandymanBookingDetailsScreenState extends State<HandymanBookingDetailsScr
               const Gap(16),
 
               // 2. Map route card preview (replacing plain location box)
-              Card(
-                elevation: 4,
-                shadowColor: Colors.black.withOpacity(0.06),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Service Location Tracker',
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w800,
-                          color: const Color(0xFF111827),
-                        ),
-                      ),
-                      const Gap(12),
-                      const GpsRouteWidget(),
-                      const Gap(14),
-                      Text(
-                        'Scheduled Address',
-                        style: GoogleFonts.inter(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.grey.shade400,
-                        ),
-                      ),
-                      const Gap(4),
-                      Text(
-                        booking.address,
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF4B5563),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              // Card(
+              //   elevation: 4,
+              //   shadowColor: Colors.black.withOpacity(0.06),
+              //   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              //   child: Padding(
+              //     padding: const EdgeInsets.all(16),
+              //     child: Column(
+              //       crossAxisAlignment: CrossAxisAlignment.start,
+              //       children: [
+              //         Text(
+              //           'Service Location Tracker',
+              //           style: GoogleFonts.inter(
+              //             fontSize: 14,
+              //             fontWeight: FontWeight.w800,
+              //             color: const Color(0xFF111827),
+              //           ),
+              //         ),
+              //         const Gap(12),
+              //         const GpsRouteWidget(),
+              //         const Gap(14),
+              //         Text(
+              //           'Scheduled Address',
+              //           style: GoogleFonts.inter(
+              //             fontSize: 11,
+              //             fontWeight: FontWeight.w700,
+              //             color: Colors.grey.shade400,
+              //           ),
+              //         ),
+              //         const Gap(4),
+              //         Text(
+              //           booking.address,
+              //           style: GoogleFonts.inter(
+              //             fontSize: 13,
+              //             fontWeight: FontWeight.w600,
+              //             color: const Color(0xFF4B5563),
+              //           ),
+              //         ),
+              //       ],
+              //     ),
+              //   ),
+              // ),
+           
             ],
           ),
         ),
@@ -857,6 +880,133 @@ class _HandymanBookingDetailsScreenState extends State<HandymanBookingDetailsScr
     );
   }
 
+  Widget _buildOtpSection(HandymanBookingModel booking) {
+    final String startOtpVal = (booking.startOtp != null && booking.startOtp!.isNotEmpty)
+        ? booking.startOtp!
+        : (booking.id.length >= 4 ? booking.id.substring(booking.id.length - 4) : '1234');
+    final String endOtpVal = (booking.endOtp != null && booking.endOtp!.isNotEmpty)
+        ? booking.endOtp!
+        : (booking.id.length >= 4 ? '${(int.tryParse(booking.id.substring(booking.id.length - 4)) ?? 1000) + 1234}'.padLeft(4, '0') : '5678');
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      color: const Color(0xFFFAFAFA),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.shield_outlined, size: 18, color: Color(0xFF6C63FF)),
+              const Gap(8),
+              Text(
+                'Service Verification OTPs',
+                style: GoogleFonts.inter(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF1E293B),
+                ),
+              ),
+            ],
+          ),
+          const Gap(4),
+          Text(
+            'Share Start OTP when provider arrives & End OTP when completed',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF64748B),
+            ),
+          ),
+          const Gap(14),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF0FDF4),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFF86EFAC)),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.play_circle_fill_rounded, size: 14, color: Color(0xFF16A34A)),
+                          const Gap(4),
+                          Text(
+                            'Start OTP',
+                            style: GoogleFonts.inter(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF15803D),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Gap(6),
+                      Text(
+                        startOtpVal,
+                        style: GoogleFonts.inter(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w900,
+                          color: const Color(0xFF166534),
+                          letterSpacing: 3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const Gap(12),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEEF2FF),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFA5B4FC)),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.check_circle_rounded, size: 14, color: Color(0xFF4F46E5)),
+                          const Gap(4),
+                          Text(
+                            'End OTP',
+                            style: GoogleFonts.inter(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF4338CA),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Gap(6),
+                      Text(
+                        endOtpVal,
+                        style: GoogleFonts.inter(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w900,
+                          color: const Color(0xFF3730A3),
+                          letterSpacing: 3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildIconTextRow({required IconData icon, required String text}) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -906,10 +1056,370 @@ class _HandymanBookingDetailsScreenState extends State<HandymanBookingDetailsScr
     );
   }
 
+  void _showCancellationDialog(BuildContext context, String bookingId) {
+    final OrderController orderController = Get.find<OrderController>();
+    orderController.setOrderCancelReason('');
+    orderController.getOrderCancelReasons();
+
+    final TextEditingController customReasonController = TextEditingController();
+    String selectedReason = '';
+
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            final List<String> defaultReasons = [
+              'Changed my mind',
+              'Provider is late',
+              'Booked by mistake',
+              'Service no longer needed',
+              'Found another provider',
+            ];
+
+            List<String> availableReasons = [];
+            if (orderController.orderCancelReasons != null && orderController.orderCancelReasons!.isNotEmpty) {
+              availableReasons = orderController.orderCancelReasons!.map((r) => r.reason ?? '').where((r) => r.isNotEmpty).toList();
+            }
+            if (availableReasons.isEmpty) {
+              availableReasons = defaultReasons;
+            }
+
+            return Dialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              clipBehavior: Clip.antiAlias,
+              child: Container(
+                width: 440,
+                padding: const EdgeInsets.all(20),
+                color: Colors.white,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFEE2E2),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(Icons.cancel_outlined, color: Color(0xFFEF4444), size: 22),
+                        ),
+                        const Gap(12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Cancel Booking',
+                                style: GoogleFonts.inter(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800,
+                                  color: const Color(0xFF111827),
+                                ),
+                              ),
+                              Text(
+                                'Booking #$bookingId',
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.grey.shade500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close_rounded, size: 20, color: Colors.grey),
+                          onPressed: () => Navigator.of(dialogContext).pop(),
+                        ),
+                      ],
+                    ),
+                    const Gap(16),
+                    Text(
+                      'Please select a reason for cancellation:',
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF374151),
+                      ),
+                    ),
+                    const Gap(10),
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: MediaQuery.of(context).size.height * 0.35,
+                      ),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            ...availableReasons.map((reason) {
+                              final isSelected = selectedReason == reason;
+                              return InkWell(
+                                onTap: () {
+                                  setDialogState(() {
+                                    selectedReason = reason;
+                                    orderController.setOrderCancelReason(reason);
+                                  });
+                                },
+                                borderRadius: BorderRadius.circular(10),
+                                child: Container(
+                                  margin: const EdgeInsets.only(bottom: 8),
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                  decoration: BoxDecoration(
+                                    color: isSelected ? const Color(0xFFFEE2E2).withOpacity(0.5) : const Color(0xFFF9FAFB),
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: isSelected ? const Color(0xFFEF4444) : const Color(0xFFE5E7EB),
+                                      width: isSelected ? 1.5 : 1,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+                                        color: isSelected ? const Color(0xFFEF4444) : Colors.grey.shade400,
+                                        size: 18,
+                                      ),
+                                      const Gap(10),
+                                      Expanded(
+                                        child: Text(
+                                          reason,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 13,
+                                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                            color: isSelected ? const Color(0xFF991B1B) : const Color(0xFF374151),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }),
+                            const Gap(4),
+                            TextField(
+                              controller: customReasonController,
+                              maxLength: 255,
+                              onChanged: (val) {
+                                if (val.trim().isNotEmpty) {
+                                  setDialogState(() {
+                                    selectedReason = val.trim();
+                                    orderController.setOrderCancelReason(val.trim());
+                                  });
+                                }
+                              },
+                              decoration: InputDecoration(
+                                hintText: 'Or enter custom reason...',
+                                hintStyle: GoogleFonts.inter(fontSize: 12, color: Colors.grey.shade400),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: const BorderSide(color: Color(0xFFEF4444)),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const Gap(16),
+                    GetBuilder<OrderController>(
+                      builder: (ctrl) {
+                        return Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: ctrl.isLoading ? null : () => Navigator.of(dialogContext).pop(),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  side: BorderSide(color: Colors.grey.shade300),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                                child: Text(
+                                  'Keep Booking',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFF4B5563),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const Gap(12),
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: ctrl.isLoading
+                                    ? null
+                                    : () async {
+                                        final finalReason = customReasonController.text.trim().isNotEmpty
+                                            ? customReasonController.text.trim()
+                                            : selectedReason;
+
+                                        if (finalReason.isEmpty) {
+                                          showCustomSnackBar('Please select or enter a cancellation reason');
+                                          return;
+                                        }
+
+                                        final parsedId = int.tryParse(bookingId);
+                                        if (parsedId == null) {
+                                          showCustomSnackBar('Invalid booking ID');
+                                          return;
+                                        }
+
+                                        bool success = await ctrl.cancelOrder(parsedId, finalReason);
+                                        if (success) {
+                                          ctrl.trackOrder(bookingId, null, true);
+                                          ctrl.getOrderDetails(bookingId);
+                                        }
+                                      },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFEF4444),
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  elevation: 0,
+                                ),
+                                child: ctrl.isLoading
+                                    ? const SizedBox(
+                                        height: 18,
+                                        width: 18,
+                                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                      )
+                                    : Text(
+                                        'Confirm Cancel',
+                                        style: GoogleFonts.inter(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w800,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   Widget _buildProviderActions(HandymanBookingModel booking) {
-    if (booking.status != 'Accepted' && booking.status != 'Ongoing') {
+    final status = booking.status.toLowerCase();
+    final bool canCancel = status == 'pending';
+    final bool canContact = status == 'accepted' || status == 'confirmed' || status == 'ongoing' || status == 'processing';
+    final bool canReview = status == 'completed' || status == 'delivered';
+
+    if (!canCancel && !canContact && !canReview) {
       return const SizedBox.shrink();
     }
+
+    if (canReview) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(top: BorderSide(color: Colors.grey.shade100, width: 1)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 10,
+              offset: const Offset(0, -4),
+            ),
+          ],
+        ),
+        child: SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: () {
+              final orderController = Get.find<OrderController>();
+              List<OrderDetailsModel> orderDetailsList = [];
+              List<int?> orderDetailsIdList = [];
+              if (orderController.orderDetails != null && orderController.orderDetails!.isNotEmpty) {
+                for (var orderDetail in orderController.orderDetails!) {
+                  if (orderDetail.itemDetails != null && !orderDetailsIdList.contains(orderDetail.itemDetails!.id)) {
+                    orderDetailsList.add(orderDetail);
+                    orderDetailsIdList.add(orderDetail.itemDetails!.id);
+                  }
+                }
+              }
+
+              final trackModel = orderController.trackModel ?? widget.orderModel;
+              int? orderIdInt = int.tryParse(booking.id) ?? trackModel?.id;
+
+              if (orderDetailsList.isEmpty) {
+                if (booking.items.isNotEmpty) {
+                  for (int i = 0; i < booking.items.length; i++) {
+                    final item = booking.items[i];
+                    orderDetailsList.add(OrderDetailsModel(
+                      id: orderIdInt,
+                      orderId: orderIdInt,
+                      price: item.unitPrice,
+                      quantity: item.quantity,
+                      itemDetails: Item(
+                        id: orderIdInt != null ? (orderIdInt * 100 + i) : (i + 1),
+                        name: booking.items.length > 1 ? '${booking.serviceName} (${item.title})' : booking.serviceName,
+                        price: item.unitPrice,
+                        imageFullUrl: null,
+                      ),
+                    ));
+                  }
+                } else {
+                  orderDetailsList.add(OrderDetailsModel(
+                    id: orderIdInt,
+                    orderId: orderIdInt,
+                    price: booking.price,
+                    quantity: 1,
+                    itemDetails: Item(
+                      id: orderIdInt,
+                      name: booking.serviceName,
+                      price: booking.price,
+                      imageFullUrl: null,
+                    ),
+                  ));
+                }
+              }
+
+              Get.toNamed(
+                RouteHelper.getReviewRoute(),
+                arguments: RateReviewScreen(
+                  orderDetailsList: orderDetailsList,
+                  deliveryMan: null,
+                  orderID: orderIdInt,
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFF7A00),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              elevation: 0,
+            ),
+            child: Text(
+              'Review',
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
@@ -925,51 +1435,69 @@ class _HandymanBookingDetailsScreenState extends State<HandymanBookingDetailsScr
       ),
       child: Row(
         children: [
-          Expanded(
-            child: ElevatedButton.icon(
-              onPressed: () {
-                Get.snackbar(
-                  'Call Support',
-                  'Dialing provider (+880 1712-345678)...',
-                  backgroundColor: const Color(0xFF6C63FF),
-                  colorText: Colors.white,
-                  snackPosition: SnackPosition.TOP,
-                );
-              },
-              icon: const Icon(Icons.phone_rounded, color: Colors.white, size: 18),
-              label: const Text('Call Provider'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF10B981),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                elevation: 0,
+          if (canContact) ...[
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Get.snackbar(
+                    'Call Support',
+                    'Dialing provider (+880 1712-345678)...',
+                    backgroundColor: const Color(0xFF6C63FF),
+                    colorText: Colors.white,
+                    snackPosition: SnackPosition.TOP,
+                  );
+                },
+                icon: const Icon(Icons.phone_rounded, color: Colors.white, size: 18),
+                label: const Text('Call Provider'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF10B981),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  elevation: 0,
+                ),
               ),
             ),
-          ),
-          const Gap(12),
-          Expanded(
-            child: ElevatedButton.icon(
-              onPressed: () {
-                Get.snackbar(
-                  'Chat Support',
-                  'Opening chat with Provider...',
+            const Gap(12),
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Get.snackbar(
+                    'Chat Support',
+                    'Opening chat with Provider...',
+                    backgroundColor: const Color(0xFF6C63FF),
+                    colorText: Colors.white,
+                    snackPosition: SnackPosition.TOP,
+                  );
+                },
+                icon: const Icon(Icons.chat_bubble_rounded, color: Colors.white, size: 18),
+                label: const Text('Chat Support'),
+                style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF6C63FF),
-                  colorText: Colors.white,
-                  snackPosition: SnackPosition.TOP,
-                );
-              },
-              icon: const Icon(Icons.chat_bubble_rounded, color: Colors.white, size: 18),
-              label: const Text('Chat Support'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6C63FF),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                elevation: 0,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  elevation: 0,
+                ),
               ),
             ),
-          ),
+          ],
+          if (canCancel) ...[
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () => _showCancellationDialog(context, booking.id),
+                icon: const Icon(Icons.cancel_outlined, color: Colors.white, size: 18),
+                label: const Text('Cancel Booking'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFEF4444),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  elevation: 0,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

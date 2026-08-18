@@ -91,6 +91,7 @@ class ConfigModel {
     bool? delivarBooking;
     double? expressCheckoutCharge;
     BaseUrls? baseUrls;
+    HandymanModule? handymanModule;
 
   ConfigModel({
     this.businessName,
@@ -181,6 +182,7 @@ class ConfigModel {
     this.delivarBooking,
     this.expressCheckoutCharge,
     this.baseUrls,
+    this.handymanModule,
   });
 
   ConfigModel.fromJson(Map<String, dynamic> json) {
@@ -304,6 +306,7 @@ class ConfigModel {
             || (json['delivar_booking_status']?.toString().toLowerCase().trim() == '1' || json['delivar_booking_status']?.toString().toLowerCase().trim() == 'true' || json['delivar_booking_status']?.toString().toLowerCase().trim() == '1.0' || json['delivar_booking_status'] == 1 || json['delivar_booking_status'] == true);
     expressCheckoutCharge = json['express_checkout_charge']?.toDouble() ?? 150.0;
     baseUrls = json['base_urls'] != null ? BaseUrls.fromJson(json['base_urls']) : null;
+    handymanModule = json['handyman_module'] != null ? HandymanModule.fromJson(json['handyman_module']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -418,6 +421,30 @@ class ConfigModel {
     data['welcome_image_url'] = welcomeimage;
     data['delivar_booking'] = delivarBooking;
     data['express_checkout_charge'] = expressCheckoutCharge;
+    if (handymanModule != null) {
+      data['handyman_module'] = handymanModule!.toJson();
+    }
+    return data;
+  }
+}
+
+class HandymanModule {
+  int? moduleId;
+  String? vendorType;
+
+  HandymanModule({this.moduleId, this.vendorType});
+
+  HandymanModule.fromJson(Map<String, dynamic> json) {
+    moduleId = json['module_id'] is int
+        ? json['module_id']
+        : int.tryParse(json['module_id']?.toString() ?? '');
+    vendorType = json['vendorType']?.toString() ?? json['vendor_type']?.toString();
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['module_id'] = moduleId;
+    data['vendorType'] = vendorType;
     return data;
   }
 }

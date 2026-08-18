@@ -571,7 +571,7 @@ class CheckoutController extends GetxController implements GetxService {
     }
   }
 
-  Future<String> placeOrder(PlaceOrderBodyModel placeOrderBody, int? zoneID, double amount, double? maximumCodOrderAmount, bool fromCart, bool isCashOnDeliveryActive, List<XFile>? orderAttachment, {bool isOfflinePay = false}) async {
+  Future<String> placeOrder(PlaceOrderBodyModel placeOrderBody, int? zoneID, double amount, double? maximumCodOrderAmount, bool fromCart, bool isCashOnDeliveryActive, List<XFile>? orderAttachment, {bool isOfflinePay = false, bool skipOrderSuccessRoute = false}) async {
     List<MultipartBody>? multiParts = [];
     for(XFile file in orderAttachment!) {
       multiParts.add(MultipartBody('order_attachment[]', file));
@@ -590,7 +590,7 @@ class CheckoutController extends GetxController implements GetxService {
       }
 
       if(!isOfflinePay) {
-        callback(true, message, orderID, zoneID, amount, maximumCodOrderAmount, fromCart, isCashOnDeliveryActive, placeOrderBody.contactPersonNumber!, userID, isSubscription: placeOrderBody.isSubscribed ?? false);
+        callback(true, message, orderID, zoneID, amount, maximumCodOrderAmount, fromCart, isCashOnDeliveryActive, placeOrderBody.contactPersonNumber!, userID, isSubscription: placeOrderBody.isSubscribed ?? false, skipOrderSuccessRoute: skipOrderSuccessRoute);
       } else {
         Get.find<CartController>().getCartDataOnline();
       }
@@ -602,7 +602,7 @@ class CheckoutController extends GetxController implements GetxService {
     } else {
 
       if(!isOfflinePay) {
-        callback(false, response.statusText, '-1', zoneID, amount, maximumCodOrderAmount, fromCart, isCashOnDeliveryActive, placeOrderBody.contactPersonNumber, userID);
+        callback(false, response.statusText, '-1', zoneID, amount, maximumCodOrderAmount, fromCart, isCashOnDeliveryActive, placeOrderBody.contactPersonNumber, userID, skipOrderSuccessRoute: skipOrderSuccessRoute);
       } else {
         showCustomSnackBar(response.statusText);
       }
@@ -640,7 +640,7 @@ class CheckoutController extends GetxController implements GetxService {
   void callback(
       bool isSuccess, String? message, String orderID, int? zoneID, double amount,
       double? maximumCodOrderAmount, bool fromCart, bool isCashOnDeliveryActive, String? contactNumber,
-      String userID, {bool isSubscription = false}) async {
+      String userID, {bool isSubscription = false, bool skipOrderSuccessRoute = false}) async {
 
     if(isSuccess) {
       if(fromCart || isSubscription) {
@@ -678,7 +678,11 @@ class CheckoutController extends GetxController implements GetxService {
         if(AuthHelper.isLoggedIn()) {
           Get.find<AuthController>().saveEarningPoint(total.toStringAsFixed(0));
         }
-        if (ResponsiveHelper.isDesktop(Get.context) && AuthHelper.isLoggedIn()){
+        bool isHandyman = (Get.find<SplashController>().module?.moduleType?.toLowerCase() == 'handyman') ||
+            (Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('handyman') ?? false);
+        if (skipOrderSuccessRoute || isHandyman) {
+          // Skip order success screen navigation for handyman module
+        } else if (ResponsiveHelper.isDesktop(Get.context) && AuthHelper.isLoggedIn()){
           Get.offNamed(RouteHelper.getInitialRoute());
           Future.delayed(const Duration(seconds: 2) , () => Get.dialog(Center(child: SizedBox(height: 350, width : 500, child: OrderSuccessfulDialog(orderID: orderID)))));
         } else {

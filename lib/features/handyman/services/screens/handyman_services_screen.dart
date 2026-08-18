@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:handy_allinone/features/cart/controllers/cart_controller.dart';
+import 'package:handy_allinone/common/widgets/confirmation_dialog.dart';
 import 'package:handy_allinone/features/handyman/services/controllers/handyman_home_controller.dart';
 import 'package:handy_allinone/features/handyman/services/models/handyman_service_model.dart';
 import 'package:handy_allinone/features/handyman/services/widgets/most_booked_services_widget.dart';
@@ -457,9 +458,41 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
                     width: double.infinity,
                     height: 48,
                     child: ElevatedButton(
-                      onPressed: () {
-                        Get.back();
-                        handymanController.updateServiceType(tempSelected, reload: true);
+                      onPressed: () async {
+                        final currentSelected = handymanController.selectedServiceType;
+                        final bool isChanged = tempSelected != currentSelected;
+                        int cartCount = handymanController.totalCartItems;
+                        if (Get.isRegistered<CartController>() && Get.find<CartController>().cartList.isNotEmpty) {
+                          cartCount = Get.find<CartController>().cartList.length;
+                        }
+
+                        if (isChanged && cartCount > 0) {
+                          Get.back();
+                          Get.dialog(
+                            ConfirmationDialog(
+                              icon: Images.warning,
+                              title: 'are_you_sure_to_reset'.tr,
+                              description: 'Changing service type will clear your cart. Do you want to proceed?',
+                              onYesPressed: () async {
+                                Get.back();
+                                if (Get.isRegistered<CartController>()) {
+                                  await Get.find<CartController>().clearCartOnline();
+                                }
+                                handymanController.clearCart();
+                                handymanController.updateServiceType(tempSelected, reload: true);
+                              },
+                              onNoPressed: () {
+                                Get.back();
+                              },
+                            ),
+                            barrierDismissible: false,
+                          );
+                        } else {
+                          Get.back();
+                          if (isChanged) {
+                            handymanController.updateServiceType(tempSelected, reload: true);
+                          }
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF6C63FF),
@@ -801,10 +834,8 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
                                   const double hPad = 16.0;
                                   const double spacing = 10.0;
                                   final double cellW = (screenW - hPad * 2 - spacing * (cols - 1)) / cols;
-                                  final double cellH = cellW * 1.15;
-                                  final double imgSz = (cellW * 0.46).clamp(28.0, 56.0);
-                                  final double fs = (cellW * 0.10).clamp(8.5, 11.5);
-                                  final double radius = (cellW * 0.10).clamp(8.0, 14.0);
+                                  final double boxH = cellW * 0.85;
+                                  final double cellH = boxH + 42.0;
 
                                   return Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: hPad),
@@ -815,81 +846,83 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
                                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                                         crossAxisCount: cols,
                                         crossAxisSpacing: spacing,
-                                        mainAxisSpacing: spacing,
+                                        mainAxisSpacing: 12,
                                         childAspectRatio: cellW / cellH,
                                       ),
-                                  itemBuilder: (context, index) {
-                                    final category = categories[index];
-                                    final String title = category.name ?? '';
-                                    final String? imageUrl = category.imageFullUrl;
+                                      itemBuilder: (context, index) {
+                                        final category = categories[index];
+                                        final String title = category.name ?? '';
+                                        final String? imageUrl = category.imageFullUrl;
 
-                                    return InkWell(
-                                      onTap: () {
-                                        Get.toNamed(
-                                          RouteHelper.getHandymanAvailableServicesRoute(),
-                                          arguments: {
-                                            'category': title,
-                                            'categoryId': category.id,
+                                        return InkWell(
+                                          onTap: () {
+                                            Get.toNamed(
+                                              RouteHelper.getHandymanAvailableServicesRoute(),
+                                              arguments: {
+                                                'category': title,
+                                                'categoryId': category.id,
+                                              },
+                                            );
                                           },
-                                        );
-                                      },
-                                      borderRadius: BorderRadius.circular(radius),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFF9FAFB),
-                                          borderRadius: BorderRadius.circular(radius),
-                                          border: Border.all(
-                                            color: const Color(0xFFF3F4F6),
-                                            width: 1,
-                                          ),
-                                        ),
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            imageUrl != null && imageUrl.isNotEmpty
-                                                ? CustomImage(
-                                                    image: imageUrl,
-                                                    height: imgSz,
-                                                    width: imgSz,
-                                                    fit: BoxFit.contain,
-                                                  )
-                                                : Icon(
-                                                    Icons.construction,
-                                                    size: imgSz * 0.6,
-                                                    color: Colors.grey,
-                                                  ),
-                                            SizedBox(height: cellW * 0.05),
-                                            Padding(
-                                              padding: EdgeInsets.symmetric(horizontal: cellW * 0.06),
-                                              child: Text(
-                                                title,
-                                                textAlign: TextAlign.center,
-                                                maxLines: 2,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: robotoRegular.copyWith(
-                                                  fontSize: fs,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: const Color(0xFF374151),
-                                                  height: 1.2,
+                                          borderRadius: BorderRadius.circular(16),
+                                          child: Column(
+                                            children: [
+                                              Container(
+                                                width: double.infinity,
+                                                height: boxH,
+                                                decoration: BoxDecoration(
+                                                  color: const Color(0xFFF3F4F6),
+                                                  borderRadius: BorderRadius.circular(16),
+                                                ),
+                                                child: ClipRRect(
+                                                  borderRadius: BorderRadius.circular(16),
+                                                  child: imageUrl != null && imageUrl.isNotEmpty
+                                                      ? CustomImage(
+                                                          image: imageUrl,
+                                                          height: double.infinity,
+                                                          width: double.infinity,
+                                                          fit: BoxFit.cover,
+                                                        )
+                                                      : Center(
+                                                          child: Icon(
+                                                            Icons.construction,
+                                                            size: boxH * 0.4,
+                                                            color: Colors.grey.shade400,
+                                                          ),
+                                                        ),
                                                 ),
                                               ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      );
-                    },
+                                              const SizedBox(height: 6),
+                                              Padding(
+                                                padding: const EdgeInsets.symmetric(horizontal: 2),
+                                                child: Text(
+                                                  title,
+                                                  textAlign: TextAlign.center,
+                                                  maxLines: 2,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: robotoMedium.copyWith(
+                                                    fontSize: (cellW * 0.11).clamp(9.5, 12.0),
+                                                    fontWeight: FontWeight.w600,
+                                                    color: const Color(0xFF1F2937),
+                                                    height: 1.2,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
+                ),
 
                 const Gap(12),
 
@@ -924,7 +957,13 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
                               continue;
                             }
 
-                            final categoryServices = apiItems.map((item) => HandymanServiceModel.fromItem(item)).toList();
+                            final Map<int, HandymanServiceModel> uniqueCategoryServicesMap = {};
+                            for (var item in apiItems) {
+                              if (item.id != null && !uniqueCategoryServicesMap.containsKey(item.id)) {
+                                uniqueCategoryServicesMap[item.id!] = HandymanServiceModel.fromItem(item);
+                              }
+                            }
+                            final categoryServices = uniqueCategoryServicesMap.values.toList();
 
                             final section = CategorySectionModel(
                               categoryId: category.id,

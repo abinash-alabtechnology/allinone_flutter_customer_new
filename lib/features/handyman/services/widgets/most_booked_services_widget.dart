@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:handy_allinone/features/handyman/services/controllers/handyman_home_controller.dart';
 import 'package:handy_allinone/features/handyman/services/widgets/service_options_bottom_sheet.dart';
 import 'package:handy_allinone/features/handyman/services/models/handyman_service_model.dart';
-import 'package:handy_allinone/features/category/controllers/category_controller.dart';
 import 'package:handy_allinone/common/widgets/custom_image.dart';
 import 'package:handy_allinone/common/widgets/cart_count_view.dart';
 
@@ -16,8 +15,6 @@ class MostBookedServicesWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<HandymanHomeController>();
-
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.only(bottom: 16, top: 8),
@@ -39,18 +36,9 @@ class MostBookedServicesWidget extends StatelessWidget {
         ),
 
         // ── Horizontal Card List ────────────────────────────────────────────
-        GetBuilder<CategoryController>(
-          builder: (categoryController) {
-            List<HandymanServiceModel> dynamicMostBooked = [];
-            categoryController.itemsByCategory.forEach((catId, items) {
-              for (var item in items) {
-                dynamicMostBooked.add(HandymanServiceModel.fromItem(item));
-              }
-            });
-
-            final displayServices = dynamicMostBooked.isNotEmpty 
-                ? dynamicMostBooked 
-                : controller.mostBookedServices;
+        GetBuilder<HandymanHomeController>(
+          builder: (controller) {
+            final displayServices = controller.mostBookedServices;
 
             if (displayServices.isEmpty) {
               return const SizedBox.shrink();
@@ -62,7 +50,7 @@ class MostBookedServicesWidget extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.only(left: 16, right: 16),
                 physics: const BouncingScrollPhysics(),
-                itemCount: displayServices.length > 6 ? 6 : displayServices.length,
+                itemCount: displayServices.length,
                 separatorBuilder: (context, index) => const Gap(12),
                 itemBuilder: (context, index) {
                   final service = displayServices[index];

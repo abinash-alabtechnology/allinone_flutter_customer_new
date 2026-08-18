@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:handy_allinone/api/api_client.dart';
 import 'package:handy_allinone/features/handyman/services/controllers/handyman_home_controller.dart';
 import 'package:handy_allinone/features/handyman/services/models/handyman_booking_model.dart';
 import 'package:handy_allinone/features/handyman/services/screens/handyman_booking_details_screen.dart';
 import 'package:handy_allinone/features/order/controllers/order_controller.dart';
 import 'package:handy_allinone/features/order/domain/models/order_model.dart';
+import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
+import 'package:handy_allinone/helper/address_helper.dart';
 import 'package:handy_allinone/helper/date_converter.dart';
+import 'package:handy_allinone/util/app_constants.dart';
 import 'package:handy_allinone/util/styles.dart';
 
 class HandymanBookingsScreen extends StatefulWidget {
@@ -24,7 +28,7 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
     'Confirmed',
     'Processing',
     'Handover',
-    'Delivered',
+    'Completed',
     'Cancelled',
   ];
   int _selectedStatusIndex = 0;
@@ -34,6 +38,20 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
     super.initState();
     if (!Get.isRegistered<HandymanHomeController>()) {
       Get.put(HandymanHomeController());
+    }
+    if (Get.isRegistered<SplashController>()) {
+      int handymanModuleId = Get.find<SplashController>().getHandymanModuleId();
+      if (Get.isRegistered<ApiClient>()) {
+        Get.find<ApiClient>().updateHeader(
+          Get.find<ApiClient>().token,
+          AddressHelper.getUserAddressFromSharedPref()?.zoneIds,
+          AddressHelper.getUserAddressFromSharedPref()?.areaIds,
+          Get.find<ApiClient>().sharedPreferences.getString(AppConstants.languageCode),
+          handymanModuleId,
+          AddressHelper.getUserAddressFromSharedPref()?.latitude,
+          AddressHelper.getUserAddressFromSharedPref()?.longitude,
+        );
+      }
     }
     if (Get.isRegistered<OrderController>()) {
       Get.find<OrderController>().getRunningOrders(1);
@@ -173,7 +191,7 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
     } else if (os == 'handover' || os == 'picked_up') {
       statusName = 'Handover';
     } else if (os == 'delivered' || os == 'completed') {
-      statusName = 'Delivered';
+      statusName = 'Completed';
     } else if (os == 'canceled' || os == 'failed') {
       statusName = 'Cancelled';
     }
@@ -197,6 +215,8 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
       discount: (order.storeDiscountAmount ?? 0.0) + (order.couponDiscountAmount ?? 0.0),
       vat: order.totalTaxAmount ?? 0.0,
       fee: order.deliveryCharge ?? 0.0,
+      startOtp: order.startOtp,
+      endOtp: order.otp,
     );
   }
 
@@ -549,12 +569,32 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
                   apiOrders.addAll(orderController.historyOrderModel!.orders!);
                 }
 
+                int handymanModuleId = Get.isRegistered<SplashController>()
+                    ? Get.find<SplashController>().getHandymanModuleId()
+                    : 10;
+
+                List<OrderModel> handymanApiOrders = apiOrders.where((o) {
+                  int? oModuleId = o.moduleId ?? o.store?.moduleId;
+                  String? oModuleType = o.moduleType;
+
+                  if (oModuleId != null && oModuleId > 0) {
+                    return oModuleId == handymanModuleId;
+                  }
+                  if (oModuleType != null && oModuleType.isNotEmpty) {
+                    return oModuleType.toLowerCase() == 'handyman';
+                  }
+                  if (o.store?.name != null) {
+                    return o.store!.name!.toLowerCase().contains('handyman');
+                  }
+                  return false;
+                }).toList();
+
                 List<HandymanBookingModel> allBookings = [];
-                if (apiOrders.isNotEmpty) {
-                  for (var o in apiOrders) {
+                if (handymanApiOrders.isNotEmpty) {
+                  for (var o in handymanApiOrders) {
                     allBookings.add(_convertOrderToBooking(o));
                   }
-                } else {
+                } else if (apiOrders.isEmpty) {
                   allBookings = _controller.bookings;
                 }
 
@@ -571,7 +611,7 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
                         if (selectedStatus == 'Handover') {
                           return b.status.toLowerCase() == 'handover' || b.status.toLowerCase() == 'picked_up';
                         }
-                        if (selectedStatus == 'Delivered') {
+                        if (selectedStatus == 'Completed' || selectedStatus == 'Delivered') {
                           return b.status.toLowerCase() == 'delivered' || b.status.toLowerCase() == 'completed';
                         }
                         return b.status.toLowerCase() == selectedStatus.toLowerCase();

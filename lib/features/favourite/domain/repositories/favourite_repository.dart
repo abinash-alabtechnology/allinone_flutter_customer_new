@@ -17,12 +17,7 @@ class FavouriteRepository implements FavouriteRepositoryInterface<ResponseModel>
     if (Get.find<SplashController>().module != null && Get.find<SplashController>().module!.id != null) {
       activeModuleId = Get.find<SplashController>().module!.id;
     } else {
-      final handymanMod = Get.find<SplashController>().moduleList?.firstWhereOrNull((m) {
-        String title = m.moduleName?.toLowerCase() ?? '';
-        String mType = m.moduleType?.toLowerCase() ?? '';
-        return title.contains('handyman') || mType.contains('handyman');
-      });
-      activeModuleId = handymanMod?.id;
+      activeModuleId = Get.find<SplashController>().getHandymanModuleId();
     }
     if (activeModuleId != null) {
       reqHeaders[AppConstants.moduleId] = activeModuleId.toString();

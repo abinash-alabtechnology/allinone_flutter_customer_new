@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 
 import 'package:get/get.dart';
 import 'package:handy_allinone/api/api_client.dart';
@@ -41,19 +40,16 @@ class BannerRepository implements BannerRepositoryInterface {
     BannerModel? bannerModel;
     Map<String, String> reqHeaders = Map.from(apiClient.getHeader());
     reqHeaders['Content-Type'] = 'application/json; charset=UTF-8';
+    reqHeaders.remove('service_type');
+    reqHeaders.remove('service-type');
 
     int? activeModuleId = ModuleHelper.getModule()?.id ?? ModuleHelper.getCacheModule()?.id;
     if (activeModuleId == null || activeModuleId == 0) {
       if (Get.isRegistered<SplashController>()) {
         final splash = Get.find<SplashController>();
         activeModuleId = splash.module?.id ?? splash.cacheModule?.id;
-        if ((activeModuleId == null || activeModuleId == 0) && splash.moduleList != null && splash.moduleList!.isNotEmpty) {
-          final handymanMod = splash.moduleList!.firstWhereOrNull((m) {
-            String name = (m.moduleName ?? '').toLowerCase();
-            String type = (m.moduleType ?? '').toLowerCase();
-            return name.contains('handy') || type.contains('handy') || name.contains('service');
-          });
-          activeModuleId = handymanMod?.id ?? splash.moduleList!.first.id;
+        if (activeModuleId == null || activeModuleId == 0) {
+          activeModuleId = splash.getHandymanModuleId();
         }
       }
     }
