@@ -40,8 +40,28 @@ class OnlineCartModel {
     moduleId = json['module_id'];
     itemId = json['item_id'];
     isGuest = json['is_guest'];
-    addOnIds = json['add_on_ids'].cast<int>();
-    addOnQtys = json['add_on_qtys'].cast<int>();
+    if (json['add_on_ids'] != null) {
+      addOnIds = [];
+      json['add_on_ids'].forEach((v) {
+        if (v != null) {
+          int? parsed = int.tryParse(v.toString());
+          if (parsed != null) addOnIds!.add(parsed);
+        }
+      });
+    } else {
+      addOnIds = [];
+    }
+    if (json['add_on_qtys'] != null) {
+      addOnQtys = [];
+      json['add_on_qtys'].forEach((v) {
+        if (v != null) {
+          int? parsed = int.tryParse(v.toString());
+          if (parsed != null) addOnQtys!.add(parsed);
+        }
+      });
+    } else {
+      addOnQtys = [];
+    }
     itemType = json['item_type'];
     price = json['price']?.toDouble();
     quantity = json['quantity'];
@@ -49,10 +69,12 @@ class OnlineCartModel {
       foodVariation = [];
       productVariation = [];
       json['variation'].forEach((v) {
-        if (v['name'] == null) {
-          productVariation!.add(product_variation.Variation.fromJson(v));
-        } else {
-          foodVariation!.add(Variation.fromJson(v));
+        if (v != null && v is Map) {
+          if (v['name'] == null) {
+            productVariation!.add(product_variation.Variation.fromJson(Map<String, dynamic>.from(v)));
+          } else {
+            foodVariation!.add(Variation.fromJson(Map<String, dynamic>.from(v)));
+          }
         }
       });
     }
@@ -115,7 +137,16 @@ class Value {
   Value({this.label});
 
   Value.fromJson(Map<String, dynamic> json) {
-    label = json['label'].cast<String>();
+    if (json['label'] != null) {
+      label = [];
+      json['label'].forEach((v) {
+        if (v != null) {
+          label!.add(v.toString());
+        }
+      });
+    } else {
+      label = [];
+    }
   }
 
   Map<String, dynamic> toJson() {

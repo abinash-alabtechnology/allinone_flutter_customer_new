@@ -72,13 +72,33 @@ class BannerRepository implements BannerRepositoryInterface {
           headers: reqHeaders,
         );
         if (response.statusCode == 200) {
-          bannerModel = BannerModel.fromJson(response.body);
+          dynamic body = response.body;
+          if (body is Map<String, dynamic>) {
+            bannerModel = BannerModel.fromJson(body);
+          } else if (body is List) {
+            List<Banner> banners = [];
+            for (var v in body) {
+              banners.add(Banner.fromJson(v));
+            }
+            bannerModel = BannerModel(banners: banners);
+          }
           LocalClient.organize(source, cacheId, jsonEncode(response.body), reqHeaders);
         }
       case DataSourceEnum.local:
         String? cacheResponseData = await LocalClient.organize(source, cacheId, null, null);
         if (cacheResponseData != null) {
-          bannerModel = BannerModel.fromJson(jsonDecode(cacheResponseData));
+          try {
+            dynamic decoded = jsonDecode(cacheResponseData);
+            if (decoded is Map<String, dynamic>) {
+              bannerModel = BannerModel.fromJson(decoded);
+            } else if (decoded is List) {
+              List<Banner> banners = [];
+              for (var v in decoded) {
+                banners.add(Banner.fromJson(v));
+              }
+              bannerModel = BannerModel(banners: banners);
+            }
+          } catch (_) {}
         }
     }
 

@@ -12,6 +12,10 @@ import 'package:handy_allinone/util/app_constants.dart';
 import 'package:handy_allinone/common/widgets/custom_snackbar.dart';
 import 'dart:convert'; 
 
+import 'package:get/get.dart';
+import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
+import 'package:handy_allinone/helper/module_helper.dart';
+
 class OrderRepository implements OrderRepositoryInterface {
   final ApiClient apiClient;
   OrderRepository({required this.apiClient});
@@ -119,7 +123,21 @@ class OrderRepository implements OrderRepositoryInterface {
 
   Future<PaginatedOrderModel?> _getRunningOrderList(int offset, bool fromDashboard) async {
     PaginatedOrderModel? runningOrderModel;
-    Response response = await apiClient.getData('${AppConstants.runningOrderListUri}?offset=$offset&limit=${fromDashboard ? 50 : 10}');
+    int handymanModuleId = Get.isRegistered<SplashController>() ? Get.find<SplashController>().getHandymanModuleId() : 10;
+    int? activeModuleId = ModuleHelper.getModule()?.id ?? ModuleHelper.getCacheModule()?.id;
+    if (activeModuleId == null || activeModuleId == 0) {
+      if (Get.isRegistered<SplashController>()) {
+        activeModuleId = Get.find<SplashController>().module?.id ?? Get.find<SplashController>().cacheModule?.id;
+      }
+    }
+    bool isHandyman = (activeModuleId == handymanModuleId) ||
+        (Get.isRegistered<SplashController>() && Get.find<SplashController>().module?.id == handymanModuleId);
+
+    String uri = isHandyman
+        ? '${AppConstants.runningOrderListUri}?limit=${fromDashboard ? 50 : 25}&offset=$offset&filter_module_id=$handymanModuleId'
+        : '${AppConstants.runningOrderListUri}?offset=$offset&limit=${fromDashboard ? 50 : 10}';
+
+    Response response = await apiClient.getData(uri);
     if (response.statusCode == 200) {
       runningOrderModel = PaginatedOrderModel.fromJson(response.body);
     }
@@ -128,7 +146,21 @@ class OrderRepository implements OrderRepositoryInterface {
 
   Future<PaginatedOrderModel?> _getHistoryOrderList(int offset) async {
     PaginatedOrderModel? historyOrderModel;
-    Response response = await apiClient.getData('${AppConstants.historyOrderListUri}?offset=$offset&limit=10');
+    int handymanModuleId = Get.isRegistered<SplashController>() ? Get.find<SplashController>().getHandymanModuleId() : 10;
+    int? activeModuleId = ModuleHelper.getModule()?.id ?? ModuleHelper.getCacheModule()?.id;
+    if (activeModuleId == null || activeModuleId == 0) {
+      if (Get.isRegistered<SplashController>()) {
+        activeModuleId = Get.find<SplashController>().module?.id ?? Get.find<SplashController>().cacheModule?.id;
+      }
+    }
+    bool isHandyman = (activeModuleId == handymanModuleId) ||
+        (Get.isRegistered<SplashController>() && Get.find<SplashController>().module?.id == handymanModuleId);
+
+    String uri = isHandyman
+        ? '${AppConstants.historyOrderListUri}?limit=25&offset=$offset&filter_module_id=$handymanModuleId'
+        : '${AppConstants.historyOrderListUri}?offset=$offset&limit=10';
+
+    Response response = await apiClient.getData(uri);
     if (response.statusCode == 200) {
       historyOrderModel = PaginatedOrderModel.fromJson(response.body);
     }

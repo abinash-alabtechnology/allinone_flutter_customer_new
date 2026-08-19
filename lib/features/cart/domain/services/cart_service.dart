@@ -268,13 +268,14 @@ class CartService implements CartServiceInterface {
   List<CartModel> formatOnlineCartToLocalCart({required List<OnlineCartModel> onlineCartModel}) {
     List<CartModel> cartList = [];
     for (OnlineCartModel cart in onlineCartModel) {
-      if (cart.item != null && cart.moduleId != null) {
+      if (cart.item == null) continue;
+      if (cart.moduleId != null) {
         cart.item!.moduleId = cart.moduleId;
       }
-      double price = cart.item!.price!;
+      double price = cart.item!.price ?? 0.0;
       double? discount = cart.item!.discount;
       String? discountType = cart.item!.discountType;
-      double discountedPrice = PriceConverter.convertWithDiscount(price, discount, discountType)!;
+      double discountedPrice = PriceConverter.convertWithDiscount(price, discount, discountType) ?? price;
 
       int? quantity = cart.quantity;
       int? stock = cart.item!.stock ?? 0;
@@ -282,25 +283,31 @@ class CartService implements CartServiceInterface {
       List<List<bool?>> selectedFoodVariations = [];
       List<bool> collapsVariation = [];
 
-      if(cart.item!.moduleType == 'food') {
-        for(int index=0; index<cart.item!.foodVariations!.length; index++) {
-          selectedFoodVariations.add([]);
-          collapsVariation.add(true);
-          for(int i=0; i < cart.item!.foodVariations![index].variationValues!.length; i++) {
-            if(cart.item!.foodVariations![index].variationValues![i].isSelected ?? false){
-              selectedFoodVariations[index].add(true);
-            } else {
-              selectedFoodVariations[index].add(false);
+      if (cart.item!.moduleType == 'food') {
+        if (cart.item!.foodVariations != null) {
+          for (int index = 0; index < cart.item!.foodVariations!.length; index++) {
+            selectedFoodVariations.add([]);
+            collapsVariation.add(true);
+            if (cart.item!.foodVariations![index].variationValues != null) {
+              for (int i = 0; i < cart.item!.foodVariations![index].variationValues!.length; i++) {
+                if (cart.item!.foodVariations![index].variationValues![i].isSelected ?? false) {
+                  selectedFoodVariations[index].add(true);
+                } else {
+                  selectedFoodVariations[index].add(false);
+                }
+              }
             }
           }
         }
       } else {
-        String variationType = cart.productVariation != null && cart.productVariation!.isNotEmpty ? cart.productVariation![0].type! : '';
-        for (item_variation.Variation variation in cart.item!.variations!) {
-          if (variation.type == variationType) {
-            price = variation.price!;
-            discountedPrice = PriceConverter.convertWithDiscount(variation.price!, discount, discountType)!;
-            break;
+        String variationType = cart.productVariation != null && cart.productVariation!.isNotEmpty ? (cart.productVariation![0].type ?? '') : '';
+        if (cart.item!.variations != null) {
+          for (item_variation.Variation variation in cart.item!.variations!) {
+            if (variation.type == variationType) {
+              price = variation.price ?? price;
+              discountedPrice = PriceConverter.convertWithDiscount(price, discount, discountType) ?? price;
+              break;
+            }
           }
         }
       }
@@ -309,11 +316,16 @@ class CartService implements CartServiceInterface {
 
       List<AddOn> addOnIdList = [];
       List<AddOns> addOnsList = [];
-      for (int index = 0; index < cart.addOnIds!.length; index++) {
-        addOnIdList.add(AddOn(id: cart.addOnIds![index], quantity: cart.addOnQtys![index]));
-        for (int i=0; i< cart.item!.addOns!.length; i++) {
-          if(cart.addOnIds![index] == cart.item!.addOns![i].id) {
-            addOnsList.add(AddOns(id: cart.item!.addOns![i].id, name: cart.item!.addOns![i].name, price: cart.item!.addOns![i].price));
+      if (cart.addOnIds != null && cart.addOnQtys != null) {
+        for (int index = 0; index < cart.addOnIds!.length; index++) {
+          int qty = index < cart.addOnQtys!.length ? (cart.addOnQtys![index] ?? 1) : 1;
+          addOnIdList.add(AddOn(id: cart.addOnIds![index], quantity: qty));
+          if (cart.item!.addOns != null) {
+            for (int i = 0; i < cart.item!.addOns!.length; i++) {
+              if (cart.addOnIds![index] == cart.item!.addOns![i].id) {
+                addOnsList.add(AddOns(id: cart.item!.addOns![i].id, name: cart.item!.addOns![i].name, price: cart.item!.addOns![i].price));
+              }
+            }
           }
         }
       }
@@ -322,7 +334,7 @@ class CartService implements CartServiceInterface {
 
       cartList.add(
         CartModel(
-          cart.id, price, discountedPrice, cart.productVariation?? [], selectedFoodVariations, discountAmount, quantity,
+          cart.id, price, discountedPrice, cart.productVariation ?? [], selectedFoodVariations, discountAmount, quantity,
           addOnIdList, addOnsList, false, stock, cart.item, quantityLimit,
         ),
       );

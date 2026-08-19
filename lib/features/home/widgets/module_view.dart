@@ -103,11 +103,11 @@ class ModuleView extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  InkWell(
-                    onTap: () => Get.toNamed(RouteHelper.getSearchRoute()),
-                    child: const Icon(Icons.search, color: Color(0xFF4B5563), size: 24),
-                  ),
+                  // const SizedBox(width: 8),
+                  // InkWell(
+                  //   onTap: () => Get.toNamed(RouteHelper.getSearchRoute()),
+                  //   child: const Icon(Icons.search, color: Color(0xFF4B5563), size: 24),
+                  // ),
                 ],
               ),
             ],

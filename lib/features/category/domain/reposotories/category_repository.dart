@@ -12,6 +12,8 @@ import 'package:handy_allinone/util/app_constants.dart';
 import 'package:handy_allinone/features/category/domain/reposotories/category_repository_interface.dart';
 import 'package:handy_allinone/features/handyman/services/controllers/handyman_home_controller.dart';
 
+import 'package:handy_allinone/helper/module_helper.dart';
+
 class CategoryRepository implements CategoryRepositoryInterface {
   final ApiClient apiClient;
   CategoryRepository({required this.apiClient});
@@ -31,10 +33,17 @@ class CategoryRepository implements CategoryRepositoryInterface {
   }
 
   int? _getActiveModuleId() {
-    if (Get.isRegistered<SplashController>()) {
-      return Get.find<SplashController>().getHandymanModuleId();
+    int? activeModuleId = ModuleHelper.getModule()?.id ?? ModuleHelper.getCacheModule()?.id;
+    if (activeModuleId == null || activeModuleId == 0) {
+      if (Get.isRegistered<SplashController>()) {
+        final splash = Get.find<SplashController>();
+        activeModuleId = splash.module?.id ?? splash.cacheModule?.id;
+        if (activeModuleId == null || activeModuleId == 0) {
+          activeModuleId = splash.getHandymanModuleId();
+        }
+      }
     }
-    return 10;
+    return activeModuleId;
   }
 
   Future<List<CategoryModel>?> _getCategoryList(bool allCategory, DataSourceEnum source) async {

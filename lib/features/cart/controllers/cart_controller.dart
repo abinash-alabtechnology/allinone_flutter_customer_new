@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:handy_allinone/features/item/domain/models/item_model.dart';
@@ -374,14 +374,20 @@ class CartController extends GetxController implements GetxService {
     _loadingItemId = cart.itemId;
     bool success = false;
     update();
-    List<OnlineCartModel>? onlineCartList = await cartServiceInterface.addToCartOnline(cart);
-    if(onlineCartList != null) {
-      _cartList = [];
-      _cartList.addAll(cartServiceInterface.formatOnlineCartToLocalCart(onlineCartModel: onlineCartList));
-      calculationCart();
-      success = true;
-    } else {
-      await getCartDataOnline();
+    try {
+      List<OnlineCartModel>? onlineCartList = await cartServiceInterface.addToCartOnline(cart);
+      if(onlineCartList != null) {
+        _cartList = [];
+        _cartList.addAll(cartServiceInterface.formatOnlineCartToLocalCart(onlineCartModel: onlineCartList));
+        calculationCart();
+        success = true;
+      } else {
+        await getCartDataOnline();
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error in addToCartOnline: $e');
+      }
     }
     _isLoading = false;
     _isSubscriptionLoading = false;
@@ -392,17 +398,22 @@ class CartController extends GetxController implements GetxService {
   }
 
   Future<bool> updateCartOnline(OnlineCart cart) async {
-    print("dfsf");
     _isLoading = true;
     _loadingItemId = cart.itemId;
     bool success = false;
     update();
-    List<OnlineCartModel>? onlineCartList = await cartServiceInterface.updateCartOnline(cart);
-    if(onlineCartList != null) {
-      _cartList = [];
-      _cartList.addAll(cartServiceInterface.formatOnlineCartToLocalCart(onlineCartModel: onlineCartList));
-      calculationCart();
-      success = true;
+    try {
+      List<OnlineCartModel>? onlineCartList = await cartServiceInterface.updateCartOnline(cart);
+      if(onlineCartList != null) {
+        _cartList = [];
+        _cartList.addAll(cartServiceInterface.formatOnlineCartToLocalCart(onlineCartModel: onlineCartList));
+        calculationCart();
+        success = true;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error in updateCartOnline: $e');
+      }
     }
     _isLoading = false;
     _loadingItemId = null;
@@ -414,11 +425,17 @@ class CartController extends GetxController implements GetxService {
   Future<void> updateCartQuantityOnline(int cartId, double price, int quantity) async {
     _isLoading = true;
     update();
-    bool success = await cartServiceInterface.updateCartQuantityOnline(cartId, price, quantity);
-    if(success) {
-      await getCartDataOnline();
-      calculationCart();
-      await Future.delayed(const Duration(milliseconds: 200));
+    try {
+      bool success = await cartServiceInterface.updateCartQuantityOnline(cartId, price, quantity);
+      if(success) {
+        await getCartDataOnline();
+        calculationCart();
+        await Future.delayed(const Duration(milliseconds: 200));
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error in updateCartQuantityOnline: $e');
+      }
     }
     _isLoading = false;
     _loadingItemId = null;
@@ -432,13 +449,19 @@ class CartController extends GetxController implements GetxService {
       } else {
         _isLoading = true;
       }
-      List<OnlineCartModel>? onlineCartList = await cartServiceInterface.getCartDataOnline();
-      if(onlineCartList != null) {
-        _cartList = [];
-        _cartList.addAll(cartServiceInterface.formatOnlineCartToLocalCart(onlineCartModel: onlineCartList));
-        calculationCart();
-        if (Get.isRegistered<HandymanHomeController>()) {
-          Get.find<HandymanHomeController>().syncWithCartController();
+      try {
+        List<OnlineCartModel>? onlineCartList = await cartServiceInterface.getCartDataOnline();
+        if(onlineCartList != null) {
+          _cartList = [];
+          _cartList.addAll(cartServiceInterface.formatOnlineCartToLocalCart(onlineCartModel: onlineCartList));
+          calculationCart();
+          if (Get.isRegistered<HandymanHomeController>()) {
+            Get.find<HandymanHomeController>().syncWithCartController();
+          }
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('Error in getCartDataOnline: $e');
         }
       }
       _isLoading = false;
