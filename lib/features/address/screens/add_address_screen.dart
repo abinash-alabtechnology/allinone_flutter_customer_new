@@ -94,6 +94,8 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
           Get.find<SplashController>().configModel!.country!,
         ).dialCode;
   bool _profilePopulated = false;
+  double? _lastLat;
+  double? _lastLng;
 
   void _populateFromProfile() {
     if (Get.find<ProfileController>().userInfoModel != null) {
@@ -175,17 +177,22 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
   }
 
   Future<void> fillAddressFromLatLng(double latitude, double longitude) async {
-    final placemarks = await placemarkFromCoordinates(latitude, longitude);
+    try {
+      final placemarks = await placemarkFromCoordinates(latitude, longitude);
 
-    if (placemarks.isEmpty) return;
+      if (placemarks.isEmpty) return;
 
-    final place = placemarks.first;
+      final place = placemarks.first;
 
-    _cityController.text = place.locality ?? '';
-    _stateController.text = place.administrativeArea ?? '';
-    _countryController.text = place.country ?? '';
-    _pincodeController.text = place.postalCode ?? '';
+      _cityController.text = place.locality?.isNotEmpty == true ? place.locality! : (place.subAdministrativeArea ?? '');
+      _stateController.text = place.administrativeArea ?? '';
+      _countryController.text = place.country ?? '';
+      _pincodeController.text = place.postalCode ?? '';
+    } catch (e) {
+      debugPrint('Failed to get placemarks from coordinates: $e');
+    }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -208,11 +215,16 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
             }
             return GetBuilder<LocationController>(
               builder: (locationController) {
-                _addressController.text = locationController.address!;
                 final latLng = locationController.position;
                 if (latLng != null) {
-                  fillAddressFromLatLng(latLng.latitude, latLng.longitude);
+                  if (_lastLat != latLng.latitude || _lastLng != latLng.longitude) {
+                    _lastLat = latLng.latitude;
+                    _lastLng = latLng.longitude;
+                    _addressController.text = locationController.address ?? '';
+                    fillAddressFromLatLng(latLng.latitude, latLng.longitude);
+                  }
                 }
+
 
                 return ResponsiveHelper.isDesktop(context)
                     ? SingleChildScrollView(

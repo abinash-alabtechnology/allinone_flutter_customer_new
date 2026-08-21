@@ -287,7 +287,19 @@ class ModuleView extends StatelessWidget {
                           color: extra['color'],
                           iconColor: extra['iconColor'],
                           onTap: extra['title'] == 'Handyman'
-                              ? () => Get.to(() => const HandymanServicesScreen())
+                              ? () {
+                                  int handymanIndex = splashController.moduleList!.indexWhere((m) {
+                                    String title = m.moduleName?.toLowerCase() ?? '';
+                                    String mType = m.moduleType?.toLowerCase() ?? '';
+                                    return title.contains('handyman') || mType.contains('handyman');
+                                  });
+                                  if (handymanIndex != -1) {
+                                    splashController.showBottomNavBar();
+                                    scrollController.animateTo(0, duration: const Duration(milliseconds: 400), curve: Curves.easeIn);
+                                    splashController.setModule(splashController.moduleList![handymanIndex]);
+                                  }
+                                  Get.to(() => const HandymanServicesScreen());
+                                }
                               : extra['isComingSoon'] == true
                                   ? () {}
                                   : () async {

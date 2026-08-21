@@ -27,6 +27,8 @@ import 'package:handy_allinone/features/category/controllers/category_controller
 import 'package:handy_allinone/features/handyman/services/widgets/spotlight_banner_widget.dart';
 import 'package:handy_allinone/common/widgets/custom_image.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
+import 'package:handy_allinone/features/store/controllers/store_controller.dart';
 
 
 class HandymanServicesScreen extends StatefulWidget {
@@ -91,6 +93,12 @@ class _HandymanServicesScreenState extends State<HandymanServicesScreen> {
                   isSelected: false,
                   activeColor: Theme.of(context).primaryColor,
                   onTap: () {
+                    if (Get.isRegistered<SplashController>()) {
+                      Get.find<SplashController>().removeModule();
+                    }
+                    if (Get.isRegistered<StoreController>()) {
+                      Get.find<StoreController>().resetStoreData();
+                    }
                     Get.offAll(() => const DashboardScreen(pageIndex: 0, fromSplash: false));
                   },
                 ),
