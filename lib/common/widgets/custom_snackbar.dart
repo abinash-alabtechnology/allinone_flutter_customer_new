@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 
 void showCustomSnackBar(String? message, {bool isError = true, bool getXSnackBar = false, int? showDuration}) {
   if(message != null && message.isNotEmpty) {
-    if(getXSnackBar) {
+    if(getXSnackBar || Get.context == null || !Get.context!.mounted) {
       Get.showSnackbar(GetSnackBar(
         backgroundColor: Colors.transparent,
         messageText: CustomToast(text: message, isError: isError),
@@ -18,14 +18,15 @@ void showCustomSnackBar(String? message, {bool isError = true, bool getXSnackBar
         dismissDirection: DismissDirection.horizontal,
       ));
     }else {
-      ScaffoldMessenger.of(Get.context!).showSnackBar(SnackBar(
-        dismissDirection: DismissDirection.endToStart,
-        elevation: 0.0,
+      Get.showSnackbar(GetSnackBar(
         backgroundColor: Colors.transparent,
-        padding: EdgeInsets.zero,
-        content: CustomToast(text: message, isError: isError),
-        duration: Duration(seconds: showDuration??2),
-        behavior: SnackBarBehavior.floating,
+        messageText: CustomToast(text: message, isError: isError),
+        duration: Duration(seconds: showDuration ?? 2),
+        snackStyle: SnackStyle.FLOATING,
+        margin: EdgeInsets.zero,
+        borderRadius: 0,
+        isDismissible: true,
+        dismissDirection: DismissDirection.horizontal,
       ));
     }
   }

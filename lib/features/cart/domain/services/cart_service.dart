@@ -277,7 +277,7 @@ class CartService implements CartServiceInterface {
       String? discountType = cart.item!.discountType;
       double discountedPrice = PriceConverter.convertWithDiscount(price, discount, discountType) ?? price;
 
-      int? quantity = cart.quantity;
+      int? quantity = cart.quantity ?? 1;
       int? stock = cart.item!.stock ?? 0;
 
       List<List<bool?>> selectedFoodVariations = [];
@@ -361,7 +361,7 @@ class CartService implements CartServiceInterface {
   @override
   bool existAnotherStoreItem(int? storeID, int? moduleId, List<CartModel> cartList) {
     for(CartModel cartModel in cartList) {
-      if(cartModel.item!.storeId != storeID && cartModel.item!.moduleId == moduleId) {
+      if(cartModel.item!.storeId != storeID) {
         return true;
       }
     }

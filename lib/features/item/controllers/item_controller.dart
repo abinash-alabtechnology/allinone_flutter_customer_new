@@ -381,6 +381,7 @@ class ItemController extends GetxController implements GetxService {
     _recommendedItemList = null;
     _subscriptionItemList = null;
     _freshItemList = null;
+    update();
   }
 
   void showBottomLoader() {

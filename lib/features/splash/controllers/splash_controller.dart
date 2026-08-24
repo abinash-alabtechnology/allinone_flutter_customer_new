@@ -220,6 +220,14 @@ class SplashController extends GetxController implements GetxService {
         _configModel!.moduleConfig!.module = Module.fromJson(_data!['module_config'][module.moduleType]);
       }
       _cacheModule = await splashServiceInterface.setCacheModule(module);
+      
+      Get.find<ItemController>().clearItemLists();
+      Get.find<StoreController>().clearStoreData();
+      Get.find<BannerController>().clearBanner();
+      Get.find<CategoryController>().clearCategoryList();
+      Get.find<CampaignController>().itemAndBasicCampaignNull();
+      Get.find<FlashSaleController>().setEmptyFlashSale(fromModule: true);
+
       if((AuthHelper.isLoggedIn() || AuthHelper.isGuestLoggedIn()) && (cacheModule != null || _module != null)) {
         Get.find<CartController>().getCartDataOnline();
       }
@@ -325,10 +333,12 @@ class SplashController extends GetxController implements GetxService {
       if(_module!.moduleType.toString() != AppConstants.taxi) {
         Get.find<CartController>().getCartDataOnline();
         Get.find<ItemController>().clearItemLists();
+        Get.find<StoreController>().clearStoreData();
         Get.find<BannerController>().clearBanner();
         Get.find<CategoryController>().clearCategoryList();
         Get.find<CampaignController>().itemAndBasicCampaignNull();
         Get.find<FlashSaleController>().setEmptyFlashSale(fromModule: true);
+
 
         if(AuthHelper.isLoggedIn()) {
           Get.find<HomeController>().getCashBackOfferList();

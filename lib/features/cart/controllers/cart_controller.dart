@@ -186,9 +186,9 @@ class CartController extends GetxController implements GetxService {
       variationWithoutDiscountPrice = cartServiceInterface.calculateVariationWithoutDiscountPrice(isFoodVariation, cartModel, variationWithoutDiscountPrice);
       haveVariation = cartServiceInterface.checkVariation(isFoodVariation, cartModel);
 
-      double price = haveVariation ? variationWithoutDiscountPrice : (cartModel.item!.price! * cartModel.quantity!);
+      double price = haveVariation ? variationWithoutDiscountPrice : (cartModel.item!.price! * (cartModel.quantity ?? 1));
       double discountPrice = haveVariation ? (variationWithoutDiscountPrice - _variationPrice)
-          : (price - (PriceConverter.convertWithDiscount(cartModel.item!.price!, discount, discountType)! * cartModel.quantity!));
+          : (price - (PriceConverter.convertWithDiscount(cartModel.item!.price!, discount, discountType)! * (cartModel.quantity ?? 1)));
 
       _itemPrice = _itemPrice + price;
       _itemDiscountPrice = _itemDiscountPrice + discountPrice;

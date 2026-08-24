@@ -261,6 +261,17 @@ class StoreController extends GetxController implements GetxService {
     _storeType = 'all';
   }
 
+  void clearStoreData() {
+    _popularStoreList = null;
+    _latestStoreList = null;
+    _topOfferStoreList = null;
+    _featuredStoreList = null;
+    _visitAgainStoreList = null;
+    _storeModel = null;
+    _recommendedStoreList = null;
+    update();
+  }
+
   Future<void> getPopularStoreList(bool reload, String type, bool notify, {DataSourceEnum dataSource = DataSourceEnum.local, bool fromRecall = false}) async {
     _type = type;
     if(reload) {
