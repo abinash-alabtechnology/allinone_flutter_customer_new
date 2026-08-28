@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:icons_plus/icons_plus.dart';
+import 'package:iconsx_plus/iconsx_plus.dart';
 import 'package:handy_allinone/common/widgets/custom_asset_image_widget.dart';
 import 'package:handy_allinone/common/widgets/custom_ink_well.dart';
 import 'package:handy_allinone/common/widgets/hover/text_hover.dart';

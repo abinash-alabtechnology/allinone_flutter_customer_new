@@ -1,7 +1,7 @@
-import 'package:flutter/cupertino.dart';
+﻿import 'package:flutter/cupertino.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:icons_plus/icons_plus.dart';
+import 'package:iconsx_plus/iconsx_plus.dart';
 import 'package:handy_allinone/common/widgets/custom_asset_image_widget.dart';
 import 'package:handy_allinone/common/widgets/custom_ink_well.dart';
 import 'package:handy_allinone/features/banner/controllers/banner_controller.dart';
@@ -71,7 +71,7 @@ class ModuleView extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Hello, $name 👋',
+                      'Hello, $name ðŸ‘‹',
                       style: GoogleFonts.inter(
                         fontSize: 22,
                         fontWeight: FontWeight.w700,
@@ -866,7 +866,7 @@ Widget notInYourAreaWidget() {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Text("😢", style: TextStyle(fontSize: 60)),
+        const Text("ðŸ˜¢", style: TextStyle(fontSize: 60)),
         const SizedBox(height: 16),
         const Text(
           "Not in Your Area Yet",

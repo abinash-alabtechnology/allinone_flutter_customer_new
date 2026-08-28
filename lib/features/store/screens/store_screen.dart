@@ -1,10 +1,10 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:icons_plus/icons_plus.dart';
+import 'package:iconsx_plus/iconsx_plus.dart';
 import 'package:handy_allinone/common/widgets/custom_asset_image_widget.dart';
 import 'package:handy_allinone/features/cart/controllers/cart_controller.dart';
 import 'package:handy_allinone/features/category/controllers/category_controller.dart';
@@ -76,10 +76,10 @@ class _StoreScreenState extends State<StoreScreen> {
   final ScrollController scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
   final GlobalKey _menuKey = GlobalKey();
-  /// Stores GlobalKeys for each category header — populated by ItemsViewStore
+  /// Stores GlobalKeys for each category header â€” populated by ItemsViewStore
   /// after each build so we can scroll to the exact pixel position.
   final Map<String, GlobalKey> _categoryHeaderKeys = {};
-  /// Filter chip state — null = no filter, true = active
+  /// Filter chip state â€” null = no filter, true = active
   bool _vegFilter = false;
   bool _nonVegFilter = false;
   bool _discountFilter = false;
@@ -118,7 +118,7 @@ class _StoreScreenState extends State<StoreScreen> {
   /// When index == 0 (All), scrolls to top of menu area.
   /// When index > 0, calculates the cumulative offset of that category.
   void scrollToCategoryByIndex(int categoryIndex) {
-    // Index 0 = "All" — scroll to top of menu area
+    // Index 0 = "All" â€” scroll to top of menu area
     if (categoryIndex == 0) {
       scrollToMenu();
       return;
@@ -135,7 +135,7 @@ class _StoreScreenState extends State<StoreScreen> {
 
     if (headerKey?.currentContext != null) {
       // Use Flutter's built-in ensureVisible to scroll the header
-      // to the very top of the viewport — pixel-perfect, no math needed.
+      // to the very top of the viewport â€” pixel-perfect, no math needed.
       Scrollable.ensureVisible(
         headerKey!.currentContext!,
         alignment: 0.0,
@@ -1141,7 +1141,7 @@ class _StoreScreenState extends State<StoreScreen> {
                             ),
                           ),
 
-                        // ── Sticky search bar + filter chips ──────────────
+                        // â”€â”€ Sticky search bar + filter chips â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                         if (!ResponsiveHelper.isDesktop(context) && storeController.categoryList != null && storeController.categoryList!.isNotEmpty)
                           SliverPersistentHeader(
                             pinned: true,
@@ -1263,7 +1263,7 @@ class _StoreScreenState extends State<StoreScreen> {
                                   ),
                                 ),
                               ),
-                        // ── scroll-to-top animated button (inline, after all items) ──
+                        // â”€â”€ scroll-to-top animated button (inline, after all items) â”€â”€
                         SliverToBoxAdapter(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 24),
@@ -1272,7 +1272,7 @@ class _StoreScreenState extends State<StoreScreen> {
                             ),
                           ),
                         ),
-                        // ── bottom scroll padding ──────────────────────────
+                        // â”€â”€ bottom scroll padding â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                         const SliverToBoxAdapter(
                           child: SizedBox(height: 80),
                         ),
@@ -1974,7 +1974,7 @@ class QuoteScreen extends StatelessWidget {
 
                   const SizedBox(height: 26),
 
-                  /// SUBTITLE — also italic like mockup
+                  /// SUBTITLE â€” also italic like mockup
                   const Text(
                     '- Our Commitment',
                     textAlign: TextAlign.center,
@@ -2004,10 +2004,10 @@ class QuoteScreen extends StatelessWidget {
 }
 
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 /// Swiggy-style toggle switch filter chip.
 /// Layout: [icon]  [label]  [toggle nub]
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _FilterChip extends StatelessWidget {
   final String label;
   final Widget icon;
@@ -2066,7 +2066,7 @@ class _FilterChip extends StatelessWidget {
   }
 }
 
-/// A compact animated toggle track + thumb (22×13 px).
+/// A compact animated toggle track + thumb (22Ã—13 px).
 class _MiniToggleSwitch extends StatelessWidget {
   final bool isActive;
   final Color activeColor;
@@ -2121,7 +2121,7 @@ class _TrianglePainter extends CustomPainter {
   bool shouldRepaint(_TrianglePainter old) => old.color != color;
 }
 
-// ── Animated back-to-top pill button ─────────────────────────────────────────
+// â”€â”€ Animated back-to-top pill button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _StoreBackToTopButton extends StatefulWidget {
   final VoidCallback onTap;
   const _StoreBackToTopButton({required this.onTap});
@@ -2197,7 +2197,7 @@ class _StoreBackToTopButtonState extends State<_StoreBackToTopButton>
   }
 }
 
-// ── Sticky header delegate (primitives + callbacks — no AppBar context) ──────
+// â”€â”€ Sticky header delegate (primitives + callbacks â€” no AppBar context) â”€â”€â”€â”€â”€â”€
 class _StoreStickyHeaderDelegate extends SliverPersistentHeaderDelegate {
   final bool vegFilter;
   final bool nonVegFilter;

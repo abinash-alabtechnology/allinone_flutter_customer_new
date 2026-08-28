@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:icons_plus/icons_plus.dart';
+import 'package:iconsx_plus/iconsx_plus.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
 import 'package:handy_allinone/features/notification/domain/models/notification_body_model.dart';
@@ -63,7 +63,7 @@ class OrderInfoWidget extends StatelessWidget {
 
       case 'accepted':
         baseColor = const Color(0xFF0BA5EC);
-        quote = "We’ve green-lit your request — execution is underway.";
+        quote = "Weâ€™ve green-lit your request â€” execution is underway.";
         break;
 
       case 'processing':
@@ -83,12 +83,12 @@ class OrderInfoWidget extends StatelessWidget {
 
       case 'picked_up':
         baseColor = const Color(0xFF2E90FA);
-        quote = "Your package is now in transit — en route to your doorstep.";
+        quote = "Your package is now in transit â€” en route to your doorstep.";
         break;
 
       case 'delivered':
         baseColor = const Color(0xFF12BD5F);
-        quote = "Order successfully completed — thank you for choosing us.";
+        quote = "Order successfully completed â€” thank you for choosing us.";
         break;
 
       default:
