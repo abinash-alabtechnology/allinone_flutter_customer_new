@@ -80,7 +80,8 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
               List<String> variationList = [];
               for (int index = 0; index < item.choiceOptions!.length; index++) {
                 if (itemController.variationIndex!.length > index &&
-                    item.choiceOptions![index].options!.length > itemController.variationIndex![index]) {
+                    item.choiceOptions![index].options!.length >
+                        itemController.variationIndex![index]) {
                   variationList.add(
                     item
                         .choiceOptions![index]
@@ -125,15 +126,20 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
               List<AddOn> addOnIdList = [];
               List<AddOns> addOnsList = [];
               for (int index = 0; index < item.addOns!.length; index++) {
-                if (itemController.addOnActiveList.length > index && itemController.addOnActiveList[index]) {
+                if (itemController.addOnActiveList.length > index &&
+                    itemController.addOnActiveList[index]) {
                   addonsCost =
                       addonsCost +
                       (item.addOns![index].price! *
-                          (itemController.addOnQtyList.length > index ? itemController.addOnQtyList[index]! : 1));
+                          (itemController.addOnQtyList.length > index
+                              ? itemController.addOnQtyList[index]!
+                              : 1));
                   addOnIdList.add(
                     AddOn(
                       id: item.addOns![index].id,
-                      quantity: itemController.addOnQtyList.length > index ? itemController.addOnQtyList[index] : 1,
+                      quantity: itemController.addOnQtyList.length > index
+                          ? itemController.addOnQtyList[index]
+                          : 1,
                     ),
                   );
                   addOnsList.add(item.addOns![index]);
@@ -168,8 +174,6 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                 addOnIdList: addOnIdList,
               );
 
-
-
               cart = OnlineCart(
                 cartId,
                 widget.itemId,
@@ -178,7 +182,9 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                 variationType,
                 variation != null ? [variation] : [],
                 null,
-                (itemController.cartIndex != -1  && itemController.cartIndex < cartController.cartList.length)
+                (itemController.cartIndex != -1 &&
+                        itemController.cartIndex <
+                            cartController.cartList.length)
                     ? cartController.cartList[itemController.cartIndex].quantity
                     : itemController.quantity,
                 listOfAddOnId,
@@ -201,7 +207,9 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
 
             return Scaffold(
               key: _globalKey,
-              backgroundColor: const Color(0xFFFFFDFB), // Premium light cream background
+              backgroundColor: const Color(
+                0xFFFFFDFB,
+              ), // Premium light cream background
               endDrawer: const MenuDrawer(),
               endDrawerEnableOpenDragGesture: false,
               appBar: ResponsiveHelper.isDesktop(context)
@@ -343,18 +351,39 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                                                           .paddingSizeExtraSmall,
                                                                   vertical: 4,
                                                                 ),
-                                                              decoration: BoxDecoration(
-                                                                color: (itemController.variationIndex!.length > index && itemController.variationIndex![index] == i)
-                                                                    ? const Color(0xFFFFF7ED)
-                                                                    : Colors.white,
-                                                                borderRadius: BorderRadius.circular(12),
-                                                                border: Border.all(
-                                                                  color: (itemController.variationIndex!.length > index && itemController.variationIndex![index] == i)
-                                                                      ? const Color(0xFFEA580C)
-                                                                      : Colors.grey.shade300,
-                                                                  width: 1.5,
-                                                                ),
+                                                            decoration: BoxDecoration(
+                                                              color:
+                                                                  (itemController
+                                                                              .variationIndex!
+                                                                              .length >
+                                                                          index &&
+                                                                      itemController
+                                                                              .variationIndex![index] ==
+                                                                          i)
+                                                                  ? const Color(
+                                                                      0xFFFFF7ED,
+                                                                    )
+                                                                  : Colors
+                                                                        .white,
+                                                              borderRadius:
+                                                                  BorderRadius.circular(
+                                                                    12,
+                                                                  ),
+                                                              border: Border.all(
+                                                                color:
+                                                                    (itemController.variationIndex!.length >
+                                                                            index &&
+                                                                        itemController.variationIndex![index] ==
+                                                                            i)
+                                                                    ? const Color(
+                                                                        0xFFEA580C,
+                                                                      )
+                                                                    : Colors
+                                                                          .grey
+                                                                          .shade300,
+                                                                width: 1.5,
                                                               ),
+                                                            ),
                                                             child: Text(
                                                               item
                                                                   .choiceOptions![index]
@@ -366,9 +395,17 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                                                       .ellipsis,
                                                               style: robotoMedium.copyWith(
                                                                 fontSize: 14.sp,
-                                                                color: (itemController.variationIndex!.length > index && itemController.variationIndex![index] == i)
-                                                                    ? const Color(0xFFC2410C)
-                                                                    : Colors.grey.shade600,
+                                                                color:
+                                                                    (itemController.variationIndex!.length >
+                                                                            index &&
+                                                                        itemController.variationIndex![index] ==
+                                                                            i)
+                                                                    ? const Color(
+                                                                        0xFFC2410C,
+                                                                      )
+                                                                    : Colors
+                                                                          .grey
+                                                                          .shade600,
                                                               ),
                                                             ),
                                                           ),
@@ -421,20 +458,39 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                                         if (discount! > 0) ...[
                                                           CustomLineThroughText(
                                                             text: PriceConverter.convertPrice(
-                                                              (price! * itemController.quantity!) + addonsCost,
+                                                              (price! *
+                                                                      itemController
+                                                                          .quantity!) +
+                                                                  addonsCost,
                                                             ),
-                                                            textDirection: TextDirection.ltr,
+                                                            textDirection:
+                                                                TextDirection
+                                                                    .ltr,
                                                             style: robotoMedium.copyWith(
-                                                              color: Theme.of(context).disabledColor,
-                                                              fontSize: Dimensions.fontSizeSmall,
+                                                              color: Theme.of(
+                                                                context,
+                                                              ).disabledColor,
+                                                              fontSize: Dimensions
+                                                                  .fontSizeSmall,
                                                             ),
                                                           ),
-                                                          const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+                                                          const SizedBox(
+                                                            width: Dimensions
+                                                                .paddingSizeExtraSmall,
+                                                          ),
                                                         ],
 
                                                         Text(
                                                           PriceConverter.convertPrice(
-                                                            (itemController.cartIndex != -1 && itemController.cartIndex < Get.find<CartController>().cartList.length)
+                                                            (itemController.cartIndex !=
+                                                                        -1 &&
+                                                                    itemController
+                                                                            .cartIndex <
+                                                                        Get.find<
+                                                                              CartController
+                                                                            >()
+                                                                            .cartList
+                                                                            .length)
                                                                 ? _getItemDetailsDiscountPrice(
                                                                     cart:
                                                                         Get.find<
@@ -480,7 +536,10 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                                         ),
                                                       ),
                                                       child: Padding(
-                                                        padding: const EdgeInsets.all(1.0),
+                                                        padding:
+                                                            const EdgeInsets.all(
+                                                              1.0,
+                                                            ),
                                                         child: Row(
                                                           children: [
                                                             InkWell(
@@ -489,8 +548,12 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                                                       .isLoading
                                                                   ? null
                                                                   : () {
-                                                                      if (itemController.cartIndex != -1 && itemController.cartIndex < cartController.cartList.length) {
-                                                                        if (cartController.cartList[itemController.cartIndex].quantity! > 1) {
+                                                                      if (itemController.cartIndex !=
+                                                                              -1 &&
+                                                                          itemController.cartIndex <
+                                                                              cartController.cartList.length) {
+                                                                        if (cartController.cartList[itemController.cartIndex].quantity! >
+                                                                            1) {
                                                                           cartController.setQuantity(
                                                                             false,
                                                                             itemController.cartIndex,
@@ -499,8 +562,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                                                           );
                                                                         }
                                                                       } else {
-                                                                        if (itemController
-                                                                                .quantity! >
+                                                                        if (itemController.quantity! >
                                                                             1) {
                                                                           itemController.setQuantity(
                                                                             false,
@@ -511,10 +573,13 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                                                       }
                                                                     },
                                                               child: Padding(
-                                                                padding: EdgeInsets.symmetric(
-                                                                    horizontal:4,
-                                                                    vertical: 2,
-                                                                  ),
+                                                                padding:
+                                                                    EdgeInsets.symmetric(
+                                                                      horizontal:
+                                                                          4,
+                                                                      vertical:
+                                                                          2,
+                                                                    ),
                                                                 child: Container(
                                                                   decoration: BoxDecoration(
                                                                     color: Colors
@@ -541,11 +606,24 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                                             ),
 
                                                             Padding(
-                                                              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                                              padding:
+                                                                  const EdgeInsets.symmetric(
+                                                                    horizontal:
+                                                                        4.0,
+                                                                  ),
                                                               child: Text(
-                                                                itemController.cartIndex != -1 && itemController.cartIndex < cartController.cartList.length
-                                                                    ? cartController.cartList[itemController.cartIndex].quantity.toString()
-                                                                    : itemController.quantity.toString(),
+                                                                itemController.cartIndex !=
+                                                                            -1 &&
+                                                                        itemController.cartIndex <
+                                                                            cartController.cartList.length
+                                                                    ? cartController
+                                                                          .cartList[itemController
+                                                                              .cartIndex]
+                                                                          .quantity
+                                                                          .toString()
+                                                                    : itemController
+                                                                          .quantity
+                                                                          .toString(),
                                                                 style: robotoMedium
                                                                     .copyWith(
                                                                       fontSize:
@@ -561,7 +639,10 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                                                       .isLoading
                                                                   ? null
                                                                   : () =>
-                                                                        itemController.cartIndex != -1 && itemController.cartIndex < cartController.cartList.length
+                                                                        itemController.cartIndex !=
+                                                                                -1 &&
+                                                                            itemController.cartIndex <
+                                                                                cartController.cartList.length
                                                                         ? cartController.setQuantity(
                                                                             true,
                                                                             itemController.cartIndex,
@@ -574,10 +655,13 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                                                             item.quantityLimit,
                                                                           ),
                                                               child: Padding(
-                                                                padding: EdgeInsets.symmetric(
-                                                                  horizontal:4,
-                                                                  vertical: 2,
-                                                                ),
+                                                                padding:
+                                                                    EdgeInsets.symmetric(
+                                                                      horizontal:
+                                                                          4,
+                                                                      vertical:
+                                                                          2,
+                                                                    ),
                                                                 child: Container(
                                                                   decoration: BoxDecoration(
                                                                     color: Colors
@@ -613,7 +697,6 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                               height:
                                                   Dimensions.paddingSizeDefault,
                                             ),
-
 
                                             item.isPrescriptionRequired!
                                                 ? Container(
@@ -655,30 +738,36 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                                     ),
                                                   )
                                                 : const SizedBox(),
-                                          DottedBorder(
-                                            options:
-                                            CustomPathDottedBorderOptions(
-                                              padding: const EdgeInsets.all(10),
-                                              color: Colors.grey,
-                                              strokeWidth: 2,
-                                              dashPattern: [10, 5],
-                                              customPath: (size) => Path()
-                                                ..moveTo(0, size.height)
-                                                ..relativeLineTo(size.width, 0),
+                                            DottedBorder(
+                                              options:
+                                                  CustomPathDottedBorderOptions(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                          10,
+                                                        ),
+                                                    color: Colors.grey,
+                                                    strokeWidth: 2,
+                                                    dashPattern: [10, 5],
+                                                    customPath: (size) => Path()
+                                                      ..moveTo(0, size.height)
+                                                      ..relativeLineTo(
+                                                        size.width,
+                                                        0,
+                                                      ),
+                                                  ),
+                                              child: const SizedBox(
+                                                width: double.infinity,
+                                                height: 0,
+                                              ),
                                             ),
-                                            child: const SizedBox(
-                                              width: double.infinity,
-                                              height: 0,
-                                            ),
-                                          ),
 
                                             const SizedBox(
                                               height:
-                                              Dimensions.paddingSizeDefault,
+                                                  Dimensions.paddingSizeDefault,
                                             ),
-                                          const SizedBox(),
+                                            const SizedBox(),
 
-                                          (item.description != null &&
+                                            (item.description != null &&
                                                     item
                                                         .description!
                                                         .isNotEmpty)
@@ -697,7 +786,12 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                                       ),
                                                       Text(
                                                         item.description!,
-                                                        style: robotoRegular.copyWith(color:Theme.of(context).disabledColor),
+                                                        style: robotoRegular
+                                                            .copyWith(
+                                                              color: Theme.of(
+                                                                context,
+                                                              ).disabledColor,
+                                                            ),
                                                       ),
                                                       const SizedBox(
                                                         height: Dimensions
@@ -707,110 +801,369 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                                   )
                                                 : const SizedBox(),
 
-                                            if ((item.manufactureDate != null && item.manufactureDate!.isNotEmpty) || (item.expiryDate != null && item.expiryDate!.isNotEmpty) || (item.packageDate != null && item.packageDate!.isNotEmpty))
+                                            if ((item.manufactureDate != null &&
+                                                    item
+                                                        .manufactureDate!
+                                                        .isNotEmpty) ||
+                                                (item.expiryDate != null &&
+                                                    item
+                                                        .expiryDate!
+                                                        .isNotEmpty) ||
+                                                (item.packageDate != null &&
+                                                    item
+                                                        .packageDate!
+                                                        .isNotEmpty))
                                               Container(
                                                 width: double.infinity,
-                                                padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
-                                                margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeLarge),
+                                                padding: const EdgeInsets.all(
+                                                  Dimensions.paddingSizeDefault,
+                                                ),
+                                                margin: const EdgeInsets.only(
+                                                  bottom: Dimensions
+                                                      .paddingSizeLarge,
+                                                ),
                                                 decoration: BoxDecoration(
-                                                  color: Theme.of(context).cardColor,
-                                                  borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-                                                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))],
-                                                  border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.1)),
+                                                  color: Theme.of(
+                                                    context,
+                                                  ).cardColor,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                        Dimensions.radiusLarge,
+                                                      ),
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: Colors.black
+                                                          .withOpacity(0.05),
+                                                      blurRadius: 10,
+                                                      offset: const Offset(
+                                                        0,
+                                                        5,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                  border: Border.all(
+                                                    color: Theme.of(context)
+                                                        .primaryColor
+                                                        .withOpacity(0.1),
+                                                  ),
                                                 ),
                                                 child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
                                                   children: [
-                                                    Text('product_details'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault)),
-                                                    const SizedBox(height: Dimensions.paddingSizeSmall),
+                                                    Text(
+                                                      'product_details'.tr,
+                                                      style: robotoBold.copyWith(
+                                                        fontSize: Dimensions
+                                                            .fontSizeDefault,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(
+                                                      height: Dimensions
+                                                          .paddingSizeSmall,
+                                                    ),
                                                     Row(
                                                       children: [
-                                                        if (item.manufactureDate != null && item.manufactureDate!.isNotEmpty)
-                                                          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                                            Text('manufacture_date'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor)),
-                                                            const SizedBox(height: 4),
-                                                            Row(children: [
-                                                              Icon(Icons.date_range, size: 16, color: Theme.of(context).primaryColor),
-                                                              const SizedBox(width: 4),
-                                                              Text(item.manufactureDate!, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeSmall)),
-                                                            ]),
-                                                          ])),
-                                                        if (item.expiryDate != null && item.expiryDate!.isNotEmpty)
-                                                          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                                            Text('Expiry Date'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor)),
-                                                            const SizedBox(height: 4),
-                                                            Row(children: [
-                                                              Icon(Icons.event_available, size: 16, color: Colors.redAccent),
-                                                              const SizedBox(width: 4),
-                                                              Text(item.expiryDate!, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeSmall)),
-                                                            ]),
-                                                          ])),
+                                                        if (item.manufactureDate !=
+                                                                null &&
+                                                            item
+                                                                .manufactureDate!
+                                                                .isNotEmpty)
+                                                          Expanded(
+                                                            child: Column(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              children: [
+                                                                Text(
+                                                                  'manufacture_date'
+                                                                      .tr,
+                                                                  style: robotoMedium.copyWith(
+                                                                    fontSize:
+                                                                        Dimensions
+                                                                            .fontSizeExtraSmall,
+                                                                    color: Theme.of(
+                                                                      context,
+                                                                    ).disabledColor,
+                                                                  ),
+                                                                ),
+                                                                const SizedBox(
+                                                                  height: 4,
+                                                                ),
+                                                                Row(
+                                                                  children: [
+                                                                    Icon(
+                                                                      Icons
+                                                                          .date_range,
+                                                                      size: 16,
+                                                                      color: Theme.of(
+                                                                        context,
+                                                                      ).primaryColor,
+                                                                    ),
+                                                                    const SizedBox(
+                                                                      width: 4,
+                                                                    ),
+                                                                    Text(
+                                                                      item.manufactureDate!,
+                                                                      style: robotoBold.copyWith(
+                                                                        fontSize:
+                                                                            Dimensions.fontSizeSmall,
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        if (item.expiryDate !=
+                                                                null &&
+                                                            item
+                                                                .expiryDate!
+                                                                .isNotEmpty)
+                                                          Expanded(
+                                                            child: Column(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              children: [
+                                                                Text(
+                                                                  'Expiry Date'
+                                                                      .tr,
+                                                                  style: robotoMedium.copyWith(
+                                                                    fontSize:
+                                                                        Dimensions
+                                                                            .fontSizeExtraSmall,
+                                                                    color: Theme.of(
+                                                                      context,
+                                                                    ).disabledColor,
+                                                                  ),
+                                                                ),
+                                                                const SizedBox(
+                                                                  height: 4,
+                                                                ),
+                                                                Row(
+                                                                  children: [
+                                                                    Icon(
+                                                                      Icons
+                                                                          .event_available,
+                                                                      size: 16,
+                                                                      color: Colors
+                                                                          .redAccent,
+                                                                    ),
+                                                                    const SizedBox(
+                                                                      width: 4,
+                                                                    ),
+                                                                    Text(
+                                                                      item.expiryDate!,
+                                                                      style: robotoBold.copyWith(
+                                                                        fontSize:
+                                                                            Dimensions.fontSizeSmall,
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
                                                       ],
                                                     ),
-                                                    if (item.packageDate != null && item.packageDate!.isNotEmpty) ...[
+                                                    if (item.packageDate !=
+                                                            null &&
+                                                        item
+                                                            .packageDate!
+                                                            .isNotEmpty) ...[
                                                       const Divider(height: 20),
-                                                      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                                        Text('package_date'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor)),
-                                                        const SizedBox(height: 4),
-                                                        Row(children: [
-                                                          Icon(Icons.inventory_2_outlined, size: 16, color: Colors.orangeAccent),
-                                                          const SizedBox(width: 4),
-                                                          Text(item.packageDate!, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeSmall)),
-                                                        ]),
-                                                      ]),
+                                                      Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Text(
+                                                            'package_date'.tr,
+                                                            style: robotoMedium.copyWith(
+                                                              fontSize: Dimensions
+                                                                  .fontSizeExtraSmall,
+                                                              color: Theme.of(
+                                                                context,
+                                                              ).disabledColor,
+                                                            ),
+                                                          ),
+                                                          const SizedBox(
+                                                            height: 4,
+                                                          ),
+                                                          Row(
+                                                            children: [
+                                                              Icon(
+                                                                Icons
+                                                                    .inventory_2_outlined,
+                                                                size: 16,
+                                                                color: Colors
+                                                                    .orangeAccent,
+                                                              ),
+                                                              const SizedBox(
+                                                                width: 4,
+                                                              ),
+                                                              Text(
+                                                                item.packageDate!,
+                                                                style: robotoBold
+                                                                    .copyWith(
+                                                                      fontSize:
+                                                                          Dimensions
+                                                                              .fontSizeSmall,
+                                                                    ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ],
+                                                      ),
                                                     ],
                                                   ],
                                                 ),
                                               ),
 
-                                              GetBuilder<ReviewController>(builder: (reviewController) {
-                                                return (reviewController.itemReviewList != null && reviewController.itemReviewList!.isNotEmpty) ? Container(
-                                                  width: double.infinity,
-                                                  margin: const EdgeInsets.only(top: Dimensions.paddingSizeDefault),
-                                                  padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
-                                                  decoration: BoxDecoration(
-                                                    color: Theme.of(context).cardColor,
-                                                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                                                    boxShadow: [BoxShadow(color: Colors.grey[Get.isDarkMode ? 800 : 200]!, spreadRadius: 1, blurRadius: 5)],
-                                                  ),
-                                                  child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                    children: [
-                                                      Row(
-                                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                        children: [
-                                                          Text('reviews'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault)),
-                                                          if (item.avgRating != null && item.avgRating! > 0)
+                                            GetBuilder<ReviewController>(
+                                              builder: (reviewController) {
+                                                return (reviewController
+                                                                .itemReviewList !=
+                                                            null &&
+                                                        reviewController
+                                                            .itemReviewList!
+                                                            .isNotEmpty)
+                                                    ? Container(
+                                                        width: double.infinity,
+                                                        margin: const EdgeInsets.only(
+                                                          top: Dimensions
+                                                              .paddingSizeDefault,
+                                                        ),
+                                                        padding:
+                                                            const EdgeInsets.all(
+                                                              Dimensions
+                                                                  .paddingSizeDefault,
+                                                            ),
+                                                        decoration: BoxDecoration(
+                                                          color: Theme.of(
+                                                            context,
+                                                          ).cardColor,
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                Dimensions
+                                                                    .radiusDefault,
+                                                              ),
+                                                          boxShadow: [
+                                                            BoxShadow(
+                                                              color:
+                                                                  Colors
+                                                                      .grey[Get
+                                                                          .isDarkMode
+                                                                      ? 800
+                                                                      : 200]!,
+                                                              spreadRadius: 1,
+                                                              blurRadius: 5,
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        child: Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
                                                             Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceBetween,
                                                               children: [
-                                                                const Icon(Icons.star, color: Colors.orange, size: 16),
-                                                                const SizedBox(width: 4),
-                                                                Text(item.avgRating!.toStringAsFixed(1), style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall)),
-                                                                const SizedBox(width: 4),
-                                                                Text('(${item.ratingCount})', style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor)),
+                                                                Text(
+                                                                  'reviews'.tr,
+                                                                  style: robotoBold
+                                                                      .copyWith(
+                                                                        fontSize:
+                                                                            Dimensions.fontSizeDefault,
+                                                                      ),
+                                                                ),
+                                                                if (item.avgRating !=
+                                                                        null &&
+                                                                    item.avgRating! >
+                                                                        0)
+                                                                  Row(
+                                                                    children: [
+                                                                      const Icon(
+                                                                        Icons
+                                                                            .star,
+                                                                        color: Colors
+                                                                            .orange,
+                                                                        size:
+                                                                            16,
+                                                                      ),
+                                                                      const SizedBox(
+                                                                        width:
+                                                                            4,
+                                                                      ),
+                                                                      Text(
+                                                                        item.avgRating!
+                                                                            .toStringAsFixed(
+                                                                              1,
+                                                                            ),
+                                                                        style: robotoMedium.copyWith(
+                                                                          fontSize:
+                                                                              Dimensions.fontSizeSmall,
+                                                                        ),
+                                                                      ),
+                                                                      const SizedBox(
+                                                                        width:
+                                                                            4,
+                                                                      ),
+                                                                      Text(
+                                                                        '(${item.ratingCount})',
+                                                                        style: robotoRegular.copyWith(
+                                                                          fontSize:
+                                                                              Dimensions.fontSizeExtraSmall,
+                                                                          color: Theme.of(
+                                                                            context,
+                                                                          ).disabledColor,
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
                                                               ],
                                                             ),
-                                                        ],
-                                                      ),
-                                                      const SizedBox(height: Dimensions.paddingSizeSmall),
-                                                      ListView.builder(
-                                                        itemCount: reviewController.itemReviewList!.length,
-                                                        physics: const NeverScrollableScrollPhysics(),
-                                                        shrinkWrap: true,
-                                                        padding: EdgeInsets.zero,
-                                                        itemBuilder: (context, index) {
-                                                          return ReviewWidget(
-                                                            review: reviewController.itemReviewList![index],
-                                                            hasDivider: index != reviewController.itemReviewList!.length - 1,
-                                                            storeName: item.storeName,
-                                                            showItem: false,
-                                                          );
-                                                        },
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ) : const SizedBox();
-                                              }),
+                                                            const SizedBox(
+                                                              height: Dimensions
+                                                                  .paddingSizeSmall,
+                                                            ),
+                                                            ListView.builder(
+                                                              itemCount:
+                                                                  reviewController
+                                                                      .itemReviewList!
+                                                                      .length,
+                                                              physics:
+                                                                  const NeverScrollableScrollPhysics(),
+                                                              shrinkWrap: true,
+                                                              padding:
+                                                                  EdgeInsets
+                                                                      .zero,
+                                                              itemBuilder: (context, index) {
+                                                                return ReviewWidget(
+                                                                  review: reviewController
+                                                                      .itemReviewList![index],
+                                                                  hasDivider:
+                                                                      index !=
+                                                                      reviewController
+                                                                              .itemReviewList!
+                                                                              .length -
+                                                                          1,
+                                                                  storeName: item
+                                                                      .storeName,
+                                                                  showItem:
+                                                                      false,
+                                                                );
+                                                              },
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      )
+                                                    : const SizedBox();
+                                              },
+                                            ),
 
                                             (item.nutritionsName != null &&
                                                     item
@@ -822,22 +1175,35 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                                             .start,
                                                     children: [
                                                       DottedBorder(
-                                                        options:
-                                                        CustomPathDottedBorderOptions(
-                                                          padding: const EdgeInsets.all(10),
+                                                        options: CustomPathDottedBorderOptions(
+                                                          padding:
+                                                              const EdgeInsets.all(
+                                                                10,
+                                                              ),
                                                           color: Colors.grey,
                                                           strokeWidth: 2,
                                                           dashPattern: [10, 5],
-                                                          customPath: (size) => Path()
-                                                            ..moveTo(0, size.height)
-                                                            ..relativeLineTo(size.width, 0),
+                                                          customPath: (size) =>
+                                                              Path()
+                                                                ..moveTo(
+                                                                  0,
+                                                                  size.height,
+                                                                )
+                                                                ..relativeLineTo(
+                                                                  size.width,
+                                                                  0,
+                                                                ),
                                                         ),
                                                         child: const SizedBox(
-                                                          width: double.infinity,
+                                                          width:
+                                                              double.infinity,
                                                           height: 0,
                                                         ),
                                                       ),
-                                                      SizedBox(height: Dimensions.paddingSizeDefault,),
+                                                      SizedBox(
+                                                        height: Dimensions
+                                                            .paddingSizeDefault,
+                                                      ),
 
                                                       Text(
                                                         'nutrition_details'.tr,
@@ -941,45 +1307,56 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
 
                                 GetBuilder<CartController>(
                                   builder: (cartController) {
-                                      return Container(
-                                        width: 1170,
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: Dimensions.paddingSizeDefault,
-                                          vertical: Dimensions.paddingSizeSmall,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black.withValues(alpha: 0.1),
-                                              blurRadius: 20,
-                                              offset: const Offset(0, -5),
+                                    return Container(
+                                      width: 1170,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal:
+                                            Dimensions.paddingSizeDefault,
+                                        vertical: Dimensions.paddingSizeSmall,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withValues(
+                                              alpha: 0.1,
                                             ),
-                                          ],
-                                        ),
-                                        child: Column(children: [
-
+                                            blurRadius: 20,
+                                            offset: const Offset(0, -5),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Column(
+                                        children: [
                                           // Two-button row: Add to Cart + Go to Cart
                                           Row(
                                             children: [
                                               Expanded(
                                                 child: CustomButton(
-                                                  isLoading: cartController.isLoading,
+                                                  isLoading:
+                                                      cartController.isLoading,
                                                   buttonText:
-                                                      (Get.find<SplashController>()
+                                                      (Get.find<
+                                                                SplashController
+                                                              >()
                                                               .configModel!
                                                               .moduleConfig!
                                                               .module!
                                                               .stock! &&
                                                           stock! <= 0)
                                                       ? 'out_of_stock'.tr
-                                                      : item.availableDateStarts != null
+                                                      : item.availableDateStarts !=
+                                                            null
                                                       ? 'order_now'.tr
-                                                      : itemController.cartIndex != -1
+                                                      : itemController
+                                                                .cartIndex !=
+                                                            -1
                                                       ? 'update_in_cart'.tr
                                                       : 'add_to_cart'.tr,
                                                   onPressed:
-                                                      (!Get.find<SplashController>()
+                                                      (!Get.find<
+                                                                SplashController
+                                                              >()
                                                               .configModel!
                                                               .moduleConfig!
                                                               .module!
@@ -1000,20 +1377,27 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                                                 RouteHelper.getCheckoutRoute(
                                                                   'campaign',
                                                                 ),
-                                                                arguments: CheckoutScreen(
-                                                                  storeId: null,
-                                                                  fromCart: false,
-                                                                  cartList: [cartModel],
-                                                                ),
+                                                                arguments:
+                                                                    CheckoutScreen(
+                                                                      storeId:
+                                                                          null,
+                                                                      fromCart:
+                                                                          false,
+                                                                      cartList: [
+                                                                        cartModel,
+                                                                      ],
+                                                                    ),
                                                               );
                                                             } else {
                                                               if (cartController.existAnotherStoreItem(
-                                                                cartModel!.item!.storeId,
+                                                                cartModel!
+                                                                    .item!
+                                                                    .storeId,
                                                                 Get.find<
-                                                                                  SplashController
-                                                                                >()
-                                                                                .module ==
-                                                                            null
+                                                                              SplashController
+                                                                            >()
+                                                                            .module ==
+                                                                        null
                                                                     ? Get.find<
                                                                             SplashController
                                                                           >()
@@ -1027,7 +1411,8 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                                               )) {
                                                                 Get.dialog(
                                                                   ConfirmationDialog(
-                                                                    icon: Images.warning,
+                                                                    icon: Images
+                                                                        .warning,
                                                                     title:
                                                                         'are_you_sure_to_reset'
                                                                             .tr,
@@ -1049,15 +1434,13 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                                                         success,
                                                                       ) async {
                                                                         if (success) {
-                                                                          await cartController
-                                                                              .addToCartOnline(
-                                                                                cart!,
-                                                                              );
-                                                                          itemController
-                                                                              .setExistInCart(
-                                                                                item,
-                                                                                null,
-                                                                              );
+                                                                          await cartController.addToCartOnline(
+                                                                            cart!,
+                                                                          );
+                                                                          itemController.setExistInCart(
+                                                                            item,
+                                                                            null,
+                                                                          );
                                                                           // showCartSnackBar();
                                                                         }
                                                                       });
@@ -1070,28 +1453,28 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                                                 if (itemController
                                                                         .cartIndex ==
                                                                     -1) {
-                                                                  await cartController
-                                                                      .addToCartOnline(
-                                                                        cart!,
-                                                                      )
-                                                                      .then((success) {
-                                                                        if (success) {
-                                                                          itemController
-                                                                              .setExistInCart(
-                                                                                item,
-                                                                                null,
-                                                                              );
-                                                                          // showCartSnackBar();
-                                                                          _key.currentState!
-                                                                              .shake();
-                                                                        }
-                                                                      });
+                                                                  await cartController.addToCartOnline(cart!).then((
+                                                                    success,
+                                                                  ) {
+                                                                    if (success) {
+                                                                      itemController
+                                                                          .setExistInCart(
+                                                                            item,
+                                                                            null,
+                                                                          );
+                                                                      // showCartSnackBar();
+                                                                      _key.currentState!
+                                                                          .shake();
+                                                                    }
+                                                                  });
                                                                 } else {
                                                                   await cartController
                                                                       .updateCartOnline(
                                                                         cart!,
                                                                       )
-                                                                      .then((success) {
+                                                                      .then((
+                                                                        success,
+                                                                      ) {
                                                                         if (success) {
                                                                           // showCartSnackBar();
                                                                           _key.currentState!
@@ -1113,42 +1496,82 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                                   height: 50,
                                                   child: ElevatedButton.icon(
                                                     style: ElevatedButton.styleFrom(
-                                                      backgroundColor: Colors.white,
-                                                      foregroundColor: Theme.of(context).primaryColor,
+                                                      backgroundColor:
+                                                          Colors.white,
+                                                      foregroundColor: Theme.of(
+                                                        context,
+                                                      ).primaryColor,
                                                       side: BorderSide(
-                                                        color: Theme.of(context).primaryColor,
+                                                        color: Theme.of(
+                                                          context,
+                                                        ).primaryColor,
                                                         width: 1.5,
                                                       ),
                                                       shape: RoundedRectangleBorder(
-                                                        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              Dimensions
+                                                                  .radiusDefault,
+                                                            ),
                                                       ),
-                                                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                                                      padding:
+                                                          const EdgeInsets.symmetric(
+                                                            horizontal: 14,
+                                                          ),
                                                     ),
-                                                    onPressed: () => Navigator.pushNamed(context, RouteHelper.getCartRoute()),
-                                                    icon: Icon(Icons.shopping_cart_outlined, size: 18, color: Theme.of(context).primaryColor),
+                                                    onPressed: () =>
+                                                        Navigator.pushNamed(
+                                                          context,
+                                                          RouteHelper.getCartRoute(),
+                                                        ),
+                                                    icon: Icon(
+                                                      Icons
+                                                          .shopping_cart_outlined,
+                                                      size: 18,
+                                                      color: Theme.of(
+                                                        context,
+                                                      ).primaryColor,
+                                                    ),
                                                     label: Stack(
                                                       clipBehavior: Clip.none,
                                                       children: [
                                                         Text(
                                                           'go_to_cart'.tr,
-                                                          style: robotoBold.copyWith(
-                                                            fontSize: 13,
-                                                            color: Theme.of(context).primaryColor,
-                                                          ),
+                                                          style: robotoBold
+                                                              .copyWith(
+                                                                fontSize: 13,
+                                                                color: Theme.of(
+                                                                  context,
+                                                                ).primaryColor,
+                                                              ),
                                                         ),
-                                                        if (cc.cartList.isNotEmpty)
+                                                        if (cc
+                                                            .cartList
+                                                            .isNotEmpty)
                                                           Positioned(
                                                             top: -8,
                                                             right: -12,
                                                             child: Container(
-                                                              padding: const EdgeInsets.all(3),
+                                                              padding:
+                                                                  const EdgeInsets.all(
+                                                                    3,
+                                                                  ),
                                                               decoration: BoxDecoration(
-                                                                color: Theme.of(context).primaryColor,
-                                                                shape: BoxShape.circle,
+                                                                color: Theme.of(
+                                                                  context,
+                                                                ).primaryColor,
+                                                                shape: BoxShape
+                                                                    .circle,
                                                               ),
                                                               child: Text(
                                                                 '${cc.cartList.length}',
-                                                                style: robotoMedium.copyWith(color: Colors.white, fontSize: 9),
+                                                                style: robotoMedium
+                                                                    .copyWith(
+                                                                      color: Colors
+                                                                          .white,
+                                                                      fontSize:
+                                                                          9,
+                                                                    ),
                                                               ),
                                                             ),
                                                           ),
@@ -1160,77 +1583,195 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                             ],
                                           ),
 
-                                          if(item.isSubscription == true) ...[
-                                            const SizedBox(height: Dimensions.paddingSizeSmall),
+                                          if (item.isSubscription == true) ...[
+                                            const SizedBox(
+                                              height:
+                                                  Dimensions.paddingSizeSmall,
+                                            ),
                                             CustomButton(
-                                              isLoading: cartController.isSubscriptionLoading,
+                                              isLoading: cartController
+                                                  .isSubscriptionLoading,
                                               buttonText: 'subscribe'.tr,
                                               onPressed: () {
-                                                print("---- Subscription cart fgdfg model: ${cartModel!.toJson()}  ${cartModel!.isSubscribed}");
-                                                  CartModel subscriptionCartModel = CartModel(
-                                                    cartModel!.id, cartModel!.price, cartModel!.discountedPrice!, cartModel!.variation!, cartModel!.foodVariations!,
-                                                    cartModel!.discountAmount!, cartModel!.quantity, cartModel!.addOnIds!, cartModel!.addOns!, cartModel!.isCampaign!,
-                                                    cartModel!.stock, cartModel!.item, cartModel!.quantityLimit, isSubscribed: true,
-                                                  );
-                                                OnlineCart subscriptionOnlineCart = OnlineCart(
-                                                  cart!.cartId, cart!.itemId, cart!.itemCampaignId, cart!.price!, cart!.variant!, cart!.variation, cart!.variations,
-                                                  cart!.quantity, cart!.addOnIds!, cart!.addOns, cart!.addOnQtys!, cart!.model!, true,
-                                                  itemType: "App\\Models\\Item",
+                                                print(
+                                                  "---- Subscription cart fgdfg model: ${cartModel!.toJson()}  ${cartModel!.isSubscribed}",
                                                 );
+                                                CartModel
+                                                subscriptionCartModel =
+                                                    CartModel(
+                                                      cartModel!.id,
+                                                      cartModel!.price,
+                                                      cartModel!
+                                                          .discountedPrice!,
+                                                      cartModel!.variation!,
+                                                      cartModel!
+                                                          .foodVariations!,
+                                                      cartModel!
+                                                          .discountAmount!,
+                                                      cartModel!.quantity,
+                                                      cartModel!.addOnIds!,
+                                                      cartModel!.addOns!,
+                                                      cartModel!.isCampaign!,
+                                                      cartModel!.stock,
+                                                      cartModel!.item,
+                                                      cartModel!.quantityLimit,
+                                                      isSubscribed: true,
+                                                    );
+                                                OnlineCart
+                                                subscriptionOnlineCart =
+                                                    OnlineCart(
+                                                      cart!.cartId,
+                                                      cart!.itemId,
+                                                      cart!.itemCampaignId,
+                                                      cart!.price!,
+                                                      cart!.variant!,
+                                                      cart!.variation,
+                                                      cart!.variations,
+                                                      cart!.quantity,
+                                                      cart!.addOnIds!,
+                                                      cart!.addOns,
+                                                      cart!.addOnQtys!,
+                                                      cart!.model!,
+                                                      true,
+                                                      itemType:
+                                                          "App\\Models\\Item",
+                                                    );
 
-                                                if (cartController.existAnotherStoreItem(
-                                                  subscriptionCartModel.item!.storeId,
-                                                  Get.find<SplashController>().module == null
-                                                      ? Get.find<SplashController>().cacheModule!.id
-                                                      : Get.find<SplashController>().module!.id,
-                                                )) {
-                                                  Get.dialog(ConfirmationDialog(
-                                                    icon: Images.warning,
-                                                    title: 'are_you_sure_to_reset'.tr,
-                                                    description: Get.find<SplashController>().configModel!.moduleConfig!.module!.showRestaurantText!
-                                                        ? 'if_you_continue'.tr : 'if_you_continue_without_another_store'.tr,
-                                                    onYesPressed: () {
-                                                      Get.back();
-                                                      cartController.clearCartOnline(isSubscription: true).then((success) async {
-                                                        if (success) {
-                                                          await cartController.addToCartOnline(subscriptionOnlineCart).then((_) {
-                                                               CartModel? newItem;
-                                                               try {
-                                                                 newItem = cartController.cartList.firstWhere((e) => e.item!.id == subscriptionOnlineCart.itemId);
-                                                                 newItem.isSubscribed = true;
-                                                               } catch (e) {
-                                                                 newItem = subscriptionCartModel;
-                                                               }
+                                                if (cartController
+                                                    .existAnotherStoreItem(
+                                                      subscriptionCartModel
+                                                          .item!
+                                                          .storeId,
+                                                      Get.find<
+                                                                    SplashController
+                                                                  >()
+                                                                  .module ==
+                                                              null
+                                                          ? Get.find<
+                                                                  SplashController
+                                                                >()
+                                                                .cacheModule!
+                                                                .id
+                                                          : Get.find<
+                                                                  SplashController
+                                                                >()
+                                                                .module!
+                                                                .id,
+                                                    )) {
+                                                  Get.dialog(
+                                                    ConfirmationDialog(
+                                                      icon: Images.warning,
+                                                      title:
+                                                          'are_you_sure_to_reset'
+                                                              .tr,
+                                                      description:
+                                                          Get.find<
+                                                                SplashController
+                                                              >()
+                                                              .configModel!
+                                                              .moduleConfig!
+                                                              .module!
+                                                              .showRestaurantText!
+                                                          ? 'if_you_continue'.tr
+                                                          : 'if_you_continue_without_another_store'
+                                                                .tr,
+                                                      onYesPressed: () {
+                                                        Get.back();
+                                                        cartController.clearCartOnline(isSubscription: true).then((
+                                                          success,
+                                                        ) async {
+                                                          if (success) {
+                                                            await cartController
+                                                                .addToCartOnline(
+                                                                  subscriptionOnlineCart,
+                                                                )
+                                                                .then((_) {
+                                                                  CartModel?
+                                                                  newItem;
+                                                                  try {
+                                                                    newItem = cartController
+                                                                        .cartList
+                                                                        .firstWhere(
+                                                                          (e) =>
+                                                                              e.item!.id ==
+                                                                              subscriptionOnlineCart.itemId,
+                                                                        );
+                                                                    newItem.isSubscribed =
+                                                                        true;
+                                                                  } catch (e) {
+                                                                    newItem =
+                                                                        subscriptionCartModel;
+                                                                  }
 
-                                                               Get.toNamed(RouteHelper.getCheckoutRoute('subscribe'), arguments: CheckoutScreen(
-                                                                 storeId: null, fromCart: false, cartList: [newItem!],
-                                                               ));
-                                                          });
-                                                        }
-                                                      });
-                                                    },
-                                                  ), barrierDismissible: false);
+                                                                  Get.toNamed(
+                                                                    RouteHelper.getCheckoutRoute(
+                                                                      'subscribe',
+                                                                    ),
+                                                                    arguments: CheckoutScreen(
+                                                                      storeId:
+                                                                          null,
+                                                                      fromCart:
+                                                                          false,
+                                                                      cartList: [
+                                                                        newItem!,
+                                                                      ],
+                                                                    ),
+                                                                  );
+                                                                });
+                                                          }
+                                                        });
+                                                      },
+                                                    ),
+                                                    barrierDismissible: false,
+                                                  );
                                                 } else {
-                                                  cartController.addToCartOnline(subscriptionOnlineCart).then((_) {
-                                                       CartModel? newItem;
+                                                  cartController
+                                                      .addToCartOnline(
+                                                        subscriptionOnlineCart,
+                                                      )
+                                                      .then((_) {
+                                                        CartModel? newItem;
                                                         try {
-                                                          newItem = cartController.cartList.firstWhere((e) => e.item!.id == subscriptionOnlineCart.itemId);
-                                                          newItem.isSubscribed = true;
+                                                          newItem = cartController
+                                                              .cartList
+                                                              .firstWhere(
+                                                                (e) =>
+                                                                    e
+                                                                        .item!
+                                                                        .id ==
+                                                                    subscriptionOnlineCart
+                                                                        .itemId,
+                                                              );
+                                                          newItem.isSubscribed =
+                                                              true;
                                                         } catch (e) {
-                                                          newItem = subscriptionCartModel;
-                                                          newItem.isSubscribed = true;
+                                                          newItem =
+                                                              subscriptionCartModel;
+                                                          newItem.isSubscribed =
+                                                              true;
                                                         }
 
-                                                       Get.toNamed(RouteHelper.getCheckoutRoute('subscribe'), arguments: CheckoutScreen(
-                                                         storeId: null, fromCart: false, cartList: [newItem!],
-                                                       ));
-                                                  });
+                                                        Get.toNamed(
+                                                          RouteHelper.getCheckoutRoute(
+                                                            'subscribe',
+                                                          ),
+                                                          arguments:
+                                                              CheckoutScreen(
+                                                                storeId: null,
+                                                                fromCart: false,
+                                                                cartList: [
+                                                                  newItem!,
+                                                                ],
+                                                              ),
+                                                        );
+                                                      });
                                                 }
                                               },
                                             ),
                                           ],
-                                        ]),
-                                      );
+                                        ],
+                                      ),
+                                    );
                                   },
                                 ),
                               ],

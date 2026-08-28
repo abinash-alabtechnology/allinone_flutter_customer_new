@@ -69,10 +69,17 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   static bool _isLoading = false;
+  static bool _queuedLoad = false;
 
   static Future<void> loadData(bool reload, {bool fromModule = false}) async {
-    if (_isLoading) return;
+    if (_isLoading) {
+      if (fromModule) {
+        _queuedLoad = true;
+      }
+      return;
+    }
     _isLoading = true;
+    _queuedLoad = false;
     try {
       final splash = Get.find<SplashController>();
       final flash = Get.find<FlashSaleController>();
@@ -194,6 +201,9 @@ class HomeScreen extends StatefulWidget {
 
     } finally {
       _isLoading = false;
+      if (_queuedLoad) {
+        loadData(reload, fromModule: true);
+      }
     }
   }
 

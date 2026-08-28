@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:iconsx_plus/iconsx_plus.dart';
@@ -170,18 +170,20 @@ class ReviewItemCard extends StatelessWidget {
                                   )),
                             ),
                             SizedBox(width: 3.w,),
-                            Column(
-                              mainAxisAlignment: .start,
-                              crossAxisAlignment: .start,
-                              children: [
-                                Text("10- 20 Mins",
-                                  style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Colors.green.shade400),
-                                ),
-                                Text(item?.storeName??"",
-                                  overflow: TextOverflow.ellipsis,
-                                  style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Colors.blueGrey.shade500),
-                                ),
-                              ],
+                            Expanded(
+                              child: Column(
+                                mainAxisAlignment: .start,
+                                crossAxisAlignment: .start,
+                                children: [
+                                  Text("10- 20 Mins",
+                                    style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Colors.green.shade400),
+                                  ),
+                                  Text(item?.storeName??"",
+                                    overflow: TextOverflow.ellipsis,
+                                    style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Colors.blueGrey.shade500),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
