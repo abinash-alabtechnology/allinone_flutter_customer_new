@@ -210,8 +210,8 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
               backgroundColor: const Color(
                 0xFFFFFDFB,
               ), // Premium light cream background
-              endDrawer: const MenuDrawer(),
-              endDrawerEnableOpenDragGesture: false,
+              //endDrawer: const MenuDrawer(),
+              //endDrawerEnableOpenDragGesture: false,
               appBar: ResponsiveHelper.isDesktop(context)
                   ? const CustomAppBar(title: '')
                   : PreferredSize(

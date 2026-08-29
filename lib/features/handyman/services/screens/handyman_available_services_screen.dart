@@ -41,21 +41,19 @@ class SubCategoryModel {
   final String name;
   final List<HandymanServiceItem> services;
 
-  SubCategoryModel({
-    required this.name,
-    required this.services,
-  });
+  SubCategoryModel({required this.name, required this.services});
 }
 
 class HandymanAvailableServicesScreen extends StatefulWidget {
   const HandymanAvailableServicesScreen({super.key});
 
   @override
-  State<HandymanAvailableServicesScreen> createState() => _HandymanAvailableServicesScreenState();
+  State<HandymanAvailableServicesScreen> createState() =>
+      _HandymanAvailableServicesScreenState();
 }
 
-class _HandymanAvailableServicesScreenState extends State<HandymanAvailableServicesScreen> {
-
+class _HandymanAvailableServicesScreenState
+    extends State<HandymanAvailableServicesScreen> {
   String _activeCategoryTitle = 'Available Services';
   int? _passedCategoryId;
 
@@ -79,11 +77,20 @@ class _HandymanAvailableServicesScreenState extends State<HandymanAvailableServi
     }
 
     final categoryController = Get.find<CategoryController>();
-    if (_passedCategoryId == null && categoryController.categoryList != null && _activeCategoryTitle.isNotEmpty) {
-      final match = categoryController.categoryList!.firstWhereOrNull((c) =>
-        c.name != null && (c.name!.toLowerCase() == _activeCategoryTitle.toLowerCase() ||
-        c.name!.toLowerCase().contains(_activeCategoryTitle.toLowerCase()) ||
-        _activeCategoryTitle.toLowerCase().contains(c.name!.toLowerCase())));
+    if (_passedCategoryId == null &&
+        categoryController.categoryList != null &&
+        _activeCategoryTitle.isNotEmpty) {
+      final match = categoryController.categoryList!.firstWhereOrNull(
+        (c) =>
+            c.name != null &&
+            (c.name!.toLowerCase() == _activeCategoryTitle.toLowerCase() ||
+                c.name!.toLowerCase().contains(
+                  _activeCategoryTitle.toLowerCase(),
+                ) ||
+                _activeCategoryTitle.toLowerCase().contains(
+                  c.name!.toLowerCase(),
+                )),
+      );
       if (match != null && match.id != null) {
         _passedCategoryId = match.id;
       }
@@ -91,7 +98,10 @@ class _HandymanAvailableServicesScreenState extends State<HandymanAvailableServi
 
     if (_passedCategoryId != null) {
       categoryController.fetchItemsForCategory(
-        _passedCategoryId.toString(), 1, 'all', true,
+        _passedCategoryId.toString(),
+        1,
+        'all',
+        true,
       );
     }
   }
@@ -99,7 +109,12 @@ class _HandymanAvailableServicesScreenState extends State<HandymanAvailableServi
   Future<void> _onRefresh() async {
     final catIdStr = _passedCategoryId?.toString();
     if (catIdStr != null) {
-      await Get.find<CategoryController>().fetchItemsForCategory(catIdStr, 1, 'all', true);
+      await Get.find<CategoryController>().fetchItemsForCategory(
+        catIdStr,
+        1,
+        'all',
+        true,
+      );
     } else {
       await Get.find<CategoryController>().getCategoryList(true);
     }
@@ -128,31 +143,46 @@ class _HandymanAvailableServicesScreenState extends State<HandymanAvailableServi
                     Container(
                       width: 140.w,
                       height: 16.h,
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4.r)),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4.r),
+                      ),
                     ),
                     Gap(8.h),
                     Container(
                       width: 80.w,
                       height: 12.h,
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4.r)),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4.r),
+                      ),
                     ),
                     Gap(8.h),
                     Container(
                       width: 60.w,
                       height: 14.h,
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4.r)),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4.r),
+                      ),
                     ),
                     Gap(12.h),
                     Container(
                       width: 180.w,
                       height: 10.h,
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4.r)),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4.r),
+                      ),
                     ),
                     Gap(4.h),
                     Container(
                       width: 120.w,
                       height: 10.h,
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4.r)),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4.r),
+                      ),
                     ),
                   ],
                 ),
@@ -203,7 +233,10 @@ class _HandymanAvailableServicesScreenState extends State<HandymanAvailableServi
                 icon: Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    const Icon(Icons.shopping_cart_outlined, color: Colors.white),
+                    const Icon(
+                      Icons.shopping_cart_outlined,
+                      color: Colors.white,
+                    ),
                     if (qty > 0)
                       Positioned(
                         top: -6,
@@ -213,7 +246,10 @@ class _HandymanAvailableServicesScreenState extends State<HandymanAvailableServi
                           decoration: BoxDecoration(
                             color: Colors.red,
                             shape: BoxShape.circle,
-                            border: Border.all(color: const Color(0xFF6C63FF), width: 1.5),
+                            border: Border.all(
+                              color: const Color(0xFF6C63FF),
+                              width: 1.5,
+                            ),
                           ),
                           constraints: BoxConstraints(
                             minWidth: 16.w,
@@ -232,7 +268,9 @@ class _HandymanAvailableServicesScreenState extends State<HandymanAvailableServi
                       ),
                   ],
                 ),
-                onPressed: () => Get.to(() => HandymanCartScreen(onBackToHome: () => Get.back())),
+                onPressed: () => Get.to(
+                  () => HandymanCartScreen(onBackToHome: () => Get.back()),
+                ),
               );
             }),
           ),
@@ -241,84 +279,104 @@ class _HandymanAvailableServicesScreenState extends State<HandymanAvailableServi
       body: RefreshIndicator(
         onRefresh: _onRefresh,
         color: const Color(0xFF6C63FF),
-        child: GetBuilder<CategoryController>(builder: (categoryController) {
-          final catIdStr = _passedCategoryId?.toString();
-          final apiItems = catIdStr != null ? categoryController.itemsByCategory[catIdStr] : null;
-          final bool isCatLoading = catIdStr != null ? categoryController.isLoadingForCategory(catIdStr) : false;
+        child: GetBuilder<CategoryController>(
+          builder: (categoryController) {
+            final catIdStr = _passedCategoryId?.toString();
+            final apiItems = catIdStr != null
+                ? categoryController.itemsByCategory[catIdStr]
+                : null;
+            final bool isCatLoading = catIdStr != null
+                ? categoryController.isLoadingForCategory(catIdStr)
+                : false;
 
-          if (catIdStr != null && (apiItems == null || isCatLoading || categoryController.isLoading || categoryController.isLoadingCategories)) {
-            return _buildShimmerLoading();
-          }
+            if (catIdStr != null &&
+                (apiItems == null ||
+                    isCatLoading ||
+                    categoryController.isLoading ||
+                    categoryController.isLoadingCategories)) {
+              return _buildShimmerLoading();
+            }
 
-          List<HandymanServiceItem> effectiveServices = [];
-          if (apiItems != null && apiItems.isNotEmpty) {
-            effectiveServices = apiItems.map((item) {
-              return HandymanServiceItem(
-                id: item.id.toString(),
-                title: item.name ?? '',
-                rating: item.avgRating ?? 4.8,
-                reviews: item.ratingCount != null ? item.ratingCount.toString() : '100+',
-                price: item.price?.toInt() ?? 0,
-                optionsCount: item.choiceOptions?.length ?? 1,
-                imageAsset: item.imageFullUrl ?? '',
-                description: item.description ?? '',
-              );
-            }).toList();
-          } else if (!isCatLoading) {
-            final homeController = Get.find<HandymanHomeController>();
-            final sectionMatch = homeController.categorySections.firstWhereOrNull((sec) =>
-                (_passedCategoryId != null && sec.categoryId == _passedCategoryId) ||
-                sec.title.toLowerCase().contains(_activeCategoryTitle.toLowerCase()) ||
-                _activeCategoryTitle.toLowerCase().contains(sec.title.toLowerCase()));
-
-            if (sectionMatch != null && sectionMatch.services.isNotEmpty) {
-              effectiveServices = sectionMatch.services.map((item) {
+            List<HandymanServiceItem> effectiveServices = [];
+            if (apiItems != null && apiItems.isNotEmpty) {
+              effectiveServices = apiItems.map((item) {
                 return HandymanServiceItem(
-                  id: item.id,
-                  title: item.name,
-                  rating: item.rating,
-                  reviews: item.reviewCount,
-                  price: item.startingPrice,
-                  optionsCount: item.optionsCount,
-                  imageAsset: item.imageUrl ?? item.imageAsset,
-                  description: item.coverDescription ?? item.name,
+                  id: item.id.toString(),
+                  title: item.name ?? '',
+                  rating: item.avgRating ?? 4.8,
+                  reviews: item.ratingCount != null
+                      ? item.ratingCount.toString()
+                      : '100+',
+                  price: item.price?.toInt() ?? 0,
+                  optionsCount: item.choiceOptions?.length ?? 1,
+                  imageAsset: item.imageFullUrl ?? '',
+                  description: item.description ?? '',
                 );
               }).toList();
-            }
-          }
+            } else if (!isCatLoading) {
+              final homeController = Get.find<HandymanHomeController>();
+              final sectionMatch = homeController.categorySections
+                  .firstWhereOrNull(
+                    (sec) =>
+                        (_passedCategoryId != null &&
+                            sec.categoryId == _passedCategoryId) ||
+                        sec.title.toLowerCase().contains(
+                          _activeCategoryTitle.toLowerCase(),
+                        ) ||
+                        _activeCategoryTitle.toLowerCase().contains(
+                          sec.title.toLowerCase(),
+                        ),
+                  );
 
-          if (effectiveServices.isEmpty) {
-            return SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: SizedBox(
-                height: MediaQuery.of(context).size.height * 0.7,
-                child: Center(
-                  child: Text(
-                    'No services available under this category.',
-                    style: robotoRegular.copyWith(color: Colors.grey),
+              if (sectionMatch != null && sectionMatch.services.isNotEmpty) {
+                effectiveServices = sectionMatch.services.map((item) {
+                  return HandymanServiceItem(
+                    id: item.id,
+                    title: item.name,
+                    rating: item.rating,
+                    reviews: item.reviewCount,
+                    price: item.startingPrice,
+                    optionsCount: item.optionsCount,
+                    imageAsset: item.imageUrl ?? item.imageAsset,
+                    description: item.coverDescription ?? item.name,
+                  );
+                }).toList();
+              }
+            }
+
+            if (effectiveServices.isEmpty) {
+              return SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.7,
+                  child: Center(
+                    child: Text(
+                      'No services available under this category.',
+                      style: robotoRegular.copyWith(color: Colors.grey),
+                    ),
                   ),
                 ),
-              ),
-            );
-          }
+              );
+            }
 
-          return ListView.separated(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-            itemCount: effectiveServices.length,
-            physics: const AlwaysScrollableScrollPhysics(),
-            separatorBuilder: (context, index) => Padding(
-              padding: EdgeInsets.symmetric(vertical: 16.h),
-              child: const Divider(height: 1, color: Color(0xFFE5E7EB)),
-            ),
-          itemBuilder: (context, index) {
-            final service = effectiveServices[index];
+            return ListView.separated(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+              itemCount: effectiveServices.length,
+              physics: const AlwaysScrollableScrollPhysics(),
+              separatorBuilder: (context, index) => Padding(
+                padding: EdgeInsets.symmetric(vertical: 16.h),
+                child: const Divider(height: 1, color: Color(0xFFE5E7EB)),
+              ),
+              itemBuilder: (context, index) {
+                final service = effectiveServices[index];
                 final homeController = Get.find<HandymanHomeController>();
 
                 void openBottomSheet() {
                   final homeController = Get.find<HandymanHomeController>();
                   HandymanServiceModel? match;
                   for (var s in homeController.mostBookedServices) {
-                    if (service.id.contains(s.id) || s.id.contains(service.id)) {
+                    if (service.id.contains(s.id) ||
+                        s.id.contains(service.id)) {
                       match = s;
                       break;
                     }
@@ -326,9 +384,14 @@ class _HandymanAvailableServicesScreenState extends State<HandymanAvailableServi
                   if (match == null) {
                     for (var section in homeController.categorySections) {
                       for (var s in section.services) {
-                        if (service.id.contains(s.id) || s.id.contains(service.id) ||
-                            service.title.toLowerCase().contains(s.name.toLowerCase()) ||
-                            s.name.toLowerCase().contains(service.title.toLowerCase())) {
+                        if (service.id.contains(s.id) ||
+                            s.id.contains(service.id) ||
+                            service.title.toLowerCase().contains(
+                              s.name.toLowerCase(),
+                            ) ||
+                            s.name.toLowerCase().contains(
+                              service.title.toLowerCase(),
+                            )) {
                           match = s;
                           break;
                         }
@@ -356,203 +419,229 @@ class _HandymanAvailableServicesScreenState extends State<HandymanAvailableServi
                   onTap: openBottomSheet,
                   behavior: HitTestBehavior.opaque,
                   child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Left details side
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Title
-                          Text(
-                            service.title,
-                            style: GoogleFonts.inter(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF1F2937),
-                            ),
-                          ),
-                          const Gap(4),
-
-                          // Rating
-                          Row(
-                            children: [
-                              Icon(Icons.star, color: Colors.amber, size: 14.sp),
-                              const Gap(4),
-                              Text(
-                                '${service.rating.toStringAsFixed(2)} (${service.reviews} reviews)',
-                                style: robotoRegular.copyWith(
-                                  fontSize: 11.5.sp,
-                                  color: Colors.grey.shade600,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Left details side
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Title
+                            Text(
+                              service.title,
+                              style: GoogleFonts.inter(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF1F2937),
                               ),
-                            ],
-                          ),
-                          const Gap(6),
-
-                          // Price
-                          Text(
-                            '₹${_formatPrice(service.price)}',
-                            style: GoogleFonts.inter(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF1F2937),
                             ),
-                          ),
-                          const Gap(8),
+                            const Gap(4),
 
-                          // Dotted Divider
-                          SizedBox(
-                            height: 1.h,
-                            child: LayoutBuilder(
-                              builder: (context, constraints) {
-                                return Flex(
-                                  direction: Axis.horizontal,
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: List.generate(
-                                    (constraints.constrainWidth() / 5).floor(),
-                                    (index) => SizedBox(
-                                      width: 2.w,
-                                      height: 1.h,
-                                      child: DecoratedBox(
-                                        decoration: BoxDecoration(color: Colors.grey.shade300),
-                                      ),
-                                    ),
+                            // Rating
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.star,
+                                  color: Colors.amber,
+                                  size: 14.sp,
+                                ),
+                                const Gap(4),
+                                Text(
+                                  '${service.rating.toStringAsFixed(2)} (${service.reviews} reviews)',
+                                  style: robotoRegular.copyWith(
+                                    fontSize: 11.5.sp,
+                                    color: Colors.grey.shade600,
+                                    fontWeight: FontWeight.w500,
                                   ),
-                                );
-                              },
+                                ),
+                              ],
                             ),
-                          ),
-                          const Gap(8),
+                            const Gap(6),
 
-                          // Description as bullet points
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: service.description
-                                .split('.')
-                                .where((s) => s.trim().isNotEmpty)
-                                .map((bullet) {
-                              return Padding(
-                                padding: EdgeInsets.only(bottom: 4.h),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('• ', style: TextStyle(color: Colors.grey.shade500, fontSize: 12.sp)),
-                                    Expanded(
-                                      child: Text(
-                                        bullet.trim(),
-                                        style: robotoRegular.copyWith(
-                                          fontSize: 11.5.sp,
-                                          color: Colors.grey.shade600,
+                            // Price
+                            Text(
+                              '₹${_formatPrice(service.price)}',
+                              style: GoogleFonts.inter(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF1F2937),
+                              ),
+                            ),
+                            const Gap(8),
+
+                            // Dotted Divider
+                            SizedBox(
+                              height: 1.h,
+                              child: LayoutBuilder(
+                                builder: (context, constraints) {
+                                  return Flex(
+                                    direction: Axis.horizontal,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: List.generate(
+                                      (constraints.constrainWidth() / 5)
+                                          .floor(),
+                                      (index) => SizedBox(
+                                        width: 2.w,
+                                        height: 1.h,
+                                        child: DecoratedBox(
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey.shade300,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                          const Gap(12),
-
-                          // View details
-                          GestureDetector(
-                            onTap: openBottomSheet,
-                            child: Text(
-                              'View details',
-                              style: GoogleFonts.inter(
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF6C63FF),
+                                  );
+                                },
                               ),
                             ),
+                            const Gap(8),
+
+                            // Description as bullet points
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: service.description
+                                  .split('.')
+                                  .where((s) => s.trim().isNotEmpty)
+                                  .map((bullet) {
+                                    return Padding(
+                                      padding: EdgeInsets.only(bottom: 4.h),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            '• ',
+                                            style: TextStyle(
+                                              color: Colors.grey.shade500,
+                                              fontSize: 12.sp,
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: Text(
+                                              bullet.trim(),
+                                              style: robotoRegular.copyWith(
+                                                fontSize: 11.5.sp,
+                                                color: Colors.grey.shade600,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  })
+                                  .toList(),
+                            ),
+                            const Gap(12),
+
+                            // View details
+                            GestureDetector(
+                              onTap: openBottomSheet,
+                              child: Text(
+                                'View details',
+                                style: GoogleFonts.inter(
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF6C63FF),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Gap(16),
+
+                      // Right image and Add Button side
+                      Stack(
+                        clipBehavior: Clip.none,
+                        alignment: Alignment.bottomCenter,
+                        children: [
+                          Container(
+                            margin: EdgeInsets.only(bottom: 12.h),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12.r),
+                              child: (service.imageAsset.startsWith('http'))
+                                  ? CustomImage(
+                                      image: service.imageAsset,
+                                      width: 115.w,
+                                      height: 115.h,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Image.asset(
+                                      service.imageAsset,
+                                      width: 115.w,
+                                      height: 115.h,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, err, stack) =>
+                                          Container(
+                                            width: 115.w,
+                                            height: 115.h,
+                                            color: Colors.grey.shade100,
+                                            child: const Icon(
+                                              Icons.construction,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                    ),
+                            ),
+                          ),
+                          // Heart Icon overlay
+                          Positioned(
+                            top: 4,
+                            right: 4,
+                            child: Obx(() {
+                              final wishlisted =
+                                  homeController
+                                      .allServices[service.id]
+                                      ?.isWishlisted ??
+                                  false;
+                              return GestureDetector(
+                                onTap: () =>
+                                    homeController.toggleWishlist(service.id),
+                                child: AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 200),
+                                  child: Container(
+                                    key: ValueKey(wishlisted),
+                                    width: 28.w,
+                                    height: 28.h,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.92),
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.12),
+                                          blurRadius: 4,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Icon(
+                                      wishlisted
+                                          ? Icons.favorite_rounded
+                                          : Icons.favorite_border_rounded,
+                                      color: wishlisted
+                                          ? const Color(0xFFEF4444)
+                                          : const Color(0xFF9CA3AF),
+                                      size: 15.sp,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }),
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            child: _buildAddButton(service),
                           ),
                         ],
                       ),
-                    ),
-                    const Gap(16),
-
-                    // Right image and Add Button side
-                    Stack(
-                      clipBehavior: Clip.none,
-                      alignment: Alignment.bottomCenter,
-                      children: [
-                        Container(
-                          margin: EdgeInsets.only(bottom: 12.h),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12.r),
-                            child: (service.imageAsset.startsWith('http'))
-                                ? CustomImage(
-                                    image: service.imageAsset,
-                                    width: 115.w,
-                                    height: 115.h,
-                                    fit: BoxFit.cover,
-                                  )
-                                : Image.asset(
-                                    service.imageAsset,
-                                    width: 115.w,
-                                    height: 115.h,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, err, stack) => Container(
-                                      width: 115.w,
-                                      height: 115.h,
-                                      color: Colors.grey.shade100,
-                                      child: const Icon(Icons.construction, color: Colors.grey),
-                                    ),
-                                  ),
-                          ),
-                        ),
-                        // Heart Icon overlay
-                        Positioned(
-                          top: 4,
-                          right: 4,
-                          child: Obx(() {
-                            final wishlisted = homeController.allServices[service.id]?.isWishlisted ?? false;
-                            return GestureDetector(
-                              onTap: () => homeController.toggleWishlist(service.id),
-                              child: AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 200),
-                                child: Container(
-                                  key: ValueKey(wishlisted),
-                                  width: 28.w,
-                                  height: 28.h,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.92),
-                                    shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.12),
-                                        blurRadius: 4,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Icon(
-                                    wishlisted
-                                        ? Icons.favorite_rounded
-                                        : Icons.favorite_border_rounded,
-                                    color: wishlisted
-                                        ? const Color(0xFFEF4444)
-                                        : const Color(0xFF9CA3AF),
-                                    size: 15.sp,
-                                  ),
-                                ),
-                              ),
-                            );
-                          }),
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          child: _buildAddButton(service),
-                        ),
-                      ],
-                    ),
-                  ],
+                    ],
                   ),
                 );
               },
             );
-        }),
+          },
+        ),
       ),
     );
   }

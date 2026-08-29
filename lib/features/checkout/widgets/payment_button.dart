@@ -24,7 +24,9 @@ class PaymentButton extends StatelessWidget {
                 borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
                 boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5, spreadRadius: 1)],
               ),
-              child: ListTile(
+              child: Material(
+                color: Colors.transparent,
+                child: ListTile(
                 contentPadding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraSmall),
                 leading: Image.asset(
                   icon, width: 30, height: 30,
@@ -39,6 +41,7 @@ class PaymentButton extends StatelessWidget {
                   style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor),
                   maxLines: 1, overflow: TextOverflow.ellipsis,
                 ),
+              ),
               ),
             ),
 

@@ -67,15 +67,18 @@ class CheckoutScreen extends StatefulWidget {
   final bool fromCart;
   final int? storeId;
 
-  const CheckoutScreen(
-      {super.key, required this.fromCart, required this.cartList, required this.storeId});
+  const CheckoutScreen({
+    super.key,
+    required this.fromCart,
+    required this.cartList,
+    required this.storeId,
+  });
 
   @override
   CheckoutScreenState createState() => CheckoutScreenState();
 }
 
 class CheckoutScreenState extends State<CheckoutScreen> {
-
   final ScrollController _scrollController = ScrollController();
   final JustTheController tooltipController1 = JustTheController();
   final JustTheController tooltipController2 = JustTheController();
@@ -94,11 +97,14 @@ class CheckoutScreenState extends State<CheckoutScreen> {
   double badWeatherChargeForToolTip = 0;
   double extraChargeForToolTip = 0;
 
-  final TextEditingController guestContactPersonNameController = TextEditingController();
-  final TextEditingController guestContactPersonNumberController = TextEditingController();
+  final TextEditingController guestContactPersonNameController =
+      TextEditingController();
+  final TextEditingController guestContactPersonNumberController =
+      TextEditingController();
   final TextEditingController guestEmailController = TextEditingController();
   final TextEditingController guestPasswordController = TextEditingController();
-  final TextEditingController guestConfirmPasswordController = TextEditingController();
+  final TextEditingController guestConfirmPasswordController =
+      TextEditingController();
   final FocusNode guestNumberNode = FocusNode();
   final FocusNode guestEmailNode = FocusNode();
   final FocusNode guestPasswordNode = FocusNode();
@@ -111,22 +117,18 @@ class CheckoutScreenState extends State<CheckoutScreen> {
   @override
   void initState() {
     super.initState();
-    String? razorpayKey = Get
-        .find<SplashController>()
-        .configModel
-        ?.nativerazor
-        ?.apiKey
-        .trim() ?? '';
-    String? razorpaySecret = Get
-        .find<SplashController>()
-        .configModel
-        ?.nativerazor
-        ?.apiSecret
-        .trim() ?? '';
+    String? razorpayKey =
+        Get.find<SplashController>().configModel?.nativerazor?.apiKey.trim() ??
+        '';
+    String? razorpaySecret =
+        Get.find<SplashController>().configModel?.nativerazor?.apiSecret
+            .trim() ??
+        '';
     _performInit();
   }
 
   Future<void> _performInit() async {
+    Get.find<CheckoutController>().clearPrevData();
     await cartinitCall();
     await initCall();
   }
@@ -134,39 +136,37 @@ class CheckoutScreenState extends State<CheckoutScreen> {
   ///cart Init Call
 
   Future<void> cartinitCall() async {
-    if (Get
-        .find<CartController>()
-        .cartList
-        .isEmpty) {
+    if (Get.find<CartController>().cartList.isEmpty) {
       await Get.find<CartController>().getCartDataOnline();
     }
-    if (Get
-        .find<CartController>()
-        .cartList
-        .isNotEmpty) {
+    if (Get.find<CartController>().cartList.isNotEmpty) {
       if (kDebugMode) {
-        print('----cart item : ${Get
-            .find<CartController>()
-            .cartList[0].toJson()}');
+        print(
+          '----cart item : ${Get.find<CartController>().cartList[0].toJson()}',
+        );
       }
 
-      if (Get
-          .find<CartController>()
-          .addCutlery) {
+      if (Get.find<CartController>().addCutlery) {
         Get.find<CartController>().updateCutlery(willUpdate: false);
       }
-      if (Get
-          .find<CartController>()
-          .needExtraPackage) {
+      if (Get.find<CartController>().needExtraPackage) {
         Get.find<CartController>().toggleExtraPackage(willUpdate: false);
       }
       Get.find<CartController>().setAvailableIndex(-1, willUpdate: false);
-      if (Get.find<CartController>().cartList[0].item != null && Get.find<CartController>().cartList[0].item!.storeId != null) {
-        await Get.find<StoreController>().getCartStoreSuggestedItemList(Get.find<CartController>().cartList[0].item!.storeId);
+      if (Get.find<CartController>().cartList[0].item != null &&
+          Get.find<CartController>().cartList[0].item!.storeId != null) {
+        await Get.find<StoreController>().getCartStoreSuggestedItemList(
+          Get.find<CartController>().cartList[0].item!.storeId,
+        );
       }
-      await Get.find<StoreController>().getStoreDetails(Store(id: Get
-          .find<CartController>()
-          .cartList[0].item!.storeId, name: null), false, fromCart: true);
+      await Get.find<StoreController>().getStoreDetails(
+        Store(
+          id: Get.find<CartController>().cartList[0].item!.storeId,
+          name: null,
+        ),
+        false,
+        fromCart: true,
+      );
       Get.find<CartController>().calculationCart();
       showReferAndEarnSnackBar();
     }
@@ -174,12 +174,8 @@ class CheckoutScreenState extends State<CheckoutScreen> {
 
   Future<void> showReferAndEarnSnackBar() async {
     String text = 'your_referral_discount_added_on_your_first_order'.tr;
-    if (Get
-        .find<ProfileController>()
-        .userInfoModel != null && Get
-        .find<ProfileController>()
-        .userInfoModel!
-        .isValidForDiscount!) {
+    if (Get.find<ProfileController>().userInfoModel != null &&
+        Get.find<ProfileController>().userInfoModel!.isValidForDiscount!) {
       showCustomSnackBar(text, isError: false);
     }
   }
@@ -193,10 +189,12 @@ class CheckoutScreenState extends State<CheckoutScreen> {
 
     List<AddressModel>? neaddress = Get.find<AddressController>().addressList;
     if (neaddress != null && neaddress.isNotEmpty) {
-      final CheckoutController checkoutController = Get.find<CheckoutController>();
+      final CheckoutController checkoutController =
+          Get.find<CheckoutController>();
       checkoutController.setAddressIndex(0);
 
-      checkoutController.streetNumberController.text = neaddress[0].streetNumber ?? '';
+      checkoutController.streetNumberController.text =
+          neaddress[0].streetNumber ?? '';
       checkoutController.houseController.text = neaddress[0].house ?? '';
       checkoutController.floorController.text = neaddress[0].floor ?? '';
       checkoutController.cityController.text = neaddress[0].city ?? '';
@@ -205,94 +203,76 @@ class CheckoutScreenState extends State<CheckoutScreen> {
       checkoutController.pincodeController.text = neaddress[0].pincode ?? '';
 
       final store = Get.find<StoreController>().store;
-      if (store != null && neaddress[0].latitude != null && neaddress[0].longitude != null) {
+      if (store != null &&
+          neaddress[0].latitude != null &&
+          neaddress[0].longitude != null) {
         checkoutController.getDistanceInKM(
-          LatLng(double.parse(neaddress[0].latitude!), double.parse(neaddress[0].longitude!)),
+          LatLng(
+            double.parse(neaddress[0].latitude!),
+            double.parse(neaddress[0].longitude!),
+          ),
           LatLng(double.parse(store.latitude!), double.parse(store.longitude!)),
         );
       }
       if (store != null && neaddress[0].id != null) {
-        checkoutController.checkAddressDelivery(neaddress[0].id!, store.id!, notify: false);
+        checkoutController.checkAddressDelivery(
+          neaddress[0].id!,
+          store.id!,
+          notify: false,
+        );
       } else if (widget.storeId != null && neaddress[0].id != null) {
-        checkoutController.checkAddressDelivery(neaddress[0].id!, widget.storeId!, notify: false);
+        checkoutController.checkAddressDelivery(
+          neaddress[0].id!,
+          widget.storeId!,
+          notify: false,
+        );
       }
     }
 
-
     final prefs = await SharedPreferences.getInstance();
 
-    Get
-        .find<CheckoutController>()
-        .streetNumberController
-        .text =
-        AddressHelper.getUserAddressFromSharedPref()!.streetNumber?? '';
+    Get.find<CheckoutController>().streetNumberController.text =
+        AddressHelper.getUserAddressFromSharedPref()!.streetNumber ?? '';
 
-    Get
-        .find<CheckoutController>()
-        .cityController
-        .text =
-        AddressHelper.getUserAddressFromSharedPref()!.city?? '';
-    Get
-        .find<CheckoutController>()
-        .stateController
-        .text =
-        AddressHelper.getUserAddressFromSharedPref()!.state?? '';
-    Get
-        .find<CheckoutController>()
-        .countryController
-        .text =
-        AddressHelper.getUserAddressFromSharedPref()!.country?? '';
-    Get
-        .find<CheckoutController>()
-        .pincodeController
-        .text =
-        AddressHelper.getUserAddressFromSharedPref()!.pincode?? '';
+    Get.find<CheckoutController>().cityController.text =
+        AddressHelper.getUserAddressFromSharedPref()!.city ?? '';
+    Get.find<CheckoutController>().stateController.text =
+        AddressHelper.getUserAddressFromSharedPref()!.state ?? '';
+    Get.find<CheckoutController>().countryController.text =
+        AddressHelper.getUserAddressFromSharedPref()!.country ?? '';
+    Get.find<CheckoutController>().pincodeController.text =
+        AddressHelper.getUserAddressFromSharedPref()!.pincode ?? '';
 
+    Get.find<CheckoutController>().houseController.text =
+        AddressHelper.getUserAddressFromSharedPref()!.house ?? '';
+    Get.find<CheckoutController>().floorController.text =
+        AddressHelper.getUserAddressFromSharedPref()!.floor ?? '';
+    Get.find<CheckoutController>().couponController.text = '';
 
-    Get
-        .find<CheckoutController>()
-        .houseController
-        .text = AddressHelper.getUserAddressFromSharedPref()!.house ?? '';
-    Get
-        .find<CheckoutController>()
-        .floorController
-        .text = AddressHelper.getUserAddressFromSharedPref()!.floor ?? '';
-    Get
-        .find<CheckoutController>()
-        .couponController
-        .text = '';
-
-    Get.find<CheckoutController>().clearPrevData();
     Get.find<CheckoutController>().getDmTipMostTapped();
     Get.find<CheckoutController>().setPreferenceTimeForView(
-        '', isUpdate: false);
+      '',
+      isUpdate: false,
+    );
 
     Get.find<CheckoutController>().getOfflineMethodList();
 
-    if (Get
-        .find<CheckoutController>()
-        .isCreateAccount) {
+    if (Get.find<CheckoutController>().isCreateAccount) {
       Get.find<CheckoutController>().toggleCreateAccount(willUpdate: false);
     }
 
-    if (Get
-        .find<CheckoutController>()
-        .isPartialPay) {
+    if (Get.find<CheckoutController>().isPartialPay) {
       Get.find<CheckoutController>().changePartialPayment(isUpdate: false);
     }
 
     if (isLoggedIn) {
-      if (Get
-          .find<ProfileController>()
-          .userInfoModel == null) {
+      if (Get.find<ProfileController>().userInfoModel == null) {
         Get.find<ProfileController>().getUserInfo();
       }
 
       Get.find<CouponController>().getCouponList();
 
-      if (Get
-          .find<AddressController>()
-          .addressList == null) {
+      if (Get.find<AddressController>().addressList == null) {
         Get.find<AddressController>().getAddressList();
       }
     }
@@ -302,65 +282,76 @@ class CheckoutScreenState extends State<CheckoutScreen> {
       if (GetPlatform.isWeb) {
         await Get.find<CartController>().getCartDataOnline();
       }
-      widget.fromCart ? _cartList!.addAll(Get
-          .find<CartController>()
-          .cartList) : _cartList!.addAll(widget.cartList!);
+      widget.fromCart
+          ? _cartList!.addAll(Get.find<CartController>().cartList)
+          : _cartList!.addAll(widget.cartList!);
       if (_cartList != null && _cartList!.isNotEmpty) {
-        await Get.find<CheckoutController>().initCheckoutData(_cartList![0]!.item!.storeId);
-        AddressModel? userAddress = AddressHelper.getUserAddressFromSharedPref();
+        await Get.find<CheckoutController>().initCheckoutData(
+          _cartList![0]!.item!.storeId,
+        );
+        AddressModel? userAddress =
+            AddressHelper.getUserAddressFromSharedPref();
         if (userAddress != null && userAddress.id != null) {
-          Get.find<CheckoutController>().checkAddressDelivery(userAddress.id!, _cartList![0]!.item!.storeId!);
+          Get.find<CheckoutController>().checkAddressDelivery(
+            userAddress.id!,
+            _cartList![0]!.item!.storeId!,
+          );
         }
-        Get.find<StoreController>().getCartStoreSuggestedItemList(_cartList![0]!.item!.storeId);
+        Get.find<StoreController>().getCartStoreSuggestedItemList(
+          _cartList![0]!.item!.storeId,
+        );
       }
     }
     if (widget.storeId != null) {
       await Get.find<CheckoutController>().initCheckoutData(widget.storeId);
       AddressModel? address = AddressHelper.getUserAddressFromSharedPref();
       if (address != null && address.id != null) {
-        Get.find<CheckoutController>().checkAddressDelivery(address.id!, widget.storeId!);
+        Get.find<CheckoutController>().checkAddressDelivery(
+          address.id!,
+          widget.storeId!,
+        );
       }
       Get.find<StoreController>().getCartStoreSuggestedItemList(widget.storeId);
       Get.find<CouponController>().removeCouponData(false);
     }
     Get.find<CheckoutController>().pickPrescriptionImage(
-        isRemove: true, isCamera: false);
-    _isWalletActive = Get
-        .find<SplashController>()
-        .configModel!
-        .customerWalletStatus == 1;
+      isRemove: true,
+      isCamera: false,
+    );
+    _isWalletActive =
+        Get.find<SplashController>().configModel!.customerWalletStatus == 1;
     Get.find<CheckoutController>().updateTips(
-      Get
-          .find<CheckoutController>()
-          .getSharedPrefDmTipIndex()
-          .isNotEmpty ? int.parse(
-          Get.find<CheckoutController>().getSharedPrefDmTipIndex()) : 0,
+      Get.find<CheckoutController>().getSharedPrefDmTipIndex().isNotEmpty
+          ? int.parse(Get.find<CheckoutController>().getSharedPrefDmTipIndex())
+          : 0,
       notify: false,
     );
-    Get
-        .find<CheckoutController>()
-        .tipController
-        .text = Get
-        .find<CheckoutController>()
-        .selectedTips != -1 ? AppConstants.tips[Get
-        .find<CheckoutController>()
-        .selectedTips] : '';
+    Get.find<CheckoutController>().tipController.text =
+        Get.find<CheckoutController>().selectedTips != -1
+        ? AppConstants.tips[Get.find<CheckoutController>().selectedTips]
+        : '';
   }
 
   void _setSinglePaymentActive() {
-    if ((!_firstTimeCheckPayment && !_isCashOnDeliveryActive! &&
-        _isDigitalPaymentActive! && Get
-        .find<SplashController>()
-        .configModel!
-        .activePaymentMethodList!
-        .length == 1) && ((!_isWalletActive && AuthHelper.isLoggedIn()) ||
-        !AuthHelper.isLoggedIn())) {
+    if ((!_firstTimeCheckPayment &&
+            !_isCashOnDeliveryActive! &&
+            _isDigitalPaymentActive! &&
+            Get.find<SplashController>()
+                    .configModel!
+                    .activePaymentMethodList!
+                    .length ==
+                1) &&
+        ((!_isWalletActive && AuthHelper.isLoggedIn()) ||
+            !AuthHelper.isLoggedIn())) {
       Future.delayed(const Duration(milliseconds: 600), () {
         Get.find<CheckoutController>().setPaymentMethod(2, isUpdate: false);
-        Get.find<CheckoutController>().changeDigitalPaymentName(Get
-            .find<SplashController>()
-            .configModel!
-            .activePaymentMethodList![0].getWay!, willUpdate: false);
+        Get.find<CheckoutController>().changeDigitalPaymentName(
+          Get.find<SplashController>()
+              .configModel!
+              .activePaymentMethodList![0]
+              .getWay!,
+          willUpdate: false,
+        );
         _firstTimeCheckPayment = true;
       });
     }
@@ -373,15 +364,21 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     guestContactPersonNumberController.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
-    Module? module = Get.find<SplashController>().configModel!.moduleConfig!.module;
-    bool guestCheckoutPermission = AuthHelper.isGuestLoggedIn() && Get.find<SplashController>().configModel!.guestCheckoutStatus!;
+    Module? module =
+        Get.find<SplashController>().configModel!.moduleConfig!.module;
+    bool guestCheckoutPermission =
+        AuthHelper.isGuestLoggedIn() &&
+        Get.find<SplashController>().configModel!.guestCheckoutStatus!;
     bool isLoggedIn = AuthHelper.isLoggedIn();
     bool isGuestLogIn = AuthHelper.isGuestLoggedIn();
-    bool isPharmacy = Get.find<SplashController>().module?.moduleType == 'pharmacy';
-    bool isFood = Get.find<SplashController>().module != null && Get.find<SplashController>().module!.moduleType.toString() == AppConstants.food;
+    bool isPharmacy =
+        Get.find<SplashController>().module?.moduleType == 'pharmacy';
+    bool isFood =
+        Get.find<SplashController>().module != null &&
+        Get.find<SplashController>().module!.moduleType.toString() ==
+            AppConstants.food;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -391,542 +388,843 @@ class CheckoutScreenState extends State<CheckoutScreen> {
         textcolor: Colors.black,
         iconcolor: Colors.black,
       ),
-      endDrawer: const MenuDrawer(), 
+      endDrawer: const MenuDrawer(),
       endDrawerEnableOpenDragGesture: false,
-      body: guestCheckoutPermission || AuthHelper.isLoggedIn() ?
-      GetBuilder<
-          CheckoutController>(builder: (checkoutController) {
-        return GetBuilder<
-            CartController>(builder: (cartController) {
-          _cartList = cartController.cartList;
-          if (_cartList == null || _cartList!.isEmpty) {
-            return const NoDataScreen(isCart: true, text: '', showFooter: true);
-          }
-          List<DropdownItem<int>> addressList = _getDropdownAddressList(
-              context: context, addressList: Get
-              .find<AddressController>()
-              .addressList, store: checkoutController.store);
-          address = _getAddressList(addressList: Get
-              .find<AddressController>()
-              .addressList, store: checkoutController.store);
+      body: guestCheckoutPermission || AuthHelper.isLoggedIn()
+          ? GetBuilder<CheckoutController>(
+              builder: (checkoutController) {
+                return GetBuilder<CartController>(
+                  builder: (cartController) {
+                    _cartList = cartController.cartList;
+                    if (_cartList == null || _cartList!.isEmpty) {
+                      return const NoDataScreen(
+                        isCart: true,
+                        text: '',
+                        showFooter: true,
+                      );
+                    }
+                    List<DropdownItem<int>> addressList =
+                        _getDropdownAddressList(
+                          context: context,
+                          addressList:
+                              Get.find<AddressController>().addressList,
+                          store: checkoutController.store,
+                        );
+                    address = _getAddressList(
+                      addressList: Get.find<AddressController>().addressList,
+                      store: checkoutController.store,
+                    );
 
-          if (address.isNotEmpty && (checkoutController.addressIndex == null || checkoutController.addressIndex! >= address.length)) {
-            checkoutController.setAddressIndex(0);
-          }
-
-          bool todayClosed = false;
-          bool tomorrowClosed = false;
-          Pivot? moduleData = _getModuleData(store: checkoutController.store);
-          _isCashOnDeliveryActive =
-              _checkCODActive(store: checkoutController.store);
-          _isDigitalPaymentActive =
-              _checkDigitalPaymentActive(store: checkoutController.store);
-          _isOfflinePaymentActive = Get
-              .find<SplashController>()
-              .configModel!
-              .offlinePaymentStatus! && _checkZoneOfflinePaymentOnOff(
-              addressModel: AddressHelper.getUserAddressFromSharedPref(),
-              checkoutController: checkoutController);
-          if (checkoutController.store != null) {
-            todayClosed = checkoutController.isStoreClosed(
-                true, checkoutController.store!.active!,
-                checkoutController.store!.schedules);
-            tomorrowClosed = checkoutController.isStoreClosed(
-                false, checkoutController.store!.active!,
-                checkoutController.store!.schedules);
-            _taxPercent = checkoutController.store!.tax;
-          }
-          return GetBuilder<CouponController>(builder: (couponController) {
-            double? maxCodOrderAmount;
-
-            if (moduleData != null) {
-              maxCodOrderAmount = moduleData.maximumCodOrderAmount;
-            }
-            bool hasSubscription = checkoutController.startDate != null && checkoutController.endDate != null;
-            int days = 1;
-            if(hasSubscription) {
-              DateTime start = DateFormat('yyyy-MM-dd').parse(checkoutController.startDate!);
-              DateTime end = DateFormat('yyyy-MM-dd').parse(checkoutController.endDate!);
-              days = end.difference(start).inDays + 1;
-            }
-
-            double price = _calculatePrice(
-                store: checkoutController.store,
-                cartList: _cartList,
-                days: days,
-                hasSubscription: hasSubscription);
-            double addOns = _calculateAddonsPrice(
-                store: checkoutController.store,
-                cartList: _cartList,
-                days: days,
-                hasSubscription: hasSubscription);
-            double variations = _calculateVariationPrice(
-                store: checkoutController.store,
-                cartList: _cartList,
-                days: days,
-                hasSubscription: hasSubscription,
-                calculateWithoutDiscount: true);
-            double? itemDiscountPrice = _calculateDiscountPrice(
-                store: checkoutController.store,
-                cartList: _cartList,
-                price: price,
-                addOns: addOns,
-                days: days,
-                hasSubscription: hasSubscription,
-                calStoreDiscount: false);
-            double? storeDiscountPrice = _calculateDiscountPrice(
-                store: checkoutController.store,
-                cartList: _cartList,
-                price: price,
-                addOns: addOns,
-                days: days,
-                hasSubscription: hasSubscription,
-                calStoreDiscount: true);
-
-            double extraDiscount = _getExtraDiscountPrice(
-                storeDiscountPrice, itemDiscountPrice);
-            double? discount = _getDiscountPrice(
-                storeDiscountPrice, itemDiscountPrice);
-            double couponDiscount = PriceConverter.toFixed(
-                couponController.discount!);
-
-            double subTotal = _calculateSubTotal(price: price,
-                addOns: addOns,
-                variations: variations,
-                cartList: _cartList);
-
-            double referralDiscount = _calculateReferralDiscount(
-                subTotal, discount, couponDiscount);
-
-            double orderAmount = _calculateOrderAmount(
-              price: price,
-              variations: variations,
-              discount: discount,
-              addOns: addOns,
-              couponDiscount: couponDiscount,
-              cartList: _cartList,
-              referralDiscount: referralDiscount,
-            );
-
-            Future.delayed(const Duration(milliseconds: 50), () {
-              if (checkoutController.isFirstTime ||
-                  (couponController.discount! > 0 &&
-                      !checkoutController.isFirstTime && !_calledOrderTax)) {
-                if (couponController.discount! > 0) {
-                  _calledOrderTax = true;
-                }
-                List<OnlineCart> carts = [];
-
-                if (widget.storeId == null) {
-                  for (int index = 0; index <
-                      _cartList!.length; index++) {
-                    CartModel cart = _cartList![index]!;
-                    List<int?> addOnIdList = [];
-                    List<int?> addOnQtyList = [];
-                    for (var addOn in cart.addOnIds!) {
-                      addOnIdList.add(addOn.id);
-                      addOnQtyList.add(addOn.quantity);
+                    if (address.isNotEmpty &&
+                        (checkoutController.addressIndex == null ||
+                            checkoutController.addressIndex! >=
+                                address.length)) {
+                      checkoutController.setAddressIndex(0);
                     }
 
-                    List<OrderVariation> variations = [];
-                    if (Get
-                        .find<SplashController>()
-                        .getModuleConfig(cart.item!.moduleType)
-                        .newVariation!) {
-                      for (int i = 0; i <
-                          cart.item!.foodVariations!.length; i++) {
-                        if (cart.foodVariations![i].contains(true)) {
-                          variations.add(OrderVariation(
-                              name: cart.item!.foodVariations![i].name,
-                              values: OrderVariationValue(label: [])));
-                          for (int j = 0; j <
-                              cart.item!.foodVariations![i].variationValues!
-                                  .length; j++) {
-                            if (cart.foodVariations![i][j]!) {
-                              variations[variations.length - 1].values!.label!
-                                  .add(cart.item!.foodVariations![i]
-                                  .variationValues![j].level);
-                            }
-                          }
+                    bool todayClosed = false;
+                    bool tomorrowClosed = false;
+                    Pivot? moduleData = _getModuleData(
+                      store: checkoutController.store,
+                    );
+                    _isCashOnDeliveryActive = _checkCODActive(
+                      store: checkoutController.store,
+                    );
+                    _isDigitalPaymentActive = _checkDigitalPaymentActive(
+                      store: checkoutController.store,
+                    );
+                    _isOfflinePaymentActive =
+                        Get.find<SplashController>()
+                            .configModel!
+                            .offlinePaymentStatus! &&
+                        _checkZoneOfflinePaymentOnOff(
+                          addressModel:
+                              AddressHelper.getUserAddressFromSharedPref(),
+                          checkoutController: checkoutController,
+                        );
+                    if (checkoutController.store != null) {
+                      todayClosed = checkoutController.isStoreClosed(
+                        true,
+                        checkoutController.store!.active!,
+                        checkoutController.store!.schedules,
+                      );
+                      tomorrowClosed = checkoutController.isStoreClosed(
+                        false,
+                        checkoutController.store!.active!,
+                        checkoutController.store!.schedules,
+                      );
+                      _taxPercent = checkoutController.store!.tax;
+                    }
+                    return GetBuilder<CouponController>(
+                      builder: (couponController) {
+                        double? maxCodOrderAmount;
+
+                        if (moduleData != null) {
+                          maxCodOrderAmount = moduleData.maximumCodOrderAmount;
                         }
-                      }
-                    }
-                    carts.add(OnlineCart(
-                      cart.id,
-                      cart.item!.id,
-                      cart.isCampaign! ? cart.item!.id : null,
-                      cart.discountedPrice.toString(),
-                      (cart.variation != null && cart.variation!.isNotEmpty) ? cart.variation![0].type ?? '' : '',
-                      Get
-                          .find<SplashController>()
-                          .getModuleConfig(cart.item!.moduleType)
-                          .newVariation! ? null : cart.variation,
-                      Get
-                          .find<SplashController>()
-                          .getModuleConfig(cart.item!.moduleType)
-                          .newVariation! ? variations : null,
-                      cart.quantity,
-                      addOnIdList,
-                      cart.addOns,
-                      addOnQtyList,
-                      'Item',
-                       cart.isSubscribed ?? false,
-                       itemType: "App\\Models\\Item",
-                     ));
-                   }
-                 }
- 
-                 PlaceOrderBodyModel placeOrderBody = PlaceOrderBodyModel(
-                   cart: carts,
-                   couponDiscountAmount: Get
-                       .find<CouponController>()
-                       .discount,
-                   distance: checkoutController.distance,
-                   orderAmount: widget.storeId == null ? subTotal : 0,
-                   orderNote: checkoutController.noteController.text,
-                   orderType: checkoutController.orderType,
-                   paymentMethod: checkoutController.paymentMethodIndex == 0
-                       ? 'cash_on_delivery'
-                       : checkoutController.paymentMethodIndex == 1 ? 'wallet'
-                       : checkoutController.paymentMethodIndex == 2
-                       ? 'digital_payment'
-                       : 'offline_payment',
-                   couponCode: (Get
-                       .find<CouponController>()
-                       .discount! > 0 || (Get
-                       .find<CouponController>()
-                       .coupon != null
-                       && Get
-                           .find<CouponController>()
-                           .freeDelivery)) ? Get
-                       .find<CouponController>()
-                       .coupon!
-                       .code : null,
-                   storeId: (widget.storeId == null)
-                       ? _cartList![0]!.item!.storeId
-                       : widget.storeId,
-                   discountAmount: discount,
-                   receiverDetails: null,
-                   parcelCategoryId: null,
-                   chargePayer: null,
-                   dmTips: (checkoutController.orderType == 'take_away' ||
-                       checkoutController.tipController.text == 'not_now')
-                       ? ''
-                       : checkoutController.tipController.text.trim(),
-                   cutlery: Get
-                       .find<CartController>()
-                       .addCutlery ? 1 : 0,
-                   unavailableItemNote: Get
-                       .find<CartController>()
-                       .notAvailableIndex != -1 ? Get
-                       .find<CartController>()
-                       .notAvailableList[Get
-                       .find<CartController>()
-                       .notAvailableIndex] : '',
-                   deliveryInstruction: checkoutController.selectedInstruction !=
-                       -1 ? AppConstants
-                       .deliveryInstructionList[checkoutController
-                       .selectedInstruction] : '',
-                   partialPayment: checkoutController.isPartialPay ? 1 : 0,
-                   guestId: isGuestLogIn
-                       ? int.parse(AuthHelper.getGuestId())
-                       : 0,
-                   isBuyNow: widget.fromCart ? 0 : 1,
-                   extraPackagingAmount: Get
-                       .find<CartController>()
-                       .needExtraPackage ? checkoutController.store!
-                       .extraPackagingAmount : 0,
-                   createNewUser: checkoutController.isCreateAccount ? 1 : 0,
-                   password: guestPasswordController.text,
-                   isPrescriptionOrder: widget.storeId == null ? false : true,
-                   isSubscribed: carts.any((e) => e.isSubscribed ?? false),
-                   startDate: checkoutController.startDate,
-                   endDate: checkoutController.endDate,
-                   dropTime: checkoutController.dropTime,
-                 );
+                        bool hasSubscription =
+                            checkoutController.startDate != null &&
+                            checkoutController.endDate != null;
+                        int days = 1;
+                        if (hasSubscription) {
+                          DateTime start = DateFormat(
+                            'yyyy-MM-dd',
+                          ).parse(checkoutController.startDate!);
+                          DateTime end = DateFormat(
+                            'yyyy-MM-dd',
+                          ).parse(checkoutController.endDate!);
+                          days = end.difference(start).inDays + 1;
+                        }
 
-                checkoutController.getOrderTax(placeOrderBody);
-              }
-            });
+                        double price = _calculatePrice(
+                          store: checkoutController.store,
+                          cartList: _cartList,
+                          days: days,
+                          hasSubscription: hasSubscription,
+                        );
+                        double addOns = _calculateAddonsPrice(
+                          store: checkoutController.store,
+                          cartList: _cartList,
+                          days: days,
+                          hasSubscription: hasSubscription,
+                        );
+                        double variations = _calculateVariationPrice(
+                          store: checkoutController.store,
+                          cartList: _cartList,
+                          days: days,
+                          hasSubscription: hasSubscription,
+                          calculateWithoutDiscount: true,
+                        );
+                        double? itemDiscountPrice = _calculateDiscountPrice(
+                          store: checkoutController.store,
+                          cartList: _cartList,
+                          price: price,
+                          addOns: addOns,
+                          days: days,
+                          hasSubscription: hasSubscription,
+                          calStoreDiscount: false,
+                        );
+                        double? storeDiscountPrice = _calculateDiscountPrice(
+                          store: checkoutController.store,
+                          cartList: _cartList,
+                          price: price,
+                          addOns: addOns,
+                          days: days,
+                          hasSubscription: hasSubscription,
+                          calStoreDiscount: true,
+                        );
 
-            double additionalCharge = Get
-                .find<SplashController>()
-                .configModel!
-                .additionalChargeStatus!
-                ? Get
-                .find<SplashController>()
-                .configModel!
-                .additionCharge! : 0;
-            double originalCharge = _calculateOriginalDeliveryCharge(
-              store: checkoutController.store,
-              address: AddressHelper.getUserAddressFromSharedPref()!,
-              distance: checkoutController.distance,
-              extraCharge: checkoutController.extraCharge,
-              surgePrice: checkoutController.surgePrice?.price,
-              surgePriceType: checkoutController.surgePrice?.priceType,
-            );
+                        double extraDiscount = _getExtraDiscountPrice(
+                          storeDiscountPrice,
+                          itemDiscountPrice,
+                        );
+                        double? discount = _getDiscountPrice(
+                          storeDiscountPrice,
+                          itemDiscountPrice,
+                        );
+                        double couponDiscount = PriceConverter.toFixed(
+                          couponController.discount!,
+                        );
 
+                        double subTotal = _calculateSubTotal(
+                          price: price,
+                          addOns: addOns,
+                          variations: variations,
+                          cartList: _cartList,
+                        );
 
-            double deliveryCharge = checkoutController.deliveryCharge != -1
-                ? checkoutController.deliveryCharge
-                : _calculateDeliveryCharge(
-              store: checkoutController.store,
-              address: AddressHelper.getUserAddressFromSharedPref()!,
-              distance: checkoutController.distance,
-              extraCharge: checkoutController.extraCharge,
-              orderType: checkoutController.orderType!,
-              orderAmount: orderAmount,
-              surgePrice: checkoutController.surgePrice?.price,
-              surgePriceType: checkoutController.surgePrice?.priceType,
-            );
+                        double referralDiscount = _calculateReferralDiscount(
+                          subTotal,
+                          discount,
+                          couponDiscount,
+                        );
 
-            if (checkoutController.orderType != 'take_away' &&
-                checkoutController.store != null) {
-              _deliveryChargeForView =
-              ((checkoutController.orderType == 'delivery' ? checkoutController
-                  .store!.freeDelivery! : true) && checkoutController.deliveryCharge == -1) ? 'free'.tr
-                  : PriceConverter.convertPrice(deliveryCharge);
-            }
+                        double orderAmount = _calculateOrderAmount(
+                          price: price,
+                          variations: variations,
+                          discount: discount,
+                          addOns: addOns,
+                          couponDiscount: couponDiscount,
+                          cartList: _cartList,
+                          referralDiscount: referralDiscount,
+                        );
 
-            double extraPackagingCharge = widget.storeId != null
-                ? 0
-                : _calculateExtraPackagingCharge(checkoutController);
+                        Future.delayed(const Duration(milliseconds: 50), () {
+                          if (checkoutController.isFirstTime ||
+                              (couponController.discount! > 0 &&
+                                  !checkoutController.isFirstTime &&
+                                  !_calledOrderTax)) {
+                            if (couponController.discount! > 0) {
+                              _calledOrderTax = true;
+                            }
+                            List<OnlineCart> carts = [];
 
-            double otherCharge = widget.storeId != null
-                ? 0
-                : _calculateotherCharge(checkoutController);
+                            if (widget.storeId == null) {
+                              for (
+                                int index = 0;
+                                index < _cartList!.length;
+                                index++
+                              ) {
+                                CartModel cart = _cartList![index]!;
+                                List<int?> addOnIdList = [];
+                                List<int?> addOnQtyList = [];
+                                for (var addOn in cart.addOnIds!) {
+                                  addOnIdList.add(addOn.id);
+                                  addOnQtyList.add(addOn.quantity);
+                                }
 
-            bool taxIncluded = (checkoutController.taxIncluded == 1);
-
-            double total = _calculateTotal(
-              subTotal: subTotal,
-              deliveryCharge: deliveryCharge,
-              discount: discount,
-              couponDiscount: couponDiscount,
-              taxIncluded: taxIncluded,
-              tax: checkoutController.orderTax!,
-              orderType: checkoutController.orderType!,
-              tips: checkoutController.tips,
-              additionalCharge: additionalCharge,
-              extraPackagingCharge: extraPackagingCharge,
-              otherCharge: otherCharge
-            );
-
-            bool isPrescriptionRequired = _checkPrescriptionRequired();
-
-            total = total - referralDiscount;
-
-            if (widget.storeId != null) {
-              checkoutController.setPaymentMethod(0, isUpdate: false);
-            }
-            checkoutController.setTotalAmount(
-                total - (checkoutController.isPartialPay ? Get
-                    .find<ProfileController>()
-                    .userInfoModel!
-                    .walletBalance! : 0));
-
-            if (_payableAmount != checkoutController.viewTotalPrice &&
-                checkoutController.distance != null && isLoggedIn) {
-              _payableAmount = checkoutController.viewTotalPrice;
-              showCashBackSnackBar();
-            }
-
-            double savings = discount + couponDiscount + referralDiscount;
-            bool takeAway = checkoutController.orderType == 'take_away';
-
-            return (checkoutController.distance != null &&
-                checkoutController.store != null) ? (_cartList != null && _cartList!.isNotEmpty) ? Column(
-              children: [
-                ResponsiveHelper.isDesktop(context) ? Container(
-                  height: 64,
-                  color: Theme
-                      .of(context)
-                      .primaryColor
-                      .withOpacity(0.10),
-                  child: Center(
-                      child: Text('checkout'.tr, style: robotoMedium)),
-                ) : const SizedBox(),
-
-                Expanded(child: SingleChildScrollView(
-                  controller: _scrollController,
-                  physics: const BouncingScrollPhysics(),
-                  child: Column(
-                    children: [
-                      if (!isPharmacy) ...[
-                        // Exact UI for Delivering to and Cart
-                        Container(
-                          color: Colors.white,
-                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-                          child: Row(
-                            children: [
-                              // Location Icon
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.deepOrange.withOpacity(0.1),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(Icons.location_on, color: Colors.deepOrange.shade600, size: 20),
-                              ),
-                              const SizedBox(width: 12),
-
-                              // Delivering to Text and Address Dropdown
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text('Delivering to', style: robotoMedium.copyWith(fontSize: 10, color: Colors.grey.shade500)),
-                                    const SizedBox(height: 1),
-                                    (address.isNotEmpty && checkoutController.addressIndex != null) ? CustomDropdown<int>(
-                                      onChange: (int? value, int index) {
-                                        checkoutController.getDistanceInKM(
-                                          LatLng(
-                                            double.parse(address[index].latitude!),
-                                            double.parse(address[index].longitude!),
+                                List<OrderVariation> variations = [];
+                                if (Get.find<SplashController>()
+                                    .getModuleConfig(cart.item!.moduleType)
+                                    .newVariation!) {
+                                  for (
+                                    int i = 0;
+                                    i < cart.item!.foodVariations!.length;
+                                    i++
+                                  ) {
+                                    if (cart.foodVariations![i].contains(
+                                      true,
+                                    )) {
+                                      variations.add(
+                                        OrderVariation(
+                                          name: cart
+                                              .item!
+                                              .foodVariations![i]
+                                              .name,
+                                          values: OrderVariationValue(
+                                            label: [],
                                           ),
-                                          LatLng(
-                                            double.parse(checkoutController.store!.latitude!),
-                                            double.parse(checkoutController.store!.longitude!),
-                                          ),
-                                        );
-                                        checkoutController.setAddressIndex(index);
-                                        if (address[index].id != null) {
-                                          checkoutController.checkAddressDelivery(address[index].id!, checkoutController.store!.id!);
+                                        ),
+                                      );
+                                      for (
+                                        int j = 0;
+                                        j <
+                                            cart
+                                                .item!
+                                                .foodVariations![i]
+                                                .variationValues!
+                                                .length;
+                                        j++
+                                      ) {
+                                        if (cart.foodVariations![i][j]!) {
+                                          variations[variations.length - 1]
+                                              .values!
+                                              .label!
+                                              .add(
+                                                cart
+                                                    .item!
+                                                    .foodVariations![i]
+                                                    .variationValues![j]
+                                                    .level,
+                                              );
                                         }
-                                      },
-                                      dropdownButtonStyle: DropdownButtonStyle(
-                                        padding: EdgeInsets.zero,
-                                        primaryColor: Colors.black,
-                                        mainAxisAlignment: MainAxisAlignment.start,
-                                      ),
-                                      dropdownStyle: DropdownStyle(
-                                        elevation: 10,
-                                        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                                        padding: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
-                                      ),
-                                      items: addressList,
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Flexible(
-                                            child: Text(
-                                              address[checkoutController.addressIndex!].address ?? 'Select Address',
-                                              style: robotoBold.copyWith(fontSize: 14, color: Colors.black),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                          const Icon(Icons.keyboard_arrow_down, size: 18, color: Colors.black),
-                                        ],
-                                      ),
-                                    ) : InkWell(
-                                      onTap: () => Get.toNamed(RouteHelper.getAddAddressRoute(true, false, checkoutController.store!.zoneId)),
-                                      child: Row(
-                                        children: [
-                                          Flexible(
-                                            child: Text(
-                                              AddressHelper.isAddressComplete(AddressHelper.getUserAddressFromSharedPref())
-                                                  ? AddressHelper.getUserAddressFromSharedPref()?.address ?? 'Select Address'
-                                                  : 'Select Address',
-                                              style: robotoBold.copyWith(fontSize: 14, color: Colors.black),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                          const Icon(Icons.keyboard_arrow_down, size: 18, color: Colors.black),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                      }
+                                    }
+                                  }
+                                }
+                                carts.add(
+                                  OnlineCart(
+                                    cart.id,
+                                    cart.item!.id,
+                                    cart.isCampaign! ? cart.item!.id : null,
+                                    cart.discountedPrice.toString(),
+                                    (cart.variation != null &&
+                                            cart.variation!.isNotEmpty)
+                                        ? cart.variation![0].type ?? ''
+                                        : '',
+                                    Get.find<SplashController>()
+                                            .getModuleConfig(
+                                              cart.item!.moduleType,
+                                            )
+                                            .newVariation!
+                                        ? null
+                                        : cart.variation,
+                                    Get.find<SplashController>()
+                                            .getModuleConfig(
+                                              cart.item!.moduleType,
+                                            )
+                                            .newVariation!
+                                        ? variations
+                                        : null,
+                                    cart.quantity,
+                                    addOnIdList,
+                                    cart.addOns,
+                                    addOnQtyList,
+                                    'Item',
+                                    cart.isSubscribed ?? false,
+                                    itemType: "App\\Models\\Item",
+                                  ),
+                                );
+                              }
+                            }
+
+                            PlaceOrderBodyModel
+                            placeOrderBody = PlaceOrderBodyModel(
+                              cart: carts,
+                              couponDiscountAmount:
+                                  Get.find<CouponController>().discount,
+                              distance: checkoutController.distance,
+                              orderAmount: widget.storeId == null
+                                  ? subTotal
+                                  : 0,
+                              orderNote: _getCombinedOrderNote(checkoutController),
+                              orderType: checkoutController.orderType,
+                              paymentMethod:
+                                  checkoutController.paymentMethodIndex == 0
+                                  ? 'cash_on_delivery'
+                                  : checkoutController.paymentMethodIndex == 1
+                                  ? 'wallet'
+                                  : checkoutController.paymentMethodIndex == 2
+                                  ? 'digital_payment'
+                                  : 'offline_payment',
+                              couponCode:
+                                  (Get.find<CouponController>().discount! > 0 ||
+                                      (Get.find<CouponController>().coupon !=
+                                              null &&
+                                          Get.find<CouponController>()
+                                              .freeDelivery))
+                                  ? Get.find<CouponController>().coupon!.code
+                                  : null,
+                              storeId: (widget.storeId == null)
+                                  ? _cartList![0]!.item!.storeId
+                                  : widget.storeId,
+                              discountAmount: discount,
+                              receiverDetails: null,
+                              parcelCategoryId: null,
+                              chargePayer: null,
+                              dmTips:
+                                  (checkoutController.orderType ==
+                                          'take_away' ||
+                                      checkoutController.tipController.text ==
+                                          'not_now')
+                                  ? ''
+                                  : checkoutController.tipController.text
+                                        .trim(),
+                              cutlery: Get.find<CartController>().addCutlery
+                                  ? 1
+                                  : 0,
+                              unavailableItemNote:
+                                  Get.find<CartController>()
+                                          .notAvailableIndex !=
+                                      -1
+                                  ? Get.find<CartController>()
+                                        .notAvailableList[Get.find<
+                                          CartController
+                                        >()
+                                        .notAvailableIndex]
+                                  : '',
+                              deliveryInstruction:
+                                  checkoutController.selectedInstruction != -1
+                                  ? AppConstants
+                                        .deliveryInstructionList[checkoutController
+                                        .selectedInstruction]
+                                  : '',
+                              partialPayment: checkoutController.isPartialPay
+                                  ? 1
+                                  : 0,
+                              guestId: isGuestLogIn
+                                  ? int.parse(AuthHelper.getGuestId())
+                                  : 0,
+                              isBuyNow: widget.fromCart ? 0 : 1,
+                              extraPackagingAmount:
+                                  Get.find<CartController>().needExtraPackage
+                                  ? checkoutController
+                                        .store!
+                                        .extraPackagingAmount
+                                  : 0,
+                              createNewUser: checkoutController.isCreateAccount
+                                  ? 1
+                                  : 0,
+                              password: guestPasswordController.text,
+                              isPrescriptionOrder: widget.storeId == null
+                                  ? false
+                                  : true,
+                              isSubscribed: carts.any(
+                                (e) => e.isSubscribed ?? false,
                               ),
-                              const SizedBox(width: 12),
+                              startDate: checkoutController.startDate,
+                              endDate: checkoutController.endDate,
+                              dropTime: checkoutController.dropTime,
+                            );
 
-                              // Add New Address Icon
-                              InkWell(
-                                onTap: () => Get.toNamed(RouteHelper.getAddAddressRoute(true, false, checkoutController.store!.zoneId)),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(Icons.add_location_alt_outlined, size: 24, color: Colors.black),
-                                    const SizedBox(height: 2),
-                                    Text('Add New', style: robotoRegular.copyWith(fontSize: 12, color: Colors.black)),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9)),
-                        const SizedBox(height: Dimensions.paddingSizeDefault),
-                      ],
+                            checkoutController.getOrderTax(placeOrderBody);
+                          }
+                        });
 
+                        double additionalCharge =
+                            Get.find<SplashController>()
+                                .configModel!
+                                .additionalChargeStatus!
+                            ? Get.find<SplashController>()
+                                  .configModel!
+                                  .additionCharge!
+                            : 0;
+                        double originalCharge =
+                            _calculateOriginalDeliveryCharge(
+                              store: checkoutController.store,
+                              address:
+                                  AddressHelper.getUserAddressFromSharedPref()!,
+                              distance: checkoutController.distance,
+                              extraCharge: checkoutController.extraCharge,
+                              surgePrice: checkoutController.surgePrice?.price,
+                              surgePriceType:
+                                  checkoutController.surgePrice?.priceType,
+                            );
 
+                        double deliveryCharge =
+                            checkoutController.deliveryCharge != -1
+                            ? checkoutController.deliveryCharge
+                            : _calculateDeliveryCharge(
+                                store: checkoutController.store,
+                                address:
+                                    AddressHelper.getUserAddressFromSharedPref()!,
+                                distance: checkoutController.distance,
+                                extraCharge: checkoutController.extraCharge,
+                                orderType: checkoutController.orderType!,
+                                orderAmount: orderAmount,
+                                surgePrice:
+                                    checkoutController.surgePrice?.price,
+                                surgePriceType:
+                                    checkoutController.surgePrice?.priceType,
+                              );
 
-                      GetBuilder<StoreController>(builder: (storeController) {
-                        return GetBuilder<CartController>(
-                            builder: (cartController) {
-                              return (!isPharmacy && _cartList != null && _cartList!.isNotEmpty) ?
-                              Column(children: [
-                                Row(crossAxisAlignment: CrossAxisAlignment
-                                    .start, children: [
-                                  ResponsiveHelper.isDesktop(context)
-                                      ? WebCardItemsWidget(
-                                      cartList: _cartList!.cast<CartModel>())
-                                      : Expanded(
-                                    flex: 7,
-                                    child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment
-                                            .start, children: [
+                        if (checkoutController.orderType != 'take_away' &&
+                            checkoutController.store != null) {
+                          _deliveryChargeForView =
+                              ((checkoutController.orderType == 'delivery'
+                                      ? checkoutController.store!.freeDelivery!
+                                      : true) &&
+                                  checkoutController.deliveryCharge == -1)
+                              ? 'free'.tr
+                              : PriceConverter.convertPrice(deliveryCharge);
+                        }
 
-                                      WebConstrainedBox(
-                                        dataLength: _cartList?.length ?? 0,
-                                        minLength: 5,
-                                        minHeight: 0.6,
-                                        child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment
-                                                .start, children: [
-                                          Container(
-                                            margin:EdgeInsets.all(8),
-                                            decoration: const BoxDecoration(
-                                                color: Colors.white,
-                                            ),
-                                            child: Column(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              crossAxisAlignment: CrossAxisAlignment.center,
-                                              children: [
-                                                Padding(
-                                                  padding: const EdgeInsets.all(
-                                                      8.0),
-                                                  child: Container(
-                                                    child: ListView.builder(
-                                                      physics: const NeverScrollableScrollPhysics(),
-                                                      shrinkWrap: true,
-                                                      itemCount: cartController
-                                                          .cartList.length,
-                                                      itemBuilder: (context,
-                                                          index) {
-                                                        return CartItemWidget(
-                                                          fromCheckout: true,
-                                                            cart: cartController
-                                                                .cartList[index],
-                                                            cartIndex: index,
-                                                            addOns: cartController
-                                                                .addOnsList[index],
-                                                            isAvailable: cartController
-                                                                .availableList[index],
-                                                            showDivider: index !=
-                                                                cartController
-                                                                    .cartList
-                                                                    .length - 1);
-                                                      },
-                                                    ),
+                        double extraPackagingCharge = widget.storeId != null
+                            ? 0
+                            : _calculateExtraPackagingCharge(
+                                checkoutController,
+                              );
+
+                        double otherCharge = widget.storeId != null
+                            ? 0
+                            : _calculateotherCharge(checkoutController);
+
+                        bool taxIncluded =
+                            (checkoutController.taxIncluded == 1);
+
+                        double total = _calculateTotal(
+                          subTotal: subTotal,
+                          deliveryCharge: deliveryCharge,
+                          discount: discount,
+                          couponDiscount: couponDiscount,
+                          taxIncluded: taxIncluded,
+                          tax: checkoutController.orderTax!,
+                          orderType: checkoutController.orderType!,
+                          tips: checkoutController.tips,
+                          additionalCharge: additionalCharge,
+                          extraPackagingCharge: extraPackagingCharge,
+                          otherCharge: otherCharge,
+                        );
+
+                        bool isPrescriptionRequired =
+                            _checkPrescriptionRequired();
+
+                        total = total - referralDiscount;
+
+                        if (widget.storeId != null) {
+                          checkoutController.setPaymentMethod(
+                            0,
+                            isUpdate: false,
+                          );
+                        }
+                        checkoutController.setTotalAmount(
+                          total -
+                              (checkoutController.isPartialPay
+                                  ? Get.find<ProfileController>()
+                                        .userInfoModel!
+                                        .walletBalance!
+                                  : 0),
+                        );
+
+                        if (_payableAmount !=
+                                checkoutController.viewTotalPrice &&
+                            checkoutController.distance != null &&
+                            isLoggedIn) {
+                          _payableAmount = checkoutController.viewTotalPrice;
+                          showCashBackSnackBar();
+                        }
+
+                        double savings =
+                            discount + couponDiscount + referralDiscount;
+                        bool takeAway =
+                            checkoutController.orderType == 'take_away';
+
+                        return (checkoutController.distance != null &&
+                                checkoutController.store != null)
+                            ? (_cartList != null && _cartList!.isNotEmpty)
+                                  ? Column(
+                                      children: [
+                                        ResponsiveHelper.isDesktop(context)
+                                            ? Container(
+                                                height: 64,
+                                                color: Theme.of(context)
+                                                    .primaryColor
+                                                    .withOpacity(0.10),
+                                                child: Center(
+                                                  child: Text(
+                                                    'checkout'.tr,
+                                                    style: robotoMedium,
                                                   ),
                                                 ),
-                                                const SizedBox(height: Dimensions
-                                                    .paddingSizeDefault),
-                                                /*Padding(
+                                              )
+                                            : const SizedBox(),
+
+                                        Expanded(
+                                          child: SingleChildScrollView(
+                                            controller: _scrollController,
+                                            physics:
+                                                const BouncingScrollPhysics(),
+                                            child: Column(
+                                              children: [
+                                                if (!isPharmacy) ...[
+                                                  // Exact UI for Delivering to and Cart
+                                                  Container(
+                                                    color: Colors.white,
+                                                    padding:
+                                                        const EdgeInsets.fromLTRB(
+                                                          16,
+                                                          16,
+                                                          16,
+                                                          12,
+                                                        ),
+                                                    child: Row(
+                                                      children: [
+                                                        // Location Icon
+                                                        Container(
+                                                          padding:
+                                                              const EdgeInsets.all(
+                                                                8,
+                                                              ),
+                                                          decoration:
+                                                              BoxDecoration(
+                                                                color: Colors
+                                                                    .deepOrange
+                                                                    .withOpacity(
+                                                                      0.1,
+                                                                    ),
+                                                                shape: BoxShape
+                                                                    .circle,
+                                                              ),
+                                                          child: Icon(
+                                                            Icons.location_on,
+                                                            color: Colors
+                                                                .deepOrange
+                                                                .shade600,
+                                                            size: 20,
+                                                          ),
+                                                        ),
+                                                        const SizedBox(
+                                                          width: 12,
+                                                        ),
+
+                                                        // Delivering to Text and Address Dropdown
+                                                        Expanded(
+                                                          child: Column(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .min,
+                                                            children: [
+                                                              Text(
+                                                                'Delivering to',
+                                                                style: robotoMedium
+                                                                    .copyWith(
+                                                                      fontSize:
+                                                                          10,
+                                                                      color: Colors
+                                                                          .grey
+                                                                          .shade500,
+                                                                    ),
+                                                              ),
+                                                              const SizedBox(
+                                                                height: 1,
+                                                              ),
+                                                              (address.isNotEmpty &&
+                                                                      checkoutController
+                                                                              .addressIndex !=
+                                                                          null)
+                                                                  ? CustomDropdown<
+                                                                      int
+                                                                    >(
+                                                                      onChange:
+                                                                          (
+                                                                            int?
+                                                                            value,
+                                                                            int
+                                                                            index,
+                                                                          ) {
+                                                                            checkoutController.getDistanceInKM(
+                                                                              LatLng(
+                                                                                double.parse(
+                                                                                  address[index].latitude!,
+                                                                                ),
+                                                                                double.parse(
+                                                                                  address[index].longitude!,
+                                                                                ),
+                                                                              ),
+                                                                              LatLng(
+                                                                                double.parse(
+                                                                                  checkoutController.store!.latitude!,
+                                                                                ),
+                                                                                double.parse(
+                                                                                  checkoutController.store!.longitude!,
+                                                                                ),
+                                                                              ),
+                                                                            );
+                                                                            checkoutController.setAddressIndex(
+                                                                              index,
+                                                                            );
+                                                                            if (address[index].id !=
+                                                                                null) {
+                                                                              checkoutController.checkAddressDelivery(
+                                                                                address[index].id!,
+                                                                                checkoutController.store!.id!,
+                                                                              );
+                                                                            }
+                                                                          },
+                                                                      dropdownButtonStyle: DropdownButtonStyle(
+                                                                        padding:
+                                                                            EdgeInsets.zero,
+                                                                        primaryColor:
+                                                                            Colors.black,
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.start,
+                                                                      ),
+                                                                      dropdownStyle: DropdownStyle(
+                                                                        elevation:
+                                                                            10,
+                                                                        borderRadius: BorderRadius.circular(
+                                                                          Dimensions
+                                                                              .radiusDefault,
+                                                                        ),
+                                                                        padding: const EdgeInsets.all(
+                                                                          Dimensions
+                                                                              .paddingSizeExtraSmall,
+                                                                        ),
+                                                                      ),
+                                                                      items:
+                                                                          addressList,
+                                                                      child: Row(
+                                                                        mainAxisSize:
+                                                                            MainAxisSize.min,
+                                                                        children: [
+                                                                          Flexible(
+                                                                            child: Text(
+                                                                              address[checkoutController.addressIndex!].address ??
+                                                                                  'Select Address',
+                                                                              style: robotoBold.copyWith(
+                                                                                fontSize: 14,
+                                                                                color: Colors.black,
+                                                                              ),
+                                                                              maxLines: 1,
+                                                                              overflow: TextOverflow.ellipsis,
+                                                                            ),
+                                                                          ),
+                                                                          const Icon(
+                                                                            Icons.keyboard_arrow_down,
+                                                                            size:
+                                                                                18,
+                                                                            color:
+                                                                                Colors.black,
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    )
+                                                                  : InkWell(
+                                                                      onTap: () => Get.toNamed(
+                                                                        RouteHelper.getAddAddressRoute(
+                                                                          true,
+                                                                          false,
+                                                                          checkoutController
+                                                                              .store!
+                                                                              .zoneId,
+                                                                        ),
+                                                                      ),
+                                                                      child: Row(
+                                                                        children: [
+                                                                          Flexible(
+                                                                            child: Text(
+                                                                              AddressHelper.isAddressComplete(
+                                                                                    AddressHelper.getUserAddressFromSharedPref(),
+                                                                                  )
+                                                                                  ? AddressHelper.getUserAddressFromSharedPref()?.address ??
+                                                                                        'Select Address'
+                                                                                  : 'Select Address',
+                                                                              style: robotoBold.copyWith(
+                                                                                fontSize: 14,
+                                                                                color: Colors.black,
+                                                                              ),
+                                                                              maxLines: 1,
+                                                                              overflow: TextOverflow.ellipsis,
+                                                                            ),
+                                                                          ),
+                                                                          const Icon(
+                                                                            Icons.keyboard_arrow_down,
+                                                                            size:
+                                                                                18,
+                                                                            color:
+                                                                                Colors.black,
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        const SizedBox(
+                                                          width: 12,
+                                                        ),
+
+                                                        // Add New Address Icon
+                                                        InkWell(
+                                                          onTap: () => Get.toNamed(
+                                                            RouteHelper.getAddAddressRoute(
+                                                              true,
+                                                              false,
+                                                              checkoutController
+                                                                  .store!
+                                                                  .zoneId,
+                                                            ),
+                                                          ),
+                                                          child: Column(
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .min,
+                                                            children: [
+                                                              const Icon(
+                                                                Icons
+                                                                    .add_location_alt_outlined,
+                                                                size: 24,
+                                                                color: Colors
+                                                                    .black,
+                                                              ),
+                                                              const SizedBox(
+                                                                height: 2,
+                                                              ),
+                                                              Text(
+                                                                'Add New',
+                                                                style: robotoRegular
+                                                                    .copyWith(
+                                                                      fontSize:
+                                                                          12,
+                                                                      color: Colors
+                                                                          .black,
+                                                                    ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  const Divider(
+                                                    height: 1,
+                                                    thickness: 1,
+                                                    color: Color(0xFFF1F5F9),
+                                                  ),
+                                                  const SizedBox(
+                                                    height: Dimensions
+                                                        .paddingSizeDefault,
+                                                  ),
+                                                ],
+
+                                                GetBuilder<StoreController>(
+                                                  builder: (storeController) {
+                                                    return GetBuilder<
+                                                      CartController
+                                                    >(
+                                                      builder: (cartController) {
+                                                        return (!isPharmacy &&
+                                                                _cartList !=
+                                                                    null &&
+                                                                _cartList!
+                                                                    .isNotEmpty)
+                                                            ? Column(
+                                                                children: [
+                                                                  Row(
+                                                                    crossAxisAlignment:
+                                                                        CrossAxisAlignment
+                                                                            .start,
+                                                                    children: [
+                                                                      ResponsiveHelper.isDesktop(
+                                                                            context,
+                                                                          )
+                                                                          ? WebCardItemsWidget(
+                                                                              cartList: _cartList!
+                                                                                  .cast<
+                                                                                    CartModel
+                                                                                  >(),
+                                                                            )
+                                                                          : Expanded(
+                                                                              flex: 7,
+                                                                              child: Column(
+                                                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                children: [
+                                                                                  WebConstrainedBox(
+                                                                                    dataLength:
+                                                                                        _cartList?.length ??
+                                                                                        0,
+                                                                                    minLength: 5,
+                                                                                    minHeight: 0.6,
+                                                                                    child: Column(
+                                                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                      children: [
+                                                                                        Container(
+                                                                                          margin: EdgeInsets.all(
+                                                                                            8,
+                                                                                          ),
+                                                                                          decoration: const BoxDecoration(
+                                                                                            color: Colors.white,
+                                                                                          ),
+                                                                                          child: Column(
+                                                                                            mainAxisAlignment: MainAxisAlignment.center,
+                                                                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                                                                            children: [
+                                                                                              Padding(
+                                                                                                padding: const EdgeInsets.all(
+                                                                                                  8.0,
+                                                                                                ),
+                                                                                                child: Container(
+                                                                                                  child: ListView.builder(
+                                                                                                    physics: const NeverScrollableScrollPhysics(),
+                                                                                                    shrinkWrap: true,
+                                                                                                    itemCount: cartController.cartList.length,
+                                                                                                    itemBuilder:
+                                                                                                        (
+                                                                                                          context,
+                                                                                                          index,
+                                                                                                        ) {
+                                                                                                          return CartItemWidget(
+                                                                                                            fromCheckout: true,
+                                                                                                            cart: cartController.cartList[index],
+                                                                                                            cartIndex: index,
+                                                                                                            addOns: cartController.addOnsList[index],
+                                                                                                            isAvailable: cartController.availableList[index],
+                                                                                                            showDivider:
+                                                                                                                index !=
+                                                                                                                cartController.cartList.length -
+                                                                                                                    1,
+                                                                                                          );
+                                                                                                        },
+                                                                                                  ),
+                                                                                                ),
+                                                                                              ),
+                                                                                              const SizedBox(
+                                                                                                height: Dimensions.paddingSizeDefault,
+                                                                                              ),
+                                                                                              /*Padding(
                                                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
                                                    child: InkWell(
                                                      onTap: (){
@@ -945,798 +1243,1588 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                                      ]),
                                                    ),
                                                  ),*/
-                                                DottedBorder(
-                                                  options:
-                                                  CustomPathDottedBorderOptions(
-                                                    padding: const EdgeInsets.all(10),
-                                                    color: Colors.grey.shade400,
-                                                    strokeWidth: 1,
-                                                    dashPattern: [5, 5],
-                                                    customPath: (size) => Path()
-                                                      ..moveTo(0, size.height)
-                                                      ..relativeLineTo(size.width, 0),
+                                                                                              DottedBorder(
+                                                                                                options: CustomPathDottedBorderOptions(
+                                                                                                  padding: const EdgeInsets.all(
+                                                                                                    10,
+                                                                                                  ),
+                                                                                                  color: Colors.grey.shade400,
+                                                                                                  strokeWidth: 1,
+                                                                                                  dashPattern: [
+                                                                                                    5,
+                                                                                                    5,
+                                                                                                  ],
+                                                                                                  customPath:
+                                                                                                      (
+                                                                                                        size,
+                                                                                                      ) => Path()
+                                                                                                        ..moveTo(
+                                                                                                          0,
+                                                                                                          size.height,
+                                                                                                        )
+                                                                                                        ..relativeLineTo(
+                                                                                                          size.width,
+                                                                                                          0,
+                                                                                                        ),
+                                                                                                ),
+                                                                                                child: const SizedBox(
+                                                                                                  width: double.infinity,
+                                                                                                  height: 0,
+                                                                                                ),
+                                                                                              ),
+                                                                                              const SizedBox(
+                                                                                                width: double.infinity,
+                                                                                                height: 0.5,
+                                                                                              ),
+                                                                                              const Padding(
+                                                                                                padding: EdgeInsets.symmetric(
+                                                                                                  horizontal: 16,
+                                                                                                  vertical: 12,
+                                                                                                ),
+                                                                                                child: Divider(
+                                                                                                  height: 1,
+                                                                                                  color: Color(
+                                                                                                    0xFFF1F5F9,
+                                                                                                  ),
+                                                                                                ),
+                                                                                              ),
+                                                                                              if (isFood)
+                                                                                                suggestedItemView(
+                                                                                                  _cartList!
+                                                                                                      .cast<
+                                                                                                        CartModel
+                                                                                                      >(),
+                                                                                                ),
+                                                                                            ],
+                                                                                          ),
+                                                                                        ),
+
+                                                                                        if (isFood)
+                                                                                          Padding(
+                                                                                            padding: const EdgeInsets.symmetric(
+                                                                                              horizontal: 16,
+                                                                                              vertical: 8,
+                                                                                            ),
+                                                                                            child: InkWell(
+                                                                                              onTap: () {
+                                                                                                _showCookingInstructionsBottomSheet(context, checkoutController);
+                                                                                              },
+                                                                                              child: Container(
+                                                                                                padding: const EdgeInsets.all(
+                                                                                                  12,
+                                                                                                ),
+                                                                                                decoration: BoxDecoration(
+                                                                                                  color: Colors.white,
+                                                                                                  borderRadius: BorderRadius.circular(
+                                                                                                    12,
+                                                                                                  ),
+                                                                                                  border: Border.all(
+                                                                                                    color: Colors.grey.shade100,
+                                                                                                  ),
+                                                                                                ),
+                                                                                                child: Row(
+                                                                                                  children: [
+                                                                                                    const Icon(
+                                                                                                      Icons.edit_note,
+                                                                                                      color: Color(
+                                                                                                        0xFF16A34A,
+                                                                                                      ),
+                                                                                                      size: 20,
+                                                                                                    ),
+                                                                                                    const SizedBox(
+                                                                                                      width: 8,
+                                                                                                    ),
+                                                                                                    Expanded(
+                                                                                                      child: Text(
+                                                                                                        checkoutController.selectedCookingInstruction != -1
+                                                                                                            ? AppConstants.cookingInstructionList[checkoutController.selectedCookingInstruction].tr
+                                                                                                            : 'Add cooking instructions',
+                                                                                                        style: robotoMedium.copyWith(
+                                                                                                          fontSize: 14,
+                                                                                                          color: Colors.grey.shade700,
+                                                                                                        ),
+                                                                                                      ),
+                                                                                                    ),
+                                                                                                    const Icon(
+                                                                                                      Icons.chevron_right,
+                                                                                                      color: Colors.grey,
+                                                                                                      size: 20,
+                                                                                                    ),
+                                                                                                  ],
+                                                                                                ),
+                                                                                              ),
+                                                                                            ),
+                                                                                          ),
+                                                                                        ExtraPackagingWidget(
+                                                                                          cartController: cartController,
+                                                                                        ),
+                                                                                        const SizedBox(),
+                                                                                      ],
+                                                                                    ),
+                                                                                  ),
+                                                                                ],
+                                                                              ),
+                                                                            ),
+                                                                      ResponsiveHelper.isDesktop(
+                                                                            context,
+                                                                          )
+                                                                          ? const SizedBox(
+                                                                              width: Dimensions.paddingSizeSmall,
+                                                                            )
+                                                                          : const SizedBox(),
+                                                                    ],
+                                                                  ),
+                                                                  ResponsiveHelper.isDesktop(
+                                                                        context,
+                                                                      )
+                                                                      ? WebSuggestedItemViewWidget(
+                                                                          cartList: _cartList!
+                                                                              .cast<
+                                                                                CartModel
+                                                                              >(),
+                                                                        )
+                                                                      : const SizedBox(),
+
+                                                                  // if (!isPharmacy) Padding(
+                                                                  //   padding: EdgeInsets.symmetric(
+                                                                  //     horizontal: 8.0,
+                                                                  //     vertical: 12,
+                                                                  //   ),
+                                                                  //   child: Container(
+                                                                  //     width: double.infinity,
+                                                                  //     padding: EdgeInsets.all(12),
+                                                                  //     decoration: BoxDecoration(
+                                                                  //       color: Colors.amber.withOpacity(0.1),
+                                                                  //       borderRadius: BorderRadius.circular(12.0),
+                                                                  //       boxShadow: [
+                                                                  //         BoxShadow(
+                                                                  //           color: Colors.black.withOpacity(0.03),
+                                                                  //           offset: const Offset(0, 2),
+                                                                  //           blurRadius: 6,
+                                                                  //         ),
+                                                                  //       ],
+                                                                  //     ),
+                                                                  //     child: Row(
+                                                                  //       crossAxisAlignment: CrossAxisAlignment.center,
+                                                                  //       children: [
+                                                                  //         Container(
+                                                                  //           width: 44.w,
+                                                                  //           height: 44.h,
+                                                                  //           alignment: Alignment.center,
+                                                                  //           margin: const EdgeInsets.only(right: 12),
+                                                                  //           child: CustomAssetImageWidget(
+                                                                  //             "assets/image/brain.png",
+                                                                  //             width: 44.w,
+                                                                  //             height: 44.h,
+                                                                  //           ),
+                                                                  //         ),
+                                                                  //         Container(
+                                                                  //           width: 1,
+                                                                  //           height: 44,
+                                                                  //           color: Colors.black12,
+                                                                  //           margin: const EdgeInsets.only(right: 12),
+                                                                  //         ),
+                                                                  //         Expanded(
+                                                                  //           child: RichText(
+                                                                  //             text: TextSpan(
+                                                                  //               style: robotoRegular.copyWith(
+                                                                  //                 color: Colors.black,
+                                                                  //                 fontSize: 11.sp,
+                                                                  //                 height: 1.25,
+                                                                  //               ),
+                                                                  //               children:  [
+                                                                  //                 TextSpan(
+                                                                  //                   text:
+                                                                  //                   "We're currently in our AYT testing phase\n",
+                                                                  //                   style: robotoRegular.copyWith(
+                                                                  //                     fontWeight: FontWeight.w100,
+                                                                  //                     fontSize: 12,color:Colors.grey.shade600
+                                                                  //                   ),
+                                                                  //                 ),
+                                                                  //                 TextSpan(
+                                                                  //                   text: "to ",
+                                                                  //                   style: robotoRegular.copyWith(
+                                                                  //                     fontWeight: FontWeight.w100,
+                                                                  //                       fontSize: 12,color:Colors.grey.shade600
+                                                                  //                   ),
+                                                                  //                 ),
+                                                                  //                 TextSpan(
+                                                                  //                   text: "fine-tune your experience",
+                                                                  //                   style: robotoBold.copyWith(
+                                                                  //                     fontWeight: FontWeight.w700,
+                                                                  //                   ),
+                                                                  //                 ),
+                                                                  //               ],
+                                                                  //             ),
+                                                                  //           ),
+                                                                  //         ),
+                                                                  //       ],
+                                                                  //     ),
+                                                                  //   ),
+                                                                  // ),
+                                                                ],
+                                                              )
+                                                            : SizedBox();
+                                                      },
+                                                    );
+                                                  },
+                                                ),
+                                                FooterView(
+                                                  child: SizedBox(
+                                                    width:
+                                                        Dimensions.webMaxWidth,
+                                                    child:
+                                                        ResponsiveHelper.isDesktop(
+                                                          context,
+                                                        )
+                                                        ? Padding(
+                                                            padding: const EdgeInsets.only(
+                                                              top: Dimensions
+                                                                  .paddingSizeLarge,
+                                                            ),
+                                                            child: Row(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              children: [
+                                                                Expanded(
+                                                                  flex: 6,
+                                                                  child: TopSection(
+                                                                    checkoutController:
+                                                                        checkoutController,
+                                                                    charge:
+                                                                        originalCharge,
+                                                                    deliveryCharge:
+                                                                        deliveryCharge,
+                                                                    addressList:
+                                                                        addressList,
+                                                                    tomorrowClosed:
+                                                                        tomorrowClosed,
+                                                                    todayClosed:
+                                                                        todayClosed,
+                                                                    module:
+                                                                        module,
+                                                                    price:
+                                                                        price,
+                                                                    discount:
+                                                                        discount,
+                                                                    addOns:
+                                                                        addOns,
+                                                                    address:
+                                                                        address,
+                                                                    isPrescriptionRequired:
+                                                                        isPrescriptionRequired,
+                                                                    cartList:
+                                                                        _cartList,
+                                                                    isCashOnDeliveryActive:
+                                                                        _isCashOnDeliveryActive!,
+                                                                    isDigitalPaymentActive:
+                                                                        _isDigitalPaymentActive!,
+                                                                    isWalletActive:
+                                                                        _isWalletActive,
+                                                                    storeId: widget
+                                                                        .storeId,
+                                                                    total:
+                                                                        total,
+                                                                    isOfflinePaymentActive:
+                                                                        _isOfflinePaymentActive,
+                                                                    guestNameTextEditingController:
+                                                                        guestContactPersonNameController,
+                                                                    guestNumberTextEditingController:
+                                                                        guestContactPersonNumberController,
+                                                                    guestNumberNode:
+                                                                        guestNumberNode,
+                                                                    guestEmailController:
+                                                                        guestEmailController,
+                                                                    guestEmailNode:
+                                                                        guestEmailNode,
+                                                                    tooltipController1:
+                                                                        tooltipController1,
+                                                                    tooltipController2:
+                                                                        tooltipController2,
+                                                                    dmTipsTooltipController:
+                                                                        tooltipController3,
+                                                                    guestPasswordController:
+                                                                        guestPasswordController,
+                                                                    guestConfirmPasswordController:
+                                                                        guestConfirmPasswordController,
+                                                                    guestPasswordNode:
+                                                                        guestPasswordNode,
+                                                                    guestConfirmPasswordNode:
+                                                                        guestConfirmPasswordNode,
+                                                                    variationPrice:
+                                                                        variations,
+                                                                    deliveryChargeForView:
+                                                                        _deliveryChargeForView,
+                                                                    badWeatherCharge:
+                                                                        badWeatherChargeForToolTip,
+                                                                    extraChargeForToolTip:
+                                                                        extraChargeForToolTip,
+                                                                  ),
+                                                                ),
+                                                                const SizedBox(
+                                                                  width: Dimensions
+                                                                      .paddingSizeLarge,
+                                                                ),
+
+                                                                Expanded(
+                                                                  flex: 4,
+                                                                  child: BottomSection(
+                                                                    checkoutController:
+                                                                        checkoutController,
+                                                                    total:
+                                                                        total,
+                                                                    module:
+                                                                        module!,
+                                                                    subTotal:
+                                                                        subTotal,
+                                                                    discount:
+                                                                        discount,
+                                                                    couponController:
+                                                                        couponController,
+                                                                    taxIncluded:
+                                                                        taxIncluded,
+                                                                    tax: checkoutController
+                                                                        .orderTax!,
+                                                                    deliveryCharge:
+                                                                        deliveryCharge,
+                                                                    todayClosed:
+                                                                        todayClosed,
+                                                                    tomorrowClosed:
+                                                                        tomorrowClosed,
+                                                                    orderAmount:
+                                                                        orderAmount,
+                                                                    maxCodOrderAmount:
+                                                                        maxCodOrderAmount,
+                                                                    storeId: widget
+                                                                        .storeId,
+                                                                    taxPercent:
+                                                                        _taxPercent,
+                                                                    price:
+                                                                        price,
+                                                                    addOns:
+                                                                        addOns,
+                                                                    isPrescriptionRequired:
+                                                                        isPrescriptionRequired,
+                                                                    checkoutButton: _orderPlaceButton(
+                                                                      checkoutController,
+                                                                      todayClosed,
+                                                                      tomorrowClosed,
+                                                                      orderAmount,
+                                                                      deliveryCharge,
+                                                                      checkoutController
+                                                                          .orderTax!,
+                                                                      discount,
+                                                                      total,
+                                                                      maxCodOrderAmount,
+                                                                      isPrescriptionRequired,
+                                                                    ),
+                                                                    referralDiscount:
+                                                                        referralDiscount,
+                                                                    variationPrice:
+                                                                        variations,
+                                                                    extraDiscount:
+                                                                        extraDiscount,
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          )
+                                                        : isPharmacy
+                                                        ? _pharmacyCheckoutBody(
+                                                            checkoutController,
+                                                            total,
+                                                            _isCashOnDeliveryActive!,
+                                                            _isDigitalPaymentActive!,
+                                                            _isWalletActive,
+                                                            _isOfflinePaymentActive,
+                                                            isPrescriptionRequired,
+                                                            deliveryCharge,
+                                                            subTotal,
+                                                            discount,
+                                                            couponDiscount,
+                                                            taxIncluded,
+                                                            checkoutController
+                                                                .orderTax!,
+                                                            checkoutController
+                                                                .tips,
+                                                            additionalCharge,
+                                                            extraPackagingCharge,
+                                                            otherCharge,
+                                                            referralDiscount,
+                                                          )
+                                                        : Column(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              TopSection(
+                                                                checkoutController:
+                                                                    checkoutController,
+                                                                charge:
+                                                                    originalCharge,
+                                                                deliveryCharge:
+                                                                    deliveryCharge,
+                                                                addressList:
+                                                                    addressList,
+                                                                tomorrowClosed:
+                                                                    tomorrowClosed,
+                                                                todayClosed:
+                                                                    todayClosed,
+                                                                module: module,
+                                                                price: price,
+                                                                discount:
+                                                                    discount,
+                                                                addOns: addOns,
+                                                                address:
+                                                                    address,
+                                                                cartList:
+                                                                    _cartList,
+                                                                isCashOnDeliveryActive:
+                                                                    _isCashOnDeliveryActive!,
+                                                                isDigitalPaymentActive:
+                                                                    _isDigitalPaymentActive!,
+                                                                isWalletActive:
+                                                                    _isWalletActive,
+                                                                storeId: widget
+                                                                    .storeId,
+                                                                total: total,
+                                                                isPrescriptionRequired:
+                                                                    isPrescriptionRequired,
+                                                                isOfflinePaymentActive:
+                                                                    _isOfflinePaymentActive,
+                                                                guestNameTextEditingController:
+                                                                    guestContactPersonNameController,
+                                                                guestNumberTextEditingController:
+                                                                    guestContactPersonNumberController,
+                                                                guestNumberNode:
+                                                                    guestNumberNode,
+                                                                guestEmailController:
+                                                                    guestEmailController,
+                                                                guestEmailNode:
+                                                                    guestEmailNode,
+                                                                tooltipController1:
+                                                                    tooltipController1,
+                                                                tooltipController2:
+                                                                    tooltipController2,
+                                                                dmTipsTooltipController:
+                                                                    tooltipController3,
+                                                                guestPasswordController:
+                                                                    guestPasswordController,
+                                                                guestConfirmPasswordController:
+                                                                    guestConfirmPasswordController,
+                                                                guestPasswordNode:
+                                                                    guestPasswordNode,
+                                                                guestConfirmPasswordNode:
+                                                                    guestConfirmPasswordNode,
+                                                                variationPrice:
+                                                                    variations,
+                                                                deliveryChargeForView:
+                                                                    _deliveryChargeForView,
+                                                                badWeatherCharge:
+                                                                    badWeatherChargeForToolTip,
+                                                                extraChargeForToolTip:
+                                                                    extraChargeForToolTip,
+                                                              ),
+
+                                                              BottomSection(
+                                                                checkoutController:
+                                                                    checkoutController,
+                                                                total: total,
+                                                                module: module!,
+                                                                subTotal:
+                                                                    subTotal,
+                                                                discount:
+                                                                    discount,
+                                                                couponController:
+                                                                    couponController,
+                                                                taxIncluded:
+                                                                    taxIncluded,
+                                                                tax: checkoutController
+                                                                    .orderTax!,
+                                                                deliveryCharge:
+                                                                    deliveryCharge,
+                                                                todayClosed:
+                                                                    todayClosed,
+                                                                tomorrowClosed:
+                                                                    tomorrowClosed,
+                                                                orderAmount:
+                                                                    orderAmount,
+                                                                maxCodOrderAmount:
+                                                                    maxCodOrderAmount,
+                                                                storeId: widget
+                                                                    .storeId,
+                                                                taxPercent:
+                                                                    _taxPercent,
+                                                                price: price,
+                                                                addOns: addOns,
+                                                                isPrescriptionRequired:
+                                                                    isPrescriptionRequired,
+                                                                checkoutButton: _orderPlaceButton(
+                                                                  checkoutController,
+                                                                  todayClosed,
+                                                                  tomorrowClosed,
+                                                                  orderAmount,
+                                                                  deliveryCharge,
+                                                                  checkoutController
+                                                                      .orderTax!,
+                                                                  discount,
+                                                                  total,
+                                                                  maxCodOrderAmount,
+                                                                  isPrescriptionRequired,
+                                                                ),
+                                                                referralDiscount:
+                                                                    referralDiscount,
+                                                                variationPrice:
+                                                                    variations,
+                                                                extraDiscount:
+                                                                    extraDiscount,
+                                                              ),
+                                                            ],
+                                                          ),
                                                   ),
-                                                  child: const SizedBox(
-                                                    width: double.infinity,
-                                                    height: 0,
-                                                  ),
                                                 ),
-                                                const SizedBox(
-                                                  width: double.infinity,
-                                                  height: 0.5,
-                                                ),
-                                                const Padding(
-                                                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                                  child: Divider(height: 1, color: Color(0xFFF1F5F9)),
-                                                ),
-                                                if (isFood) suggestedItemView(_cartList!.cast<CartModel>()),
                                               ],
                                             ),
                                           ),
+                                        ),
 
-
-                                          if (isFood)
-                                            Padding(
-                                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                              child: InkWell(
-                                                onTap: () {
-                                                  // Instructions logic
-                                                },
-                                                child: Container(
-                                                  padding: const EdgeInsets.all(12),
+                                        ResponsiveHelper.isDesktop(context)
+                                            ? const SizedBox()
+                                            : isPharmacy
+                                            ? _pharmacyOrderPlaceButton(
+                                                checkoutController,
+                                                todayClosed,
+                                                tomorrowClosed,
+                                                orderAmount,
+                                                deliveryCharge,
+                                                checkoutController.orderTax!,
+                                                discount,
+                                                total,
+                                                maxCodOrderAmount,
+                                                isPrescriptionRequired,
+                                              )
+                                            : SafeArea(
+                                                child: AnimatedContainer(
+                                                  duration: const Duration(
+                                                    milliseconds: 400,
+                                                  ),
+                                                  curve: Curves.fastOutSlowIn,
                                                   decoration: BoxDecoration(
                                                     color: Colors.white,
-                                                    borderRadius: BorderRadius.circular(12),
-                                                    border: Border.all(color: Colors.grey.shade100),
+                                                    borderRadius:
+                                                        const BorderRadius.only(
+                                                          topRight:
+                                                              Radius.circular(
+                                                                25,
+                                                              ),
+                                                          topLeft:
+                                                              Radius.circular(
+                                                                25,
+                                                              ),
+                                                        ),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Colors.black.withValues(
+                                                          alpha:
+                                                              checkoutController
+                                                                  .isAmountExpanded
+                                                              ? 0.15
+                                                              : 0.05,
+                                                        ),
+                                                        blurRadius:
+                                                            checkoutController
+                                                                .isAmountExpanded
+                                                            ? 30
+                                                            : 15,
+                                                        offset: Offset(
+                                                          0,
+                                                          checkoutController
+                                                                  .isAmountExpanded
+                                                              ? -10
+                                                              : -4,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                    border: Border.all(
+                                                      color:
+                                                          checkoutController
+                                                              .isAmountExpanded
+                                                          ? Colors.deepOrange
+                                                                .withValues(
+                                                                  alpha: 0.1,
+                                                                )
+                                                          : Colors.transparent,
+                                                      width: 1,
+                                                    ),
                                                   ),
-                                                  child: Row(
+                                                  child: Column(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
                                                     children: [
-                                                      const Icon(Icons.note_add_outlined, color: Color(0xFF16A34A), size: 20),
-                                                      const SizedBox(width: 8),
-                                                      Text('Add cooking instructions', style: robotoMedium.copyWith(fontSize: 14, color: Colors.grey.shade700)),
-                                                      const Spacer(),
-                                                      const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
+                                                      /// Handle/Indicator for expansion
+                                                      if (!checkoutController
+                                                          .isAmountExpanded)
+                                                        Container(
+                                                          width: 40,
+                                                          height: 4,
+                                                          margin:
+                                                              const EdgeInsets.symmetric(
+                                                                vertical: 8,
+                                                              ),
+                                                          decoration: BoxDecoration(
+                                                            color: Colors
+                                                                .grey
+                                                                .shade300,
+                                                            borderRadius:
+                                                                BorderRadius.circular(
+                                                                  2,
+                                                                ),
+                                                          ),
+                                                        ),
+
+                                                      Padding(
+                                                        padding: const EdgeInsets.fromLTRB(
+                                                          Dimensions
+                                                              .paddingSizeLarge,
+                                                          8,
+                                                          Dimensions
+                                                              .paddingSizeLarge,
+                                                          4,
+                                                        ),
+                                                        child: Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          children: [
+                                                            Column(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              mainAxisSize:
+                                                                  MainAxisSize
+                                                                      .min,
+                                                              children: [
+                                                                Text(
+                                                                  'Total',
+                                                                  style: robotoMedium.copyWith(
+                                                                    fontSize:
+                                                                        12,
+                                                                    color: Colors
+                                                                        .grey
+                                                                        .shade600,
+                                                                  ),
+                                                                ),
+                                                                const SizedBox(
+                                                                  height: 2,
+                                                                ),
+                                                                Row(
+                                                                  children: [
+                                                                    PriceConverter.convertAnimationPrice(
+                                                                      checkoutController
+                                                                          .viewTotalPrice,
+                                                                      textStyle: robotoBlack.copyWith(
+                                                                        fontSize:
+                                                                            22,
+                                                                        color: Colors
+                                                                            .black,
+                                                                      ),
+                                                                    ),
+                                                                    const SizedBox(
+                                                                      width: 4,
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            InkWell(
+                                                              onTap: () =>
+                                                                  checkoutController
+                                                                      .toggleAmountExpanded(),
+                                                              child: AnimatedContainer(
+                                                                duration:
+                                                                    const Duration(
+                                                                      milliseconds:
+                                                                          300,
+                                                                    ),
+                                                                padding:
+                                                                    const EdgeInsets.symmetric(
+                                                                      horizontal:
+                                                                          14,
+                                                                      vertical:
+                                                                          8,
+                                                                    ),
+                                                                decoration: BoxDecoration(
+                                                                  color:
+                                                                      checkoutController
+                                                                          .isAmountExpanded
+                                                                      ? Colors
+                                                                            .deepOrange
+                                                                            .shade700
+                                                                      : Colors
+                                                                            .deepOrange,
+                                                                  borderRadius:
+                                                                      BorderRadius.circular(
+                                                                        10,
+                                                                      ),
+                                                                  boxShadow:
+                                                                      checkoutController
+                                                                          .isAmountExpanded
+                                                                      ? [
+                                                                          BoxShadow(
+                                                                            color: Colors.deepOrange.withValues(
+                                                                              alpha: 0.3,
+                                                                            ),
+                                                                            blurRadius:
+                                                                                8,
+                                                                            offset: const Offset(
+                                                                              0,
+                                                                              4,
+                                                                            ),
+                                                                          ),
+                                                                        ]
+                                                                      : [],
+                                                                ),
+                                                                child: Row(
+                                                                  children: [
+                                                                    Text(
+                                                                      checkoutController
+                                                                              .isAmountExpanded
+                                                                          ? "hide_details".tr
+                                                                          : "view_details".tr,
+                                                                      style: robotoBold.copyWith(
+                                                                        color: Colors
+                                                                            .white,
+                                                                        fontSize:
+                                                                            12,
+                                                                      ),
+                                                                    ),
+                                                                    const SizedBox(
+                                                                      width: 6,
+                                                                    ),
+                                                                    Icon(
+                                                                      checkoutController
+                                                                              .isAmountExpanded
+                                                                          ? Icons.keyboard_arrow_up
+                                                                          : Icons.keyboard_arrow_down,
+                                                                      color: Colors
+                                                                          .white,
+                                                                      size: 16,
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+
+                                                      if (savings > 0)
+                                                        Padding(
+                                                          padding: const EdgeInsets.symmetric(
+                                                            horizontal: Dimensions
+                                                                .paddingSizeLarge,
+                                                          ),
+                                                          child: Align(
+                                                            alignment: Alignment
+                                                                .centerLeft,
+                                                            child: Text(
+                                                              'You saved ${PriceConverter.convertPrice(savings)} on this order',
+                                                              style: robotoMedium
+                                                                  .copyWith(
+                                                                    fontSize:
+                                                                        11,
+                                                                    color: Colors
+                                                                        .green
+                                                                        .shade600,
+                                                                  ),
+                                                            ),
+                                                          ),
+                                                        ),
+
+                                                      AnimatedCrossFade(
+                                                        firstChild:
+                                                            const SizedBox(
+                                                              height: 0,
+                                                              width: double
+                                                                  .infinity,
+                                                            ),
+                                                        secondChild: Container(
+                                                          constraints:
+                                                              BoxConstraints(
+                                                                maxHeight:
+                                                                    Get.height *
+                                                                    0.4,
+                                                              ),
+                                                          child: SingleChildScrollView(
+                                                            padding:
+                                                                const EdgeInsets.all(
+                                                                  Dimensions
+                                                                      .paddingSizeLarge,
+                                                                ),
+                                                            child: Column(
+                                                              children: [
+                                                                const Divider(
+                                                                  height: 24,
+                                                                  color: Color(
+                                                                    0xFFF1F5F9,
+                                                                  ),
+                                                                ),
+                                                                _priceRow(
+                                                                  'Item Total',
+                                                                  price +
+                                                                      addOns +
+                                                                      variations,
+                                                                ),
+                                                                if (discount >
+                                                                    0)
+                                                                  _priceRow(
+                                                                    'Discount',
+                                                                    discount,
+                                                                    isDiscount:
+                                                                        true,
+                                                                  ),
+                                                                if (couponController
+                                                                        .discount! >
+                                                                    0)
+                                                                  _priceRow(
+                                                                    'Coupon Discount',
+                                                                    couponController
+                                                                        .discount!,
+                                                                    isDiscount:
+                                                                        true,
+                                                                  ),
+                                                                if (referralDiscount >
+                                                                    0)
+                                                                  _priceRow(
+                                                                    'Referral Discount',
+                                                                    referralDiscount,
+                                                                    isDiscount:
+                                                                        true,
+                                                                  ),
+                                                                _priceRow(
+                                                                  'Delivery Fee',
+                                                                  deliveryCharge,
+                                                                ),
+                                                                if (widget.storeId ==
+                                                                        null &&
+                                                                    checkoutController
+                                                                        .store!
+                                                                        .extraPackagingStatus! &&
+                                                                    Get.find<
+                                                                          CartController
+                                                                        >()
+                                                                        .needExtraPackage)
+                                                                  _priceRow(
+                                                                    'Packaging Fee',
+                                                                    checkoutController
+                                                                        .store!
+                                                                        .extraPackagingAmount!,
+                                                                  ),
+                                                                if (widget.storeId ==
+                                                                        null &&
+                                                                    checkoutController
+                                                                            .store!
+                                                                            .otherchargeenabled ==
+                                                                        true)
+                                                                  _priceRow(
+                                                                    checkoutController
+                                                                            .store
+                                                                            ?.otherchargelabel ??
+                                                                        "Other Fee",
+                                                                    checkoutController
+                                                                        .store!
+                                                                        .otherchargeamount!,
+                                                                  ),
+                                                                if (checkoutController
+                                                                        .orderTax! >
+                                                                    0)
+                                                                  _priceRow(
+                                                                    'VAT/Tax',
+                                                                    checkoutController
+                                                                        .orderTax!,
+                                                                  ),
+                                                                if (!takeAway &&
+                                                                    Get.find<
+                                                                              SplashController
+                                                                            >()
+                                                                            .configModel!
+                                                                            .dmTipsStatus ==
+                                                                        1 &&
+                                                                    checkoutController
+                                                                            .tips >
+                                                                        0)
+                                                                  _priceRow(
+                                                                    'Delivery Man Tips',
+                                                                    checkoutController
+                                                                        .tips,
+                                                                  ),
+                                                                if (Get.find<
+                                                                      SplashController
+                                                                    >()
+                                                                    .configModel!
+                                                                    .additionalChargeStatus!)
+                                                                  _priceRow(
+                                                                    Get.find<
+                                                                          SplashController
+                                                                        >()
+                                                                        .configModel!
+                                                                        .additionalChargeName!,
+                                                                    Get.find<
+                                                                          SplashController
+                                                                        >()
+                                                                        .configModel!
+                                                                        .additionCharge!,
+                                                                  ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        crossFadeState:
+                                                            checkoutController
+                                                                .isAmountExpanded
+                                                            ? CrossFadeState
+                                                                  .showSecond
+                                                            : CrossFadeState
+                                                                  .showFirst,
+                                                        duration:
+                                                            const Duration(
+                                                              milliseconds: 300,
+                                                            ),
+                                                      ),
+
+                                                      const SizedBox(height: 8),
+
+                                                      _orderPlaceButton(
+                                                        checkoutController,
+                                                        todayClosed,
+                                                        tomorrowClosed,
+                                                        orderAmount,
+                                                        deliveryCharge,
+                                                        checkoutController
+                                                            .orderTax!,
+                                                        discount,
+                                                        total,
+                                                        maxCodOrderAmount,
+                                                        isPrescriptionRequired,
+                                                      ),
                                                     ],
                                                   ),
                                                 ),
                                               ),
-                                            ),
-                                          ExtraPackagingWidget(cartController: cartController),
-                                          const SizedBox(),
-                                        ]),
-                                      ),
-
-
-
-                                    ]),
-                                  ),
-                                  ResponsiveHelper.isDesktop(context)
-                                      ? const SizedBox(
-                                      width: Dimensions.paddingSizeSmall)
-                                      : const SizedBox(),
-
-                                ]),
-                                ResponsiveHelper.isDesktop(context)
-                                    ? WebSuggestedItemViewWidget(
-                                    cartList: _cartList!.cast<CartModel>())
-                                    : const SizedBox(),
-                                // if (!isPharmacy) Padding(
-                                //   padding: EdgeInsets.symmetric(
-                                //     horizontal: 8.0,
-                                //     vertical: 12,
-                                //   ),
-                                //   child: Container(
-                                //     width: double.infinity,
-                                //     padding: EdgeInsets.all(12),
-                                //     decoration: BoxDecoration(
-                                //       color: Colors.amber.withOpacity(0.1),
-                                //       borderRadius: BorderRadius.circular(12.0),
-                                //       boxShadow: [
-                                //         BoxShadow(
-                                //           color: Colors.black.withOpacity(0.03),
-                                //           offset: const Offset(0, 2),
-                                //           blurRadius: 6,
-                                //         ),
-                                //       ],
-                                //     ),
-                                //     child: Row(
-                                //       crossAxisAlignment: CrossAxisAlignment.center,
-                                //       children: [
-                                //         Container(
-                                //           width: 44.w,
-                                //           height: 44.h,
-                                //           alignment: Alignment.center,
-                                //           margin: const EdgeInsets.only(right: 12),
-                                //           child: CustomAssetImageWidget(
-                                //             "assets/image/brain.png",
-                                //             width: 44.w,
-                                //             height: 44.h,
-                                //           ),
-                                //         ),
-                                //         Container(
-                                //           width: 1,
-                                //           height: 44,
-                                //           color: Colors.black12,
-                                //           margin: const EdgeInsets.only(right: 12),
-                                //         ),
-                                //         Expanded(
-                                //           child: RichText(
-                                //             text: TextSpan(
-                                //               style: robotoRegular.copyWith(
-                                //                 color: Colors.black,
-                                //                 fontSize: 11.sp,
-                                //                 height: 1.25,
-                                //               ),
-                                //               children:  [
-                                //                 TextSpan(
-                                //                   text:
-                                //                   "We're currently in our AYT testing phase\n",
-                                //                   style: robotoRegular.copyWith(
-                                //                     fontWeight: FontWeight.w100,
-                                //                     fontSize: 12,color:Colors.grey.shade600
-                                //                   ),
-                                //                 ),
-                                //                 TextSpan(
-                                //                   text: "to ",
-                                //                   style: robotoRegular.copyWith(
-                                //                     fontWeight: FontWeight.w100,
-                                //                       fontSize: 12,color:Colors.grey.shade600
-                                //                   ),
-                                //                 ),
-                                //                 TextSpan(
-                                //                   text: "fine-tune your experience",
-                                //                   style: robotoBold.copyWith(
-                                //                     fontWeight: FontWeight.w700,
-                                //                   ),
-                                //                 ),
-                                //               ],
-                                //             ),
-                                //           ),
-                                //         ),
-                                //       ],
-                                //     ),
-                                //   ),
-                                // ),
-                            
-                              ])
-                                  : SizedBox();
-                            });
-                      }),
-                      FooterView(child: SizedBox(
-                        width: Dimensions.webMaxWidth,
-                        child: ResponsiveHelper.isDesktop(context) ? Padding(
-                          padding: const EdgeInsets.only(
-                              top: Dimensions.paddingSizeLarge),
-                          child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-
-                                Expanded(flex: 6, child: TopSection(
-                                  checkoutController: checkoutController,
-                                  charge: originalCharge,
-                                  deliveryCharge: deliveryCharge,
-                                  addressList: addressList,
-                                  tomorrowClosed: tomorrowClosed,
-                                  todayClosed: todayClosed,
-                                  module: module,
-                                  price: price,
-                                  discount: discount,
-                                  addOns: addOns,
-                                  address: address,
-                                  isPrescriptionRequired: isPrescriptionRequired,
-                                  cartList: _cartList,
-                                  isCashOnDeliveryActive: _isCashOnDeliveryActive!,
-                                  isDigitalPaymentActive: _isDigitalPaymentActive!,
-                                  isWalletActive: _isWalletActive,
-                                  storeId: widget.storeId,
-                                  total: total,
-                                  isOfflinePaymentActive: _isOfflinePaymentActive,
-                                  guestNameTextEditingController: guestContactPersonNameController,
-                                  guestNumberTextEditingController: guestContactPersonNumberController,
-                                  guestNumberNode: guestNumberNode,
-                                  guestEmailController: guestEmailController,
-                                  guestEmailNode: guestEmailNode,
-                                  tooltipController1: tooltipController1,
-                                  tooltipController2: tooltipController2,
-                                  dmTipsTooltipController: tooltipController3,
-                                  guestPasswordController: guestPasswordController,
-                                  guestConfirmPasswordController: guestConfirmPasswordController,
-                                  guestPasswordNode: guestPasswordNode,
-                                  guestConfirmPasswordNode: guestConfirmPasswordNode,
-                                  variationPrice: variations,
-                                  deliveryChargeForView: _deliveryChargeForView,
-                                  badWeatherCharge: badWeatherChargeForToolTip,
-                                  extraChargeForToolTip: extraChargeForToolTip,
-                                )),
-                                const SizedBox(
-                                    width: Dimensions.paddingSizeLarge),
-
-                                Expanded(flex: 4, child: BottomSection(
-                                  checkoutController: checkoutController,
-                                  total: total,
-                                  module: module!,
-                                  subTotal: subTotal,
-                                  discount: discount,
-                                  couponController: couponController,
-                                  taxIncluded: taxIncluded,
-                                  tax: checkoutController.orderTax!,
-                                  deliveryCharge: deliveryCharge,
-                                  todayClosed: todayClosed,
-                                  tomorrowClosed: tomorrowClosed,
-                                  orderAmount: orderAmount,
-                                  maxCodOrderAmount: maxCodOrderAmount,
-                                  storeId: widget.storeId,
-                                  taxPercent: _taxPercent,
-                                  price: price,
-                                  addOns: addOns,
-                                  isPrescriptionRequired: isPrescriptionRequired,
-                                  checkoutButton: _orderPlaceButton(
-                                    checkoutController,
-                                    todayClosed,
-                                    tomorrowClosed,
-                                    orderAmount,
-                                    deliveryCharge,
-                                    checkoutController.orderTax!,
-                                    discount,
-                                    total,
-                                    maxCodOrderAmount,
-                                    isPrescriptionRequired,
-                                  ),
-                                  referralDiscount: referralDiscount,
-                                  variationPrice: variations,
-                                  extraDiscount: extraDiscount,
-                                )),
-                              ]))
-                                    : isPharmacy ? _pharmacyCheckoutBody(
-                                        checkoutController, total, _isCashOnDeliveryActive!, _isDigitalPaymentActive!, _isWalletActive, _isOfflinePaymentActive,
-                                        isPrescriptionRequired, deliveryCharge, subTotal, discount, couponDiscount, taxIncluded, checkoutController.orderTax!,
-                                        checkoutController.tips, additionalCharge, extraPackagingCharge, otherCharge, referralDiscount,
-                                    ) : Column(crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-
-                              TopSection(
-                                checkoutController: checkoutController,
-                                charge: originalCharge,
-                                deliveryCharge: deliveryCharge,
-                                addressList: addressList,
-                                tomorrowClosed: tomorrowClosed,
-                                todayClosed: todayClosed,
-                                module: module,
-                                price: price,
-                                discount: discount,
-                                addOns: addOns,
-                                address: address,
-                                cartList: _cartList,
-                                isCashOnDeliveryActive: _isCashOnDeliveryActive!,
-                                isDigitalPaymentActive: _isDigitalPaymentActive!,
-                                isWalletActive: _isWalletActive,
-                                storeId: widget.storeId,
-                                total: total,
-                                 isPrescriptionRequired: isPrescriptionRequired,
-                                isOfflinePaymentActive: _isOfflinePaymentActive,
-                                guestNameTextEditingController: guestContactPersonNameController,
-                                guestNumberTextEditingController: guestContactPersonNumberController,
-                                guestNumberNode: guestNumberNode,
-                                guestEmailController: guestEmailController,
-                                guestEmailNode: guestEmailNode,
-                                tooltipController1: tooltipController1,
-                                tooltipController2: tooltipController2,
-                                dmTipsTooltipController: tooltipController3,
-                                guestPasswordController: guestPasswordController,
-                                guestConfirmPasswordController: guestConfirmPasswordController,
-                                guestPasswordNode: guestPasswordNode,
-                                guestConfirmPasswordNode: guestConfirmPasswordNode,
-                                variationPrice: variations,
-                                deliveryChargeForView: _deliveryChargeForView,
-                                badWeatherCharge: badWeatherChargeForToolTip,
-                                extraChargeForToolTip: extraChargeForToolTip,
-                              ),
-
-                              BottomSection(
-                                checkoutController: checkoutController,
-                                total: total,
-                                module: module!,
-                                subTotal: subTotal,
-                                discount: discount,
-                                couponController: couponController,
-                                taxIncluded: taxIncluded,
-                                tax: checkoutController.orderTax!,
-                                deliveryCharge: deliveryCharge,
-                                todayClosed: todayClosed,
-                                tomorrowClosed: tomorrowClosed,
-                                orderAmount: orderAmount,
-                                maxCodOrderAmount: maxCodOrderAmount,
-                                storeId: widget.storeId,
-                                taxPercent: _taxPercent,
-                                price: price,
-                                addOns: addOns,
-                                isPrescriptionRequired: isPrescriptionRequired,
-                                checkoutButton: _orderPlaceButton(
-                                  checkoutController,
-                                  todayClosed,
-                                  tomorrowClosed,
-                                  orderAmount,
-                                  deliveryCharge,
-                                  checkoutController.orderTax!,
-                                  discount,
-                                  total,
-                                  maxCodOrderAmount,
-                                  isPrescriptionRequired,
-                                ),
-                                referralDiscount: referralDiscount,
-                                variationPrice: variations,
-                                extraDiscount: extraDiscount,
-                              )
-                            ]),
-                      )),
-                    ],
-                  ),
-                )),
-
-                ResponsiveHelper.isDesktop(context)
-                    ? const SizedBox()
-                    : isPharmacy ? _pharmacyOrderPlaceButton(
-                      checkoutController, todayClosed, tomorrowClosed, orderAmount, deliveryCharge, checkoutController.orderTax!,
-                      discount, total, maxCodOrderAmount, isPrescriptionRequired,
-                    ) : SafeArea(
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 400),
-                          curve: Curves.fastOutSlowIn,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: const BorderRadius.only(topRight: Radius.circular(25), topLeft: Radius.circular(25)),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: checkoutController.isAmountExpanded ? 0.15 : 0.05),
-                                blurRadius: checkoutController.isAmountExpanded ? 30 : 15,
-                                offset: Offset(0, checkoutController.isAmountExpanded ? -10 : -4),
-                              ),
-                            ],
-                            border: Border.all(color: checkoutController.isAmountExpanded ? Colors.deepOrange.withValues(alpha: 0.1) : Colors.transparent, width: 1),
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              /// Handle/Indicator for expansion
-                              if (!checkoutController.isAmountExpanded)
-                                Container(
-                                  width: 40, height: 4,
-                                  margin: const EdgeInsets.symmetric(vertical: 8),
-                                  decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
-                                ),
-
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(Dimensions.paddingSizeLarge, 8, Dimensions.paddingSizeLarge, 4),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text('Total', style: robotoMedium.copyWith(fontSize: 12, color: Colors.grey.shade600)),
-                                        const SizedBox(height: 2),
-                                        Row(
-                                          children: [
-                                            PriceConverter.convertAnimationPrice(
-                                              checkoutController.viewTotalPrice,
-                                              textStyle: robotoBlack.copyWith(fontSize: 22, color: Colors.black),
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Icon(Icons.keyboard_arrow_down, size: 18, color: Colors.grey.shade400),
-                                          ],
-                                        ),
                                       ],
-                                    ),
-                                    InkWell(
-                                      onTap: () => checkoutController.toggleAmountExpanded(),
-                                      child: AnimatedContainer(
-                                        duration: const Duration(milliseconds: 300),
-                                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                        decoration: BoxDecoration(
-                                          color: checkoutController.isAmountExpanded ? Colors.deepOrange.shade700 : Colors.deepOrange,
-                                          borderRadius: BorderRadius.circular(10),
-                                          boxShadow: checkoutController.isAmountExpanded ? [BoxShadow(color: Colors.deepOrange.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 4))] : [],
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Text(
-                                              checkoutController.isAmountExpanded ? "hide_details".tr : "view_details".tr,
-                                              style: robotoBold.copyWith(color: Colors.white, fontSize: 12),
-                                            ),
-                                            const SizedBox(width: 6),
-                                            Icon(
-                                              checkoutController.isAmountExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                                              color: Colors.white,
-                                              size: 16,
-                                            ),
-                                          ],
-                                        ),
+                                    )
+                                  : SizedBox(
+                                      height: Get.height,
+                                      child: const NoDataScreen(
+                                        isCart: true,
+                                        text: '',
+                                        showFooter: true,
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              if (savings > 0)
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge),
-                                  child: Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Text(
-                                      'You saved ${PriceConverter.convertPrice(savings)} on this order',
-                                      style: robotoMedium.copyWith(fontSize: 11, color: Colors.green.shade600),
-                                    ),
-                                  ),
-                                ),
-
-                              AnimatedCrossFade(
-                                firstChild: const SizedBox(height: 0, width: double.infinity),
-                                secondChild: Container(
-                                  constraints: BoxConstraints(maxHeight: Get.height * 0.4),
-                                  child: SingleChildScrollView(
-                                    padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
-                                    child: Column(
-                                      children: [
-                                        const Divider(height: 24, color: Color(0xFFF1F5F9)),
-                                        _priceRow('Item Total', price + addOns + variations),
-                                        if (discount > 0) _priceRow('Discount', discount, isDiscount: true),
-                                        if (couponController.discount! > 0) _priceRow('Coupon Discount', couponController.discount!, isDiscount: true),
-                                        if (referralDiscount > 0) _priceRow('Referral Discount', referralDiscount, isDiscount: true),
-                                        _priceRow( 'Delivery Fee', deliveryCharge),
-                                        if (widget.storeId == null && checkoutController.store!.extraPackagingStatus! && Get.find<CartController>().needExtraPackage)
-                                          _priceRow('Packaging Fee', checkoutController.store!.extraPackagingAmount!),
-                                        if (widget.storeId == null && checkoutController.store!.otherchargeenabled == true)
-                                          _priceRow(checkoutController.store?.otherchargelabel ?? "Other Fee", checkoutController.store!.otherchargeamount!),
-                                        if (checkoutController.orderTax! > 0) _priceRow('VAT/Tax', checkoutController.orderTax!),
-                                        if (!takeAway && Get.find<SplashController>().configModel!.dmTipsStatus == 1 && checkoutController.tips > 0)
-                                          _priceRow('Delivery Man Tips', checkoutController.tips),
-                                        if (Get.find<SplashController>().configModel!.additionalChargeStatus!)
-                                          _priceRow(Get.find<SplashController>().configModel!.additionalChargeName!, Get.find<SplashController>().configModel!.additionCharge!),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                crossFadeState: checkoutController.isAmountExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-                                duration: const Duration(milliseconds: 300),
-                              ),
-
-                              const SizedBox(height: 8),
-
-                              _orderPlaceButton(
-                                checkoutController,
-                                todayClosed,
-                                tomorrowClosed,
-                                orderAmount,
-                                deliveryCharge,
-                                checkoutController.orderTax!,
-                                discount,
-                                total,
-                                maxCodOrderAmount,
-                                isPrescriptionRequired,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-              ],
-            ) :
-            SizedBox(
-                height: Get.height,
-                child: const NoDataScreen(
-                    isCart: true, text: '', showFooter: true))
-                : FactCardView();
-            // const CheckoutScreenShimmerView();
-          });
-        });
-      }) : NotLoggedInScreen(callBack: (value) {
-        initCall();
-        setState(() {});
-      }),
+                                    )
+                            : FactCardView();
+                        // const CheckoutScreenShimmerView();
+                      },
+                    );
+                  },
+                );
+              },
+            )
+          : NotLoggedInScreen(
+              callBack: (value) {
+                initCall();
+                setState(() {});
+              },
+            ),
     );
   }
 
   Widget suggestedItemView(List<CartModel> cartList) {
-    return GetBuilder<StoreController>(builder: (storeController) {
-      List<Item>? suggestedItems;
-      if (storeController.cartSuggestItemModel != null && storeController.cartSuggestItemModel!.items != null) {
-        suggestedItems = [];
-        List<int> cartIds = [];
-        for (CartModel cartItem in cartList) {
-          cartIds.add(cartItem.item!.id!);
-        }
-        for (Item item in storeController.cartSuggestItemModel!.items!) {
-          if (!cartIds.contains(item.id)) {
-            suggestedItems.add(item);
+    return GetBuilder<StoreController>(
+      builder: (storeController) {
+        List<Item>? suggestedItems;
+        if (storeController.cartSuggestItemModel != null &&
+            storeController.cartSuggestItemModel!.items != null) {
+          suggestedItems = [];
+          List<int> cartIds = [];
+          for (CartModel cartItem in cartList) {
+            cartIds.add(cartItem.item!.id!);
+          }
+          for (Item item in storeController.cartSuggestItemModel!.items!) {
+            if (!cartIds.contains(item.id)) {
+              suggestedItems.add(item);
+            }
           }
         }
-      }
-      return storeController.cartSuggestItemModel != null &&
-          suggestedItems != null && suggestedItems.isNotEmpty ? Padding(
-            padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
-            child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-                const SizedBox(height: Dimensions.paddingSizeSmall),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: Dimensions.paddingSizeDefault,
-                      vertical: Dimensions.paddingSizeExtraSmall),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'You might also like',
-                        style: robotoBold.copyWith(fontSize: 16),
-                      ),
-                      Text(
-                        'See more',
-                        style: robotoMedium.copyWith(color: Colors.blue, fontSize: 12),
-                      ),
-                    ],
-                  ),
+        return storeController.cartSuggestItemModel != null &&
+                suggestedItems != null &&
+                suggestedItems.isNotEmpty
+            ? Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: Dimensions.paddingSizeSmall,
                 ),
-
-                SizedBox(
-                  height: ResponsiveHelper.isDesktop(context) ? 900 : 300,
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    scrollDirection: Axis.horizontal,
-                    itemCount: suggestedItems.length,
-                    physics: const BouncingScrollPhysics(),
-                    padding: EdgeInsets.only(
-                        left: ResponsiveHelper.isDesktop(context) ? Dimensions
-                            .paddingSizeExtraSmall : Dimensions
-                            .paddingSizeDefault),
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: ResponsiveHelper.isDesktop(context)
-                            ? const EdgeInsets.symmetric(vertical: 20)
-                            : const EdgeInsets.symmetric(vertical: 10),
-                        child: Container(
-                          width: ResponsiveHelper.isDesktop(context)
-                              ? 900
-                              : 220,
-                          padding: const EdgeInsets.only(
-                              right: Dimensions.paddingSizeSmall,
-                              left: Dimensions.paddingSizeExtraSmall),
-                          margin: const EdgeInsets.only(
-                              right: Dimensions.paddingSizeSmall),
-                          child: ItemWidgetStore(
-                            isStore: false,
-                            item: suggestedItems![index],
-                            fromCartSuggestion: true,
-                            store: null,
-                            index: index,
-                            length: null,
-                            isCampaign: false,
-                            inStore: true,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: Dimensions.paddingSizeSmall),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: Dimensions.paddingSizeDefault,
+                        vertical: Dimensions.paddingSizeExtraSmall,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'You might also like',
+                            style: robotoBold.copyWith(fontSize: 16),
                           ),
+                          Text(
+                            'See more',
+                            style: robotoMedium.copyWith(
+                              color: Colors.blue,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    SizedBox(
+                      height: ResponsiveHelper.isDesktop(context) ? 900 : 300,
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        scrollDirection: Axis.horizontal,
+                        itemCount: suggestedItems.length,
+                        physics: const BouncingScrollPhysics(),
+                        padding: EdgeInsets.only(
+                          left: ResponsiveHelper.isDesktop(context)
+                              ? Dimensions.paddingSizeExtraSmall
+                              : Dimensions.paddingSizeDefault,
                         ),
-                      );
-                    },
-                  ),
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: ResponsiveHelper.isDesktop(context)
+                                ? const EdgeInsets.symmetric(vertical: 20)
+                                : const EdgeInsets.symmetric(vertical: 10),
+                            child: Container(
+                              width: ResponsiveHelper.isDesktop(context)
+                                  ? 900
+                                  : 220,
+                              padding: const EdgeInsets.only(
+                                right: Dimensions.paddingSizeSmall,
+                                left: Dimensions.paddingSizeExtraSmall,
+                              ),
+                              margin: const EdgeInsets.only(
+                                right: Dimensions.paddingSizeSmall,
+                              ),
+                              child: ItemWidgetStore(
+                                isStore: false,
+                                item: suggestedItems![index],
+                                fromCartSuggestion: true,
+                                store: null,
+                                index: index,
+                                length: null,
+                                isCampaign: false,
+                                inStore: true,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-        ],
-      )) : const SizedBox();
-    });
+              )
+            : const SizedBox();
+      },
+    );
   }
 
   Widget _pharmacyCheckoutBody(
-      CheckoutController checkoutController, double total, bool isCashOnDeliveryActive, bool isDigitalPaymentActive, bool isWalletActive,
-      bool isOfflinePaymentActive, bool isPrescriptionRequired, double deliveryCharge, double subTotal, double discount, double couponDiscount,
-      bool taxIncluded, double tax, double tips, double additionalCharge, double extraPackagingCharge, double otherCharge, double referralDiscount,
+    CheckoutController checkoutController,
+    double total,
+    bool isCashOnDeliveryActive,
+    bool isDigitalPaymentActive,
+    bool isWalletActive,
+    bool isOfflinePaymentActive,
+    bool isPrescriptionRequired,
+    double deliveryCharge,
+    double subTotal,
+    double discount,
+    double couponDiscount,
+    bool taxIncluded,
+    double tax,
+    double tips,
+    double additionalCharge,
+    double extraPackagingCharge,
+    double otherCharge,
+    double referralDiscount,
   ) {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        _pharmacyDeliverToCard(checkoutController),
-        const SizedBox(height: Dimensions.paddingSizeLarge),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _pharmacyDeliverToCard(checkoutController),
+          const SizedBox(height: Dimensions.paddingSizeLarge),
 
-        Text('Payment Options', style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
-        const SizedBox(height: Dimensions.paddingSizeSmall),
-
-        _pharmacyPaymentMethodsList(checkoutController, total, isCashOnDeliveryActive, isDigitalPaymentActive, isWalletActive, isOfflinePaymentActive),
-
-        const SizedBox(height: Dimensions.paddingSizeLarge),
-        PrescriptionImagePickerWidget(checkoutController: checkoutController, storeId: widget.storeId, isPrescriptionRequired: isPrescriptionRequired),
-        const SizedBox(height: Dimensions.paddingSizeSmall),
-        NoteAndPrescriptionSection(checkoutController: checkoutController, storeId: widget.storeId),
-        const SizedBox(height: Dimensions.paddingSizeLarge),
-
-        // Bill Details Section
-        Container(
-          padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)],
+          Text(
+            'Payment Options',
+            style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge),
           ),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('Bill Details', style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
-            const SizedBox(height: Dimensions.paddingSizeSmall),
-            
-            _priceRow('Item Total', subTotal),
-            if (discount > 0) _priceRow('Item Discount', -discount),
-            if (couponDiscount > 0) _priceRow('Coupon Discount', -couponDiscount),
-            if (referralDiscount > 0) _priceRow('Referral Discount', -referralDiscount),
-            _priceRow('Delivery Fee', deliveryCharge),
-            if (extraPackagingCharge > 0) _priceRow('Packaging Charges', extraPackagingCharge),
-            if (additionalCharge > 0) _priceRow('Additional Charge', additionalCharge),
-            if (otherCharge > 0) _priceRow('Other Charge', otherCharge),
-            if (tips > 0) _priceRow('Tips', tips),
-            if (tax > 0) _priceRow(taxIncluded ? 'Tax (Included)' : 'Tax', tax),
-            
-            const Divider(),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text('Total Amount', style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
-              Text(PriceConverter.convertPrice(total), style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge, color: const Color(0xFF16A34A))),
-            ]),
-          ]),
-        ),
-        const SizedBox(height: 100),
-      ]),
+          const SizedBox(height: Dimensions.paddingSizeSmall),
+
+          _pharmacyPaymentMethodsList(
+            checkoutController,
+            total,
+            isCashOnDeliveryActive,
+            isDigitalPaymentActive,
+            isWalletActive,
+            isOfflinePaymentActive,
+          ),
+
+          const SizedBox(height: Dimensions.paddingSizeLarge),
+          PrescriptionImagePickerWidget(
+            checkoutController: checkoutController,
+            storeId: widget.storeId,
+            isPrescriptionRequired: isPrescriptionRequired,
+          ),
+          const SizedBox(height: Dimensions.paddingSizeSmall),
+          NoteAndPrescriptionSection(
+            checkoutController: checkoutController,
+            storeId: widget.storeId,
+          ),
+          const SizedBox(height: Dimensions.paddingSizeLarge),
+
+          // Bill Details Section
+          Container(
+            padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.02),
+                  blurRadius: 10,
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Bill Details',
+                  style: robotoBold.copyWith(
+                    fontSize: Dimensions.fontSizeLarge,
+                  ),
+                ),
+                const SizedBox(height: Dimensions.paddingSizeSmall),
+
+                _priceRow('Item Total', subTotal),
+                if (discount > 0) _priceRow('Item Discount', -discount),
+                if (couponDiscount > 0)
+                  _priceRow('Coupon Discount', -couponDiscount),
+                if (referralDiscount > 0)
+                  _priceRow('Referral Discount', -referralDiscount),
+                _priceRow('Delivery Fee', deliveryCharge),
+                if (extraPackagingCharge > 0)
+                  _priceRow('Packaging Charges', extraPackagingCharge),
+                if (additionalCharge > 0)
+                  _priceRow('Additional Charge', additionalCharge),
+                if (otherCharge > 0) _priceRow('Other Charge', otherCharge),
+                if (tips > 0) _priceRow('Tips', tips),
+                if (tax > 0)
+                  _priceRow(taxIncluded ? 'Tax (Included)' : 'Tax', tax),
+
+                const Divider(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Total Amount',
+                      style: robotoBold.copyWith(
+                        fontSize: Dimensions.fontSizeLarge,
+                      ),
+                    ),
+                    Text(
+                      PriceConverter.convertPrice(total),
+                      style: robotoBold.copyWith(
+                        fontSize: Dimensions.fontSizeLarge,
+                        color: const Color(0xFF16A34A),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 100),
+        ],
+      ),
     );
   }
 
   Widget _pharmacyDeliverToCard(CheckoutController checkoutController) {
-    AddressModel? selectedAddress = address.isNotEmpty ? address[checkoutController.addressIndex!] : null;
+    AddressModel? selectedAddress = address.isNotEmpty
+        ? address[checkoutController.addressIndex!]
+        : null;
     return Container(
       padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
         border: Border.all(color: Colors.grey.withOpacity(0.1)),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10),
+        ],
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('Deliver To', style: robotoRegular.copyWith(color: Colors.grey, fontSize: Dimensions.fontSizeExtraSmall)),
-        const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-        
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text(selectedAddress?.addressType?.tr ?? 'Home', style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
-          InkWell(
-            onTap: () async {
-              await Get.toNamed(RouteHelper.getAccessLocationRoute('checkout'));
-              AddressModel? addressModel = AddressHelper.getUserAddressFromSharedPref();
-              if (addressModel != null && addressModel.id != null && checkoutController.store != null) {
-                checkoutController.checkAddressDelivery(addressModel.id!, checkoutController.store!.id!);
-              }
-            },
-            child: Text('Change', style: robotoBold.copyWith(color: const Color(0xFF16A34A), fontSize: Dimensions.fontSizeSmall)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Deliver To',
+            style: robotoRegular.copyWith(
+              color: Colors.grey,
+              fontSize: Dimensions.fontSizeExtraSmall,
+            ),
           ),
-        ]),
-        const SizedBox(height: Dimensions.paddingSizeSmall),
+          const SizedBox(height: Dimensions.paddingSizeExtraSmall),
 
-        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Icon(Icons.location_on_outlined, size: 18, color: Color(0xFF16A34A)),
-          const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-          Expanded(child: Text(selectedAddress?.address ?? '', style: robotoRegular.copyWith(color: Colors.grey, fontSize: Dimensions.fontSizeSmall), maxLines: 2, overflow: TextOverflow.ellipsis)),
-        ]),
-        const SizedBox(height: Dimensions.paddingSizeSmall),
-        Text('${selectedAddress?.contactPersonName ?? ''} - ${selectedAddress?.contactPersonNumber ?? ''}',
-            style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Colors.grey)),
-      ]),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                selectedAddress?.addressType?.tr ?? 'Home',
+                style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge),
+              ),
+              InkWell(
+                onTap: () async {
+                  await Get.toNamed(
+                    RouteHelper.getAccessLocationRoute('checkout'),
+                  );
+                  AddressModel? addressModel =
+                      AddressHelper.getUserAddressFromSharedPref();
+                  if (addressModel != null &&
+                      addressModel.id != null &&
+                      checkoutController.store != null) {
+                    checkoutController.checkAddressDelivery(
+                      addressModel.id!,
+                      checkoutController.store!.id!,
+                    );
+                  }
+                },
+                child: Text(
+                  'Change',
+                  style: robotoBold.copyWith(
+                    color: const Color(0xFF16A34A),
+                    fontSize: Dimensions.fontSizeSmall,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: Dimensions.paddingSizeSmall),
+
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(
+                Icons.location_on_outlined,
+                size: 18,
+                color: Color(0xFF16A34A),
+              ),
+              const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+              Expanded(
+                child: Text(
+                  selectedAddress?.address ?? '',
+                  style: robotoRegular.copyWith(
+                    color: Colors.grey,
+                    fontSize: Dimensions.fontSizeSmall,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: Dimensions.paddingSizeSmall),
+          Text(
+            '${selectedAddress?.contactPersonName ?? ''} - ${selectedAddress?.contactPersonNumber ?? ''}',
+            style: robotoRegular.copyWith(
+              fontSize: Dimensions.fontSizeSmall,
+              color: Colors.grey,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _pharmacyPaymentMethodsList(CheckoutController checkoutController, double total, bool isCashOnDeliveryActive, bool isDigitalPaymentActive, bool isWalletActive, bool isOfflinePaymentActive) {
-    return Column(children: [
-      if (isDigitalPaymentActive && widget.storeId == null && checkoutController.digitalPaymentAvailable)
-        _pharmacyPaymentCard(
-          title: 'Online Payment',
-          subtitle: 'UPI, Credit/Debit Card, Net Banking',
-          icon: Icons.payments_outlined,
-          isSelected: checkoutController.paymentMethodIndex == 2 && checkoutController.digitalPaymentName == 'razor_pay',
-          onTap: () {
-            checkoutController.setPaymentMethod(2);
-            checkoutController.changeDigitalPaymentName('razor_pay');
-          },
-          customIcon: Image.asset(Images.digitalPay, height: 18),
-        ),
+  Widget _pharmacyPaymentMethodsList(
+    CheckoutController checkoutController,
+    double total,
+    bool isCashOnDeliveryActive,
+    bool isDigitalPaymentActive,
+    bool isWalletActive,
+    bool isOfflinePaymentActive,
+  ) {
+    return Column(
+      children: [
+        if (isDigitalPaymentActive &&
+            widget.storeId == null &&
+            checkoutController.digitalPaymentAvailable)
+          _pharmacyPaymentCard(
+            title: 'Online Payment',
+            subtitle: 'UPI, Credit/Debit Card, Net Banking',
+            icon: Icons.payments_outlined,
+            isSelected:
+                checkoutController.paymentMethodIndex == 2 &&
+                checkoutController.digitalPaymentName == 'razor_pay',
+            onTap: () {
+              checkoutController.setPaymentMethod(2);
+              checkoutController.changeDigitalPaymentName('razor_pay');
+            },
+            customIcon: Image.asset(Images.digitalPay, height: 18),
+          ),
 
-      if (isCashOnDeliveryActive && checkoutController.codAvailable)
-        _pharmacyPaymentCard(
-          title: 'Cash On Delivery',
-          subtitle: 'Pay when you receive',
-          icon: Icons.account_balance_wallet_outlined,
-          isSelected: checkoutController.paymentMethodIndex == 0,
-          onTap: () => checkoutController.setPaymentMethod(0),
-        ),
+        if (isCashOnDeliveryActive && checkoutController.codAvailable)
+          _pharmacyPaymentCard(
+            title: 'Cash On Delivery',
+            subtitle: 'Pay when you receive',
+            icon: Icons.account_balance_wallet_outlined,
+            isSelected: checkoutController.paymentMethodIndex == 0,
+            onTap: () => checkoutController.setPaymentMethod(0),
+          ),
 
-      if (isWalletActive && widget.storeId == null && checkoutController.walletAvailable)
-        _pharmacyPaymentCard(
-          title: 'Wallet Payment',
-          subtitle: 'Pay from your wallet balance',
-          icon: Icons.wallet_outlined,
-          isSelected: checkoutController.paymentMethodIndex == 1,
-          onTap: () => checkoutController.setPaymentMethod(1),
-        ),
-    ]);
+        if (isWalletActive &&
+            widget.storeId == null &&
+            checkoutController.walletAvailable)
+          _pharmacyPaymentCard(
+            title: 'Wallet Payment',
+            subtitle: 'Pay from your wallet balance',
+            icon: Icons.wallet_outlined,
+            isSelected: checkoutController.paymentMethodIndex == 1,
+            onTap: () => checkoutController.setPaymentMethod(1),
+          ),
+      ],
+    );
   }
 
-  Widget _pharmacyPaymentCard({required String title, required String subtitle, required IconData icon, required bool isSelected, required Function onTap, Widget? customIcon}) {
+  Widget _pharmacyPaymentCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required bool isSelected,
+    required Function onTap,
+    Widget? customIcon,
+  }) {
     return InkWell(
       onTap: onTap as void Function()?,
       child: Container(
         margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeSmall),
-        padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeSmall),
+        padding: const EdgeInsets.symmetric(
+          horizontal: Dimensions.paddingSizeDefault,
+          vertical: Dimensions.paddingSizeSmall,
+        ),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-          border: Border.all(color: isSelected ? const Color(0xFF16A34A).withOpacity(0.1) : Colors.grey.withOpacity(0.1), width: 1),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.01), blurRadius: 5)],
+          border: Border.all(
+            color: isSelected
+                ? const Color(0xFF16A34A).withOpacity(0.1)
+                : Colors.grey.withOpacity(0.1),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.01), blurRadius: 5),
+          ],
         ),
-        child: Row(children: [
-          Icon(isSelected ? Icons.radio_button_checked : Icons.radio_button_off, color: isSelected ? const Color(0xFF16A34A) : Colors.grey, size: 22),
-          const SizedBox(width: Dimensions.paddingSizeDefault),
+        child: Row(
+          children: [
+            Icon(
+              isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+              color: isSelected ? const Color(0xFF16A34A) : Colors.grey,
+              size: 22,
+            ),
+            const SizedBox(width: Dimensions.paddingSizeDefault),
 
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(title, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault)),
-            Text(subtitle, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Colors.grey)),
-          ])),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: robotoBold.copyWith(
+                      fontSize: Dimensions.fontSizeDefault,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: robotoRegular.copyWith(
+                      fontSize: Dimensions.fontSizeExtraSmall,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+            ),
 
-          customIcon ?? Icon(icon, size: 22, color: Colors.grey.withOpacity(0.5)),
-        ]),
+            customIcon ??
+                Icon(icon, size: 22, color: Colors.grey.withOpacity(0.5)),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _pharmacyOrderPlaceButton(CheckoutController checkoutController, bool todayClosed, bool tomorrowClosed,
-      double orderAmount, double? deliveryCharge, double tax, double? discount, double total, double? maxCodOrderAmount, bool isPrescriptionRequired) {
+  Widget _pharmacyOrderPlaceButton(
+    CheckoutController checkoutController,
+    bool todayClosed,
+    bool tomorrowClosed,
+    double orderAmount,
+    double? deliveryCharge,
+    double tax,
+    double? discount,
+    double total,
+    double? maxCodOrderAmount,
+    bool isPrescriptionRequired,
+  ) {
     return Container(
       padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
       decoration: BoxDecoration(
         color: Colors.white,
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
       ),
       child: SafeArea(
         child: InkWell(
-          onTap: (checkoutController.isLoading || !checkoutController.isDeliveryAvailable || checkoutController.paymentMethodIndex == -1) ? (checkoutController.paymentMethodIndex == -1 ? () => showCustomSnackBar('payment_is_not_selected'.tr) : null) : () => _onPlaceOrderPressed(
-            checkoutController, todayClosed, tomorrowClosed, orderAmount, deliveryCharge, tax, discount, total, maxCodOrderAmount, isPrescriptionRequired,
-          ),
+          onTap:
+              (checkoutController.isLoading ||
+                  !checkoutController.isDeliveryAvailable ||
+                  checkoutController.paymentMethodIndex == -1)
+              ? (checkoutController.paymentMethodIndex == -1
+                    ? () => showCustomSnackBar('payment_is_not_selected'.tr)
+                    : null)
+              : () => _onPlaceOrderPressed(
+                  checkoutController,
+                  todayClosed,
+                  tomorrowClosed,
+                  orderAmount,
+                  deliveryCharge,
+                  tax,
+                  discount,
+                  total,
+                  maxCodOrderAmount,
+                  isPrescriptionRequired,
+                ),
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
+            padding: const EdgeInsets.symmetric(
+              vertical: Dimensions.paddingSizeSmall,
+            ),
             decoration: BoxDecoration(
-              color: (checkoutController.isDeliveryAvailable && checkoutController.paymentMethodIndex != -1) ? const Color(0xFF16A34A) : Colors.grey,
+              color:
+                  (checkoutController.isDeliveryAvailable &&
+                      checkoutController.paymentMethodIndex != -1)
+                  ? const Color(0xFF16A34A)
+                  : Colors.grey,
               borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
             ),
-            child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Text(!checkoutController.isDeliveryAvailable ? 'Delivery is unavailable' : checkoutController.paymentMethodIndex == -1 ? 'Select Payment Method' : 'Place Order', style: robotoBold.copyWith(color: Colors.white, fontSize: Dimensions.fontSizeLarge)),
-              const SizedBox(height: 2),
-              Text('Total Amount: ${PriceConverter.convertPrice(total)}', style: robotoMedium.copyWith(color: Colors.white, fontSize: Dimensions.fontSizeDefault)),
-            ]),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  !checkoutController.isDeliveryAvailable
+                      ? 'Delivery is unavailable'
+                      : checkoutController.paymentMethodIndex == -1
+                      ? 'Select Payment Method'
+                      : 'Place Order',
+                  style: robotoBold.copyWith(
+                    color: Colors.white,
+                    fontSize: Dimensions.fontSizeLarge,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Total Amount: ${PriceConverter.convertPrice(total)}',
+                  style: robotoMedium.copyWith(
+                    color: Colors.white,
+                    fontSize: Dimensions.fontSizeDefault,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _orderPlaceButton(CheckoutController checkoutController, bool todayClosed, bool tomorrowClosed,
-      double orderAmount, double? deliveryCharge, double tax, double? discount, double total, double? maxCodOrderAmount, bool isPrescriptionRequired) {
-
-
+  Widget _orderPlaceButton(
+    CheckoutController checkoutController,
+    bool todayClosed,
+    bool tomorrowClosed,
+    double orderAmount,
+    double? deliveryCharge,
+    double tax,
+    double? discount,
+    double total,
+    double? maxCodOrderAmount,
+    bool isPrescriptionRequired,
+  ) {
     return Container(
       width: Dimensions.webMaxWidth,
       alignment: Alignment.center,
-      padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall, horizontal: Dimensions.paddingSizeLarge),
+      padding: const EdgeInsets.symmetric(
+        vertical: Dimensions.paddingSizeSmall,
+        horizontal: Dimensions.paddingSizeLarge,
+      ),
       child: SafeArea(
         child: CustomButton(
-            isLoading: checkoutController.isLoading,
-            buttonText: checkoutController.isDeliveryAvailable ? 'place_order'.tr : 'Delivery is unavailable',
-            onPressed: (checkoutController.acceptTerms && checkoutController.isDeliveryAvailable) ? () => _onPlaceOrderPressed(
-              checkoutController, todayClosed, tomorrowClosed, orderAmount, deliveryCharge, tax, discount, total, maxCodOrderAmount, isPrescriptionRequired,
-            ) : null),
+          isLoading: checkoutController.isLoading,
+          buttonText: checkoutController.isDeliveryAvailable
+              ? 'place_order'.tr
+              : 'Delivery is unavailable',
+          onPressed:
+              (checkoutController.acceptTerms &&
+                  checkoutController.isDeliveryAvailable)
+              ? () => _onPlaceOrderPressed(
+                  checkoutController,
+                  todayClosed,
+                  tomorrowClosed,
+                  orderAmount,
+                  deliveryCharge,
+                  tax,
+                  discount,
+                  total,
+                  maxCodOrderAmount,
+                  isPrescriptionRequired,
+                )
+              : null,
+        ),
       ),
     );
   }
 
-  void _onPlaceOrderPressed(CheckoutController checkoutController, bool todayClosed, bool tomorrowClosed,
-      double orderAmount, double? deliveryCharge, double tax, double? discount, double total, double? maxCodOrderAmount, bool isPrescriptionRequired) {
-
+  void _onPlaceOrderPressed(
+    CheckoutController checkoutController,
+    bool todayClosed,
+    bool tomorrowClosed,
+    double orderAmount,
+    double? deliveryCharge,
+    double tax,
+    double? discount,
+    double total,
+    double? maxCodOrderAmount,
+    bool isPrescriptionRequired,
+  ) {
     final city = checkoutController.cityController?.text.trim();
     final state = checkoutController.stateController?.text.trim();
     final country = checkoutController.countryController?.text.trim();
@@ -1745,24 +2833,71 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     DateTime scheduleStartDate = DateTime.now();
     DateTime scheduleEndDate = DateTime.now();
     bool isGuestLogIn = AuthHelper.isGuestLoggedIn();
-    bool hasSubscription = _cartList?.any((e) => e!.isSubscribed ?? false) ?? false;
+    bool hasSubscription =
+        _cartList?.any((e) => e!.isSubscribed ?? false) ?? false;
 
-    if(!hasSubscription && (checkoutController.timeSlots == null || checkoutController.timeSlots!.isEmpty)) {
+    if (!hasSubscription &&
+        (checkoutController.timeSlots == null ||
+            checkoutController.timeSlots!.isEmpty)) {
       isAvailable = false;
-    }else if (checkoutController.timeSlots != null && checkoutController.timeSlots!.isNotEmpty) {
-      DateTime date = checkoutController.selectedDateSlot == 0 ? DateTime.now() : DateTime.now().add(const Duration(days: 1));
-      DateTime startTime = checkoutController.timeSlots![checkoutController.selectedTimeSlot].startTime!;
-      DateTime endTime = checkoutController.timeSlots![checkoutController.selectedTimeSlot].endTime!;
-      scheduleStartDate = DateTime(date.year, date.month, date.day, startTime.hour, startTime.minute+1);
-      scheduleEndDate = DateTime(date.year, date.month, date.day, endTime.hour, endTime.minute+1);
-      if(_cartList != null){
+    } else if (checkoutController.timeSlots != null &&
+        checkoutController.timeSlots!.isNotEmpty) {
+      DateTime date = checkoutController.selectedDateSlot == 0
+          ? DateTime.now()
+          : DateTime.now().add(const Duration(days: 1));
+      DateTime startTime = checkoutController
+          .timeSlots![checkoutController.selectedTimeSlot]
+          .startTime!;
+      DateTime endTime = checkoutController
+          .timeSlots![checkoutController.selectedTimeSlot]
+          .endTime!;
+      scheduleStartDate = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        startTime.hour,
+        startTime.minute + 1,
+      );
+      scheduleEndDate = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        endTime.hour,
+        endTime.minute + 1,
+      );
+      if (_cartList != null) {
         for (CartModel? cart in _cartList!) {
           if (!DateConverter.isAvailable(
-            cart!.item!.availableTimeStarts, cart.item!.availableTimeEnds,
-            time: checkoutController.store!.scheduleOrder! ? scheduleStartDate : null,
-          ) && !DateConverter.isAvailable(
-            cart.item!.availableTimeStarts, cart.item!.availableTimeEnds,
-            time: checkoutController.store!.scheduleOrder! ? scheduleEndDate : null,
+                cart!.item!.availableTimeStarts,
+                cart.item!.availableTimeEnds,
+                time: checkoutController.store!.scheduleOrder!
+                    ? scheduleStartDate
+                    : null,
+              ) &&
+              !DateConverter.isAvailable(
+                cart.item!.availableTimeStarts,
+                cart.item!.availableTimeEnds,
+                time: checkoutController.store!.scheduleOrder!
+                    ? scheduleEndDate
+                    : null,
+              )) {
+            isAvailable = false;
+            break;
+          }
+        }
+      }
+    }
+
+    if (hasSubscription && isAvailable && checkoutController.dropTime != null) {
+      for (CartModel? cart in _cartList!) {
+        if (cart!.isSubscribed ?? false) {
+          DateTime dt = DateFormat(
+            'HH:mm:ss',
+          ).parse(checkoutController.dropTime!);
+          if (!DateConverter.isAvailable(
+            cart.item!.availableTimeStarts,
+            cart.item!.availableTimeEnds,
+            time: dt,
           )) {
             isAvailable = false;
             break;
@@ -1771,106 +2906,173 @@ class CheckoutScreenState extends State<CheckoutScreen> {
       }
     }
 
-    if(hasSubscription && isAvailable && checkoutController.dropTime != null) {
-      for (CartModel? cart in _cartList!) {
-        if (cart!.isSubscribed ?? false) {
-          DateTime dt = DateFormat('HH:mm:ss').parse(checkoutController.dropTime!);
-          if (!DateConverter.isAvailable(cart.item!.availableTimeStarts, cart.item!.availableTimeEnds, time: dt)) {
-            isAvailable = false;
-            break;
-          }
-        }
-      }
-    }
-
-    if(isGuestLogIn && checkoutController.guestAddress == null && checkoutController.orderType != 'take_away') {
+    if (isGuestLogIn &&
+        checkoutController.guestAddress == null &&
+        checkoutController.orderType != 'take_away') {
       showCustomSnackBar('please_setup_your_delivery_address_first'.tr);
-    } else if(isGuestLogIn && checkoutController.orderType == 'take_away' && guestContactPersonNameController.text.isEmpty) {
+    } else if (isGuestLogIn &&
+        checkoutController.orderType == 'take_away' &&
+        guestContactPersonNameController.text.isEmpty) {
       showCustomSnackBar('please_enter_contact_person_name'.tr);
-    } else if(isGuestLogIn && checkoutController.orderType == 'take_away' && guestContactPersonNumberController.text.isEmpty) {
+    } else if (isGuestLogIn &&
+        checkoutController.orderType == 'take_away' &&
+        guestContactPersonNumberController.text.isEmpty) {
       showCustomSnackBar('please_enter_contact_person_number'.tr);
-    }else if(isGuestLogIn && checkoutController.orderType == 'take_away' && guestEmailController.text.isEmpty) {
+    } else if (isGuestLogIn &&
+        checkoutController.orderType == 'take_away' &&
+        guestEmailController.text.isEmpty) {
       showCustomSnackBar('please_enter_contact_person_email'.tr);
-    }else if(isGuestLogIn && checkoutController.isCreateAccount && guestPasswordController.text.isEmpty) {
+    } else if (isGuestLogIn &&
+        checkoutController.isCreateAccount &&
+        guestPasswordController.text.isEmpty) {
       showCustomSnackBar('enter_password'.tr);
-    }else if(isGuestLogIn && checkoutController.isCreateAccount && guestConfirmPasswordController.text.isEmpty) {
+    } else if (isGuestLogIn &&
+        checkoutController.isCreateAccount &&
+        guestConfirmPasswordController.text.isEmpty) {
       showCustomSnackBar('enter_confirm_password'.tr);
-    }else if(isGuestLogIn && checkoutController.isCreateAccount && (guestPasswordController.text != guestConfirmPasswordController.text)) {
+    } else if (isGuestLogIn &&
+        checkoutController.isCreateAccount &&
+        (guestPasswordController.text != guestConfirmPasswordController.text)) {
       showCustomSnackBar('confirm_password_does_not_matched'.tr);
     }
     ///newly added by ak
     ///
-    else if (address.isEmpty &&
-        checkoutController.orderType != 'take_away') {
+    else if (address.isEmpty && checkoutController.orderType != 'take_away') {
       showCustomSnackBar('Please add address');
-    }
-    else if (address[checkoutController.addressIndex!].id==null &&
+    } else if (address[checkoutController.addressIndex!].id == null &&
         checkoutController.orderType != 'take_away') {
       showCustomSnackBar('Please enter valid address');
-    }
-    else if (!checkoutController.isDeliveryAvailable && checkoutController.orderType != 'take_away') {
-      showCustomSnackBar(checkoutController.deliveryMessage ?? 'delivery_is_not_available_in_this_area'.tr);
-    }
-    else if(isPrescriptionRequired && checkoutController.pickedPrescriptions.isEmpty) {
+    } else if (!checkoutController.isDeliveryAvailable &&
+        checkoutController.orderType != 'take_away') {
+      showCustomSnackBar(
+        checkoutController.deliveryMessage ??
+            'delivery_is_not_available_in_this_area'.tr,
+      );
+    } else if (isPrescriptionRequired &&
+        checkoutController.pickedPrescriptions.isEmpty) {
       showCustomSnackBar('you_must_upload_prescription_for_this_order'.tr);
-    } else if(!_isCashOnDeliveryActive! && !_isDigitalPaymentActive! && !_isWalletActive) {
+    } else if (!_isCashOnDeliveryActive! &&
+        !_isDigitalPaymentActive! &&
+        !_isWalletActive) {
       showCustomSnackBar('no_payment_method_is_enabled'.tr);
-    }else if(checkoutController.paymentMethodIndex == -1) {
+    } else if (checkoutController.paymentMethodIndex == -1) {
       showCustomSnackBar('payment_is_not_selected'.tr);
-    } else if((checkoutController.store!.minimumOrder ?? 0) > 0 && orderAmount < (checkoutController.store!.minimumOrder ?? 0) && widget.storeId == null) {
-      showCustomSnackBar('${'minimum_order_amount_is'.tr} ${checkoutController.store!.minimumOrder}');
-    }else if(checkoutController.tipController.text.isNotEmpty && checkoutController.tipController.text != 'not_now' && double.parse(checkoutController.tipController.text.trim()) < 0) {
+    } else if ((checkoutController.store!.minimumOrder ?? 0) > 0 &&
+        orderAmount < (checkoutController.store!.minimumOrder ?? 0) &&
+        widget.storeId == null) {
+      showCustomSnackBar(
+        '${'minimum_order_amount_is'.tr} ${checkoutController.store!.minimumOrder}',
+      );
+    } else if (checkoutController.tipController.text.isNotEmpty &&
+        checkoutController.tipController.text != 'not_now' &&
+        double.parse(checkoutController.tipController.text.trim()) < 0) {
       showCustomSnackBar('tips_can_not_be_negative'.tr);
-    }else if((checkoutController.selectedDateSlot == 0 && todayClosed) || (checkoutController.selectedDateSlot == 1 && tomorrowClosed)) {
-      bool isPharmacy = Get.find<SplashController>().module?.moduleType == 'pharmacy';
-      bool showRestaurantText = Get.find<SplashController>().configModel?.moduleConfig?.module?.showRestaurantText ?? false;
-      showCustomSnackBar(isPharmacy ? 'pharmacy_is_closed'.tr : showRestaurantText ? 'restaurant_is_closed'.tr : 'store_is_closed'.tr);
-    }else if(checkoutController.paymentMethodIndex == 0 && _isCashOnDeliveryActive! && maxCodOrderAmount != null && maxCodOrderAmount != 0 && (total > maxCodOrderAmount) && widget.storeId == null){
-      showCustomSnackBar('${'you_cant_order_more_then'.tr} ${PriceConverter.convertPrice(maxCodOrderAmount)} ${'in_cash_on_delivery'.tr}');
-    }else if(checkoutController.paymentMethodIndex != 0 && widget.storeId != null){
+    } else if ((checkoutController.selectedDateSlot == 0 && todayClosed) ||
+        (checkoutController.selectedDateSlot == 1 && tomorrowClosed)) {
+      bool isPharmacy =
+          Get.find<SplashController>().module?.moduleType == 'pharmacy';
+      bool showRestaurantText =
+          Get.find<SplashController>()
+              .configModel
+              ?.moduleConfig
+              ?.module
+              ?.showRestaurantText ??
+          false;
+      showCustomSnackBar(
+        isPharmacy
+            ? 'pharmacy_is_closed'.tr
+            : showRestaurantText
+            ? 'restaurant_is_closed'.tr
+            : 'store_is_closed'.tr,
+      );
+    } else if (checkoutController.paymentMethodIndex == 0 &&
+        _isCashOnDeliveryActive! &&
+        maxCodOrderAmount != null &&
+        maxCodOrderAmount != 0 &&
+        (total > maxCodOrderAmount) &&
+        widget.storeId == null) {
+      showCustomSnackBar(
+        '${'you_cant_order_more_then'.tr} ${PriceConverter.convertPrice(maxCodOrderAmount)} ${'in_cash_on_delivery'.tr}',
+      );
+    } else if (checkoutController.paymentMethodIndex != 0 &&
+        widget.storeId != null) {
       showCustomSnackBar('payment_method_is_not_available'.tr);
-    }else if (!hasSubscription && (checkoutController.timeSlots == null || checkoutController.timeSlots!.isEmpty)) {
-      if(checkoutController.store!.scheduleOrder!) {
+    } else if (!hasSubscription &&
+        (checkoutController.timeSlots == null ||
+            checkoutController.timeSlots!.isEmpty)) {
+      if (checkoutController.store!.scheduleOrder!) {
         showCustomSnackBar('select_a_time'.tr);
-      }else {
-        bool isPharmacy = Get.find<SplashController>().module?.moduleType == 'pharmacy';
-        bool showRestaurantText = Get.find<SplashController>().configModel?.moduleConfig?.module?.showRestaurantText ?? false;
-        showCustomSnackBar(isPharmacy ? 'pharmacy_is_closed'.tr : showRestaurantText ? 'restaurant_is_closed'.tr : 'store_is_closed'.tr);
+      } else {
+        bool isPharmacy =
+            Get.find<SplashController>().module?.moduleType == 'pharmacy';
+        bool showRestaurantText =
+            Get.find<SplashController>()
+                .configModel
+                ?.moduleConfig
+                ?.module
+                ?.showRestaurantText ??
+            false;
+        showCustomSnackBar(
+          isPharmacy
+              ? 'pharmacy_is_closed'.tr
+              : showRestaurantText
+              ? 'restaurant_is_closed'.tr
+              : 'store_is_closed'.tr,
+        );
       }
-    }else if (!isAvailable) {
-      showCustomSnackBar('one_or_more_products_are_not_available_for_this_selected_time'.tr);
-    }else if (hasSubscription && (checkoutController.startDate == null || checkoutController.endDate == null)) {
+    } else if (!isAvailable) {
+      showCustomSnackBar(
+        'one_or_more_products_are_not_available_for_this_selected_time'.tr,
+      );
+    } else if (hasSubscription &&
+        (checkoutController.startDate == null ||
+            checkoutController.endDate == null)) {
       showCustomSnackBar('please_select_subscription_date_range'.tr);
     } else if (hasSubscription && checkoutController.dropTime == null) {
       showCustomSnackBar('please_select_subscription_time'.tr);
-    }else if (checkoutController.orderType != 'take_away' && checkoutController.distance == -1 && deliveryCharge == -1) {
+    } else if (checkoutController.orderType != 'take_away' &&
+        checkoutController.distance == -1 &&
+        deliveryCharge == -1) {
       showCustomSnackBar('delivery_fee_not_set_yet'.tr);
-    }else if (widget.storeId != null && checkoutController.pickedPrescriptions.isEmpty) {
+    } else if (widget.storeId != null &&
+        checkoutController.pickedPrescriptions.isEmpty) {
       showCustomSnackBar('please_upload_your_prescription_images'.tr);
-    }else if (checkoutController.orderType != 'take_away' && !checkoutController.isDeliveryAvailable) {
-      showCustomSnackBar(checkoutController.deliveryMessage ?? 'delivery_is_not_available_in_this_area'.tr);
-    }else if (!checkoutController.acceptTerms) {
-      showCustomSnackBar('please_accept_privacy_policy_trams_conditions_refund_policy_first'.tr);
-    }
-    else {
+    } else if (checkoutController.orderType != 'take_away' &&
+        !checkoutController.isDeliveryAvailable) {
+      showCustomSnackBar(
+        checkoutController.deliveryMessage ??
+            'delivery_is_not_available_in_this_area'.tr,
+      );
+    } else if (!checkoutController.acceptTerms) {
+      showCustomSnackBar(
+        'please_accept_privacy_policy_trams_conditions_refund_policy_first'.tr,
+      );
+    } else {
+      AddressModel? finalAddress = isGuestLogIn
+          ? checkoutController.guestAddress
+          : address[checkoutController.addressIndex!];
 
-      AddressModel? finalAddress = isGuestLogIn ? checkoutController.guestAddress : address[checkoutController.addressIndex!];
-
-      if(isGuestLogIn && checkoutController.orderType == 'take_away') {
-        String number = checkoutController.countryDialCode! + guestContactPersonNumberController.text;
-        finalAddress = AddressModel(contactPersonName: guestContactPersonNameController.text, contactPersonNumber: number,
-          address: AddressHelper.getUserAddressFromSharedPref()!.address!, latitude: AddressHelper.getUserAddressFromSharedPref()!.latitude,
-          longitude: AddressHelper.getUserAddressFromSharedPref()!.longitude, zoneId: AddressHelper.getUserAddressFromSharedPref()!.zoneId,
+      if (isGuestLogIn && checkoutController.orderType == 'take_away') {
+        String number =
+            checkoutController.countryDialCode! +
+            guestContactPersonNumberController.text;
+        finalAddress = AddressModel(
+          contactPersonName: guestContactPersonNameController.text,
+          contactPersonNumber: number,
+          address: AddressHelper.getUserAddressFromSharedPref()!.address!,
+          latitude: AddressHelper.getUserAddressFromSharedPref()!.latitude,
+          longitude: AddressHelper.getUserAddressFromSharedPref()!.longitude,
+          zoneId: AddressHelper.getUserAddressFromSharedPref()!.zoneId,
           email: guestEmailController.text,
         );
       }
 
-      if(!isGuestLogIn && finalAddress!.contactPersonNumber == 'null'){
-        finalAddress.contactPersonNumber = Get.find<ProfileController>().userInfoModel!.phone;
+      if (!isGuestLogIn && finalAddress!.contactPersonNumber == 'null') {
+        finalAddress.contactPersonNumber =
+            Get.find<ProfileController>().userInfoModel!.phone;
       }
 
-      if(widget.storeId == null){
-
+      if (widget.storeId == null) {
         List<OnlineCart> carts = [];
         for (int index = 0; index < _cartList!.length; index++) {
           CartModel cart = _cartList![index]!;
@@ -1882,28 +3084,65 @@ class CheckoutScreenState extends State<CheckoutScreen> {
           }
 
           List<OrderVariation> variations = [];
-          if(Get.find<SplashController>().getModuleConfig(cart.item!.moduleType).newVariation!) {
-            for(int i=0; i<cart.item!.foodVariations!.length; i++) {
-              if(cart.foodVariations![i].contains(true)) {
-                variations.add(OrderVariation(name: cart.item!.foodVariations![i].name, values: OrderVariationValue(label: [])));
-                for(int j=0; j<cart.item!.foodVariations![i].variationValues!.length; j++) {
-                  if(cart.foodVariations![i][j]!) {
-                    variations[variations.length-1].values!.label!.add(cart.item!.foodVariations![i].variationValues![j].level);
+          if (Get.find<SplashController>()
+              .getModuleConfig(cart.item!.moduleType)
+              .newVariation!) {
+            for (int i = 0; i < cart.item!.foodVariations!.length; i++) {
+              if (cart.foodVariations![i].contains(true)) {
+                variations.add(
+                  OrderVariation(
+                    name: cart.item!.foodVariations![i].name,
+                    values: OrderVariationValue(label: []),
+                  ),
+                );
+                for (
+                  int j = 0;
+                  j < cart.item!.foodVariations![i].variationValues!.length;
+                  j++
+                ) {
+                  if (cart.foodVariations![i][j]!) {
+                    variations[variations.length - 1].values!.label!.add(
+                      cart.item!.foodVariations![i].variationValues![j].level,
+                    );
                   }
                 }
               }
             }
           }
-          carts.add(OnlineCart(
-            cart.id, cart.item!.id, cart.isCampaign! ? cart.item!.id : null,
-            cart.discountedPrice.toString(), (cart.variation != null && cart.variation!.isNotEmpty) ? cart.variation![0].type ?? '' : '',
-            Get.find<SplashController>().getModuleConfig(cart.item!.moduleType).newVariation! ? null : cart.variation,
-            Get.find<SplashController>().getModuleConfig(cart.item!.moduleType).newVariation! ? variations : null,
-            cart.quantity, addOnIdList, cart.addOns, addOnQtyList, 'Item', cart.isSubscribed ?? false, itemType: "App\\Models\\Item",
-          ));
+          carts.add(
+            OnlineCart(
+              cart.id,
+              cart.item!.id,
+              cart.isCampaign! ? cart.item!.id : null,
+              cart.discountedPrice.toString(),
+              (cart.variation != null && cart.variation!.isNotEmpty)
+                  ? cart.variation![0].type ?? ''
+                  : '',
+              Get.find<SplashController>()
+                      .getModuleConfig(cart.item!.moduleType)
+                      .newVariation!
+                  ? null
+                  : cart.variation,
+              Get.find<SplashController>()
+                      .getModuleConfig(cart.item!.moduleType)
+                      .newVariation!
+                  ? variations
+                  : null,
+              cart.quantity,
+              addOnIdList,
+              cart.addOns,
+              addOnQtyList,
+              'Item',
+              cart.isSubscribed ?? false,
+              itemType: "App\\Models\\Item",
+            ),
+          );
         }
 
-        if(hasSubscription && (checkoutController.startDate == null || checkoutController.endDate == null || checkoutController.dropTime == null)) {
+        if (hasSubscription &&
+            (checkoutController.startDate == null ||
+                checkoutController.endDate == null ||
+                checkoutController.dropTime == null)) {
           showCustomSnackBar('please_select_subscription_date_and_time'.tr);
           return;
         }
@@ -1914,36 +3153,92 @@ class CheckoutScreenState extends State<CheckoutScreen> {
         String? pincode = finalAddress.pincode;
 
         PlaceOrderBodyModel placeOrderBody = PlaceOrderBodyModel(
-          cart: carts, couponDiscountAmount: Get.find<CouponController>().discount, distance: checkoutController.distance,
-          scheduleAt: !checkoutController.store!.scheduleOrder! ? null : (checkoutController.selectedDateSlot == 0
-              && checkoutController.selectedTimeSlot == 0) ? null : DateConverter.dateToDateAndTime(scheduleEndDate),
-          orderAmount: total, orderNote: checkoutController.noteController.text, orderType: checkoutController.orderType,
-          paymentMethod: checkoutController.paymentMethodIndex == 0 ? 'cash_on_delivery'
-              : checkoutController.paymentMethodIndex == 1 ? 'wallet'
-              : checkoutController.paymentMethodIndex == 2 ? 'digital_payment' : 'offline_payment',
-          couponCode: (Get.find<CouponController>().discount! > 0 || (Get.find<CouponController>().coupon != null
-              && Get.find<CouponController>().freeDelivery)) ? Get.find<CouponController>().coupon!.code : null,
+          cart: carts,
+          couponDiscountAmount: Get.find<CouponController>().discount,
+          distance: checkoutController.distance,
+          scheduleAt: !checkoutController.store!.scheduleOrder!
+              ? null
+              : (checkoutController.selectedDateSlot == 0 &&
+                    checkoutController.selectedTimeSlot == 0)
+              ? null
+              : DateConverter.dateToDateAndTime(scheduleEndDate),
+          orderAmount: total,
+          orderNote: _getCombinedOrderNote(checkoutController),
+          orderType: checkoutController.orderType,
+          paymentMethod: checkoutController.paymentMethodIndex == 0
+              ? 'cash_on_delivery'
+              : checkoutController.paymentMethodIndex == 1
+              ? 'wallet'
+              : checkoutController.paymentMethodIndex == 2
+              ? 'digital_payment'
+              : 'offline_payment',
+          couponCode:
+              (Get.find<CouponController>().discount! > 0 ||
+                  (Get.find<CouponController>().coupon != null &&
+                      Get.find<CouponController>().freeDelivery))
+              ? Get.find<CouponController>().coupon!.code
+              : null,
           storeId: _cartList![0]!.item!.storeId,
-          address: finalAddress!.address, latitude: finalAddress.latitude, longitude: finalAddress.longitude,
-          senderZoneId: null, addressType: finalAddress.addressType,
-          contactPersonName: finalAddress.contactPersonName ?? '${Get.find<ProfileController>().userInfoModel!.fName} '
-              '${Get.find<ProfileController>().userInfoModel!.lName}',
-          contactPersonNumber: finalAddress.contactPersonNumber ?? Get.find<ProfileController>().userInfoModel!.phone,
-          streetNumber: isGuestLogIn ? finalAddress.streetNumber??'' : checkoutController.streetNumberController.text.trim(),
-          house: isGuestLogIn ? finalAddress.house??'' : checkoutController.houseController.text.trim(),
-          floor: isGuestLogIn ? finalAddress.floor??'' : checkoutController.floorController.text.trim(),
-          discountAmount: discount, taxAmount: tax, receiverDetails: null, parcelCategoryId: null,
-          chargePayer: null, dmTips: (checkoutController.orderType == 'take_away' || checkoutController.tipController.text == 'not_now') ? '' : checkoutController.tipController.text.trim(),
+          address: finalAddress!.address,
+          latitude: finalAddress.latitude,
+          longitude: finalAddress.longitude,
+          senderZoneId: null,
+          addressType: finalAddress.addressType,
+          contactPersonName:
+              finalAddress.contactPersonName ??
+              '${Get.find<ProfileController>().userInfoModel!.fName} '
+                  '${Get.find<ProfileController>().userInfoModel!.lName}',
+          contactPersonNumber:
+              finalAddress.contactPersonNumber ??
+              Get.find<ProfileController>().userInfoModel!.phone,
+          streetNumber: isGuestLogIn
+              ? finalAddress.streetNumber ?? ''
+              : checkoutController.streetNumberController.text.trim(),
+          house: isGuestLogIn
+              ? finalAddress.house ?? ''
+              : checkoutController.houseController.text.trim(),
+          floor: isGuestLogIn
+              ? finalAddress.floor ?? ''
+              : checkoutController.floorController.text.trim(),
+          discountAmount: discount,
+          taxAmount: tax,
+          receiverDetails: null,
+          parcelCategoryId: null,
+          chargePayer: null,
+          dmTips:
+              (checkoutController.orderType == 'take_away' ||
+                  checkoutController.tipController.text == 'not_now')
+              ? ''
+              : checkoutController.tipController.text.trim(),
           cutlery: Get.find<CartController>().addCutlery ? 1 : 0,
-          unavailableItemNote: Get.find<CartController>().notAvailableIndex != -1 ? Get.find<CartController>().notAvailableList[Get.find<CartController>().notAvailableIndex] : '',
-          deliveryInstruction: checkoutController.selectedInstruction != -1 ? AppConstants.deliveryInstructionList[checkoutController.selectedInstruction] : '',
-          partialPayment: checkoutController.isPartialPay ? 1 : 0, guestId: isGuestLogIn ? int.parse(AuthHelper.getGuestId()) : 0,
-          isBuyNow: widget.fromCart ? 0 : 1, guestEmail: isGuestLogIn ? finalAddress.email : null,
-          extraPackagingAmount: Get.find<CartController>().needExtraPackage ? checkoutController.store!.extraPackagingAmount : 0,
-          createNewUser: checkoutController.isCreateAccount ? 1 : 0, password: guestPasswordController.text,
-          otherchargesamount:checkoutController.store?.otherchargeenabled==true? checkoutController.store?.otherchargeamount??0.0:0.0,
-          otherchargeslabel: checkoutController.store?.otherchargeenabled==true? checkoutController.store?.otherchargelabel??"":"",
-          city:city,
+          unavailableItemNote:
+              Get.find<CartController>().notAvailableIndex != -1
+              ? Get.find<CartController>()
+                    .notAvailableList[Get.find<CartController>()
+                    .notAvailableIndex]
+              : '',
+          deliveryInstruction: checkoutController.selectedInstruction != -1
+              ? AppConstants.deliveryInstructionList[checkoutController
+                    .selectedInstruction]
+              : '',
+          partialPayment: checkoutController.isPartialPay ? 1 : 0,
+          guestId: isGuestLogIn ? int.parse(AuthHelper.getGuestId()) : 0,
+          isBuyNow: widget.fromCart ? 0 : 1,
+          guestEmail: isGuestLogIn ? finalAddress.email : null,
+          extraPackagingAmount: Get.find<CartController>().needExtraPackage
+              ? checkoutController.store!.extraPackagingAmount
+              : 0,
+          createNewUser: checkoutController.isCreateAccount ? 1 : 0,
+          password: guestPasswordController.text,
+          otherchargesamount:
+              checkoutController.store?.otherchargeenabled == true
+              ? checkoutController.store?.otherchargeamount ?? 0.0
+              : 0.0,
+          otherchargeslabel:
+              checkoutController.store?.otherchargeenabled == true
+              ? checkoutController.store?.otherchargelabel ?? ""
+              : "",
+          city: city,
           state: state,
           country: country,
           pincode: pincode,
@@ -1953,44 +3248,147 @@ class CheckoutScreenState extends State<CheckoutScreen> {
           dropTime: checkoutController.dropTime,
           deliveryCharge: checkoutController.deliveryCharge,
         );
-        if(checkoutController.paymentMethodIndex == 3){
-          Get.toNamed(RouteHelper.getOfflinePaymentScreen(
-            placeOrderBody: placeOrderBody, zoneId: checkoutController.store!.zoneId!, total: checkoutController.viewTotalPrice!,
-            maxCodOrderAmount: maxCodOrderAmount, fromCart: widget.fromCart, isCodActive: _isCashOnDeliveryActive, forParcel: false,
-          ));
+        if (checkoutController.paymentMethodIndex == 3) {
+          Get.toNamed(
+            RouteHelper.getOfflinePaymentScreen(
+              placeOrderBody: placeOrderBody,
+              zoneId: checkoutController.store!.zoneId!,
+              total: checkoutController.viewTotalPrice!,
+              maxCodOrderAmount: maxCodOrderAmount,
+              fromCart: widget.fromCart,
+              isCodActive: _isCashOnDeliveryActive,
+              forParcel: false,
+            ),
+          );
         } else {
-          checkoutController.placeOrder(placeOrderBody, checkoutController.store!.zoneId, total, maxCodOrderAmount, widget.fromCart, _isCashOnDeliveryActive!, checkoutController.pickedPrescriptions);
+          checkoutController.placeOrder(
+            placeOrderBody,
+            checkoutController.store!.zoneId,
+            total,
+            maxCodOrderAmount,
+            widget.fromCart,
+            _isCashOnDeliveryActive!,
+            checkoutController.pickedPrescriptions,
+          );
         }
-      }else{
+      } else {
         checkoutController.placePrescriptionOrder(
-          widget.storeId, checkoutController.store!.zoneId, checkoutController.distance,
-          finalAddress!.address!, finalAddress.longitude!, finalAddress.latitude!, checkoutController.noteController.text,
-          checkoutController.pickedPrescriptions, (checkoutController.orderType == 'take_away' || checkoutController.tipController.text == 'not_now')
-            ? '' : checkoutController.tipController.text.trim(), checkoutController.selectedInstruction != -1
-            ? AppConstants.deliveryInstructionList[checkoutController.selectedInstruction] : '', 0, 0, widget.fromCart, _isCashOnDeliveryActive!,
+          widget.storeId,
+          checkoutController.store!.zoneId,
+          checkoutController.distance,
+          finalAddress!.address!,
+          finalAddress.longitude!,
+          finalAddress.latitude!,
+          _getCombinedOrderNote(checkoutController),
+          checkoutController.pickedPrescriptions,
+          (checkoutController.orderType == 'take_away' ||
+                  checkoutController.tipController.text == 'not_now')
+              ? ''
+              : checkoutController.tipController.text.trim(),
+          checkoutController.selectedInstruction != -1
+              ? AppConstants.deliveryInstructionList[checkoutController
+                    .selectedInstruction]
+              : '',
+          0,
+          0,
+          widget.fromCart,
+          _isCashOnDeliveryActive!,
         );
       }
     }
   }
 
+  String _getCombinedOrderNote(CheckoutController checkoutController) {
+    String note = checkoutController.noteController.text;
+    if (checkoutController.selectedCookingInstruction != -1) {
+      String cookingInstruction = AppConstants.cookingInstructionList[checkoutController.selectedCookingInstruction].tr;
+      note = note.isEmpty ? cookingInstruction : '$cookingInstruction, $note';
+    }
+    return note;
+  }
 
-  List<DropdownItem<int>> _getDropdownAddressList(
-      {required BuildContext context, required List<
-          AddressModel>? addressList, required Store? store}) {
+  void _showCookingInstructionsBottomSheet(BuildContext context, CheckoutController checkoutController) {
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text('Cooking Instructions', style: robotoBold.copyWith(fontSize: 18)),
+          const SizedBox(height: 16),
+          ListView.builder(
+            shrinkWrap: true,
+            itemCount: AppConstants.cookingInstructionList.length,
+            itemBuilder: (context, index) {
+              bool isSelected = checkoutController.selectedCookingInstruction == index;
+              return InkWell(
+                onTap: () {
+                  checkoutController.setCookingInstruction(index);
+                  Get.back();
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: isSelected ? const Color(0xFF16A34A).withValues(alpha: 0.1) : Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: isSelected ? const Color(0xFF16A34A) : Colors.transparent),
+                  ),
+                  child: Row(children: [
+                    Icon(
+                      index == 0 ? Icons.whatshot :
+                      index == 1 ? Icons.no_food :
+                      index == 2 ? Icons.cookie : Icons.restaurant,
+                      color: isSelected ? const Color(0xFF16A34A) : Colors.black87,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        AppConstants.cookingInstructionList[index].tr,
+                        style: robotoMedium.copyWith(color: isSelected ? const Color(0xFF16A34A) : Colors.black87),
+                      ),
+                    ),
+                    if (isSelected) const Icon(Icons.check_circle, color: Color(0xFF16A34A), size: 20),
+                  ]),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+        ]),
+      ),
+    );
+  }
+
+  List<DropdownItem<int>> _getDropdownAddressList({
+    required BuildContext context,
+    required List<AddressModel>? addressList,
+    required Store? store,
+  }) {
     List<DropdownItem<int>> dropDownAddressList = [];
 
     if (addressList != null && store != null) {
       int dropdownIndex = 0;
       for (int index = 0; index < addressList.length; index++) {
-        if (addressList[index].zoneIds!.contains(store.zoneId) && AddressHelper.isAddressComplete(addressList[index])) {
+        if (addressList[index].zoneIds!.contains(store.zoneId) &&
+            AddressHelper.isAddressComplete(addressList[index])) {
           dropDownAddressList.add(
-              DropdownItem<int>(value: dropdownIndex, child: Container(
-                width: context.width > Dimensions.webMaxWidth ? Dimensions.webMaxWidth - 50 : context.width - 50,
-                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                child: AddressWidgetCustom(
-                  address: addressList[index],
+            DropdownItem<int>(
+              value: dropdownIndex,
+              child: Container(
+                width: context.width > Dimensions.webMaxWidth
+                    ? Dimensions.webMaxWidth - 50
+                    : context.width - 50,
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8,
+                  horizontal: 12,
                 ),
-              )));
+                child: AddressWidgetCustom(address: addressList[index]),
+              ),
+            ),
+          );
           dropdownIndex++;
         }
       }
@@ -1998,15 +3396,18 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     return dropDownAddressList;
   }
 
-  List<AddressModel> _getAddressList(
-      {required List<AddressModel>? addressList, required Store? store}) {
+  List<AddressModel> _getAddressList({
+    required List<AddressModel>? addressList,
+    required Store? store,
+  }) {
     List<AddressModel> address = [];
 
     // address.add(AddressHelper.getUserAddressFromSharedPref()!);
 
     if (addressList != null && store != null) {
       for (int index = 0; index < addressList.length; index++) {
-        if (addressList[index].zoneIds!.contains(store.zoneId) && AddressHelper.isAddressComplete(addressList[index])) {
+        if (addressList[index].zoneIds!.contains(store.zoneId) &&
+            AddressHelper.isAddressComplete(addressList[index])) {
           address.add(addressList[index]);
         }
       }
@@ -2017,13 +3418,11 @@ class CheckoutScreenState extends State<CheckoutScreen> {
   Pivot? _getModuleData({required Store? store}) {
     Pivot? moduleData;
     if (store != null) {
-      for (ZoneData zData in AddressHelper.getUserAddressFromSharedPref()!
-          .zoneData!) {
+      for (ZoneData zData
+          in AddressHelper.getUserAddressFromSharedPref()!.zoneData!) {
         for (Modules m in zData.modules!) {
-          if (m.id == Get
-              .find<SplashController>()
-              .module!
-              .id && m.pivot!.zoneId == store.zoneId) {
+          if (m.id == Get.find<SplashController>().module!.id &&
+              m.pivot!.zoneId == store.zoneId) {
             moduleData = m.pivot;
             break;
           }
@@ -2036,13 +3435,12 @@ class CheckoutScreenState extends State<CheckoutScreen> {
   bool _checkCODActive({required Store? store}) {
     bool isCashOnDeliveryActive = false;
     if (store != null) {
-      for (ZoneData zData in AddressHelper.getUserAddressFromSharedPref()!
-          .zoneData!) {
+      for (ZoneData zData
+          in AddressHelper.getUserAddressFromSharedPref()!.zoneData!) {
         if (zData.id == store.zoneId) {
-          isCashOnDeliveryActive = zData.cashOnDelivery! && Get
-              .find<SplashController>()
-              .configModel!
-              .cashOnDelivery!;
+          isCashOnDeliveryActive =
+              zData.cashOnDelivery! &&
+              Get.find<SplashController>().configModel!.cashOnDelivery!;
         }
       }
     }
@@ -2052,45 +3450,58 @@ class CheckoutScreenState extends State<CheckoutScreen> {
   bool _checkDigitalPaymentActive({required Store? store}) {
     bool isDigitalPaymentActive = false;
     if (store != null) {
-      for (ZoneData zData in AddressHelper.getUserAddressFromSharedPref()!
-          .zoneData!) {
+      for (ZoneData zData
+          in AddressHelper.getUserAddressFromSharedPref()!.zoneData!) {
         if (zData.id == store.zoneId) {
-          isDigitalPaymentActive = zData.digitalPayment! && Get
-              .find<SplashController>()
-              .configModel!
-              .digitalPayment!;
+          isDigitalPaymentActive =
+              zData.digitalPayment! &&
+              Get.find<SplashController>().configModel!.digitalPayment!;
         }
       }
     }
     return isDigitalPaymentActive;
   }
 
-  double _calculatePrice(
-      {required Store? store, required List<CartModel?>? cartList, int days = 1, bool hasSubscription = false}) {
+  double _calculatePrice({
+    required Store? store,
+    required List<CartModel?>? cartList,
+    int days = 1,
+    bool hasSubscription = false,
+  }) {
     double price = 0;
 
     if (cartList != null) {
       for (var cartModel in cartList) {
-        bool isFoodVariation = Get.find<SplashController>().getModuleConfig(cartModel!.item!.moduleType).newVariation!;
+        bool isFoodVariation = Get.find<SplashController>()
+            .getModuleConfig(cartModel!.item!.moduleType)
+            .newVariation!;
         bool haveVariation = false;
-        if (!isFoodVariation && cartModel.variation != null && cartModel.variation!.isNotEmpty && cartModel.item!.variations != null && cartModel.item!.variations!.isNotEmpty) {
-            haveVariation = true;
+        if (!isFoodVariation &&
+            cartModel.variation != null &&
+            cartModel.variation!.isNotEmpty &&
+            cartModel.item!.variations != null &&
+            cartModel.item!.variations!.isNotEmpty) {
+          haveVariation = true;
         }
 
         if (isFoodVariation || !haveVariation) {
-            double itemPrice = (cartModel.item!.price! * cartModel.quantity!);
-            if (hasSubscription || (cartModel.isSubscribed ?? false)) {
-              itemPrice = itemPrice * days;
-            }
-            price = price + itemPrice;
+          double itemPrice = (cartModel.item!.price! * cartModel.quantity!);
+          if (hasSubscription || (cartModel.isSubscribed ?? false)) {
+            itemPrice = itemPrice * days;
+          }
+          price = price + itemPrice;
         }
       }
     }
     return PriceConverter.toFixed(price);
   }
 
-  double _calculateAddonsPrice(
-      {required Store? store, required List<CartModel?>? cartList, int days = 1, bool hasSubscription = false}) {
+  double _calculateAddonsPrice({
+    required Store? store,
+    required List<CartModel?>? cartList,
+    int days = 1,
+    bool hasSubscription = false,
+  }) {
     double addOns = 0;
     if (store != null && cartList != null) {
       for (var cartModel in cartList) {
@@ -2104,8 +3515,9 @@ class CheckoutScreenState extends State<CheckoutScreen> {
           }
         }
         for (int index = 0; index < addOnList.length; index++) {
-          double addOnPrice = (addOnList[index].price! * cartModel.addOnIds![index].quantity!);
-          if(hasSubscription || (cartModel.isSubscribed ?? false)) {
+          double addOnPrice =
+              (addOnList[index].price! * cartModel.addOnIds![index].quantity!);
+          if (hasSubscription || (cartModel.isSubscribed ?? false)) {
             addOnPrice = addOnPrice * days;
           }
           addOns = addOns + addOnPrice;
@@ -2115,35 +3527,64 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     return PriceConverter.toFixed(addOns);
   }
 
-  double _calculateVariationPrice({required Store? store, required List<
-      CartModel?>? cartList, int days = 1, bool hasSubscription = false, bool calculateDiscount = false, bool calculateWithoutDiscount = false}) {
+  double _calculateVariationPrice({
+    required Store? store,
+    required List<CartModel?>? cartList,
+    int days = 1,
+    bool hasSubscription = false,
+    bool calculateDiscount = false,
+    bool calculateWithoutDiscount = false,
+  }) {
     double variationPrice = 0; // This will hold the discounted variation price
-    double variationWithoutDiscountPrice = 0; // This will hold the full variation price
-    
+    double variationWithoutDiscountPrice =
+        0; // This will hold the full variation price
+
     if (store != null && cartList != null) {
       for (var cartModel in cartList) {
         double? discount = cartModel!.item!.discount;
         String? discountType = cartModel.item!.discountType;
 
-        if (Get
-            .find<SplashController>()
+        if (Get.find<SplashController>()
             .getModuleConfig(cartModel.item!.moduleType)
             .newVariation!) {
           // Food variations
-          for (int index = 0; index <
-              cartModel.item!.foodVariations!.length; index++) {
-            for (int i = 0; i <
-                cartModel.item!.foodVariations![index].variationValues!
-                    .length; i++) {
+          for (
+            int index = 0;
+            index < cartModel.item!.foodVariations!.length;
+            index++
+          ) {
+            for (
+              int i = 0;
+              i <
+                  cartModel
+                      .item!
+                      .foodVariations![index]
+                      .variationValues!
+                      .length;
+              i++
+            ) {
               if (cartModel.foodVariations![index][i]!) {
-                double vPrice = (PriceConverter.convertWithDiscount(
-                    cartModel.item!.foodVariations![index].variationValues![i]
-                        .optionPrice!, discount, discountType,
-                    isFoodVariation: true)! * cartModel.quantity!);
-                double vFullPrice = (cartModel.item!.foodVariations![index].variationValues![i]
-                    .optionPrice! * cartModel.quantity!);
+                double vPrice =
+                    (PriceConverter.convertWithDiscount(
+                      cartModel
+                          .item!
+                          .foodVariations![index]
+                          .variationValues![i]
+                          .optionPrice!,
+                      discount,
+                      discountType,
+                      isFoodVariation: true,
+                    )! *
+                    cartModel.quantity!);
+                double vFullPrice =
+                    (cartModel
+                        .item!
+                        .foodVariations![index]
+                        .variationValues![i]
+                        .optionPrice! *
+                    cartModel.quantity!);
 
-                if(hasSubscription || (cartModel.isSubscribed ?? false)) {
+                if (hasSubscription || (cartModel.isSubscribed ?? false)) {
                   vPrice = vPrice * days;
                   vFullPrice = vFullPrice * days;
                 }
@@ -2163,10 +3604,15 @@ class CheckoutScreenState extends State<CheckoutScreen> {
             for (Variation variation in cartModel.item!.variations!) {
               if (variation.type == variationType) {
                 double vFullPrice = (variation.price! * cartModel.quantity!);
-                double vDiscountedPrice = (PriceConverter.convertWithDiscount(
-                    variation.price!, discount, discountType)! * cartModel.quantity!);
-                
-                if(hasSubscription || (cartModel.isSubscribed ?? false)) {
+                double vDiscountedPrice =
+                    (PriceConverter.convertWithDiscount(
+                      variation.price!,
+                      discount,
+                      discountType,
+                    )! *
+                    cartModel.quantity!);
+
+                if (hasSubscription || (cartModel.isSubscribed ?? false)) {
                   vFullPrice = vFullPrice * days;
                   vDiscountedPrice = vDiscountedPrice * days;
                 }
@@ -2182,7 +3628,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
         }
       }
     }
-    
+
     if (calculateDiscount) {
       return (variationWithoutDiscountPrice - variationPrice);
     } else if (calculateWithoutDiscount) {
@@ -2192,37 +3638,61 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     }
   }
 
-  double _calculateDiscountPrice({required Store? store, required List<
-      CartModel?>? cartList, required double price, required double addOns, int days = 1, bool hasSubscription = false, required bool calStoreDiscount}) {
+  double _calculateDiscountPrice({
+    required Store? store,
+    required List<CartModel?>? cartList,
+    required double price,
+    required double addOns,
+    int days = 1,
+    bool hasSubscription = false,
+    required bool calStoreDiscount,
+  }) {
     double discount = 0;
     if (store != null && cartList != null) {
       for (var cartModel in cartList) {
-        double? dis = (store.discount != null
-            && DateConverter.isAvailable(
-                store.discount!.startTime, store.discount!.endTime))
-            && calStoreDiscount ? store.discount!.discount : cartModel!.item!
-            .discount;
+        double? dis =
+            (store.discount != null &&
+                    DateConverter.isAvailable(
+                      store.discount!.startTime,
+                      store.discount!.endTime,
+                    )) &&
+                calStoreDiscount
+            ? store.discount!.discount
+            : cartModel!.item!.discount;
 
-        String? disType = (store.discount != null
-            && DateConverter.isAvailable(
-                store.discount!.startTime, store.discount!.endTime))
-            && calStoreDiscount ? 'percent' : cartModel?.item!.discountType;
+        String? disType =
+            (store.discount != null &&
+                    DateConverter.isAvailable(
+                      store.discount!.startTime,
+                      store.discount!.endTime,
+                    )) &&
+                calStoreDiscount
+            ? 'percent'
+            : cartModel?.item!.discountType;
 
-        if (Get
-            .find<SplashController>()
+        if (Get.find<SplashController>()
             .getModuleConfig(cartModel!.item!.moduleType)
             .newVariation!) {
-          double d = ((cartModel.item!.price! -
-              PriceConverter.convertWithDiscount(
-                  cartModel.item!.price!, dis, disType)!) *
+          double d =
+              ((cartModel.item!.price! -
+                  PriceConverter.convertWithDiscount(
+                    cartModel.item!.price!,
+                    dis,
+                    disType,
+                  )!) *
               cartModel.quantity!);
-          if(hasSubscription || (cartModel.isSubscribed ?? false)) {
+          if (hasSubscription || (cartModel.isSubscribed ?? false)) {
             d = d * days;
           }
           discount = discount + d;
           if (disType == 'percent' && discount != 0) {
-            discount = discount +
-                _calculateFoodVariationDiscount(cartModel: cartModel, days: days, hasSubscription: hasSubscription);
+            discount =
+                discount +
+                _calculateFoodVariationDiscount(
+                  cartModel: cartModel,
+                  days: days,
+                  hasSubscription: hasSubscription,
+                );
           }
         } else {
           String variationType = '';
@@ -2234,10 +3704,16 @@ class CheckoutScreenState extends State<CheckoutScreen> {
           if (cartModel.item!.variations!.isNotEmpty) {
             for (Variation variation in cartModel.item!.variations!) {
               if (variation.type == variationType) {
-                double vPrice = (PriceConverter.convertWithDiscount(
-                    variation.price!, dis, disType)! * cartModel.quantity!);
-                double vWithoutDiscountPrice = (variation.price! * cartModel.quantity!);
-                if(hasSubscription || (cartModel.isSubscribed ?? false)) {
+                double vPrice =
+                    (PriceConverter.convertWithDiscount(
+                      variation.price!,
+                      dis,
+                      disType,
+                    )! *
+                    cartModel.quantity!);
+                double vWithoutDiscountPrice =
+                    (variation.price! * cartModel.quantity!);
+                if (hasSubscription || (cartModel.isSubscribed ?? false)) {
                   vPrice = vPrice * days;
                   vWithoutDiscountPrice = vWithoutDiscountPrice * days;
                 }
@@ -2249,11 +3725,15 @@ class CheckoutScreenState extends State<CheckoutScreen> {
             discount =
                 discount + (variationWithoutDiscountPrice - variationPrice);
           } else {
-            double d = ((cartModel.item!.price! -
-                PriceConverter.convertWithDiscount(
-                    cartModel.item!.price!, dis, disType)!) *
+            double d =
+                ((cartModel.item!.price! -
+                    PriceConverter.convertWithDiscount(
+                      cartModel.item!.price!,
+                      dis,
+                      disType,
+                    )!) *
                 cartModel.quantity!);
-            if(hasSubscription || (cartModel.isSubscribed ?? false)) {
+            if (hasSubscription || (cartModel.isSubscribed ?? false)) {
               d = d * days;
             }
             discount = discount + d;
@@ -2277,8 +3757,10 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     return PriceConverter.toFixed(discount);
   }
 
-  double _getDiscountPrice(double storeDiscountPrice,
-      double itemDiscountPrice) {
+  double _getDiscountPrice(
+    double storeDiscountPrice,
+    double itemDiscountPrice,
+  ) {
     double discountPrice = 0;
     if (storeDiscountPrice > itemDiscountPrice) {
       discountPrice = storeDiscountPrice;
@@ -2290,8 +3772,10 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     return discountPrice;
   }
 
-  double _getExtraDiscountPrice(double storeDiscountPrice,
-      double itemDiscountPrice) {
+  double _getExtraDiscountPrice(
+    double storeDiscountPrice,
+    double itemDiscountPrice,
+  ) {
     double extraDiscount = 0;
     if (storeDiscountPrice > itemDiscountPrice) {
       extraDiscount = storeDiscountPrice - itemDiscountPrice;
@@ -2303,26 +3787,48 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     return extraDiscount;
   }
 
-  double _calculateFoodVariationDiscount({required CartModel? cartModel, int days = 1, bool hasSubscription = false}) {
+  double _calculateFoodVariationDiscount({
+    required CartModel? cartModel,
+    int days = 1,
+    bool hasSubscription = false,
+  }) {
     double variationPrice = 0;
     double variationDiscount = 0;
     if (cartModel != null) {
       double? discount = cartModel.item!.discount;
       String? discountType = cartModel.item!.discountType;
-      for (int index = 0; index <
-          cartModel.item!.foodVariations!.length; index++) {
-        for (int i = 0; i <
-            cartModel.item!.foodVariations![index].variationValues!
-                .length; i++) {
+      for (
+        int index = 0;
+        index < cartModel.item!.foodVariations!.length;
+        index++
+      ) {
+        for (
+          int i = 0;
+          i < cartModel.item!.foodVariations![index].variationValues!.length;
+          i++
+        ) {
           if (cartModel.foodVariations![index][i]!) {
-            double vPrice = (PriceConverter.convertWithDiscount(
-                cartModel.item!.foodVariations![index].variationValues![i]
-                    .optionPrice!, discount, discountType,
-                isFoodVariation: true)! * cartModel.quantity!);
-            double vDiscount = (cartModel.item!.foodVariations![index].variationValues![i]
-                .optionPrice! * cartModel.quantity!);
-            
-            if(hasSubscription || (cartModel.isSubscribed ?? false)) {
+            double vPrice =
+                (PriceConverter.convertWithDiscount(
+                  cartModel
+                      .item!
+                      .foodVariations![index]
+                      .variationValues![i]
+                      .optionPrice!,
+                  discount,
+                  discountType,
+                  isFoodVariation: true,
+                )! *
+                cartModel.quantity!);
+            double vDiscount =
+                (cartModel
+                    .item!
+                    .foodVariations![index]
+                    .variationValues![i]
+                    .optionPrice! *
+                cartModel.quantity!);
+
+            if (hasSubscription || (cartModel.isSubscribed ?? false)) {
               vPrice = vPrice * days;
               vDiscount = vDiscount * days;
             }
@@ -2335,26 +3841,36 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     return (variationDiscount - variationPrice);
   }
 
-  double _calculateOrderAmount(
-      {required double price, required double variations, required double discount, required double addOns, required double couponDiscount, required List<
-          CartModel?>? cartList, required double referralDiscount}) {
+  double _calculateOrderAmount({
+    required double price,
+    required double variations,
+    required double discount,
+    required double addOns,
+    required double couponDiscount,
+    required List<CartModel?>? cartList,
+    required double referralDiscount,
+  }) {
     double orderAmount = 0;
     double variationPrice = variations;
     orderAmount =
-        (price + variationPrice - discount) + addOns - couponDiscount -
-            referralDiscount;
+        (price + variationPrice - discount) +
+        addOns -
+        couponDiscount -
+        referralDiscount;
     return PriceConverter.toFixed(orderAmount < 0 ? 0.0 : orderAmount);
   }
 
-  double _calculateSubTotal(
-      {required double price, required double addOns, required double variations, required List<
-          CartModel?>? cartList}) {
+  double _calculateSubTotal({
+    required double price,
+    required double addOns,
+    required double variations,
+    required List<CartModel?>? cartList,
+  }) {
     double subTotal = 0;
     bool isFoodVariation = false;
 
     if (cartList != null && cartList.isNotEmpty) {
-      isFoodVariation = Get
-          .find<SplashController>()
+      isFoodVariation = Get.find<SplashController>()
           .getModuleConfig(cartList[0]!.item!.moduleType)
           .newVariation!;
     }
@@ -2363,18 +3879,22 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     return subTotal;
   }
 
-  double _calculateOriginalDeliveryCharge(
-      {required Store? store, required AddressModel address, required double? distance, required double? extraCharge, double? surgePrice, String? surgePriceType}) {
+  double _calculateOriginalDeliveryCharge({
+    required Store? store,
+    required AddressModel address,
+    required double? distance,
+    required double? extraCharge,
+    double? surgePrice,
+    String? surgePriceType,
+  }) {
     double deliveryCharge = -1;
 
     Pivot? moduleData;
     if (store != null) {
       for (ZoneData zData in address.zoneData!) {
         for (Modules m in zData.modules!) {
-          if (m.id == Get
-              .find<SplashController>()
-              .module!
-              .id && m.pivot!.zoneId == store.zoneId) {
+          if (m.id == Get.find<SplashController>().module!.id &&
+              m.pivot!.zoneId == store.zoneId) {
             moduleData = m.pivot;
             break;
           }
@@ -2384,17 +3904,23 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     double perKmCharge = 0;
     double minimumCharge = 0;
     double? maximumCharge = 0;
-    if (store != null && distance != null && distance != -1 &&
+    if (store != null &&
+        distance != null &&
+        distance != -1 &&
         store.selfDeliverySystem == 1) {
       perKmCharge = store.perKmShippingCharge!;
       minimumCharge = store.minimumShippingCharge!;
       maximumCharge = store.maximumShippingCharge;
-    } else if (store != null && distance != null && distance != -1 &&
-        moduleData != null && moduleData.deliveryChargeType == 'distance') {
+    } else if (store != null &&
+        distance != null &&
+        distance != -1 &&
+        moduleData != null &&
+        moduleData.deliveryChargeType == 'distance') {
       perKmCharge = moduleData.perKmShippingCharge!;
       minimumCharge = moduleData.minimumShippingCharge!;
       maximumCharge = moduleData.maximumShippingCharge;
-    } else if (store != null && moduleData != null &&
+    } else if (store != null &&
+        moduleData != null &&
         moduleData.deliveryChargeType == 'fixed') {
       perKmCharge = moduleData.fixedShippingCharge ?? 0;
       minimumCharge = moduleData.fixedShippingCharge ?? 0;
@@ -2415,7 +3941,9 @@ class CheckoutScreenState extends State<CheckoutScreen> {
       deliveryCharge = deliveryCharge + extraCharge;
     }
 
-    if (store != null && store.selfDeliverySystem == 0 && surgePrice != null &&
+    if (store != null &&
+        store.selfDeliverySystem == 0 &&
+        surgePrice != null &&
         surgePrice > 0) {
       if (surgePriceType == 'percent') {
         badWeatherChargeForToolTip = (deliveryCharge * (surgePrice / 100));
@@ -2429,44 +3957,48 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     return deliveryCharge;
   }
 
-  double _calculateDeliveryCharge(
-      {required Store? store, required AddressModel address, required double? distance, required double? extraCharge, required double orderAmount,
-        required String orderType, double? surgePrice, String? surgePriceType}) {
-    double deliveryCharge = _calculateOriginalDeliveryCharge(store: store,
-        address: address,
-        distance: distance,
-        extraCharge: extraCharge,
-        surgePrice: surgePrice,
-        surgePriceType: surgePriceType);
+  double _calculateDeliveryCharge({
+    required Store? store,
+    required AddressModel address,
+    required double? distance,
+    required double? extraCharge,
+    required double orderAmount,
+    required String orderType,
+    double? surgePrice,
+    String? surgePriceType,
+  }) {
+    double deliveryCharge = _calculateOriginalDeliveryCharge(
+      store: store,
+      address: address,
+      distance: distance,
+      extraCharge: extraCharge,
+      surgePrice: surgePrice,
+      surgePriceType: surgePriceType,
+    );
 
-    ConfigModel? configModel = Get
-        .find<SplashController>()
-        .configModel;
+    ConfigModel? configModel = Get.find<SplashController>().configModel;
 
-
-    if (orderType == 'take_away' || (store != null && store.freeDelivery!)
-        || (configModel?.adminFreeDelivery?.status == true &&
+    if (orderType == 'take_away' ||
+        (store != null && store.freeDelivery!) ||
+        (configModel?.adminFreeDelivery?.status == true &&
             (configModel?.adminFreeDelivery?.type != null &&
                 configModel?.adminFreeDelivery?.type ==
-                    'free_delivery_to_all_store'))
-        || ((configModel?.adminFreeDelivery?.status == true &&
-            (configModel?.adminFreeDelivery?.type != null &&
-                configModel?.adminFreeDelivery?.type ==
-                    'free_delivery_by_order_amount') &&
-            (configModel!.adminFreeDelivery?.freeDeliveryOver != null &&
-                orderAmount >=
-                    configModel.adminFreeDelivery!.freeDeliveryOver!))
-        && (configModel?.adminFreeDelivery?.status == true &&
-            configModel?.adminFreeDelivery?.freeDeliveryKm != null &&
-            distance != null &&
-            distance <= configModel!.adminFreeDelivery!.freeDeliveryKm!))
-        || Get
-            .find<CouponController>()
-            .freeDelivery || (AuthHelper.isGuestLoggedIn() && (Get
-        .find<CheckoutController>()
-        .guestAddress == null && Get
-        .find<CheckoutController>()
-        .orderType != 'take_away'))) {
+                    'free_delivery_to_all_store')) ||
+        ((configModel?.adminFreeDelivery?.status == true &&
+                (configModel?.adminFreeDelivery?.type != null &&
+                    configModel?.adminFreeDelivery?.type ==
+                        'free_delivery_by_order_amount') &&
+                (configModel!.adminFreeDelivery?.freeDeliveryOver != null &&
+                    orderAmount >=
+                        configModel.adminFreeDelivery!.freeDeliveryOver!)) &&
+            (configModel?.adminFreeDelivery?.status == true &&
+                configModel?.adminFreeDelivery?.freeDeliveryKm != null &&
+                distance != null &&
+                distance <= configModel!.adminFreeDelivery!.freeDeliveryKm!)) ||
+        Get.find<CouponController>().freeDelivery ||
+        (AuthHelper.isGuestLoggedIn() &&
+            (Get.find<CheckoutController>().guestAddress == null &&
+                Get.find<CheckoutController>().orderType != 'take_away'))) {
       deliveryCharge = 0;
     }
 
@@ -2474,23 +4006,38 @@ class CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   double _calculateTotal({
-    required double subTotal, required double deliveryCharge, required double discount,
-    required double couponDiscount, required bool taxIncluded, required double tax,
-    required String orderType, required double tips, required double additionalCharge, required double extraPackagingCharge, required double otherCharge
+    required double subTotal,
+    required double deliveryCharge,
+    required double discount,
+    required double couponDiscount,
+    required bool taxIncluded,
+    required double tax,
+    required String orderType,
+    required double tips,
+    required double additionalCharge,
+    required double extraPackagingCharge,
+    required double otherCharge,
   }) {
     return PriceConverter.toFixed(
-        subTotal + deliveryCharge - discount - couponDiscount +
-            (taxIncluded ? 0 : tax)
-            + ((orderType != 'take_away' && Get
-            .find<SplashController>()
-            .configModel!
-            .dmTipsStatus == 1) ? tips : 0)
-            + additionalCharge + extraPackagingCharge + otherCharge
+      subTotal +
+          deliveryCharge -
+          discount -
+          couponDiscount +
+          (taxIncluded ? 0 : tax) +
+          ((orderType != 'take_away' &&
+                  Get.find<SplashController>().configModel!.dmTipsStatus == 1)
+              ? tips
+              : 0) +
+          additionalCharge +
+          extraPackagingCharge +
+          otherCharge,
     );
   }
 
-  bool _checkZoneOfflinePaymentOnOff(
-      {required AddressModel? addressModel, required CheckoutController checkoutController}) {
+  bool _checkZoneOfflinePaymentOnOff({
+    required AddressModel? addressModel,
+    required CheckoutController checkoutController,
+  }) {
     bool? status = false;
     ZoneData? zoneData;
     for (var data in addressModel!.zoneData!) {
@@ -2504,15 +4051,13 @@ class CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   bool _checkPrescriptionRequired() {
-    if (widget.storeId == null && Get
-        .find<SplashController>()
-        .configModel!
-        .moduleConfig!
-        .module!
-        .orderAttachment!) {
-      for (var cart in Get
-          .find<CheckoutController>()
-          .cartList!) {
+    if (widget.storeId == null &&
+        Get.find<SplashController>()
+            .configModel!
+            .moduleConfig!
+            .module!
+            .orderAttachment!) {
+      for (var cart in Get.find<CheckoutController>().cartList!) {
         if (cart!.item!.isPrescriptionRequired!) {
           return true;
         }
@@ -2522,14 +4067,12 @@ class CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   double _calculateExtraPackagingCharge(CheckoutController checkoutController) {
-    if ((checkoutController.store?.extraPackagingStatus ?? true) && (Get
-        .find<CartController>()
-        .needExtraPackage)) {
+    if ((checkoutController.store?.extraPackagingStatus ?? true) &&
+        (Get.find<CartController>().needExtraPackage)) {
       return checkoutController.store?.extraPackagingAmount ?? 0;
     }
     return 0;
   }
-
 
   double _calculateotherCharge(CheckoutController checkoutController) {
     if ((checkoutController.store?.otherchargeenabled ?? true)) {
@@ -2538,39 +4081,39 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     return 0;
   }
 
-  double _calculateReferralDiscount(double subTotal, double discount,
-      double couponDiscount) {
+  double _calculateReferralDiscount(
+    double subTotal,
+    double discount,
+    double couponDiscount,
+  ) {
     double referralDiscount = 0;
-    if (Get
-        .find<ProfileController>()
-        .userInfoModel != null && Get
-        .find<ProfileController>()
-        .userInfoModel!
-        .isValidForDiscount!) {
-      if (Get
-          .find<ProfileController>()
-          .userInfoModel!
-          .discountAmountType! == "percentage") {
-        referralDiscount = (Get
-            .find<ProfileController>()
-            .userInfoModel!
-            .discountAmount! / 100) * (subTotal - discount - couponDiscount);
+    if (Get.find<ProfileController>().userInfoModel != null &&
+        Get.find<ProfileController>().userInfoModel!.isValidForDiscount!) {
+      if (Get.find<ProfileController>().userInfoModel!.discountAmountType! ==
+          "percentage") {
+        referralDiscount =
+            (Get.find<ProfileController>().userInfoModel!.discountAmount! /
+                100) *
+            (subTotal - discount - couponDiscount);
       } else {
-        referralDiscount = Get
-            .find<ProfileController>()
-            .userInfoModel!
-            .discountAmount!;
+        referralDiscount =
+            Get.find<ProfileController>().userInfoModel!.discountAmount!;
       }
     }
     return PriceConverter.toFixed(referralDiscount);
   }
 
-
   Widget _buildBillRow(String label, String value, {bool isGreen = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: robotoRegular.copyWith(fontSize: 14, color: Colors.grey.shade600)),
+        Text(
+          label,
+          style: robotoRegular.copyWith(
+            fontSize: 14,
+            color: Colors.grey.shade600,
+          ),
+        ),
         Text(
           value,
           style: robotoBold.copyWith(
@@ -2584,18 +4127,12 @@ class CheckoutScreenState extends State<CheckoutScreen> {
 
   Future<void> showCashBackSnackBar() async {
     await Get.find<HomeController>().getCashBackData(_payableAmount!);
-    double? cashBackAmount = Get
-        .find<HomeController>()
-        .cashBackData
-        ?.cashbackAmount ?? 0;
-    String? cashBackType = Get
-        .find<HomeController>()
-        .cashBackData
-        ?.cashbackType ?? '';
-    String text = '${'you_will_get'.tr} ${cashBackType == 'amount'
-        ? PriceConverter.convertPrice(cashBackAmount)
-        : '${cashBackAmount.toStringAsFixed(
-        0)}%'} ${'cash_back_after_completing_order'.tr}';
+    double? cashBackAmount =
+        Get.find<HomeController>().cashBackData?.cashbackAmount ?? 0;
+    String? cashBackType =
+        Get.find<HomeController>().cashBackData?.cashbackType ?? '';
+    String text =
+        '${'you_will_get'.tr} ${cashBackType == 'amount' ? PriceConverter.convertPrice(cashBackAmount) : '${cashBackAmount.toStringAsFixed(0)}%'} ${'cash_back_after_completing_order'.tr}';
     if (cashBackAmount > 0) {
       showCustomSnackBar(text, isError: false);
     }
@@ -2607,7 +4144,13 @@ class CheckoutScreenState extends State<CheckoutScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: robotoRegular.copyWith(color: Colors.grey.shade600, fontSize: 14)),
+          Text(
+            label,
+            style: robotoRegular.copyWith(
+              color: Colors.grey.shade600,
+              fontSize: 14,
+            ),
+          ),
           Text(
             (isDiscount ? '(-) ' : '') + PriceConverter.convertPrice(amount),
             style: robotoMedium.copyWith(
@@ -2621,13 +4164,8 @@ class CheckoutScreenState extends State<CheckoutScreen> {
   }
 }
 
-
 class CheckoutTabBar extends StatelessWidget {
-  final List<String> tabs = const [
-    'Delivery Type',
-    'Tip',
-    'Instructions',
-  ];
+  final List<String> tabs = const ['Delivery Type', 'Tip', 'Instructions'];
 
   const CheckoutTabBar({super.key});
 
@@ -2644,8 +4182,7 @@ class CheckoutTabBar extends StatelessWidget {
           ),
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final indicatorWidth =
-                  (constraints.maxWidth - 8.r) / tabs.length;
+              final indicatorWidth = (constraints.maxWidth - 8.r) / tabs.length;
 
               return Stack(
                 children: [
@@ -2667,7 +4204,7 @@ class CheckoutTabBar extends StatelessWidget {
                   Row(
                     children: List.generate(
                       tabs.length,
-                          (index) => Expanded(
+                      (index) => Expanded(
                         child: GestureDetector(
                           onTap: () => controller.changeTab(index),
                           behavior: HitTestBehavior.opaque,
@@ -2679,8 +4216,7 @@ class CheckoutTabBar extends StatelessWidget {
                                 fontSize: 12.sp,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: 0.2,
-                                color:
-                                controller.selectedtabIndex == index
+                                color: controller.selectedtabIndex == index
                                     ? Colors.white
                                     : const Color(0xff1C1C1E),
                               ),
@@ -2700,7 +4236,6 @@ class CheckoutTabBar extends StatelessWidget {
   }
 }
 
-
 class FactCardView extends StatefulWidget {
   const FactCardView({super.key});
 
@@ -2710,7 +4245,6 @@ class FactCardView extends StatefulWidget {
 
 class _FactCardViewState extends State<FactCardView>
     with SingleTickerProviderStateMixin {
-
   late AnimationController _controller;
   late Animation<Color?> _colorAnimation;
 
@@ -2726,12 +4260,7 @@ class _FactCardViewState extends State<FactCardView>
     _colorAnimation = ColorTween(
       begin: const Color(0xFF9E9E9E),
       end: const Color(0xFF000000),
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOut,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -2750,7 +4279,6 @@ class _FactCardViewState extends State<FactCardView>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-
               const Icon(
                 Icons.lightbulb_outline_rounded,
                 size: 48,
@@ -2781,20 +4309,14 @@ class _FactCardViewState extends State<FactCardView>
 
               const Text(
                 '- ${AppConstants.appName} Scale',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFFB0B0B0),
-                ),
+                style: TextStyle(fontSize: 14, color: Color(0xFFB0B0B0)),
               ),
 
               const SizedBox(height: 32),
 
               const Text(
                 'Tap for next fact',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFFD6D6D6),
-                ),
+                style: TextStyle(fontSize: 12, color: Color(0xFFD6D6D6)),
               ),
             ],
           ),
@@ -2803,4 +4325,3 @@ class _FactCardViewState extends State<FactCardView>
     );
   }
 }
-

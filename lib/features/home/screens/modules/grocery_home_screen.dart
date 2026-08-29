@@ -121,7 +121,12 @@ class GroceryHomeScreen extends StatefulWidget {
   final String? wheathertype;
   final List<HourlyTemperature> hourlyTemp;
 
-  const GroceryHomeScreen({super.key, required this.scrollController, this.wheathertype, required this.hourlyTemp});
+  const GroceryHomeScreen({
+    super.key,
+    required this.scrollController,
+    this.wheathertype,
+    required this.hourlyTemp,
+  });
 
   @override
   State<GroceryHomeScreen> createState() => _GroceryHomeScreenState();
@@ -208,7 +213,9 @@ class _GroceryHomeScreenState extends State<GroceryHomeScreen> {
                           tileMode: TileMode.mirror,
                           colors: [
                             Theme.of(context).primaryColor,
-                            Theme.of(context).primaryColor.withValues(alpha: 0.7),
+                            Theme.of(
+                              context,
+                            ).primaryColor.withValues(alpha: 0.7),
                           ],
                         ),
                       ),
@@ -593,11 +600,11 @@ class _GroceryHomeScreenState extends State<GroceryHomeScreen> {
                                         children: [
                                           Expanded(
                                             child: Row(
-                                              mainAxisSize: MainAxisSize.min,
+                                              mainAxisSize: MainAxisSize.max,
                                               children: <Widget>[
-                                                const SizedBox(
-                                                  width: 10.0,
-                                                  height: 100.0,
+                                                SizedBox(
+                                                  width: 10.w,
+                                                  height: 100.h,
                                                 ),
                                                 Text(
                                                   'Search for',
@@ -606,45 +613,49 @@ class _GroceryHomeScreenState extends State<GroceryHomeScreen> {
                                                         .fontSizeLarge,
                                                   ),
                                                 ),
-                                                const SizedBox(
-                                                  width: 5,
-                                                  height: 100.0,
+                                                SizedBox(
+                                                  width: 5.w,
+                                                  height: 100.h,
                                                 ),
-                                                GetBuilder<CategoryController>(
-                                                  builder: (categoryController) {
-                                                    if (categoryController
-                                                                .categoryList !=
-                                                            null &&
-                                                        categoryController
-                                                            .categoryList!
-                                                            .isNotEmpty) {
-                                                      return AnimatedTextKit(
-                                                        repeatForever: true,
-                                                        animatedTexts: categoryController
-                                                            .categoryList!
-                                                            .map(
-                                                              (
-                                                                category,
-                                                              ) => RotateAnimatedText(
-                                                                ("${(category.name?.capitalizeFirst)}"),
-                                                                textStyle: robotoRegular.copyWith(
-                                                                  fontSize:
-                                                                      Dimensions
-                                                                          .fontSizeLarge,
-                                                                  color: Theme.of(
-                                                                    context,
-                                                                  ).primaryColor,
+                                                Expanded(
+                                                  child: GetBuilder<CategoryController>(
+                                                    builder: (categoryController) {
+                                                      if (categoryController
+                                                                  .categoryList !=
+                                                              null &&
+                                                          categoryController
+                                                              .categoryList!
+                                                              .isNotEmpty) {
+                                                        return AnimatedTextKit(
+                                                          repeatForever: true,
+                                                          animatedTexts: categoryController
+                                                              .categoryList!
+                                                              .map(
+                                                                (
+                                                                  category,
+                                                                ) => RotateAnimatedText(
+                                                                  ("${(category.name?.capitalizeFirst)}"),
+                                                                  textStyle: robotoRegular.copyWith(
+                                                                    fontSize:
+                                                                        Dimensions
+                                                                            .fontSizeLarge,
+                                                                    color: Theme.of(
+                                                                      context,
+                                                                    ).primaryColor,
+                                                                  ),
                                                                 ),
-                                                              ),
-                                                            )
-                                                            .toList(),
-                                                      );
-                                                    } else {
-                                                      return const Text(
-                                                        'Loading categories...',
-                                                      );
-                                                    }
-                                                  },
+                                                              )
+                                                              .toList(),
+                                                        );
+                                                      } else {
+                                                        return const Text(
+                                                          'Loading categories...',
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                        );
+                                                      }
+                                                    },
+                                                  ),
                                                 ),
                                               ],
                                             ),
@@ -710,7 +721,6 @@ class _GroceryHomeScreenState extends State<GroceryHomeScreen> {
                     ),
                   ),
 
-
                   // if (widget.wheathertype=="RAINY")
                   // const Positioned.fill(
                   //   child: IgnorePointer(
@@ -737,7 +747,7 @@ class _GroceryHomeScreenState extends State<GroceryHomeScreen> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                       const Gap(10),
+                      const Gap(10),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: Row(
@@ -762,7 +772,9 @@ class _GroceryHomeScreenState extends State<GroceryHomeScreen> {
                                 child: InkWell(
                                   onTap: () {
                                     if (ResponsiveHelper.isMobile(context)) {
-                                      Get.toNamed(RouteHelper.getCategoryRoute());
+                                      Get.toNamed(
+                                        RouteHelper.getCategoryRoute(),
+                                      );
                                     } else {
                                       showDialog(
                                         context: context,
@@ -781,11 +793,16 @@ class _GroceryHomeScreenState extends State<GroceryHomeScreen> {
                                   },
                                   child: ResponsiveHelper.isMobile(context)
                                       ? Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 4,
+                                            vertical: 2,
+                                          ),
                                           child: Text(
                                             'see_all'.tr,
                                             style: robotoMedium.copyWith(
-                                              color: Theme.of(context).primaryColor,
+                                              color: Theme.of(
+                                                context,
+                                              ).primaryColor,
                                               fontSize: 14.sp,
                                             ),
                                           ),
@@ -798,8 +815,11 @@ class _GroceryHomeScreenState extends State<GroceryHomeScreen> {
                                           child: Text(
                                             'view_all'.tr,
                                             style: TextStyle(
-                                              fontSize: Dimensions.paddingSizeDefault,
-                                              color: Theme.of(context).cardColor,
+                                              fontSize:
+                                                  Dimensions.paddingSizeDefault,
+                                              color: Theme.of(
+                                                context,
+                                              ).cardColor,
                                             ),
                                           ),
                                         ),
@@ -814,18 +834,24 @@ class _GroceryHomeScreenState extends State<GroceryHomeScreen> {
                         child: SizedBox(
                           height: 270.h,
                           child: GridView.builder(
-                            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 12.w,
+                              vertical: 4.h,
+                            ),
                             scrollDirection: Axis.horizontal,
                             physics: const BouncingScrollPhysics(),
-                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
-                              mainAxisSpacing: 12.w,
-                              crossAxisSpacing: 10.h,
-                              childAspectRatio: .85,
-                            ),
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 3,
+                                  mainAxisSpacing: 12.w,
+                                  crossAxisSpacing: 10.h,
+                                  childAspectRatio: .85,
+                                ),
                             itemCount: list?.length ?? 12,
                             itemBuilder: (_, index) {
-                              final category = list != null ? list[index] : null;
+                              final category = list != null
+                                  ? list[index]
+                                  : null;
                               final isLoading = category == null;
                               return InkWell(
                                 onTap: isLoading
@@ -849,11 +875,14 @@ class _GroceryHomeScreenState extends State<GroceryHomeScreen> {
                                         color: Colors.grey.shade200,
                                       ),
                                       child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(100),
+                                        borderRadius: BorderRadius.circular(
+                                          100,
+                                        ),
                                         child: isLoading
                                             ? const SizedBox()
                                             : CustomImage(
-                                                image: '${category.imageFullUrl}',
+                                                image:
+                                                    '${category.imageFullUrl}',
                                                 fit: BoxFit.cover,
                                               ),
                                       ),
@@ -960,7 +989,7 @@ class _GroceryHomeScreenState extends State<GroceryHomeScreen> {
                     //     ),
                     //   ),
                     // ),
-                  
+
                     const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 12.0),
                       child: BannerViewGrocery(isFeatured: false),
@@ -1052,7 +1081,8 @@ class CategoryListScreen extends StatelessWidget {
               return const Center(child: CircularProgressIndicator());
             }
 
-            if (categoryController.categoryList == null || categoryController.categoryList!.isEmpty) {
+            if (categoryController.categoryList == null ||
+                categoryController.categoryList!.isEmpty) {
               return const SizedBox.shrink();
             }
 
@@ -1074,13 +1104,15 @@ class CategoryListScreen extends StatelessWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 // Category & Product List
                 ...categoryController.categoryList!.map((category) {
                   // Filter items that belong to the current category and exist in the sourceItems list
                   final items = sourceItems.where((item) {
                     return item.categoryId == category.id ||
-                        item.categoryIds?.any((catId) => catId.id == category.id) == true;
+                        item.categoryIds?.any(
+                              (catId) => catId.id == category.id,
+                            ) ==
+                            true;
                   }).toList();
 
                   if (items.isEmpty) {
@@ -1105,7 +1137,10 @@ class CategoryListScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -1152,14 +1187,18 @@ class CategoryListScreen extends StatelessWidget {
                           child: GridView.builder(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                            itemCount: items.length,
-                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: columns,
-                              mainAxisSpacing: 10,
-                              crossAxisSpacing: 10,
-                              mainAxisExtent: 250,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 4,
                             ),
+                            itemCount: items.length,
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: columns,
+                                  mainAxisSpacing: 10,
+                                  crossAxisSpacing: 10,
+                                  mainAxisExtent: 250,
+                                ),
                             itemBuilder: (context, idx) {
                               return ItemCard(
                                 key: ValueKey(items[idx].id),
@@ -1552,7 +1591,6 @@ Widget _buildCategorySkeleton() {
   );
 }
 
-
 ///newly added by ak
 class CloudAnimation extends StatefulWidget {
   const CloudAnimation({super.key});
@@ -1588,6 +1626,7 @@ class _CloudAnimationState extends State<CloudAnimation>
     super.dispose();
   }
 }
+
 class LoopingCloudPainter extends CustomPainter {
   final double progress;
   LoopingCloudPainter(this.progress);
@@ -1596,9 +1635,7 @@ class LoopingCloudPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     // Only top part visible
     canvas.save();
-    canvas.clipRect(
-      Rect.fromLTWH(0, 0, size.width, size.height * 0.35),
-    );
+    canvas.clipRect(Rect.fromLTWH(0, 0, size.width, size.height * 0.35));
 
     final cloudPaint = Paint()
       ..shader = const LinearGradient(
@@ -1646,44 +1683,32 @@ class LoopingCloudPainter extends CustomPainter {
   }
 
   void _drawMovingCloud(
-      Canvas canvas,
-      Size size,
-      Paint cloudPaint,
-      Paint shadowPaint, {
-        required double speed,
-        required double y,
-        required double scale,
-      }) {
+    Canvas canvas,
+    Size size,
+    Paint cloudPaint,
+    Paint shadowPaint, {
+    required double speed,
+    required double y,
+    required double scale,
+  }) {
     final cloudWidth = 180 * scale;
     final travel = size.width + cloudWidth * 2;
 
     final x = ((progress * travel * speed) % travel) - cloudWidth;
 
-    _drawCloud(
-      canvas,
-      cloudPaint,
-      shadowPaint,
-      Offset(x, y),
-      scale,
-    );
+    _drawCloud(canvas, cloudPaint, shadowPaint, Offset(x, y), scale);
 
     // Duplicate cloud for seamless looping
-    _drawCloud(
-      canvas,
-      cloudPaint,
-      shadowPaint,
-      Offset(x + travel, y),
-      scale,
-    );
+    _drawCloud(canvas, cloudPaint, shadowPaint, Offset(x + travel, y), scale);
   }
 
   void _drawCloud(
-      Canvas canvas,
-      Paint cloudPaint,
-      Paint shadowPaint,
-      Offset center,
-      double scale,
-      ) {
+    Canvas canvas,
+    Paint cloudPaint,
+    Paint shadowPaint,
+    Offset center,
+    double scale,
+  ) {
     final offsets = [
       const Offset(0, 0),
       const Offset(30, -10),
@@ -1696,27 +1721,18 @@ class LoopingCloudPainter extends CustomPainter {
 
     for (int i = 0; i < offsets.length; i++) {
       final pos = center + offsets[i] * scale;
-      canvas.drawCircle(
-        pos.translate(6, 8),
-        radii[i] * scale,
-        shadowPaint,
-      );
+      canvas.drawCircle(pos.translate(6, 8), radii[i] * scale, shadowPaint);
     }
 
     for (int i = 0; i < offsets.length; i++) {
       final pos = center + offsets[i] * scale;
-      canvas.drawCircle(
-        pos,
-        radii[i] * scale,
-        cloudPaint,
-      );
+      canvas.drawCircle(pos, radii[i] * scale, cloudPaint);
     }
   }
 
   @override
   bool shouldRepaint(_) => true;
 }
-
 
 class RainAnimation extends StatefulWidget {
   const RainAnimation({super.key});
@@ -1732,9 +1748,10 @@ class _RainAnimationState extends State<RainAnimation>
   @override
   void initState() {
     super.initState();
-    _controller =
-    AnimationController(vsync: this, duration: const Duration(milliseconds: 800))
-      ..repeat();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    )..repeat();
   }
 
   @override
@@ -1742,9 +1759,7 @@ class _RainAnimationState extends State<RainAnimation>
     return AnimatedBuilder(
       animation: _controller,
       builder: (_, __) {
-        return CustomPaint(
-          painter: RainPainter(_controller.value),
-        );
+        return CustomPaint(painter: RainPainter(_controller.value));
       },
     );
   }
@@ -1770,20 +1785,18 @@ class RainPainter extends CustomPainter {
 
     for (int i = 0; i < 120; i++) {
       final x = random.nextDouble() * size.width;
-      final y = (random.nextDouble() * size.height + progress * size.height) %
+      final y =
+          (random.nextDouble() * size.height + progress * size.height) %
           size.height;
 
-      canvas.drawLine(
-        Offset(x, y),
-        Offset(x, y + 12),
-        paint,
-      );
+      canvas.drawLine(Offset(x, y), Offset(x, y + 12), paint);
     }
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
+
 class ThunderFlash extends StatefulWidget {
   const ThunderFlash({super.key});
 
@@ -1798,9 +1811,10 @@ class _ThunderFlashState extends State<ThunderFlash>
   @override
   void initState() {
     super.initState();
-    _controller =
-    AnimationController(vsync: this, duration: const Duration(seconds: 5))
-      ..repeat();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 5),
+    )..repeat();
   }
 
   @override

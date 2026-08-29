@@ -33,8 +33,6 @@ class SplashController extends GetxController implements GetxService {
   final SplashServiceInterface splashServiceInterface;
   SplashController({required this.splashServiceInterface});
 
-
-
   ConfigModel? _configModel;
   ConfigModel? get configModel => _configModel;
 
@@ -81,7 +79,6 @@ class SplashController extends GetxController implements GetxService {
 
   DateTime get currentTime => DateTime.now();
 
-
   ///newly added by ak
   bool showBottomNav = true;
 
@@ -94,6 +91,7 @@ class SplashController extends GetxController implements GetxService {
     showBottomNav = true;
     update();
   }
+
   ///
 
   void selectModuleIndex(int index) {
@@ -101,35 +99,71 @@ class SplashController extends GetxController implements GetxService {
     update();
   }
 
-  Future<void> getConfigData({NotificationBodyModel? notificationBody, bool loadModuleData = false, bool loadLandingData = false, DataSourceEnum source = DataSourceEnum.local, bool fromMainFunction = false, bool fromDemoReset = false}) async {
+  Future<void> getConfigData({
+    NotificationBodyModel? notificationBody,
+    bool loadModuleData = false,
+    bool loadLandingData = false,
+    DataSourceEnum source = DataSourceEnum.local,
+    bool fromMainFunction = false,
+    bool fromDemoReset = false,
+  }) async {
     _hasConnection = true;
     _moduleIndex = 0;
     Response response;
-    if(source == DataSourceEnum.local && !fromDemoReset) {
-      response = await splashServiceInterface.getConfigData(source: DataSourceEnum.local);
-      _handleConfigResponse(response, loadModuleData, loadLandingData, fromMainFunction, fromDemoReset, notificationBody);
-      getConfigData(loadModuleData: loadModuleData, loadLandingData: loadLandingData, source: DataSourceEnum.client);
-
+    if (source == DataSourceEnum.local && !fromDemoReset) {
+      response = await splashServiceInterface.getConfigData(
+        source: DataSourceEnum.local,
+      );
+      _handleConfigResponse(
+        response,
+        loadModuleData,
+        loadLandingData,
+        fromMainFunction,
+        fromDemoReset,
+        notificationBody,
+      );
+      getConfigData(
+        loadModuleData: loadModuleData,
+        loadLandingData: loadLandingData,
+        source: DataSourceEnum.client,
+      );
     } else {
-      response = await splashServiceInterface.getConfigData(source: DataSourceEnum.client);
-      _handleConfigResponse(response, loadModuleData, loadLandingData, fromMainFunction, fromDemoReset, notificationBody);
+      response = await splashServiceInterface.getConfigData(
+        source: DataSourceEnum.client,
+      );
+      _handleConfigResponse(
+        response,
+        loadModuleData,
+        loadLandingData,
+        fromMainFunction,
+        fromDemoReset,
+        notificationBody,
+      );
     }
-
   }
 
-  Future<void> _handleConfigResponse(Response response, bool loadModuleData, bool loadLandingData, bool fromMainFunction, bool fromDemoReset, NotificationBodyModel? notificationBody) async {
-    if(response.statusCode == 200) {
+  Future<void> _handleConfigResponse(
+    Response response,
+    bool loadModuleData,
+    bool loadLandingData,
+    bool fromMainFunction,
+    bool fromDemoReset,
+    NotificationBodyModel? notificationBody,
+  ) async {
+    if (response.statusCode == 200) {
       _data = response.body;
       _configModel = ConfigModel.fromJson(response.body);
-      if(_configModel!.module != null) {
+      if (_configModel!.module != null) {
         setModule(_configModel!.module);
-      }else if(GetPlatform.isWeb || (loadModuleData && _module != null)) {
-        setModule(GetPlatform.isWeb ? splashServiceInterface.getModule() : _module);
+      } else if (GetPlatform.isWeb || (loadModuleData && _module != null)) {
+        setModule(
+          GetPlatform.isWeb ? splashServiceInterface.getModule() : _module,
+        );
       }
-      if(loadLandingData){
+      if (loadLandingData) {
         await getLandingPageData();
       }
-      if(fromMainFunction) {
+      if (fromMainFunction) {
         _mainConfigRouting();
       } else if (fromDemoReset) {
         ///added by ak
@@ -140,8 +174,8 @@ class SplashController extends GetxController implements GetxService {
         route(body: notificationBody);
       }
       _onRemoveLoader();
-    }else {
-      if(response.statusText == ApiClient.noInternetMessage) {
+    } else {
+      if (response.statusText == ApiClient.noInternetMessage) {
         _hasConnection = false;
       }
     }
@@ -151,7 +185,7 @@ class SplashController extends GetxController implements GetxService {
   Future<void> _mainConfigRouting() async {
     if (Get.find<AuthController>().isLoggedIn()) {
       Get.find<AuthController>().updateToken();
-      if(Get.find<SplashController>().module != null) {
+      if (Get.find<SplashController>().module != null) {
         await Get.find<FavouriteController>().getFavouriteList();
       }
     }
@@ -164,32 +198,40 @@ class SplashController extends GetxController implements GetxService {
     }
   }
 
-  Future<void> getLandingPageData({DataSourceEnum source = DataSourceEnum.local}) async {
+  Future<void> getLandingPageData({
+    DataSourceEnum source = DataSourceEnum.local,
+  }) async {
     LandingModel? landingModel;
-    if(source == DataSourceEnum.local) {
-      landingModel = await splashServiceInterface.getLandingPageData(source: DataSourceEnum.local);
+    if (source == DataSourceEnum.local) {
+      landingModel = await splashServiceInterface.getLandingPageData(
+        source: DataSourceEnum.local,
+      );
       _prepareLandingModel(landingModel);
       getLandingPageData(source: DataSourceEnum.client);
     } else {
-      landingModel = await splashServiceInterface.getLandingPageData(source: DataSourceEnum.client);
+      landingModel = await splashServiceInterface.getLandingPageData(
+        source: DataSourceEnum.client,
+      );
       _prepareLandingModel(landingModel);
     }
-
   }
 
   void _prepareLandingModel(LandingModel? landingModel) {
-    if(landingModel != null) {
+    if (landingModel != null) {
       _landingModel = landingModel;
-      hoverStates = List<bool>.generate(_landingModel!.availableZoneList!.length, (index) => false);
+      hoverStates = List<bool>.generate(
+        _landingModel!.availableZoneList!.length,
+        (index) => false,
+      );
     }
     update();
   }
 
   Future<void> initSharedData() async {
-    if(!GetPlatform.isWeb) {
+    if (!GetPlatform.isWeb) {
       _module = null;
       splashServiceInterface.initSharedData();
-    }else {
+    } else {
       _module = await splashServiceInterface.initSharedData();
     }
     _cacheModule = splashServiceInterface.getCacheModule();
@@ -197,7 +239,9 @@ class SplashController extends GetxController implements GetxService {
   }
 
   void setCacheConfigModule(ModuleModel? cacheModule) {
-    _configModel!.moduleConfig!.module = Module.fromJson(_data!['module_config'][cacheModule!.moduleType]);
+    _configModel!.moduleConfig!.module = Module.fromJson(
+      _data!['module_config'][cacheModule!.moduleType],
+    );
   }
 
   bool? showIntro() {
@@ -215,9 +259,11 @@ class SplashController extends GetxController implements GetxService {
   Future<void> setModule(ModuleModel? module, {bool notify = true}) async {
     _module = module;
     splashServiceInterface.setModule(module);
-    if(module != null) {
-      if(_configModel != null) {
-        _configModel!.moduleConfig!.module = Module.fromJson(_data!['module_config'][module.moduleType]);
+    if (module != null) {
+      if (_configModel != null) {
+        _configModel!.moduleConfig!.module = Module.fromJson(
+          _data!['module_config'][module.moduleType],
+        );
       }
       Get.find<ItemController>().clearItemLists();
       Get.find<StoreController>().clearStoreData();
@@ -228,40 +274,46 @@ class SplashController extends GetxController implements GetxService {
 
       _cacheModule = await splashServiceInterface.setCacheModule(module);
 
-      if((AuthHelper.isLoggedIn() || AuthHelper.isGuestLoggedIn()) && (cacheModule != null || _module != null)) {
+      if ((AuthHelper.isLoggedIn() || AuthHelper.isGuestLoggedIn()) &&
+          (cacheModule != null || _module != null)) {
         Get.find<CartController>().getCartDataOnline();
       }
     }
 
-    if(_cacheModule != null && _cacheModule!.moduleType.toString() == AppConstants.taxi) {
+    if (_cacheModule != null &&
+        _cacheModule!.moduleType.toString() == AppConstants.taxi) {
       Get.find<TaxiCartController>().getCarCartList();
     }
 
-    if(AuthHelper.isLoggedIn()) {
-      if(Get.find<SplashController>().module != null) {
+    if (AuthHelper.isLoggedIn()) {
+      if (Get.find<SplashController>().module != null) {
         Get.find<HomeController>().getCashBackOfferList();
-        if(module?.moduleType.toString() == AppConstants.taxi) {
+        if (module?.moduleType.toString() == AppConstants.taxi) {
           Get.find<TaxiFavouriteController>().getFavouriteTaxiList();
         } else {
           Get.find<FavouriteController>().getFavouriteList();
         }
-      } else if (_cacheModule != null && _cacheModule!.moduleType.toString() == AppConstants.taxi){
+      } else if (_cacheModule != null &&
+          _cacheModule!.moduleType.toString() == AppConstants.taxi) {
         Get.find<TaxiCartController>().getCarCartList();
       }
     }
-    if(notify) {
+    if (notify) {
       update();
     }
   }
 
   Module getModuleConfig(String? moduleType) {
     Module module = Module.fromJson(_data!['module_config'][moduleType]);
-    moduleType == 'food' ? module.newVariation = true : module.newVariation = false;
+    moduleType == 'food'
+        ? module.newVariation = true
+        : module.newVariation = false;
     return module;
   }
 
   int getHandymanModuleId() {
-    if (_configModel?.handymanModule?.moduleId != null && _configModel!.handymanModule!.moduleId! > 0) {
+    if (_configModel?.handymanModule?.moduleId != null &&
+        _configModel!.handymanModule!.moduleId! > 0) {
       return _configModel!.handymanModule!.moduleId!;
     }
     if (_moduleList != null) {
@@ -274,37 +326,49 @@ class SplashController extends GetxController implements GetxService {
         return handymanMod.id!;
       }
     }
-    if (_module != null && (_module!.moduleType?.toLowerCase() == 'handyman' || _module!.moduleName?.toLowerCase().contains('handyman') == true)) {
+    if (_module != null &&
+        (_module!.moduleType?.toLowerCase() == 'handyman' ||
+            _module!.moduleName?.toLowerCase().contains('handyman') == true)) {
       return _module!.id!;
     }
-    if (_cacheModule != null && (_cacheModule!.moduleType?.toLowerCase() == 'handyman' || _cacheModule!.moduleName?.toLowerCase().contains('handyman') == true)) {
+    if (_cacheModule != null &&
+        (_cacheModule!.moduleType?.toLowerCase() == 'handyman' ||
+            _cacheModule!.moduleName?.toLowerCase().contains('handyman') ==
+                true)) {
       return _cacheModule!.id!;
     }
     return 10;
   }
 
-
-  Future<void> getModules({Map<String, String>? headers, DataSourceEnum dataSource = DataSourceEnum.local}) async {
+  Future<void> getModules({
+    Map<String, String>? headers,
+    DataSourceEnum dataSource = DataSourceEnum.local,
+  }) async {
     _moduleIndex = 0;
     List<ModuleModel>? moduleList;
-    if(dataSource == DataSourceEnum.local) {
-      moduleList = await splashServiceInterface.getModules(headers: headers, source: DataSourceEnum.local);
+    if (dataSource == DataSourceEnum.local) {
+      moduleList = await splashServiceInterface.getModules(
+        headers: headers,
+        source: DataSourceEnum.local,
+      );
       _prepareModuleList(moduleList);
       getModules(headers: headers, dataSource: DataSourceEnum.client);
     } else {
-      moduleList = await splashServiceInterface.getModules(headers: headers, source: DataSourceEnum.client);
+      moduleList = await splashServiceInterface.getModules(
+        headers: headers,
+        source: DataSourceEnum.client,
+      );
       _prepareModuleList(moduleList);
     }
-
   }
 
   void _prepareModuleList(List<ModuleModel>? moduleList) {
     if (moduleList != null) {
       _moduleList = [];
       for (var module in moduleList) {
-        if(module.moduleType != AppConstants.taxi && GetPlatform.isWeb) {
+        if (module.moduleType != AppConstants.taxi && GetPlatform.isWeb) {
           _moduleList!.add(module);
-        } else if(!GetPlatform.isWeb) {
+        } else if (!GetPlatform.isWeb) {
           _moduleList!.add(module);
         }
       }
@@ -313,25 +377,31 @@ class SplashController extends GetxController implements GetxService {
   }
 
   Future<void> _showInterestPage() async {
-    if(!Get.find<ProfileController>().userInfoModel!.selectedModuleForInterest!.contains(Get.find<SplashController>().module!.id)
-        && (Get.find<SplashController>().module!.moduleType == 'food' || Get.find<SplashController>().module!.moduleType == 'grocery' || Get.find<SplashController>().module!.moduleType == 'ecommerce')
-    ) {
-      await Get.find<CategoryController>().getCategoryList(true, allCategory: false).then((_) async {
-        if(Get.find<CategoryController>().categoryList != null && Get.find<CategoryController>().categoryList!.isNotEmpty){
-          await Get.toNamed(RouteHelper.getInterestRoute());
-        }else{
-          Get.offAllNamed(RouteHelper.getInitialRoute());
-        }
-      });
+    if (!Get.find<ProfileController>().userInfoModel!.selectedModuleForInterest!
+            .contains(Get.find<SplashController>().module!.id) &&
+        (Get.find<SplashController>().module!.moduleType == 'food' ||
+            Get.find<SplashController>().module!.moduleType == 'grocery' ||
+            Get.find<SplashController>().module!.moduleType == 'ecommerce')) {
+      await Get.find<CategoryController>()
+          .getCategoryList(true, allCategory: false)
+          .then((_) async {
+            if (Get.find<CategoryController>().categoryList != null &&
+                Get.find<CategoryController>().categoryList!.isNotEmpty) {
+              await Get.toNamed(RouteHelper.getInterestRoute());
+            } else {
+              Get.offAllNamed(RouteHelper.getInitialRoute());
+            }
+          });
     }
   }
 
   void switchModule(int index, bool fromPhone) async {
-    if(_module == null || _module!.id != _moduleList![index].id) {
+    if (_module == null || _module!.id != _moduleList![index].id) {
       await Get.find<SplashController>().setModule(_moduleList![index]);
 
-      if(_module!.moduleType.toString() != AppConstants.taxi) {
+      if (_module!.moduleType.toString() != AppConstants.taxi) {
         Get.find<CartController>().getCartDataOnline();
+        //Get.find<CartController>().clearCartList();
         Get.find<ItemController>().clearItemLists();
         Get.find<StoreController>().clearStoreData();
         Get.find<BannerController>().clearBanner();
@@ -339,14 +409,13 @@ class SplashController extends GetxController implements GetxService {
         Get.find<CampaignController>().itemAndBasicCampaignNull();
         Get.find<FlashSaleController>().setEmptyFlashSale(fromModule: true);
 
-
-        if(AuthHelper.isLoggedIn()) {
+        if (AuthHelper.isLoggedIn()) {
           Get.find<HomeController>().getCashBackOfferList();
           _showInterestPage();
         }
         HomeScreen.loadData(true, fromModule: true);
       } else {
-        if(AuthHelper.isLoggedIn()) {
+        if (AuthHelper.isLoggedIn()) {
           Get.find<HomeController>().getCashBackOfferList();
         }
         Get.find<TaxiCartController>().getCarCartList();
@@ -368,7 +437,7 @@ class SplashController extends GetxController implements GetxService {
     Get.find<BannerController>().getFeaturedBanner(false);
     getModules();
     Get.find<HomeController>().forcefullyNullCashBackOffers();
-    if(AuthHelper.isLoggedIn()) {
+    if (AuthHelper.isLoggedIn()) {
       Get.find<AddressController>().getAddressList();
     }
     Get.find<StoreController>().getFeaturedStoreList();
@@ -382,10 +451,12 @@ class SplashController extends GetxController implements GetxService {
   Future<bool> subscribeMail(String email) async {
     _isLoading = true;
     update();
-    ResponseModel responseModel = await splashServiceInterface.subscribeEmail(email);
+    ResponseModel responseModel = await splashServiceInterface.subscribeEmail(
+      email,
+    );
     if (responseModel.isSuccess) {
       showCustomSnackBar(responseModel.message, isError: false);
-    }else {
+    } else {
       showCustomSnackBar(responseModel.message, isError: true);
     }
     _isLoading = false;
@@ -399,7 +470,7 @@ class SplashController extends GetxController implements GetxService {
     update();
   }
 
-  void getCookiesData(){
+  void getCookiesData() {
     _savedCookiesData = splashServiceInterface.getSavedCookiesData();
     update();
   }
@@ -408,8 +479,8 @@ class SplashController extends GetxController implements GetxService {
     splashServiceInterface.cookiesStatusChange(data);
   }
 
-  bool getAcceptCookiesStatus(String data) => splashServiceInterface.getAcceptCookiesStatus(data);
-
+  bool getAcceptCookiesStatus(String data) =>
+      splashServiceInterface.getAcceptCookiesStatus(data);
 
   void saveWebSuggestedLocationStatus(bool data) {
     splashServiceInterface.saveSuggestedLocationStatus(data);
@@ -417,7 +488,7 @@ class SplashController extends GetxController implements GetxService {
     update();
   }
 
-  void getWebSuggestedLocationStatus(){
+  void getWebSuggestedLocationStatus() {
     _webSuggestedLocation = splashServiceInterface.getSuggestedLocationStatus();
   }
 
@@ -432,7 +503,7 @@ class SplashController extends GetxController implements GetxService {
     update();
   }
 
-  void getReferBottomSheetStatus(){
+  void getReferBottomSheetStatus() {
     _showReferBottomSheet = splashServiceInterface.getReferBottomSheetStatus();
   }
 
@@ -442,5 +513,4 @@ class SplashController extends GetxController implements GetxService {
     hoverStates[index] = state;
     update();
   }
-
 }

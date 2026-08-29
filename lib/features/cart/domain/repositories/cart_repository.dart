@@ -29,7 +29,8 @@ class CartRepository implements CartRepositoryInterface<OnlineCart> {
           modId = 10;
         }
       } else {
-        modId = ModuleHelper.getModule()?.id ?? ModuleHelper.getCacheModule()?.id;
+        modId =
+            ModuleHelper.getModule()?.id ?? ModuleHelper.getCacheModule()?.id;
         if (modId == null || modId == 0) {
           if (Get.isRegistered<SplashController>()) {
             final splash = Get.find<SplashController>();
@@ -50,24 +51,29 @@ class CartRepository implements CartRepositoryInterface<OnlineCart> {
   @override
   Future<void> addSharedPrefCartList(List<CartModel> cartProductList) async {
     List<String> carts = [];
-    if(sharedPreferences.containsKey(AppConstants.cartList)) {
+    if (sharedPreferences.containsKey(AppConstants.cartList)) {
       carts = sharedPreferences.getStringList(AppConstants.cartList) ?? [];
     }
     List<String> cartStringList = [];
-    for(String cartString in carts) {
+    for (String cartString in carts) {
       CartModel cartModel = CartModel.fromJson(jsonDecode(cartString));
-      if(cartModel.item!.moduleId != _getModuleId()) {
+      if (cartModel.item!.moduleId != _getModuleId()) {
         cartStringList.add(cartString);
       }
     }
-    for(CartModel cartModel in cartProductList) {
+    for (CartModel cartModel in cartProductList) {
       cartStringList.add(jsonEncode(cartModel.toJson()));
     }
-    await sharedPreferences.setStringList(AppConstants.cartList, cartStringList);
+    await sharedPreferences.setStringList(
+      AppConstants.cartList,
+      cartStringList,
+    );
   }
 
   int _getModuleId() {
-    return ModuleHelper.getModule()?.id ?? ModuleHelper.getCacheModule()?.id ?? 0;
+    return ModuleHelper.getModule()?.id ??
+        ModuleHelper.getCacheModule()?.id ??
+        0;
   }
 
   @override
@@ -90,10 +96,14 @@ class CartRepository implements CartRepositoryInterface<OnlineCart> {
       cart.toJson(),
       headers: _getCartHeader(itemModId),
     );
-    if(response.statusCode == 200) {
+    if (response.statusCode == 200) {
       onlineCartList = [];
-      response.body.forEach((c) => onlineCartList!.add(OnlineCartModel.fromJson(c)));
-    } else if (response.statusCode == 403 || (response.body is Map && response.body.toString().contains('Item already exists'))) {
+      response.body.forEach(
+        (c) => onlineCartList!.add(OnlineCartModel.fromJson(c)),
+      );
+    } else if (response.statusCode == 403 ||
+        (response.body is Map &&
+            response.body.toString().contains('Item already exists'))) {
       // Remove stale duplicate item in backend cart and re-add with current module ID
       if (cart.itemId != null) {
         await apiClient.deleteData(
@@ -108,7 +118,9 @@ class CartRepository implements CartRepositoryInterface<OnlineCart> {
       );
       if (response.statusCode == 200) {
         onlineCartList = [];
-        response.body.forEach((c) => onlineCartList!.add(OnlineCartModel.fromJson(c)));
+        response.body.forEach(
+          (c) => onlineCartList!.add(OnlineCartModel.fromJson(c)),
+        );
       } else {
         onlineCartList = await _getCartDataOnline();
       }
@@ -118,7 +130,7 @@ class CartRepository implements CartRepositoryInterface<OnlineCart> {
 
   @override
   Future<bool> delete(int? id, {bool isRemoveAll = false}) async {
-    if(isRemoveAll) {
+    if (isRemoveAll) {
       return await _clearCartOnline();
     } else {
       return await _removeCartItemOnline(id!);
@@ -157,37 +169,53 @@ class CartRepository implements CartRepositoryInterface<OnlineCart> {
       '${AppConstants.getCartListUri}${!AuthHelper.isLoggedIn() ? '?guest_id=${AuthHelper.getGuestId()}' : ''}',
       headers: _getCartHeader(),
     );
-    if(response.statusCode == 200) {
+    if (response.statusCode == 200) {
       onlineCartList = [];
-      response.body.forEach((cart) => onlineCartList!.add(OnlineCartModel.fromJson(cart)));
+      response.body.forEach(
+        (cart) => onlineCartList!.add(OnlineCartModel.fromJson(cart)),
+      );
     }
     return onlineCartList;
   }
 
   @override
-  Future update(Map<String, dynamic> body, int? id, {double? price, int? quantity, bool isUpdateQty = false}) async {
-    if(isUpdateQty) {
+  Future update(
+    Map<String, dynamic> body,
+    int? id, {
+    double? price,
+    int? quantity,
+    bool isUpdateQty = false,
+  }) async {
+    if (isUpdateQty) {
       return await _updateCartQuantityOnline(id!, price!, quantity!);
     } else {
       return await _updateCartOnline(body);
     }
   }
 
-  Future<List<OnlineCartModel>?> _updateCartOnline(Map<String, dynamic> body) async {
+  Future<List<OnlineCartModel>?> _updateCartOnline(
+    Map<String, dynamic> body,
+  ) async {
     List<OnlineCartModel>? onlineCartList;
     Response response = await apiClient.postData(
       '${AppConstants.updateCartUri}${!AuthHelper.isLoggedIn() ? '?guest_id=${AuthHelper.getGuestId()}' : ''}',
       body,
       headers: _getCartHeader(),
     );
-    if(response.statusCode == 200) {
+    if (response.statusCode == 200) {
       onlineCartList = [];
-      response.body.forEach((cart) => onlineCartList!.add(OnlineCartModel.fromJson(cart)));
+      response.body.forEach(
+        (cart) => onlineCartList!.add(OnlineCartModel.fromJson(cart)),
+      );
     }
     return onlineCartList;
   }
 
-  Future<bool> _updateCartQuantityOnline(int cartId, double price, int quantity) async {
+  Future<bool> _updateCartQuantityOnline(
+    int cartId,
+    double price,
+    int quantity,
+  ) async {
     Map<String, dynamic> data = {
       "cart_id": cartId,
       "price": price,

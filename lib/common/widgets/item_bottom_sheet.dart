@@ -1163,11 +1163,38 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                                                           }
                                                         }
 
-                                                        int? currentModuleId = Get.find<SplashController>().module?.id ?? Get.find<SplashController>().cacheModule?.id;
-                                                        if (currentModuleId != item.moduleId && Get.find<SplashController>().moduleList != null) {
-                                                          for (ModuleModel module in Get.find<SplashController>().moduleList!) {
-                                                            if (module.id == item.moduleId) {
-                                                              await Get.find<SplashController>().setModule(module);
+                                                        int? currentModuleId =
+                                                            Get.find<
+                                                                  SplashController
+                                                                >()
+                                                                .module
+                                                                ?.id ??
+                                                            Get.find<
+                                                                  SplashController
+                                                                >()
+                                                                .cacheModule
+                                                                ?.id;
+                                                        if (currentModuleId !=
+                                                                item.moduleId &&
+                                                            Get.find<
+                                                                      SplashController
+                                                                    >()
+                                                                    .moduleList !=
+                                                                null) {
+                                                          for (ModuleModel
+                                                              module
+                                                              in Get.find<
+                                                                    SplashController
+                                                                  >()
+                                                                  .moduleList!) {
+                                                            if (module.id ==
+                                                                item.moduleId) {
+                                                              await Get.find<
+                                                                    SplashController
+                                                                  >()
+                                                                  .setModule(
+                                                                    module,
+                                                                  );
                                                               break;
                                                             }
                                                           }

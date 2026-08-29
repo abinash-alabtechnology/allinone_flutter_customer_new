@@ -309,6 +309,14 @@ class AppConstants {
     'Beware of DOG',
   ];
 
+  static List<String> cookingInstructionList = [
+    'Make it spicy',
+    'Please no salt',
+    'Make it sweet',
+    'Add extra cheese',
+    'Add extra mayonnaise',
+  ];
+
   static List<ChooseUsModel> whyChooseUsList = [
     ChooseUsModel(icon: Images.landingTrusted, title: 'trusted_by_customers_and_store_owners'),
     ChooseUsModel(icon: Images.landingStores, title: 'thousands_of_stores'),

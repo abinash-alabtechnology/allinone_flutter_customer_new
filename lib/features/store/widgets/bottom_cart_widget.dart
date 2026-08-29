@@ -148,6 +148,7 @@ class _BottomCartWidgetState extends State<BottomCartWidget>
                                     scrollDirection: Axis.horizontal,
                                     itemCount: cartController.cartList.length,
                                     itemBuilder: (context, index) {
+                                      if (index >= cartController.cartList.length) return const SizedBox();
                                       return Padding(
                                         padding:
                                         const EdgeInsets.symmetric(horizontal: 4),
@@ -355,6 +356,7 @@ class _BottomCartWidgetStoreState extends State<BottomCartWidgetStore>
                                 scrollDirection: Axis.horizontal,
                                 itemCount: cartController.cartList.length,
                                 itemBuilder: (context, index) {
+                                  if (index >= cartController.cartList.length) return const SizedBox();
                                   return Padding(
                                     padding: const EdgeInsets.only(right: 4),
                                     child: Container(

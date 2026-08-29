@@ -462,6 +462,13 @@ class StoreController extends GetxController implements GetxService {
           ModuleHelper.getModule(), ModuleHelper.getCacheModule()?.id, ModuleHelper.getModule()?.id);
       if (storeDetails != null) {
         _store = storeDetails;
+        
+        if(fromModule) {
+          HomeScreen.loadData(true);
+        }else {
+          Get.find<CheckoutController>().clearPrevData();
+        }
+
         Get.find<CheckoutController>().initializeTimeSlot(_store!);
         if(!fromCart && slug.isEmpty){
           Get.find<CheckoutController>().getDistanceInKM(
@@ -474,11 +481,6 @@ class StoreController extends GetxController implements GetxService {
         }
         if(slug.isNotEmpty){
           await Get.find<LocationController>().setStoreAddressToUserAddress(LatLng(double.parse(_store!.latitude!), double.parse(_store!.longitude!)));
-        }
-        if(fromModule) {
-          HomeScreen.loadData(true);
-        }else {
-          Get.find<CheckoutController>().clearPrevData();
         }
       }
       Get.find<CheckoutController>().setOrderType(

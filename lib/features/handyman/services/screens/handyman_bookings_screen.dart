@@ -46,7 +46,9 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
           Get.find<ApiClient>().token,
           AddressHelper.getUserAddressFromSharedPref()?.zoneIds,
           AddressHelper.getUserAddressFromSharedPref()?.areaIds,
-          Get.find<ApiClient>().sharedPreferences.getString(AppConstants.languageCode),
+          Get.find<ApiClient>().sharedPreferences.getString(
+            AppConstants.languageCode,
+          ),
           handymanModuleId,
           AddressHelper.getUserAddressFromSharedPref()?.latitude,
           AddressHelper.getUserAddressFromSharedPref()?.longitude,
@@ -124,7 +126,7 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
       'Sep',
       'Oct',
       'Nov',
-      'Dec'
+      'Dec',
     ];
     final month = months[dt.month - 1];
     final year = dt.year;
@@ -196,7 +198,8 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
       statusName = 'Cancelled';
     }
 
-    DateTime bookingDt = DateTime.tryParse(order.createdAt ?? '') ?? DateTime.now();
+    DateTime bookingDt =
+        DateTime.tryParse(order.createdAt ?? '') ?? DateTime.now();
     DateTime serviceDt = DateTime.tryParse(order.scheduleAt ?? '') ?? bookingDt;
 
     return HandymanBookingModel(
@@ -207,12 +210,23 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
       price: order.orderAmount ?? 0.0,
       status: statusName,
       tasks: ['Booking #${order.id}'],
-      timeSlot: DateConverter.dateTimeStringToDateTime(order.scheduleAt ?? order.createdAt ?? ''),
+      timeSlot: DateConverter.dateTimeStringToDateTime(
+        order.scheduleAt ?? order.createdAt ?? '',
+      ),
       address: order.deliveryAddress?.address ?? '',
-      paymentMethod: order.paymentMethod == 'cash_on_delivery' ? 'Cash after service' : (order.paymentMethod ?? 'Online Payment'),
-      paymentStatus: (order.paymentStatus ?? '').toLowerCase() == 'paid' ? 'Paid' : 'Unpaid',
-      subTotal: (order.orderAmount ?? 0.0) - (order.totalTaxAmount ?? 0.0) - (order.deliveryCharge ?? 0.0),
-      discount: (order.storeDiscountAmount ?? 0.0) + (order.couponDiscountAmount ?? 0.0),
+      paymentMethod: order.paymentMethod == 'cash_on_delivery'
+          ? 'Cash after service'
+          : (order.paymentMethod ?? 'Online Payment'),
+      paymentStatus: (order.paymentStatus ?? '').toLowerCase() == 'paid'
+          ? 'Paid'
+          : 'Unpaid',
+      subTotal:
+          (order.orderAmount ?? 0.0) -
+          (order.totalTaxAmount ?? 0.0) -
+          (order.deliveryCharge ?? 0.0),
+      discount:
+          (order.storeDiscountAmount ?? 0.0) +
+          (order.couponDiscountAmount ?? 0.0),
       vat: order.totalTaxAmount ?? 0.0,
       fee: order.deliveryCharge ?? 0.0,
       startOtp: order.startOtp,
@@ -255,7 +269,10 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: _getStatusBgColor(booking.status),
                     borderRadius: BorderRadius.circular(6),
@@ -284,7 +301,9 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
             const Gap(12),
             _buildDetailRow(
               'Tasks',
-              booking.tasks.isEmpty ? 'General Service' : booking.tasks.join(', '),
+              booking.tasks.isEmpty
+                  ? 'General Service'
+                  : booking.tasks.join(', '),
             ),
             const Gap(12),
             _buildDetailRow('Booking Date', _formatDate(booking.bookingDate)),
@@ -315,7 +334,8 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
               ],
             ),
             const Gap(24),
-            if (booking.status == 'Pending' || booking.status == 'Accepted') ...[
+            if (booking.status == 'Pending' ||
+                booking.status == 'Accepted') ...[
               SizedBox(
                 width: double.infinity,
                 height: 48,
@@ -325,7 +345,10 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
                     _cancelBooking(booking);
                   },
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Color(0xFFDC2626), width: 1.5),
+                    side: const BorderSide(
+                      color: Color(0xFFDC2626),
+                      width: 1.5,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -413,21 +436,29 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
         ),
         content: Text(
           'Are you sure you want to cancel booking #${booking.id}?',
-          style: robotoRegular.copyWith(fontSize: 13, color: Colors.grey.shade600),
+          style: robotoRegular.copyWith(
+            fontSize: 13,
+            color: Colors.grey.shade600,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
               'No',
-              style: robotoRegular.copyWith(color: Colors.grey, fontWeight: FontWeight.bold),
+              style: robotoRegular.copyWith(
+                color: Colors.grey,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
               // Find and modify booking in controller
-              final index = _controller.bookings.indexWhere((b) => b.id == booking.id);
+              final index = _controller.bookings.indexWhere(
+                (b) => b.id == booking.id,
+              );
               if (index != -1) {
                 final b = _controller.bookings[index];
                 _controller.bookings[index] = HandymanBookingModel(
@@ -452,10 +483,15 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
                 );
               }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFDC2626)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFDC2626),
+            ),
             child: Text(
               'Yes, Cancel',
-              style: robotoRegular.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+              style: robotoRegular.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],
@@ -525,7 +561,9 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
                             decoration: BoxDecoration(
                               color: isSelected
                                   ? Colors.white.withOpacity(0.2)
-                                  : _getIconColorForStatus(status).withOpacity(0.1),
+                                  : _getIconColorForStatus(
+                                      status,
+                                    ).withOpacity(0.1),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
@@ -603,18 +641,24 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
                     ? allBookings
                     : allBookings.where((b) {
                         if (selectedStatus == 'Confirmed') {
-                          return b.status.toLowerCase() == 'confirmed' || b.status.toLowerCase() == 'accepted';
+                          return b.status.toLowerCase() == 'confirmed' ||
+                              b.status.toLowerCase() == 'accepted';
                         }
                         if (selectedStatus == 'Processing') {
-                          return b.status.toLowerCase() == 'processing' || b.status.toLowerCase() == 'ongoing';
+                          return b.status.toLowerCase() == 'processing' ||
+                              b.status.toLowerCase() == 'ongoing';
                         }
                         if (selectedStatus == 'Handover') {
-                          return b.status.toLowerCase() == 'handover' || b.status.toLowerCase() == 'picked_up';
+                          return b.status.toLowerCase() == 'handover' ||
+                              b.status.toLowerCase() == 'picked_up';
                         }
-                        if (selectedStatus == 'Completed' || selectedStatus == 'Delivered') {
-                          return b.status.toLowerCase() == 'delivered' || b.status.toLowerCase() == 'completed';
+                        if (selectedStatus == 'Completed' ||
+                            selectedStatus == 'Delivered') {
+                          return b.status.toLowerCase() == 'delivered' ||
+                              b.status.toLowerCase() == 'completed';
                         }
-                        return b.status.toLowerCase() == selectedStatus.toLowerCase();
+                        return b.status.toLowerCase() ==
+                            selectedStatus.toLowerCase();
                       }).toList();
 
                 if (filteredBookings.isEmpty) {
@@ -661,142 +705,164 @@ class _HandymanBookingsScreenState extends State<HandymanBookingsScreen> {
                     itemCount: filteredBookings.length,
                     itemBuilder: (context, index) {
                       final booking = filteredBookings[index];
-                      final OrderModel? matchingOrder = apiOrders.firstWhereOrNull((o) => o.id.toString() == booking.id);
+                      final OrderModel? matchingOrder = apiOrders
+                          .firstWhereOrNull(
+                            (o) => o.id.toString() == booking.id,
+                          );
 
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 16),
                         child: InkWell(
                           onTap: () {
-                            Get.to(() => HandymanBookingDetailsScreen(
-                              orderId: booking.id,
-                              orderModel: matchingOrder,
-                              booking: booking,
-                            ));
-                          },
-                      borderRadius: BorderRadius.circular(16),
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade100, width: 1),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.02),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Card Header: Title + Menu Button
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Booking# ${booking.id}',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 14.5,
-                                    fontWeight: FontWeight.w800,
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                                PopupMenuButton<String>(
-                                  onSelected: (val) {
-                                    if (val == 'details') {
-                                      Get.to(() => HandymanBookingDetailsScreen(booking: booking));
-                                    } else if (val == 'cancel') {
-                                      _cancelBooking(booking);
-                                    }
-                                  },
-                              icon: const Icon(
-                                Icons.more_vert_rounded,
-                                color: Colors.black54,
-                                size: 20,
+                            Get.to(
+                              () => HandymanBookingDetailsScreen(
+                                orderId: booking.id,
+                                orderModel: matchingOrder,
+                                booking: booking,
                               ),
-                              itemBuilder: (context) => [
-                                const PopupMenuItem(
-                                  value: 'details',
-                                  child: Text('View Details'),
+                            );
+                          },
+                          borderRadius: BorderRadius.circular(16),
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: Colors.grey.shade100,
+                                width: 1,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.02),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
                                 ),
-                                if (booking.status == 'Pending' ||
-                                    booking.status == 'Accepted')
-                                  const PopupMenuItem(
-                                    value: 'cancel',
-                                    child: Text('Cancel Booking'),
-                                  ),
                               ],
                             ),
-                          ],
-                        ),
-                        const Gap(4),
-
-                        // Booking Date
-                        Text(
-                          'Booking Date : ${_formatDate(booking.bookingDate)}',
-                          style: GoogleFonts.inter(
-                            fontSize: 12.5,
-                            color: Colors.grey.shade500,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const Gap(6),
-
-                        // Service Date
-                        Text(
-                          'Service Date : ${_formatDate(booking.serviceDate)}',
-                          style: GoogleFonts.inter(
-                            fontSize: 12.5,
-                            color: Colors.grey.shade500,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const Gap(16),
-
-                        // Bottom Row: Status Badge + Price
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 4.5),
-                              decoration: BoxDecoration(
-                                color: _getStatusBgColor(booking.status),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                booking.status,
-                                style: GoogleFonts.inter(
-                                  color: _getStatusTextColor(booking.status),
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 11,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Card Header: Title + Menu Button
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Booking# ${booking.id}',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 14.5,
+                                        fontWeight: FontWeight.w800,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                    PopupMenuButton<String>(
+                                      onSelected: (val) {
+                                        if (val == 'details') {
+                                          Get.to(
+                                            () => HandymanBookingDetailsScreen(
+                                              booking: booking,
+                                            ),
+                                          );
+                                        } else if (val == 'cancel') {
+                                          _cancelBooking(booking);
+                                        }
+                                      },
+                                      icon: const Icon(
+                                        Icons.more_vert_rounded,
+                                        color: Colors.black54,
+                                        size: 20,
+                                      ),
+                                      itemBuilder: (context) => [
+                                        const PopupMenuItem(
+                                          value: 'details',
+                                          child: Text('View Details'),
+                                        ),
+                                        if (booking.status == 'Pending' ||
+                                            booking.status == 'Accepted')
+                                          const PopupMenuItem(
+                                            value: 'cancel',
+                                            child: Text('Cancel Booking'),
+                                          ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
-                              ),
+                                const Gap(4),
+
+                                // Booking Date
+                                Text(
+                                  'Booking Date : ${_formatDate(booking.bookingDate)}',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12.5,
+                                    color: Colors.grey.shade500,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const Gap(6),
+
+                                // Service Date
+                                Text(
+                                  'Service Date : ${_formatDate(booking.serviceDate)}',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12.5,
+                                    color: Colors.grey.shade500,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const Gap(16),
+
+                                // Bottom Row: Status Badge + Price
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 4.5,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: _getStatusBgColor(
+                                          booking.status,
+                                        ),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        booking.status,
+                                        style: GoogleFonts.inter(
+                                          color: _getStatusTextColor(
+                                            booking.status,
+                                          ),
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 11,
+                                        ),
+                                      ),
+                                    ),
+                                    Text(
+                                      '₹${booking.price.toStringAsFixed(2)}',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w800,
+                                        color: const Color(
+                                          0xFF6C63FF,
+                                        ), // Aligned brand purple
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
-                            Text(
-                              '₹${booking.price.toStringAsFixed(2)}',
-                              style: GoogleFonts.inter(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w800,
-                                color: const Color(0xFF6C63FF), // Aligned brand purple
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                      ],
-                    ),
+                      );
+                    },
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
-        );
-      },
-    ),
-  ),
-],
+        ],
       ),
     );
   }

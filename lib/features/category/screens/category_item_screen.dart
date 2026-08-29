@@ -339,7 +339,7 @@ class CategoryItemScreenState extends State<CategoryItemScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               ItemsViewCategory(
-                                isStore: false, items: item, stores: null, noDataText: 'no_category_item_found'.tr, backButton: () {  },
+                                isStore: false, items: item, stores: null, noDataText: 'no_category_found'.tr, backButton: () {  },
                                 showbackbutton: false,
                               ),
                             ],

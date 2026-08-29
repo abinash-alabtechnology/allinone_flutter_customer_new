@@ -1136,10 +1136,10 @@ class FreshItemCard extends StatelessWidget {
                               ),
 
                             // Wishlist
-                            Positioned(
+                            AddFavouriteView(
                               top: 8.h,
                               right: 8.w,
-                              child: AddFavouriteView(item: item),
+                              item: item,
                             ),
 
                             item.isStoreHalalActive! && item.isHalalItem!
@@ -1461,10 +1461,10 @@ class SubscriptionItemCard extends StatelessWidget {
 
 
                               // Wishlist
-                              Positioned(
+                              AddFavouriteView(
                                 top: 32.h,
                                 right: 8.w,
-                                child: AddFavouriteView(item: item),
+                                item: item,
                               ),
 
                               item.isStoreHalalActive! && item.isHalalItem!
@@ -1801,10 +1801,10 @@ class TrendingItemCard extends StatelessWidget {
 
 
                               // Wishlist
-                              Positioned(
+                              AddFavouriteView(
                                 top: 32.h,
                                 right: 8.w,
-                                child: AddFavouriteView(item: item),
+                                item: item,
                               ),
 
                               item.isStoreHalalActive! && item.isHalalItem!
@@ -2141,10 +2141,10 @@ class SpecialOfferItemCard extends StatelessWidget {
 
 
                               // Wishlist
-                              Positioned(
+                              AddFavouriteView(
                                 top: 32.h,
                                 right: 8.w,
-                                child: AddFavouriteView(item: item),
+                                item: item,
                               ),
 
                               item.isStoreHalalActive! && item.isHalalItem!
