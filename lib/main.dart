@@ -170,7 +170,8 @@ class _MyAppState extends State<MyApp> {
                 if (splashController.module != null) {
                   if (splashController.module!.moduleType.toString() ==
                       AppConstants.pharmacy) {
-                    primaryColor = const Color(0xFF16A34A);
+                    primaryColor = const Color(0xFF0EA5E9);
+                    secondaryColor = const Color(0xFF0284C7);
                   } else if (splashController.module!.moduleType.toString() ==
                       AppConstants.grocery) {
                     primaryColor = const Color(0xFF1E7F35);
@@ -180,15 +181,14 @@ class _MyAppState extends State<MyApp> {
                     primaryColor = const Color(0xFF16A34A);
                   } else if (splashController.module!.moduleType.toString() ==
                       AppConstants.food) {
-                    primaryColor = const Color(0xFF16A34A);
+                    primaryColor = const Color(0xFFF97316);
+                    secondaryColor = const Color(0xFFEA580C);
                   } else if (splashController.module!.moduleType.toString() ==
                       AppConstants.parcel) {
-                    primaryColor = const Color(0xFF16A34A);
+                    primaryColor = const Color(0xFFEF4444);
+                    secondaryColor = const Color(0xFFDC2626);
                   } else if (splashController.module!.moduleType.toString() ==
                       AppConstants.ecommerce) {
-                    primaryColor = const Color(0xFF16A34A);
-                  } else if (splashController.module!.moduleType.toString() ==
-                      AppConstants.taxi) {
                     primaryColor = const Color(0xFF16A34A);
                   }
                 }

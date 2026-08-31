@@ -407,8 +407,7 @@ class _GroceryHomeScreenState extends State<GroceryHomeScreen> {
                                                           children: [
                                                             Flexible(
                                                               child: Text(
-                                                                AddressHelper.getUserAddressFromSharedPref()!
-                                                                    .address!,
+                                                                AddressHelper.getUserAddressFromSharedPref()?.address ?? '',
                                                                 maxLines: 2,
                                                                 overflow:
                                                                     TextOverflow

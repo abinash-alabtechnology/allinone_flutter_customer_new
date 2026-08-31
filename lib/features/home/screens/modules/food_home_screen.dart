@@ -327,8 +327,7 @@ class _FoodHomeScreenState extends State<FoodHomeScreen> {
                                                           children: [
                                                             Flexible(
                                                               child: Text(
-                                                                AddressHelper.getUserAddressFromSharedPref()!
-                                                                    .address!,
+                                                                AddressHelper.getUserAddressFromSharedPref()?.address ?? '',
                                                                 maxLines: 2,
                                                                 overflow:
                                                                     TextOverflow

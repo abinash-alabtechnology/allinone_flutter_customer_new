@@ -230,12 +230,14 @@ class _HomeScreenState extends State<HomeScreen> {
     
 
     if (!ResponsiveHelper.isWeb()) {
-      Get.find<LocationController>().getZone(
-        AddressHelper.getUserAddressFromSharedPref()!.latitude,
-        AddressHelper.getUserAddressFromSharedPref()!.longitude,
-        false,
-        updateInAddress: true,
-      );
+      if (AddressHelper.getUserAddressFromSharedPref() != null) {
+        Get.find<LocationController>().getZone(
+          AddressHelper.getUserAddressFromSharedPref()!.latitude,
+          AddressHelper.getUserAddressFromSharedPref()!.longitude,
+          false,
+          updateInAddress: true,
+        );
+      }
 
     }
 
@@ -1293,7 +1295,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                             crossAxisAlignment: CrossAxisAlignment.start,
                                                             children: [
                                                               Text(
-                                                                AuthHelper.isLoggedIn() ? AddressHelper.getUserAddressFromSharedPref()!.addressType!.tr : 'your_location'.tr,
+                                                                AuthHelper.isLoggedIn() ? AddressHelper.getUserAddressFromSharedPref()?.addressType?.tr ?? 'your_location'.tr : 'your_location'.tr,
                                                                 style: robotoMedium.copyWith(
                                                                   color: Theme.of(context).cardColor,
                                                                   fontSize: Dimensions.fontSizeDefault,
@@ -1305,7 +1307,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                 children: [
                                                                   Flexible(
                                                                     child: Text(
-                                                                      AddressHelper.getUserAddressFromSharedPref()!.address!,
+                                                                      AddressHelper.getUserAddressFromSharedPref()?.address ?? '',
                                                                       style: robotoRegular.copyWith(
                                                                         color: Theme.of(context).cardColor,
                                                                         fontSize: Dimensions.fontSizeSmall,

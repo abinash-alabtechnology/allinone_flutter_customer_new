@@ -205,9 +205,11 @@ class _ParcelNewRequestScreenState extends State<ParcelNewRequestScreen> {
                 isGuestLoggedIn: isGuestLoggedIn,
               ),
               OrderSummaryBooking(total: total, charge: charge, dmTips: dmTips),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeSmall),
-                child: CheckoutCondition(isParcel: true),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeSmall),
+                  child: CheckoutCondition(isParcel: true),
+                ),
               ),
             ],
           ),

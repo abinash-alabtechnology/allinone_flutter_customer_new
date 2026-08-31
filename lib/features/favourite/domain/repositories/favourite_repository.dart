@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:handy_allinone/common/models/response_model.dart';
 import 'package:handy_allinone/api/api_client.dart';
 import 'package:handy_allinone/features/favourite/domain/repositories/favourite_repository_interface.dart';
+import 'package:handy_allinone/helper/module_helper.dart';
 import 'package:handy_allinone/util/app_constants.dart';
 
 import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
@@ -13,13 +14,8 @@ class FavouriteRepository implements FavouriteRepositoryInterface<ResponseModel>
 
   Map<String, String> _getModuleHeaders() {
     Map<String, String> reqHeaders = Map.from(apiClient.getHeader());
-    int? activeModuleId;
-    if (Get.find<SplashController>().module != null && Get.find<SplashController>().module!.id != null) {
-      activeModuleId = Get.find<SplashController>().module!.id;
-    } else {
-      activeModuleId = Get.find<SplashController>().getHandymanModuleId();
-    }
-    if (activeModuleId != null) {
+    int? activeModuleId = ModuleHelper.getModule()?.id ?? ModuleHelper.getCacheModule()?.id;
+    if (activeModuleId != null && activeModuleId > 0) {
       reqHeaders[AppConstants.moduleId] = activeModuleId.toString();
     }
     return reqHeaders;
@@ -27,9 +23,12 @@ class FavouriteRepository implements FavouriteRepositoryInterface<ResponseModel>
 
   @override
   Future<Response> getList({int? offset}) async {
-    String? serviceType = Get.isRegistered<HandymanHomeController>()
-        ? Get.find<HandymanHomeController>().selectedServiceType
-        : null;
+    String? serviceType;
+    if (ModuleHelper.getModule()?.moduleType == 'handyman' || ModuleHelper.getCacheModule()?.moduleType == 'handyman') {
+      if (Get.isRegistered<HandymanHomeController>()) {
+        serviceType = Get.find<HandymanHomeController>().selectedServiceType;
+      }
+    }
     String url = AppConstants.wishListGetUri;
     if (serviceType != null && serviceType.isNotEmpty) {
       url = '$url${url.contains('?') ? '&' : '?'}service_type=$serviceType';

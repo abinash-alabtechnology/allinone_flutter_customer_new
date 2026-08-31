@@ -72,22 +72,7 @@ class OrderViewWidget extends StatelessWidget {
 
         List<OrderModel>? filteredOrders;
         if (paginatedOrderModel != null && paginatedOrderModel.orders != null) {
-          int handymanModuleId = 10;
-          if (Get.isRegistered<SplashController>()) {
-            handymanModuleId = Get.find<SplashController>().getHandymanModuleId();
-          }
-
-          filteredOrders = paginatedOrderModel.orders!.where((order) {
-            int? oModuleId = order.moduleId ?? order.store?.moduleId;
-            String? oModuleType = order.moduleType;
-            String? storeName = order.store?.name?.toLowerCase();
-
-            bool isHandyman = (oModuleId != null && oModuleId == handymanModuleId) ||
-                              (oModuleType != null && oModuleType.toLowerCase() == 'handyman') ||
-                              (storeName != null && storeName.contains('handyman'));
-
-            return !isHandyman;
-          }).toList();
+          filteredOrders = paginatedOrderModel.orders;
         }
 
         return paginatedOrderModel != null ? (filteredOrders != null && filteredOrders.isNotEmpty) ? RefreshIndicator(

@@ -22,22 +22,13 @@ class CartRepository implements CartRepositoryInterface<OnlineCart> {
     Map<String, String> reqHeaders = Map.from(apiClient.getHeader());
     int? modId = customModuleId;
     if (modId == null || modId == 0) {
-      if (Get.isRegistered<HandymanHomeController>()) {
+      modId = ModuleHelper.getModule()?.id ?? ModuleHelper.getCacheModule()?.id;
+      if (modId == null || modId == 0) {
         if (Get.isRegistered<SplashController>()) {
-          modId = Get.find<SplashController>().getHandymanModuleId();
-        } else {
-          modId = 10;
-        }
-      } else {
-        modId =
-            ModuleHelper.getModule()?.id ?? ModuleHelper.getCacheModule()?.id;
-        if (modId == null || modId == 0) {
-          if (Get.isRegistered<SplashController>()) {
-            final splash = Get.find<SplashController>();
-            modId = splash.module?.id ?? splash.cacheModule?.id;
-            if (modId == null || modId == 0) {
-              modId = splash.getHandymanModuleId();
-            }
+          final splash = Get.find<SplashController>();
+          modId = splash.module?.id ?? splash.cacheModule?.id;
+          if (modId == null || modId == 0) {
+            modId = splash.getHandymanModuleId();
           }
         }
       }
@@ -83,18 +74,10 @@ class CartRepository implements CartRepositoryInterface<OnlineCart> {
 
   Future<List<OnlineCartModel>?> _addToCartOnline(OnlineCart cart) async {
     List<OnlineCartModel>? onlineCartList;
-    int? itemModId;
-    if (Get.isRegistered<HandymanHomeController>()) {
-      if (Get.isRegistered<SplashController>()) {
-        itemModId = Get.find<SplashController>().getHandymanModuleId();
-      } else {
-        itemModId = 10;
-      }
-    }
     Response response = await apiClient.postData(
       '${AppConstants.addCartUri}${!AuthHelper.isLoggedIn() ? '?guest_id=${AuthHelper.getGuestId()}' : ''}',
       cart.toJson(),
-      headers: _getCartHeader(itemModId),
+      headers: _getCartHeader(),
     );
     if (response.statusCode == 200) {
       onlineCartList = [];
@@ -108,13 +91,13 @@ class CartRepository implements CartRepositoryInterface<OnlineCart> {
       if (cart.itemId != null) {
         await apiClient.deleteData(
           '${AppConstants.removeItemCartUri}?cart_id=${cart.itemId}${!AuthHelper.isLoggedIn() ? '&guest_id=${AuthHelper.getGuestId()}' : ''}',
-          headers: _getCartHeader(itemModId),
+          headers: _getCartHeader(),
         );
       }
       response = await apiClient.postData(
         '${AppConstants.addCartUri}${!AuthHelper.isLoggedIn() ? '?guest_id=${AuthHelper.getGuestId()}' : ''}',
         cart.toJson(),
-        headers: _getCartHeader(itemModId),
+        headers: _getCartHeader(),
       );
       if (response.statusCode == 200) {
         onlineCartList = [];

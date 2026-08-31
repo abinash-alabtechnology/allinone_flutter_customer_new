@@ -1441,7 +1441,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                                                             item,
                                                                             null,
                                                                           );
-                                                                          // showCartSnackBar();
+                                                                          showCartSnackBar();
                                                                         }
                                                                       });
                                                                     },
@@ -1462,7 +1462,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                                                             item,
                                                                             null,
                                                                           );
-                                                                      // showCartSnackBar();
+                                                                      showCartSnackBar();
                                                                       _key.currentState!
                                                                           .shake();
                                                                     }
@@ -1476,7 +1476,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                                                         success,
                                                                       ) {
                                                                         if (success) {
-                                                                          // showCartSnackBar();
+                                                                          showCartSnackBar();
                                                                           _key.currentState!
                                                                               .shake();
                                                                         }

@@ -977,7 +977,7 @@ class ItemController extends GetxController implements GetxService {
                 if (success) {
                   await cartController.addToCartOnline(onlineCart);
                   Get.back();
-                  // showCartSnackBar();
+                  showCartSnackBar();
                 }
               });
             },
@@ -985,7 +985,7 @@ class ItemController extends GetxController implements GetxService {
         } else {
           cartController.addToCart(cartModel, null);
           cartController.addToCartOnline(onlineCart);
-          // showCartSnackBar();
+          showCartSnackBar();
         }
       } else {
         cartController.setIsLoading(false);

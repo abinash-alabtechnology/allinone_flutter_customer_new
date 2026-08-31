@@ -132,7 +132,10 @@ class CategoryRepository implements CategoryRepositoryInterface {
     if (activeModuleId != null) {
       reqHeaders[AppConstants.moduleId] = activeModuleId.toString();
     }
-    String? serviceType = Get.isRegistered<HandymanHomeController>()
+    bool isHandyman = Get.isRegistered<SplashController>() &&
+        Get.find<SplashController>().module?.moduleType?.toLowerCase() == 'handyman';
+
+    String? serviceType = (isHandyman && Get.isRegistered<HandymanHomeController>())
         ? Get.find<HandymanHomeController>().selectedServiceType
         : null;
     String serviceTypeParam = (serviceType != null && serviceType.isNotEmpty)

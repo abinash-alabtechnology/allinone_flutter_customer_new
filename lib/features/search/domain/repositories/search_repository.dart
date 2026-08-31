@@ -7,6 +7,7 @@ import 'package:handy_allinone/features/search/domain/models/search_suggestion_m
 import 'package:handy_allinone/features/search/domain/repositories/search_repository_interface.dart';
 import 'package:handy_allinone/util/app_constants.dart';
 import 'package:handy_allinone/features/handyman/services/controllers/handyman_home_controller.dart';
+import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
 
 class SearchRepository implements SearchRepositoryInterface {
   final ApiClient apiClient;
@@ -63,9 +64,13 @@ class SearchRepository implements SearchRepositoryInterface {
   }
 
   Future<Response> _getSearchData(String? query, bool isStore) async {
-    String? serviceType = Get.isRegistered<HandymanHomeController>()
+    bool isHandyman = Get.isRegistered<SplashController>() &&
+        Get.find<SplashController>().module?.moduleType?.toLowerCase() == 'handyman';
+
+    String? serviceType = (isHandyman && Get.isRegistered<HandymanHomeController>())
         ? Get.find<HandymanHomeController>().selectedServiceType
         : null;
+
     String serviceTypeParam = (serviceType != null && serviceType.isNotEmpty)
         ? '&service_type=$serviceType'
         : '';

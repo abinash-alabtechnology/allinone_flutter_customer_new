@@ -202,6 +202,11 @@ class SearchController extends GetxController implements GetxService {
     update();
   }
 
+  void clearResultTexts() {
+    _itemResultText = '';
+    _storeResultText = '';
+  }
+
   void searchData(String? query, bool fromHome) async {
     if((_isStore && query!.isNotEmpty && query != _storeResultText) || (!_isStore && query!.isNotEmpty && (query != _itemResultText || fromHome))) {
       _searchHomeText = query;
