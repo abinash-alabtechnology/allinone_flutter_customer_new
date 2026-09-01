@@ -361,7 +361,7 @@ class DashboardScreenState extends State<DashboardScreen> {
             if (!ResponsiveHelper.isDesktop(context) &&
                 Get.find<SplashController>().module != null &&
                 Get.find<SplashController>().configModel!.module == null) {
-              Get.find<SplashController>().setModule(null);
+              Get.find<SplashController>().removeModule();
               Get.find<StoreController>().resetStoreData();
             } else {
               if (_canExit) {
@@ -563,6 +563,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                                 onTap: () {
                                                                   splashController.removeModule();
                                                                   Get.find<StoreController>().resetStoreData();
+                                                                  _setPage(0);
                                                                 },
                                                               );
                                                             } else {
@@ -654,8 +655,13 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                           unSelectedIcon: Images.ordersvg,
                                                           isSelected:  _pageIndex == ((isBookingTab || _pageIndex == 6 ) ? 6 : 4),
                                                           activeColor: Theme.of(context).primaryColor,
-                                                          onTap: () => _setPage(isBookingTab
-                                                              ? 6 : 4) ,
+                                                          onTap: () {
+                                                            _setPage(isBookingTab ? 6 : 4);
+                                                            if (AuthHelper.isLoggedIn()) {
+                                                              Get.find<OrderController>().getRunningOrders(1);
+                                                              Get.find<OrderController>().getHistoryOrders(1);
+                                                            }
+                                                          },
                                                         ),
                                                          if (!(splashController.module != null && splashController.configModel!.module == null)) BottomNavItemWidget(
                                                             title: 'profile'.tr,
@@ -670,7 +676,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                       ],
                                                     ),
                                                   ),
-                                                ),
+                                                ),  
                                               ),
                                             ),
                                           ),

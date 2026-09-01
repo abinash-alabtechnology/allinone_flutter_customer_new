@@ -2,6 +2,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:handy_allinone/common/enums/data_source_enum.dart';
@@ -274,6 +275,7 @@ class StoreController extends GetxController implements GetxService {
 
   Future<void> getPopularStoreList(bool reload, String type, bool notify, {DataSourceEnum dataSource = DataSourceEnum.local, bool fromRecall = false}) async {
     _type = type;
+    int? currentModuleId = Get.isRegistered<SplashController>() ? Get.find<SplashController>().module?.id : null;
     if(reload) {
       _popularStoreList = null;
     }
@@ -284,6 +286,7 @@ class StoreController extends GetxController implements GetxService {
       List<Store>? popularStoreList;
       if(dataSource == DataSourceEnum.local) {
         popularStoreList = await storeServiceInterface.getPopularStoreList(type, source: DataSourceEnum.local);
+        if (Get.isRegistered<SplashController>() && Get.find<SplashController>().module?.id != currentModuleId) return;
         if (popularStoreList != null) {
           _popularStoreList = [];
           _popularStoreList!.addAll(popularStoreList);
@@ -292,6 +295,7 @@ class StoreController extends GetxController implements GetxService {
         getPopularStoreList(false, type, notify, dataSource: DataSourceEnum.client, fromRecall: true);
       } else {
         popularStoreList = await storeServiceInterface.getPopularStoreList(type, source: DataSourceEnum.client);
+        if (Get.isRegistered<SplashController>() && Get.find<SplashController>().module?.id != currentModuleId) return;
         if (popularStoreList != null) {
           _popularStoreList = [];
           _popularStoreList!.addAll(popularStoreList);

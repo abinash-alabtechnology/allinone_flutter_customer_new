@@ -417,6 +417,8 @@ class ItemController extends GetxController implements GetxService {
       if(notify) update();
     }
 
+    int? currentModuleId = Get.isRegistered<SplashController>() ? Get.find<SplashController>().module?.id : null;
+
     if(offset == '1') {
       _offsetList = [];
       _offset = 1;
@@ -432,6 +434,8 @@ class ItemController extends GetxController implements GetxService {
         type: _popularType, source: dataSource, offset: _offset, search: _searchController.text, categoryIds: _selectedCategoryIds, filter: _filter,
         rating: _rating, minPrice: _selectedMinPrice, maxPrice: _selectedMaxPrice,
       );
+
+      if (Get.isRegistered<SplashController>() && Get.find<SplashController>().module?.id != currentModuleId) return;
 
       _preparePopularItems(itemModel, offset, firstTimeCategoryLoad);
 

@@ -198,7 +198,7 @@ class AuthController extends GetxController implements GetxService {
 
   Future<bool> clearSharedData({bool removeToken = true}) async {
     if(!ResponsiveHelper.isDesktop(Get.context)){
-      Get.find<SplashController>().setModule(null);
+      Get.find<SplashController>().removeModule();
     }
     return await authServiceInterface.clearSharedData(removeToken: removeToken);
   }

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:handy_allinone/common/enums/data_source_enum.dart';
 import 'package:handy_allinone/features/category/domain/models/category_model.dart';
 import 'package:handy_allinone/features/item/domain/models/item_model.dart';
+import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
 import 'package:handy_allinone/features/store/domain/models/store_model.dart';
 import 'package:get/get.dart';
 import 'package:handy_allinone/features/category/domain/services/category_service_interface.dart';
@@ -110,8 +111,9 @@ class CategoryController extends GetxController implements GetxService {
         bool fromRecall = false,
       }) async {
     if (_categoryList == null || reload || fromRecall) {
+      int? currentModuleId = Get.isRegistered<SplashController>() ? Get.find<SplashController>().module?.id : null;
+
       try {
-        // Set loading true
         isLoadingCategories = true;
 
         // ✅ Safe update — schedule it after current frame
@@ -131,6 +133,8 @@ class CategoryController extends GetxController implements GetxService {
             source: DataSourceEnum.local,
           );
 
+          if (Get.isRegistered<SplashController>() && Get.find<SplashController>().module?.id != currentModuleId) return;
+
           _prepareCategoryList(categoryList);
 
           // Recall to fetch from client source
@@ -145,6 +149,8 @@ class CategoryController extends GetxController implements GetxService {
             allCategory,
             source: DataSourceEnum.client,
           );
+
+          if (Get.isRegistered<SplashController>() && Get.find<SplashController>().module?.id != currentModuleId) return;
 
           _prepareCategoryList(categoryList);
         }

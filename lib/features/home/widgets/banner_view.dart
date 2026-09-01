@@ -170,7 +170,7 @@ class BannerView extends StatelessWidget {
               },
             ),
             const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-            if (bannerList != null && bannerList.isNotEmpty)
+            if (bannerList.isNotEmpty)
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: bannerList

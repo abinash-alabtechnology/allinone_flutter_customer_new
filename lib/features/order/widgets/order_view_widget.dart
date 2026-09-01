@@ -62,7 +62,8 @@ class OrderViewWidget extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
-      body: GetBuilder<OrderController>(builder: (orderController) {
+      body: GetBuilder<SplashController>(builder: (splashController) {
+        return GetBuilder<OrderController>(builder: (orderController) {
         PaginatedOrderModel? paginatedOrderModel;
         if(isRunning) {
           paginatedOrderModel = orderController.runningOrderModel;
@@ -70,10 +71,7 @@ class OrderViewWidget extends StatelessWidget {
           paginatedOrderModel = orderController.historyOrderModel;
         }
 
-        List<OrderModel>? filteredOrders;
-        if (paginatedOrderModel != null && paginatedOrderModel.orders != null) {
-          filteredOrders = paginatedOrderModel.orders;
-        }
+        List<OrderModel>? filteredOrders = paginatedOrderModel?.orders;
 
         return paginatedOrderModel != null ? (filteredOrders != null && filteredOrders.isNotEmpty) ? RefreshIndicator(
           onRefresh: () async {
@@ -402,6 +400,7 @@ class OrderViewWidget extends StatelessWidget {
             ),
           ),
         ) : NoDataScreen(text: 'no_order_found'.tr, showFooter: true) : OrderShimmerWidget(orderController: orderController);
+        });
       }),
     );
   }
