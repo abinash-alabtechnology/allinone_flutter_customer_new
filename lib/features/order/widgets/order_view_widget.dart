@@ -73,6 +73,13 @@ class OrderViewWidget extends StatelessWidget {
 
         List<OrderModel>? filteredOrders = paginatedOrderModel?.orders;
 
+        if (filteredOrders != null) {
+          int? activeModuleId = splashController.module?.id ?? splashController.cacheModule?.id;
+          if (activeModuleId != null) {
+            filteredOrders = filteredOrders.where((order) => order.moduleId == activeModuleId).toList();
+          }
+        }
+
         return paginatedOrderModel != null ? (filteredOrders != null && filteredOrders.isNotEmpty) ? RefreshIndicator(
           onRefresh: () async {
             if(isRunning) {

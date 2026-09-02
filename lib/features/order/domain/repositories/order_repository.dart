@@ -130,12 +130,10 @@ class OrderRepository implements OrderRepositoryInterface {
         activeModuleId = Get.find<SplashController>().module?.id ?? Get.find<SplashController>().cacheModule?.id;
       }
     }
-    bool isHandyman = (activeModuleId == handymanModuleId) ||
-        (Get.isRegistered<SplashController>() && Get.find<SplashController>().module?.id == handymanModuleId);
-
-    String uri = isHandyman
-        ? '${AppConstants.runningOrderListUri}?limit=${fromDashboard ? 50 : 25}&offset=$offset&filter_module_id=$handymanModuleId'
-        : '${AppConstants.runningOrderListUri}?offset=$offset&limit=${fromDashboard ? 50 : 10}';
+    String uri = '${AppConstants.runningOrderListUri}?offset=$offset&limit=${fromDashboard ? 50 : 10}';
+    if (activeModuleId != null) {
+      uri = '${AppConstants.runningOrderListUri}?limit=${fromDashboard ? 50 : 25}&offset=$offset&filter_module_id=$activeModuleId';
+    }
 
     Response response = await apiClient.getData(uri);
     if (response.statusCode == 200) {
@@ -153,12 +151,10 @@ class OrderRepository implements OrderRepositoryInterface {
         activeModuleId = Get.find<SplashController>().module?.id ?? Get.find<SplashController>().cacheModule?.id;
       }
     }
-    bool isHandyman = (activeModuleId == handymanModuleId) ||
-        (Get.isRegistered<SplashController>() && Get.find<SplashController>().module?.id == handymanModuleId);
-
-    String uri = isHandyman
-        ? '${AppConstants.historyOrderListUri}?limit=25&offset=$offset&filter_module_id=$handymanModuleId'
-        : '${AppConstants.historyOrderListUri}?offset=$offset&limit=10';
+    String uri = '${AppConstants.historyOrderListUri}?offset=$offset&limit=10';
+    if (activeModuleId != null) {
+      uri = '${AppConstants.historyOrderListUri}?limit=25&offset=$offset&filter_module_id=$activeModuleId';
+    }
 
     Response response = await apiClient.getData(uri);
     if (response.statusCode == 200) {
