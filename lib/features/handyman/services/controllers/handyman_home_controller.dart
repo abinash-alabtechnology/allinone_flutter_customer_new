@@ -133,10 +133,14 @@ class HandymanHomeController extends GetxController {
       if (favController.wishItemList != null && favController.wishItemList!.isNotEmpty) {
         final apiWishList = <HandymanServiceModel>[];
         for (var item in favController.wishItemList!) {
-          if (item != null) {
-            bool isHandymanModule = item.moduleId == activeModuleId ||
-                (item.moduleType?.toLowerCase() == 'handyman');
-            if (isHandymanModule) {
+            if (item != null) {
+              bool isHandymanModule = false;
+              if (item.moduleType != null && item.moduleType!.isNotEmpty) {
+                isHandymanModule = item.moduleType!.toLowerCase() == 'handyman';
+              } else {
+                isHandymanModule = item.moduleId == activeModuleId;
+              }
+              if (isHandymanModule) {
               apiWishList.add(HandymanServiceModel.fromItem(item));
             }
           }
@@ -209,7 +213,12 @@ class HandymanHomeController extends GetxController {
     for (var s in allServices.values) {
       bool itemInCart = cartList.any((c) {
         if (c.item == null) return false;
-        bool isHandyman = c.item!.moduleId == handymanModuleId || (c.item!.moduleType?.toLowerCase() == 'handyman');
+        bool isHandyman = false;
+        if (c.item!.moduleType != null && c.item!.moduleType!.isNotEmpty) {
+          isHandyman = c.item!.moduleType!.toLowerCase() == 'handyman';
+        } else {
+          isHandyman = c.item!.moduleId == handymanModuleId;
+        }
         if (!isHandyman) return false;
         String idStr = c.item!.id.toString();
         String itemName = c.item!.name?.toLowerCase().trim() ?? '';
@@ -239,8 +248,12 @@ class HandymanHomeController extends GetxController {
 
     for (var cart in cartList) {
       if (cart.item != null) {
-        bool isHandymanModule = cart.item!.moduleId == handymanModuleId ||
-            (cart.item!.moduleType?.toLowerCase() == 'handyman');
+        bool isHandymanModule = false;
+        if (cart.item!.moduleType != null && cart.item!.moduleType!.isNotEmpty) {
+          isHandymanModule = cart.item!.moduleType!.toLowerCase() == 'handyman';
+        } else {
+          isHandymanModule = cart.item!.moduleId == handymanModuleId;
+        }
 
         if (!isHandymanModule) {
           continue;
@@ -376,8 +389,12 @@ class HandymanHomeController extends GetxController {
         bool isAnotherStore = false;
         final handymanCartItems = cartController.cartList.where((cartModel) {
           if (cartModel.item == null) return false;
-          bool isHandyman = cartModel.item!.moduleId == activeModuleId ||
-              (cartModel.item!.moduleType?.toLowerCase() == 'handyman');
+          bool isHandyman = false;
+          if (cartModel.item!.moduleType != null && cartModel.item!.moduleType!.isNotEmpty) {
+            isHandyman = cartModel.item!.moduleType!.toLowerCase() == 'handyman';
+          } else {
+            isHandyman = cartModel.item!.moduleId == activeModuleId;
+          }
           return isHandyman;
         }).toList();
 
