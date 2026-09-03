@@ -199,9 +199,6 @@ class CategoryController extends GetxController implements GetxService {
       _categoryList!.addAll(uniqueCatMap.values);
       for(int i = 0; i < _categoryList!.length; i++) {
         _interestSelectedList!.add(false);
-        if (_categoryList![i].id != null) {
-          fetchItemsForCategory(_categoryList![i].id.toString(), 1, 'all', false);
-        }
       }
     }
     update();
@@ -240,13 +237,6 @@ class CategoryController extends GetxController implements GetxService {
   void clearCategoryCache() {
     _itemsByCategory.clear();
     _loadingStatusByCategory.clear();
-    if (_categoryList != null && _categoryList!.isNotEmpty) {
-      for (var cat in _categoryList!) {
-        if (cat.id != null) {
-          fetchItemsForCategory(cat.id.toString(), 1, 'all', true);
-        }
-      }
-    }
     update();
   }
   void getSubCategoryList(String? categoryID) async {

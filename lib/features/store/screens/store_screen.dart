@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
@@ -1141,7 +1141,7 @@ class _StoreScreenState extends State<StoreScreen> {
                             ),
                           ),
 
-                        // â”€â”€ Sticky search bar + filter chips â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                        // Sticky search bar + filter chips 
                         if (!ResponsiveHelper.isDesktop(context) && storeController.categoryList != null && storeController.categoryList!.isNotEmpty)
                           SliverPersistentHeader(
                             pinned: true,
@@ -1230,9 +1230,7 @@ class _StoreScreenState extends State<StoreScreen> {
                                            ? storeController.storeItemModel!.items
                                            : null;
 
-                                       final filteredItems = rawItems == null
-                                           ? null
-                                           : rawItems.where((item) {
+                                       final filteredItems = rawItems?.where((item) {
                                                if (_vegFilter && (item.veg ?? 0) != 1) return false;
                                                if (_nonVegFilter && (item.veg ?? 0) != 0) return false;
                                                if (_discountFilter && (item.discount == null || item.discount! <= 0)) return false;
@@ -1263,7 +1261,7 @@ class _StoreScreenState extends State<StoreScreen> {
                                   ),
                                 ),
                               ),
-                        // â”€â”€ scroll-to-top animated button (inline, after all items) â”€â”€
+                        // scroll-to-top animated button (inline, after all items)
                         SliverToBoxAdapter(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 24),
@@ -1272,7 +1270,7 @@ class _StoreScreenState extends State<StoreScreen> {
                             ),
                           ),
                         ),
-                        // â”€â”€ bottom scroll padding â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                        // bottom scroll padding 
                         const SliverToBoxAdapter(
                           child: SizedBox(height: 80),
                         ),

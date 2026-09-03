@@ -7,7 +7,7 @@ import 'package:handy_allinone/util/images.dart';
 
 class AppConstants {
 
-  static const String developedby = 'Alabtechnology Pvt. ltd';
+  static const String developedby = 'Alabtechnology Pvt. Ltd';
 
 
   static const String TaxiIconsolid = 'assets/image/taxiicon1.png';

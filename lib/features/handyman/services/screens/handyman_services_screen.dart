@@ -160,6 +160,7 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
   bool _isScrolled = false;
   double _scrollOffset = 0.0;
   int _currentBannerIndex = 0;
+  int _displayedCategoriesCount = 5;
   Timer? _bannerTimer;
   @override
   void initState() {
@@ -217,10 +218,39 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
     final double minHeaderHeight = MediaQuery.of(context).padding.top + 70;
     final double threshold = maxHeaderHeight - minHeaderHeight;
 
-    setState(() {
-      _scrollOffset = offset;
-      _isScrolled = offset > threshold;
-    });
+    bool needsUpdate = false;
+    double newOffset = _scrollOffset;
+    bool newIsScrolled = _isScrolled;
+    int newDisplayedCount = _displayedCategoriesCount;
+
+    if (offset != _scrollOffset) {
+      newOffset = offset;
+      needsUpdate = true;
+    }
+    if ((offset > threshold) != _isScrolled) {
+      newIsScrolled = offset > threshold;
+      needsUpdate = true;
+    }
+    
+    // Lazy load more categories when scrolling near the bottom
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 500) {
+      if (Get.isRegistered<CategoryController>()) {
+        final catLen = Get.find<CategoryController>().categoryList?.length ?? 0;
+        if (_displayedCategoriesCount < catLen) {
+          newDisplayedCount = _displayedCategoriesCount + 5;
+          if (newDisplayedCount > catLen) newDisplayedCount = catLen;
+          needsUpdate = true;
+        }
+      }
+    }
+
+    if (needsUpdate) {
+      setState(() {
+        _scrollOffset = newOffset;
+        _isScrolled = newIsScrolled;
+        _displayedCategoriesCount = newDisplayedCount;
+      });
+    }
   }
 
   Widget _buildCartButton({required bool isScrolled}) {
@@ -953,7 +983,11 @@ class _HandymanHomeScreenBodyState extends State<HandymanHomeScreenBody> {
 
                         if (categoryController.categoryList != null && categoryController.categoryList!.isNotEmpty) {
                           int categoryIndex = 0;
-                          for (final category in categoryController.categoryList!) {
+                          final displayCount = categoryController.categoryList!.length > _displayedCategoriesCount 
+                              ? _displayedCategoriesCount 
+                              : categoryController.categoryList!.length;
+                          for (int i = 0; i < displayCount; i++) {
+                            final category = categoryController.categoryList![i];
                             final catIdStr = category.id.toString();
                             final apiItems = categoryController.itemsByCategory[catIdStr];
 
