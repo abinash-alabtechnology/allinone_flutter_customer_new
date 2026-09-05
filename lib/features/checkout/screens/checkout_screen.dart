@@ -667,7 +667,9 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                               orderAmount: widget.storeId == null
                                   ? subTotal
                                   : 0,
-                              orderNote: _getCombinedOrderNote(checkoutController),
+                              orderNote: _getCombinedOrderNote(
+                                checkoutController,
+                              ),
                               orderType: checkoutController.orderType,
                               paymentMethod:
                                   checkoutController.paymentMethodIndex == 0
@@ -1307,7 +1309,10 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                                                                             ),
                                                                                             child: InkWell(
                                                                                               onTap: () {
-                                                                                                _showCookingInstructionsBottomSheet(context, checkoutController);
+                                                                                                _showCookingInstructionsBottomSheet(
+                                                                                                  context,
+                                                                                                  checkoutController,
+                                                                                                );
                                                                                               },
                                                                                               child: Container(
                                                                                                 padding: const EdgeInsets.all(
@@ -1336,7 +1341,8 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                                                                                     ),
                                                                                                     Expanded(
                                                                                                       child: Text(
-                                                                                                        checkoutController.selectedCookingInstruction != -1
+                                                                                                        checkoutController.selectedCookingInstruction !=
+                                                                                                                -1
                                                                                                             ? AppConstants.cookingInstructionList[checkoutController.selectedCookingInstruction].tr
                                                                                                             : 'Add cooking instructions',
                                                                                                         style: robotoMedium.copyWith(
@@ -3047,6 +3053,16 @@ class CheckoutScreenState extends State<CheckoutScreen> {
       showCustomSnackBar(
         'please_accept_privacy_policy_trams_conditions_refund_policy_first'.tr,
       );
+    } else if (checkoutController.store!.nonVeg == 0 &&
+        (_cartList?.any((cart) => cart?.item?.veg == 0) ?? false)) {
+      showCustomSnackBar(
+        'This store is currently not accepting non-vegetarian orders.',
+      );
+    } else if (checkoutController.store!.veg == 0 &&
+        (_cartList?.any((cart) => cart?.item?.veg == 1) ?? false)) {
+      showCustomSnackBar(
+        'This store is currently not accepting vegetarian orders.',
+      );
     } else {
       AddressModel? finalAddress = isGuestLogIn
           ? checkoutController.guestAddress
@@ -3301,13 +3317,18 @@ class CheckoutScreenState extends State<CheckoutScreen> {
   String _getCombinedOrderNote(CheckoutController checkoutController) {
     String note = checkoutController.noteController.text;
     if (checkoutController.selectedCookingInstruction != -1) {
-      String cookingInstruction = AppConstants.cookingInstructionList[checkoutController.selectedCookingInstruction].tr;
+      String cookingInstruction = AppConstants
+          .cookingInstructionList[checkoutController.selectedCookingInstruction]
+          .tr;
       note = note.isEmpty ? cookingInstruction : '$cookingInstruction, $note';
     }
     return note;
   }
 
-  void _showCookingInstructionsBottomSheet(BuildContext context, CheckoutController checkoutController) {
+  void _showCookingInstructionsBottomSheet(
+    BuildContext context,
+    CheckoutController checkoutController,
+  ) {
     Get.bottomSheet(
       Container(
         padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
@@ -3315,49 +3336,80 @@ class CheckoutScreenState extends State<CheckoutScreen> {
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('Cooking Instructions', style: robotoBold.copyWith(fontSize: 18)),
-          const SizedBox(height: 16),
-          ListView.builder(
-            shrinkWrap: true,
-            itemCount: AppConstants.cookingInstructionList.length,
-            itemBuilder: (context, index) {
-              bool isSelected = checkoutController.selectedCookingInstruction == index;
-              return InkWell(
-                onTap: () {
-                  checkoutController.setCookingInstruction(index);
-                  Get.back();
-                },
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: isSelected ? const Color(0xFF16A34A).withValues(alpha: 0.1) : Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: isSelected ? const Color(0xFF16A34A) : Colors.transparent),
-                  ),
-                  child: Row(children: [
-                    Icon(
-                      index == 0 ? Icons.whatshot :
-                      index == 1 ? Icons.no_food :
-                      index == 2 ? Icons.cookie : Icons.restaurant,
-                      color: isSelected ? const Color(0xFF16A34A) : Colors.black87,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        AppConstants.cookingInstructionList[index].tr,
-                        style: robotoMedium.copyWith(color: isSelected ? const Color(0xFF16A34A) : Colors.black87),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Cooking Instructions',
+              style: robotoBold.copyWith(fontSize: 18),
+            ),
+            const SizedBox(height: 16),
+            ListView.builder(
+              shrinkWrap: true,
+              itemCount: AppConstants.cookingInstructionList.length,
+              itemBuilder: (context, index) {
+                bool isSelected =
+                    checkoutController.selectedCookingInstruction == index;
+                return InkWell(
+                  onTap: () {
+                    checkoutController.setCookingInstruction(index);
+                    Get.back();
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? const Color(0xFF16A34A).withValues(alpha: 0.1)
+                          : Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isSelected
+                            ? const Color(0xFF16A34A)
+                            : Colors.transparent,
                       ),
                     ),
-                    if (isSelected) const Icon(Icons.check_circle, color: Color(0xFF16A34A), size: 20),
-                  ]),
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: 16),
-        ]),
+                    child: Row(
+                      children: [
+                        Icon(
+                          index == 0
+                              ? Icons.whatshot
+                              : index == 1
+                              ? Icons.no_food
+                              : index == 2
+                              ? Icons.cookie
+                              : Icons.restaurant,
+                          color: isSelected
+                              ? const Color(0xFF16A34A)
+                              : Colors.black87,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            AppConstants.cookingInstructionList[index].tr,
+                            style: robotoMedium.copyWith(
+                              color: isSelected
+                                  ? const Color(0xFF16A34A)
+                                  : Colors.black87,
+                            ),
+                          ),
+                        ),
+                        if (isSelected)
+                          const Icon(
+                            Icons.check_circle,
+                            color: Color(0xFF16A34A),
+                            size: 20,
+                          ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
       ),
     );
   }
