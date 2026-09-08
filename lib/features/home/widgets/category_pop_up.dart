@@ -1,4 +1,5 @@
 import 'package:handy_allinone/features/category/controllers/category_controller.dart';
+import 'package:handy_allinone/helper/responsive_helper.dart';
 import 'package:handy_allinone/helper/route_helper.dart';
 import 'package:handy_allinone/util/dimensions.dart';
 import 'package:handy_allinone/util/styles.dart';
@@ -34,42 +35,41 @@ class CategoryPopUp extends StatelessWidget {
                   physics: const BouncingScrollPhysics(),
                   gridDelegate:
                   SliverGridDelegateWithFixedCrossAxisCount(
-                    childAspectRatio: 1.2,
-                    crossAxisCount: GetPlatform.isDesktop ? 5 : 4,
+                    childAspectRatio: ResponsiveHelper.isMobile(context) ? 0.95 : 1.0,
+                    crossAxisCount: ResponsiveHelper.isMobile(context) ? 3 : 5,
+                    mainAxisSpacing: Dimensions.paddingSizeSmall,
+                    crossAxisSpacing: Dimensions.paddingSizeSmall,
                   ),
                   itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(right: Dimensions.paddingSizeSmall),
-                      child: InkWell(
-                        onTap: () => Get.toNamed(RouteHelper.getCategoryItemRoute(
-                          categoryController.categoryList![index].id, categoryController.categoryList![index].name!,
-                        )),
-                        child: SizedBox(
-                          width: 50,
-                          child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Container(
-                                  height: 50, width: 50,
-                                  margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeExtraSmall),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).cardColor,
-                                    borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                                    boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5, spreadRadius: 1)],
-                                  ),
-                                  child: CustomImage(
-                                    image: '${categoryController.categoryList![index].imageFullUrl}',
-                                    height: 50, width: 50, fit: BoxFit.cover,
-                                  ),
+                    return InkWell(
+                      onTap: () => Get.toNamed(RouteHelper.getCategoryItemRoute(
+                        categoryController.categoryList![index].id, categoryController.categoryList![index].name!,
+                      )),
+                      child: SizedBox(
+                        width: 50,
+                        child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                height: 50, width: 50,
+                                margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeExtraSmall),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).cardColor,
+                                  borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                                  boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5, spreadRadius: 1)],
                                 ),
-                                Text(
-                                  categoryController.categoryList![index].name!,
-                                  style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall),
-                                  maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center,
+                                child: CustomImage(
+                                  image: '${categoryController.categoryList![index].imageFullUrl}',
+                                  height: 50, width: 50, fit: BoxFit.cover,
                                 ),
-                              ]),
-                        ),
+                              ),
+                              Text(
+                                categoryController.categoryList![index].name!,
+                                style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall),
+                                maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center,
+                              ),
+                            ]),
                       ),
                     );
                   },

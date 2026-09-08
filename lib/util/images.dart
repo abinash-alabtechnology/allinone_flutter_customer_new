@@ -24,7 +24,7 @@ class Images {
   static const String card = 'assets/image/card.png';
   static const String favouritenew = 'assets/image/favouritenew.png';
   static const String tickmark = 'assets/image/tickmark.png';
-  static const String logotransparent = 'assets/image/Logotrans.png';
+  static const String logotransparent = 'assets/image/logo_transparent.png';
   // static const String TaxiIconsolid = 'assets/image/taxiicon1.png';
   // static const String TaxiIcon = 'assets/taxi/taxiicon.png';
 
@@ -57,7 +57,7 @@ class Images {
   ///
   static const String itemdetail = 'assets/image/itemdetail.png';
 
-  static const String logo = 'assets/image/logo.jpeg';
+  static const String logo = 'assets/image/logo.png';
   static const String offergif = 'assets/animation/offer.gif';
   static const String spendMoney = 'assets/image/presents.png';
   static const String addMoney = 'assets/image/rupee.png';
@@ -385,4 +385,60 @@ class Images {
 
   static const String mapIconExtended = 'assets/json/map-picker-1.json';
   static const String mapIconMinimised = 'assets/json/map-picker-2.json';
+
+  static const String travelsIcon = 'assets/image/travels_icon.png';
+  static const String rentalIcon = 'assets/image/rental_icon.png';
+  static const String handymanIcon = 'assets/image/handyman_icon.png';
+  static const String utilityIcon = 'assets/image/utility_icon.png';
+
+  static const String handymanInstaHelp = 'assets/image/handyman_instahelp.png';
+  static const String handymanWomenSalon = 'assets/image/handyman_women_salon.png';
+  static const String handymanWomenSalonNoBg = 'assets/image/handyman_women_salon_nobg.png';
+  static const String handymanThreading = 'assets/image/handyman_threading.png';
+  static const String handymanHeadMassage = 'assets/image/handyman_head_massage.png';
+  static const String handymanFacial = 'assets/image/handyman_facial.png';
+  static const String handymanAc = 'assets/image/handyman_ac.png';
+  static const String handymanMenSalon = 'assets/image/handyman_men_salon.png';
+  static const String handymanCleaning = 'assets/image/handyman_cleaning.png';
+  static const String handymanCleaningNoBg = 'assets/image/handyman_cleaning_nobg.png';
+  static const String handymanPainting = 'assets/image/handyman_painting.png';
+  static const String handymanAcRepair = 'assets/image/handyman_ac_repair.png';
+  static const String handymanTools = 'assets/image/handyman_tools.png';
+  static const String handymanCctv = 'assets/image/handyman_cctv.png';
+  static const String handymanGardening = 'assets/image/handyman_gardening.png';
+  static const String handymanRenovation = 'assets/image/handyman_renovation.png';
+  static const String handymanTvmount = 'assets/image/handyman_tvmount.png';
+  static const String handymanLocksmith = 'assets/image/handyman_locksmith.png';
+  static const String handymanPromoBanner = 'assets/image/handyman_promo_banner.png';
+  static const String handymanElectricianBanner = 'assets/image/Electrian.png';
+  static const String handymanPainterBanner = 'assets/image/Paniter.png';
+  static const String handymanAcMechanicNoBg = 'assets/image/Ac_mechanic_nobg.png';
+  static const String handymanElectricalRepair = 'assets/image/handyman_electrical_repair.png';
+  static const String handymanCarpentryRepair = 'assets/image/handyman_carpentry_repair.png';
+  static const String handymanUpperLip = 'assets/image/handyman_upper_lip.png';
+  static const String handymanChin = 'assets/image/handyman_chin.png';
+  static const String facialFruit = 'assets/image/facial_fruit.png';
+  static const String facialGold = 'assets/image/facial_gold.png';
+  static const String facialDetan = 'assets/image/facial_detan.png';
+  static const String facialHerbal = 'assets/image/facial_herbal.png';
+  static const String facialGlow = 'assets/image/facial_glow.png';
+  static const String handymanWaxing = 'assets/image/handyman_waxing.png';
+  static const String acDeepClean = 'assets/image/ac_deep_clean.png';
+  static const String acInstallation = 'assets/image/ac_installation.png';
+  static const String geyserRepair = 'assets/image/geyser_repair.png';
+
+  static const String bathroomCleaning = 'assets/image/bathroom_cleaning.png';
+  static const String kitchenCleaning = 'assets/image/kitchen_cleaning.png';
+  static const String kitchenSink = 'assets/image/kitchen_sink.png';
+  static const String bungalowCleaning = 'assets/image/bungalow_cleaning.png';
+  static const String mirrorCabinet = 'assets/image/mirror_cabinet.png';
+  static const String kitchenCounter = 'assets/image/kitchen_counter.png';
+
+  static const String bathroomSink = 'assets/image/bathroom_sink.png';
+  static const String geyserClean = 'assets/image/geyser_clean.png';
+  static const String sofaClean = 'assets/image/sofa_clean.png';
+  static const String houseClean = 'assets/image/house_clean.png';
+  static const String intenseBathroom = 'assets/image/intense_bathroom.png';
+  static const String antControl = 'assets/image/ant_control.png';
+  static const String furnishedApartment = 'assets/image/furnished_apartment.png';
 }

@@ -408,28 +408,31 @@ class _DeliveryManTipsSectionState extends State<DeliveryManTipsSection> {
                     checkoutController.selectedTips ==
                         AppConstants.tips.length - 1
                         ? const SizedBox()
-                        : ListTile(
-                      onTap: () =>
-                          checkoutController.toggleDmTipSave(),
-                      leading: Checkbox(
-                        visualDensity: const VisualDensity(
-                            horizontal: -4, vertical: -4),
-                        activeColor: Theme.of(context).primaryColor,
-                        value: checkoutController.isDmTipSave,
-                        onChanged: (bool? isChecked) =>
-                            checkoutController.toggleDmTipSave(),
-                      ),
-                      title: Text(
-                        'save_for_later'.tr,
-                        style: robotoMedium.copyWith(
-                            color: Theme.of(context).primaryColor),
-                      ),
-                      contentPadding: EdgeInsets.zero,
-                      visualDensity: const VisualDensity(
-                          horizontal: 0, vertical: -4),
-                      dense: true,
-                      horizontalTitleGap: 0,
-                    ),
+                        : Material(
+                          color: Colors.transparent,
+                          child: ListTile(
+                            onTap: () =>
+                                checkoutController.toggleDmTipSave(),
+                            leading: Checkbox(
+                              visualDensity: const VisualDensity(
+                                  horizontal: -4, vertical: -4),
+                              activeColor: Theme.of(context).primaryColor,
+                              value: checkoutController.isDmTipSave,
+                              onChanged: (bool? isChecked) =>
+                                  checkoutController.toggleDmTipSave(),
+                            ),
+                            title: Text(
+                              'save_for_later'.tr,
+                              style: robotoMedium.copyWith(
+                                  color: Theme.of(context).primaryColor),
+                            ),
+                            contentPadding: EdgeInsets.zero,
+                            visualDensity: const VisualDensity(
+                                horizontal: 0, vertical: -4),
+                            dense: true,
+                            horizontalTitleGap: 0,
+                          ),
+                        ),
                     SizedBox(
                       height: checkoutController.selectedTips ==
                           AppConstants.tips.length - 1

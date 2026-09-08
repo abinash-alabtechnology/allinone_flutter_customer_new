@@ -6,8 +6,9 @@ import 'package:handy_allinone/features/banner/domain/models/promotional_banner_
 abstract class BannerServiceInterface {
   Future<BannerModel?> getBannerList({required DataSourceEnum source});
   Future<BannerModel?> getTaxiBannerList();
-  Future<BannerModel?> getFeaturedBannerList();
+  Future<BannerModel?> getFeaturedBannerList({required DataSourceEnum source});
   Future<ParcelOtherBannerModel?> getParcelOtherBannerList({required DataSourceEnum source});
   Future<PromotionalBanner?> getPromotionalBannerList();
+  Future<BannerModel?> getSpotlightBannerList({required DataSourceEnum source});
   List<int?> moduleIdList();
 }

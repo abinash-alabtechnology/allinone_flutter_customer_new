@@ -36,7 +36,8 @@ import '../../../util/app_constants.dart';
 import '../../profile/controllers/profile_controller.dart';
 
 class MenuScreen extends StatefulWidget {
-  const MenuScreen({super.key});
+  final bool fromNav;
+  const MenuScreen({super.key, this.fromNav = false});
 
   @override
   State<MenuScreen> createState() => _MenuScreenState();
@@ -74,7 +75,7 @@ class _MenuScreenState extends State<MenuScreen> {
                         style: robotoBold.copyWith(
                             fontSize: 22, color: Theme.of(context).cardColor),
                       ),
-                      GestureDetector(
+                      widget.fromNav ? const SizedBox() : GestureDetector(
                           onTap: () {
                             Get.back();
                           },
@@ -651,39 +652,48 @@ class _MenuScreenState extends State<MenuScreen> {
                           color: Colors.grey[600],
                         ),
                       ),
-                      const SizedBox(height: 20),                      Row(
+                      const SizedBox(height: 20),
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _AnimatedIconButton(
-                            color: Colors.blue,
-                            asset: Images.facebook,
-                            url: 'https://www.facebook.com',
-                            delay: const Duration(
-                                milliseconds: 0),
-                          ),
-                          _AnimatedIconButton(
-                            color: Colors.pink,
-                            asset: Images.instagram,
-                            url: 'https://www.instagram.com',
-                            delay: const Duration(
-                                milliseconds: 300),
-                          ),
-                          _AnimatedIconButton(
-                            color: Colors.black,
-                            asset: Images.youtube,
-                            url: 'https://youtube.com',
-                            delay: const Duration(
-                                milliseconds: 600),
-                          ),
-                        ],
+                        children: (Get.find<SplashController>().configModel!.socialMedia ?? []).where((social) {
+                          bool isSupported = ['facebook', 'instagram', 'youtube'].contains(social.name?.toLowerCase());
+                          return social.status == 1 && isSupported;
+                        }).map((social) {
+                          String? asset;
+                          Color color = Colors.blue;
+
+                          switch (social.name?.toLowerCase()) {
+                            case 'facebook':
+                              asset = Images.facebook;
+                              color = const Color(0xFF1877F2);
+                              break;
+                            case 'instagram':
+                              asset = Images.instagram;
+                              color = const Color(0xFFE4405F);
+                              break;
+                            case 'youtube':
+                              asset = Images.youtube;
+                              color = const Color(0xFFFF0000);
+                              break;
+                          }
+
+                          if (asset == null) return const SizedBox();
+
+                          return _AnimatedIconButton(
+                            color: color,
+                            asset: asset,
+                            url: social.link ?? '',
+                            delay: Duration(milliseconds: (Get.find<SplashController>().configModel!.socialMedia!.indexOf(social) * 200)),
+                          );
+                        }).toList(),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  "App Version: DEV -3.5.0",
+                  "App Version: ${AppConstants.devAppVersion}",
                   style: TextStyle(
                     fontSize: Dimensions.fontSizeDefault,
                     color: Theme.of(context).hintColor,
@@ -693,7 +703,7 @@ class _MenuScreenState extends State<MenuScreen> {
                 TypingText(
                   lines: [
                     "©${DateTime.now().year} Crafted with ❤️",
-                    "By Alabtechnology Pvt.Ltd",
+                    "By Alabtechnology Pvt.Ltd",  
                   ],
                   style: const TextStyle(
                     fontSize: 16,
@@ -977,6 +987,4 @@ class _AnimatedIconButtonState extends State<_AnimatedIconButton>
   }
 }
 
-// class MenuScreen extends StatefulWidget {
-//   const MenuScreen({super.key});
-//
+

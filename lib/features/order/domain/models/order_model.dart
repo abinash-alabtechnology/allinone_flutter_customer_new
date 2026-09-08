@@ -53,6 +53,7 @@ class OrderModel {
   double? deliveryCharge;
   String? scheduleAt;
   String? otp;
+  String? startOtp;
   String? pending;
   String? accepted;
   String? confirmed;
@@ -70,6 +71,7 @@ class OrderModel {
   List<String?>? orderAttachmentFullUrl;
   String? chargePayer;
   String? moduleType;
+  int? moduleId;
   DeliveryMan? deliveryMan;
   Store? store;
   AddressModel? deliveryAddress;
@@ -120,6 +122,7 @@ class OrderModel {
         this.deliveryCharge,
         this.scheduleAt,
         this.otp,
+        this.startOtp,
         this.pending,
         this.accepted,
         this.confirmed,
@@ -136,6 +139,7 @@ class OrderModel {
         this.detailsCount,
         this.chargePayer,
         this.moduleType,
+        this.moduleId,
         this.deliveryMan,
         this.deliveryAddress,
         this.receiverDetails,
@@ -186,7 +190,8 @@ class OrderModel {
     updatedAt = json['updated_at'];
     deliveryCharge = json['delivery_charge'].toDouble();
     scheduleAt = json['schedule_at'];
-    otp = json['otp'];
+    otp = json['otp']?.toString() ?? json['otp_key']?.toString() ?? json['end_otp']?.toString() ?? json['end_otp_key']?.toString();
+    startOtp = json['start_otp']?.toString() ?? json['start_otp_key']?.toString() ?? json['start_key']?.toString();
     pending = json['pending'];
     accepted = json['accepted'];
     confirmed = json['confirmed'];
@@ -209,8 +214,12 @@ class OrderModel {
     }
     chargePayer = json['charge_payer'];
     moduleType = json['module_type'];
+    moduleId = json['module_id'] != null ? int.tryParse(json['module_id'].toString()) : null;
     deliveryMan = json['delivery_man'] != null ? DeliveryMan.fromJson(json['delivery_man']) : null;
     store = json['store'] != null ? Store.fromJson(json['store']) : null;
+    if (moduleId == null && store != null && store!.moduleId != null) {
+      moduleId = store!.moduleId;
+    }
     deliveryAddress = json['delivery_address'] != null ? AddressModel.fromJson(json['delivery_address']) : null;
     receiverDetails = json['receiver_details'] != null ? AddressModel.fromJson(json['receiver_details']) : null;
     parcelCategory = json['parcel_category'] != null ? ParcelCategoryModel.fromJson(json['parcel_category']) : null;
@@ -281,6 +290,7 @@ class OrderModel {
     data['delivery_charge'] = deliveryCharge;
     data['schedule_at'] = scheduleAt;
     data['otp'] = otp;
+    data['start_otp'] = startOtp;
     data['pending'] = pending;
     data['accepted'] = accepted;
     data['confirmed'] = confirmed;
@@ -297,6 +307,7 @@ class OrderModel {
     data['order_attachment_full_url'] = orderAttachmentFullUrl;
     data['charge_payer'] = chargePayer;
     data['module_type'] = moduleType;
+    data['module_id'] = moduleId;
     data['details_count'] = detailsCount;
     if (deliveryMan != null) {
       data['delivery_man'] = deliveryMan!.toJson();

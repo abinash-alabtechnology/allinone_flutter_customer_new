@@ -113,12 +113,12 @@ class FlashProductCardWidget extends StatelessWidget {
 
                   Wrap(children: [
 
-                    product.item!.discount != null && product.item!.discount! > 0  ? Text(
-                      PriceConverter.convertPrice(Get.find<ItemController>().getStartingPrice(product.item!)),
+                    product.item!.discount != null && product.item!.discount! > 0  ? CustomLineThroughText(
+                      text: PriceConverter.convertPrice(Get.find<ItemController>().getStartingPrice(product.item!)),
                       style: robotoMedium.copyWith(
                         fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor,
-                        decoration: TextDecoration.lineThrough,
-                      ), textDirection: TextDirection.ltr,
+                      ),
+                      textAlign: TextAlign.center, textDirection: TextDirection.ltr,
                     ) : const SizedBox(),
                     SizedBox(width: product.item!.discount != null && product.item!.discount! > 0 ? Dimensions.paddingSizeExtraSmall : 0),
 

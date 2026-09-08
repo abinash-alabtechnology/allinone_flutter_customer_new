@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
@@ -47,6 +48,32 @@ class AuthController extends GetxController implements GetxService {
 
   bool _isOtpViewEnable = false;
   bool get isOtpViewEnable => _isOtpViewEnable;
+
+  int _otpResendSeconds = 0;
+  int get otpResendSeconds => _otpResendSeconds;
+  Timer? _otpTimer;
+
+  void startOtpTimer([int seconds = 60]) {
+    _otpResendSeconds = seconds;
+    _otpTimer?.cancel();
+    update();
+    _otpTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_otpResendSeconds > 0) {
+        _otpResendSeconds--;
+        update();
+      } else {
+        _otpTimer?.cancel();
+        _otpTimer = null;
+        update();
+      }
+    });
+  }
+
+  @override
+  void onClose() {
+    _otpTimer?.cancel();
+    super.onClose();
+  }
 
   Future<ResponseModel> registration(SignUpBodyModel signUpBody) async {
     _isLoading = true;
@@ -171,7 +198,7 @@ class AuthController extends GetxController implements GetxService {
 
   Future<bool> clearSharedData({bool removeToken = true}) async {
     if(!ResponsiveHelper.isDesktop(Get.context)){
-      Get.find<SplashController>().setModule(null);
+      Get.find<SplashController>().removeModule();
     }
     return await authServiceInterface.clearSharedData(removeToken: removeToken);
   }

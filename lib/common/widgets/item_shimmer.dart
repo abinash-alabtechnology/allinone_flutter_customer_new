@@ -103,9 +103,16 @@ import 'custom_image.dart';
 class ItemShimmer extends StatelessWidget {
   final bool hasDivider;
   final bool isStore;
-    final bool isEnabled;
+  final bool isEnabled;
+  final bool isGridView;
 
-  const ItemShimmer({super.key, this.hasDivider = true, required this.isStore, required this.isEnabled});
+  const ItemShimmer({
+    super.key,
+    this.hasDivider = true,
+    required this.isStore,
+    required this.isEnabled,
+    this.isGridView = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -179,6 +186,72 @@ class ItemShimmer extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    ) : isGridView ? Skeletonizer(
+      enabled: isEnabled,
+      child: Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+            color: Theme.of(context).cardColor,
+            border: Border.all(color: Theme.of(context).disabledColor.withValues(alpha: 0.1), width: 1),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                height: 140,
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(Dimensions.radiusDefault)),
+                  color: Colors.grey,
+                ),
+              ),
+              const SizedBox(height: Dimensions.paddingSizeDefault),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Container(
+                  height: 14,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.grey,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      height: 16,
+                      width: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.grey,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    Container(
+                      height: 25,
+                      width: 35,
+                      decoration: BoxDecoration(
+                        color: Colors.grey,
+                        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+            ],
+          ),
         ),
       ),
     ) : Skeletonizer(

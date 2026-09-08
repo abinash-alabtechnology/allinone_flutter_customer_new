@@ -381,6 +381,7 @@ class ItemController extends GetxController implements GetxService {
     _recommendedItemList = null;
     _subscriptionItemList = null;
     _freshItemList = null;
+    update();
   }
 
   void showBottomLoader() {
@@ -416,6 +417,8 @@ class ItemController extends GetxController implements GetxService {
       if(notify) update();
     }
 
+    int? currentModuleId = Get.isRegistered<SplashController>() ? Get.find<SplashController>().module?.id : null;
+
     if(offset == '1') {
       _offsetList = [];
       _offset = 1;
@@ -431,6 +434,8 @@ class ItemController extends GetxController implements GetxService {
         type: _popularType, source: dataSource, offset: _offset, search: _searchController.text, categoryIds: _selectedCategoryIds, filter: _filter,
         rating: _rating, minPrice: _selectedMinPrice, maxPrice: _selectedMaxPrice,
       );
+
+      if (Get.isRegistered<SplashController>() && Get.find<SplashController>().module?.id != currentModuleId) return;
 
       _preparePopularItems(itemModel, offset, firstTimeCategoryLoad);
 
@@ -930,10 +935,19 @@ class ItemController extends GetxController implements GetxService {
   }
 
   void itemDirectlyAddToCart(Item? item, BuildContext context, {bool inStore = false, bool isCampaign = false}) {
+    final cartController = Get.find<CartController>();
+    cartController.setLoadingItemId(item?.id);
+    cartController.setIsLoading(true);
     getItemDetails(itemId: item!.id!).then((value) {
-      if(_item!.isSubscription == true) {
-        navigateToItemPage(_item, context, inStore: inStore, isCampaign: isCampaign);
-      } else if (((_item!.foodVariations != null && _item!.foodVariations!.isEmpty) && _item?.moduleType == AppConstants.food) || (_item?.variations != null && _item!.variations!.isEmpty && _item?.moduleType != AppConstants.food)) {
+      bool hasSubscription = _item!.isSubscription == true;
+      bool hasVariations = false;
+      if (_item!.moduleType == AppConstants.food) {
+        hasVariations = _item!.foodVariations != null && _item!.foodVariations!.isNotEmpty;
+      } else {
+        hasVariations = _item!.variations != null && _item!.variations!.isNotEmpty;
+      }
+
+      if (!hasVariations && !hasSubscription) {
         double price = _item!.price!;
         double discount = _item!.discount!;
         double discountPrice = PriceConverter.convertWithDiscount(price, discount, _item!.discountType)!;
@@ -950,38 +964,41 @@ class ItemController extends GetxController implements GetxService {
         );
         if(Get.find<SplashController>().configModel!.moduleConfig!.module!.stock! && _item!.stock! <= 0){
           showCustomSnackBar('out_of_stock'.tr);
+          cartController.setIsLoading(false);
+          cartController.setLoadingItemId(null);
         }
-        else if (Get.find<CartController>().existAnotherStoreItem(cartModel.item!.storeId, ModuleHelper.getModule() != null
+        else if (cartController.existAnotherStoreItem(cartModel.item!.storeId, ModuleHelper.getModule() != null
             ? ModuleHelper.getModule()?.id : ModuleHelper.getCacheModule()?.id)) {
+          cartController.setIsLoading(false);
+          cartController.setLoadingItemId(null);
           Get.dialog(ConfirmationDialog(
             icon: Images.warning,
             title: 'are_you_sure_to_reset'.tr,
             description: Get.find<SplashController>().configModel!.moduleConfig!.module!.showRestaurantText!
                 ? 'if_you_continue'.tr : 'if_you_continue_without_another_store'.tr,
             onYesPressed: () {
-              Get.find<CartController>().clearCartOnline().then((success) async {
+              cartController.clearCartOnline().then((success) async {
                 if (success) {
-                  await Get.find<CartController>().addToCartOnline(onlineCart);
+                  await cartController.addToCartOnline(onlineCart);
                   Get.back();
-                  // showCartSnackBar();
+                  showCartSnackBar();
                 }
               });
             },
           ), barrierDismissible: false);
         } else {
-          Get.find<CartController>().addToCartOnline(onlineCart);
-          // showCartSnackBar();
+          cartController.addToCart(cartModel, null);
+          cartController.addToCartOnline(onlineCart);
+          showCartSnackBar();
         }
-      } else if(Get.find<SplashController>().configModel!.moduleConfig!.module!.showRestaurantText! || _item?.moduleType == AppConstants.food){
-        ResponsiveHelper.isMobile(Get.context) ? Get.bottomSheet(
-          ItemBottomSheet(itemId: _item!.id!, inStorePage: inStore, isCampaign: isCampaign),
-          backgroundColor: Colors.transparent, isScrollControlled: true,
-        ) : Get.dialog(
-          Dialog(child: ItemBottomSheet(itemId: _item!.id!, inStorePage: inStore, isCampaign: isCampaign)),
-        );
       } else {
-        Get.toNamed(RouteHelper.getItemDetailsRoute(_item!.id, inStore), arguments: ItemDetailsScreen(itemId: _item!.id!, inStorePage: inStore));
+        cartController.setIsLoading(false);
+        cartController.setLoadingItemId(null);
+        navigateToItemPage(_item, context, inStore: inStore, isCampaign: isCampaign);
       }
+    }).catchError((error) {
+      cartController.setIsLoading(false);
+      cartController.setLoadingItemId(null);
     });
   }
 

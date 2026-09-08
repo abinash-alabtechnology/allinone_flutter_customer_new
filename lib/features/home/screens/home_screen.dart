@@ -29,6 +29,7 @@ import 'package:handy_allinone/features/item/controllers/item_controller.dart';
 import 'package:handy_allinone/features/store/controllers/store_controller.dart';
 import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
 import 'package:handy_allinone/features/profile/controllers/profile_controller.dart';
+import 'package:handy_allinone/features/cart/controllers/cart_controller.dart';
 import 'package:handy_allinone/features/address/controllers/address_controller.dart';
 import 'package:handy_allinone/features/home/screens/modules/food_home_screen.dart';
 import 'package:handy_allinone/features/home/screens/modules/grocery_home_screen.dart';
@@ -68,10 +69,17 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   static bool _isLoading = false;
+  static bool _queuedLoad = false;
 
   static Future<void> loadData(bool reload, {bool fromModule = false}) async {
-    if (_isLoading) return;
+    if (_isLoading) {
+      if (fromModule) {
+        _queuedLoad = true;
+      }
+      return;
+    }
     _isLoading = true;
+    _queuedLoad = false;
     try {
       final splash = Get.find<SplashController>();
       final flash = Get.find<FlashSaleController>();
@@ -90,14 +98,19 @@ class HomeScreen extends StatefulWidget {
 
       final location = Get.find<LocationController>();
       location.syncZoneData();
-      await splash.getModules();
-      await banner.getFeaturedBanner();
+      await Future.wait([
+        splash.getModules(),
+        banner.getFeaturedBanner(reload),
+      ]);
 
       flash.setEmptyFlashSale(fromModule: fromModule);
 
       List<Future> authGroup = [];
       if (AuthHelper.isLoggedIn()) {
         authGroup.add(store.getVisitAgainStoreList(fromModule: fromModule));
+      }
+      if (AuthHelper.isLoggedIn() || AuthHelper.isGuestLoggedIn()) {
+        authGroup.add(Get.find<CartController>().getCartDataOnline());
       }
 
       List<Future> generalModuleGroup = [];
@@ -188,6 +201,9 @@ class HomeScreen extends StatefulWidget {
 
     } finally {
       _isLoading = false;
+      if (_queuedLoad) {
+        loadData(reload, fromModule: true);
+      }
     }
   }
 
@@ -214,12 +230,14 @@ class _HomeScreenState extends State<HomeScreen> {
     
 
     if (!ResponsiveHelper.isWeb()) {
-      Get.find<LocationController>().getZone(
-        AddressHelper.getUserAddressFromSharedPref()!.latitude,
-        AddressHelper.getUserAddressFromSharedPref()!.longitude,
-        false,
-        updateInAddress: true,
-      );
+      if (AddressHelper.getUserAddressFromSharedPref() != null) {
+        Get.find<LocationController>().getZone(
+          AddressHelper.getUserAddressFromSharedPref()!.latitude,
+          AddressHelper.getUserAddressFromSharedPref()!.longitude,
+          false,
+          updateInAddress: true,
+        );
+      }
 
     }
 
@@ -498,7 +516,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       await loadTaxiApis();
                     }
                     else {
-                      await Get.find<BannerController>().getFeaturedBanner();
+                      await Get.find<BannerController>().getFeaturedBanner(true);
                       await Get.find<SplashController>().getModules();
                       if (AuthHelper.isLoggedIn()) {
                         await Get.find<AddressController>().getAddressList();
@@ -1277,7 +1295,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                             crossAxisAlignment: CrossAxisAlignment.start,
                                                             children: [
                                                               Text(
-                                                                AuthHelper.isLoggedIn() ? AddressHelper.getUserAddressFromSharedPref()!.addressType!.tr : 'your_location'.tr,
+                                                                AuthHelper.isLoggedIn() ? AddressHelper.getUserAddressFromSharedPref()?.addressType?.tr ?? 'your_location'.tr : 'your_location'.tr,
                                                                 style: robotoMedium.copyWith(
                                                                   color: Theme.of(context).cardColor,
                                                                   fontSize: Dimensions.fontSizeDefault,
@@ -1289,7 +1307,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                 children: [
                                                                   Flexible(
                                                                     child: Text(
-                                                                      AddressHelper.getUserAddressFromSharedPref()!.address!,
+                                                                      AddressHelper.getUserAddressFromSharedPref()?.address ?? '',
                                                                       style: robotoRegular.copyWith(
                                                                         color: Theme.of(context).cardColor,
                                                                         fontSize: Dimensions.fontSizeSmall,

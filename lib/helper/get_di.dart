@@ -206,6 +206,7 @@ import 'package:handy_allinone/features/wallet/domain/repositories/wallet_reposi
 import 'package:handy_allinone/features/wallet/domain/services/wallet_service.dart';
 import 'package:handy_allinone/features/wallet/domain/services/wallet_service_interface.dart';
 import 'package:handy_allinone/features/menu/controllers/faq_controller.dart';
+import 'package:handy_allinone/features/handyman/services/controllers/handyman_home_controller.dart';
 import 'package:handy_allinone/util/app_constants.dart';
 import 'package:handy_allinone/features/language/domain/models/language_model.dart';
 import 'package:flutter/services.dart';
@@ -474,6 +475,7 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => DeliverymanRegistrationController(deliverymanRegistrationServiceInterface: Get.find()));
   Get.lazyPut(() => StoreRegistrationController(storeRegistrationServiceInterface: Get.find(), locationServiceInterface: locationServiceInterface));
   Get.lazyPut(() => ProfileController(profileServiceInterface: Get.find()));
+  Get.lazyPut(() => HandymanHomeController(), fenix: true);
   Get.lazyPut(() => BannerController(bannerServiceInterface: Get.find()));
   Get.lazyPut(() => CategoryController(categoryServiceInterface: Get.find()));
   Get.lazyPut(() => ItemController(itemServiceInterface: Get.find()));
@@ -506,6 +508,7 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => TaxiVendorController(taxiVendorServiceInterface: Get.find()));
   Get.lazyPut(() => TaxiOrderController(taxiOrderServiceInterface: Get.find()));
   Get.lazyPut(() => TaxiFavouriteController(taxiFavouriteServiceInterface: Get.find()));
+  Get.lazyPut(() => HandymanHomeController());
   Get.lazyPut(() => FaqController());
 
   /// Retrieving localized data

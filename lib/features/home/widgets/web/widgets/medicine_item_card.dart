@@ -125,12 +125,12 @@ class MedicineItemCard extends StatelessWidget {
 
                         ]),
 
-                      item.discount != null && item.discount! > 0  ? Text(
-                        PriceConverter.convertPrice(Get.find<ItemController>().getStartingPrice(item)),
+                      item.discount != null && item.discount! > 0  ? CustomLineThroughText(
+                        text: PriceConverter.convertPrice(Get.find<ItemController>().getStartingPrice(item)),
                         style: robotoMedium.copyWith(
                           fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor,
-                          decoration: TextDecoration.lineThrough,
-                        ), textDirection: TextDirection.ltr,
+                        ),
+                        textAlign: TextAlign.center, textDirection: TextDirection.ltr,
                       ) : const SizedBox(),
 
                       Align(

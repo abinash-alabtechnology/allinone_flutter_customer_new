@@ -1,3 +1,4 @@
+import 'package:handy_allinone/util/app_constants.dart';
 import 'package:handy_allinone/common/widgets/cart_count_view.dart';
 import 'package:handy_allinone/common/widgets/custom_favourite_widget.dart';
 import 'package:handy_allinone/common/widgets/hover/on_hover.dart';
@@ -42,6 +43,7 @@ class WebItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool desktop = ResponsiveHelper.isDesktop(context);
+    bool isFood = Get.find<SplashController>().module != null && Get.find<SplashController>().module!.moduleType.toString().toLowerCase() == AppConstants.food.toLowerCase();
     double? discount;
     String? discountType;
     bool isAvailable;
@@ -153,7 +155,7 @@ class WebItemWidget extends StatelessWidget {
                                 ),
                                 const SizedBox(width: Dimensions.paddingSizeExtraSmall),
 
-                                (Get.find<SplashController>().configModel!.moduleConfig!.module!.vegNonVeg! && Get.find<SplashController>().configModel!.toggleVegNonVeg!)
+                                (isFood && Get.find<SplashController>().configModel!.moduleConfig!.module!.vegNonVeg! && Get.find<SplashController>().configModel!.toggleVegNonVeg!)
                                     ? CustomAssetImageWidget(item != null && item!.veg == 0 ? Images.nonVegImage : Images.vegImage,
                                     height: 10, width: 10, fit: BoxFit.contain) : const SizedBox(),
                               ]),
@@ -195,13 +197,13 @@ class WebItemWidget extends StatelessWidget {
                                     ),
                                     SizedBox(width: discount! > 0 ? Dimensions.paddingSizeExtraSmall : 0),
 
-                                    discount > 0 ? Text(
-                                      PriceConverter.convertPrice(item!.price),
+                                    discount > 0 ? CustomLineThroughText(
+                                      text: PriceConverter.convertPrice(item!.price),
                                       style: robotoMedium.copyWith(
                                         fontSize: Dimensions.fontSizeOverSmall,
                                         color: Theme.of(context).disabledColor,
-                                        decoration: TextDecoration.lineThrough,
-                                      ), textDirection: TextDirection.ltr,
+                                      ),
+                                      textAlign: TextAlign.center, textDirection: TextDirection.ltr,
                                     ) : const SizedBox(),
                                   ],
                                 ),

@@ -21,7 +21,6 @@ import 'package:handy_allinone/common/widgets/web_menu_bar.dart';
 import 'package:handy_allinone/features/checkout/widgets/payment_failed_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:handy_allinone/helper/price_converter.dart';
 
 class OrderSuccessfulScreen extends StatefulWidget {
@@ -100,8 +99,9 @@ class _OrderSuccessfulScreenState extends State<OrderSuccessfulScreen> {
               success = orderController.trackModel!.paymentStatus == 'paid' || orderController.trackModel!.paymentMethod == 'cash_on_delivery' || orderController.trackModel!.paymentMethod == 'partial_payment';
               parcel = orderController.trackModel!.paymentMethod == 'parcel';
               for(ZoneData zData in AddressHelper.getUserAddressFromSharedPref()!.zoneData!) {
+                int currentModuleId = Get.find<SplashController>().module?.id ?? Get.find<SplashController>().getHandymanModuleId();
                 for(Modules m in zData.modules!) {
-                  if(m.id == Get.find<SplashController>().module!.id) {
+                  if(m.id == currentModuleId) {
                     maximumCodOrderAmount = m.pivot!.maximumCodOrderAmount;
                     break;
                   }

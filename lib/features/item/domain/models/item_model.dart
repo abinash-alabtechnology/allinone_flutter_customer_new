@@ -10,12 +10,22 @@ class ItemModel {
   List<Categories>? categories;
   List<CountData>? countData;
 
-  ItemModel({this.totalSize, this.limit, this.offset, this.items, this.categories,  this.countData,});
+  ItemModel({
+    this.totalSize,
+    this.limit,
+    this.offset,
+    this.items,
+    this.categories,
+    this.countData,
+  });
 
   ItemModel.fromJson(Map<String, dynamic> json) {
     totalSize = json['total_size'];
     limit = json['limit'].toString();
-    offset = (json['offset'] != null && json['offset'].toString().trim().isNotEmpty) ? int.parse(json['offset'].toString()) : null;
+    offset =
+        (json['offset'] != null && json['offset'].toString().trim().isNotEmpty)
+        ? int.parse(json['offset'].toString())
+        : null;
     if (json['products'] != null) {
       items = [];
       json['products'].forEach((v) {
@@ -26,10 +36,12 @@ class ItemModel {
       items = [];
       json['items'].forEach((v) {
         if (v['module_type'] == null ||
-          !Get.find<SplashController>().getModuleConfig(v['module_type']).newVariation! ||
-          v['variations'] == null ||
-          v['variations'].isEmpty ||
-          (v['food_variations'] != null && v['food_variations'].isNotEmpty)) {
+            !Get.find<SplashController>()
+                .getModuleConfig(v['module_type'])
+                .newVariation! ||
+            v['variations'] == null ||
+            v['variations'].isEmpty ||
+            (v['food_variations'] != null && v['food_variations'].isNotEmpty)) {
           items!.add(Item.fromJson(v));
         }
       });
@@ -71,6 +83,7 @@ class Item {
   int? id;
   String? name;
   String? description;
+  String? image;
   String? imageFullUrl;
   List<String>? imagesFullUrl;
   int? categoryId;
@@ -92,6 +105,7 @@ class Item {
   double? avgRating;
   int? ratingCount;
   int? veg;
+  int? nonVeg;
   int? moduleId;
   String? moduleType;
   String? unitType;
@@ -110,6 +124,7 @@ class Item {
   String? manufactureDate;
   String? packageDate;
   String? expiryDate;
+  List<String>? serviceType;
 
   Item({
     this.id,
@@ -136,6 +151,7 @@ class Item {
     this.avgRating,
     this.ratingCount,
     this.veg,
+    this.nonVeg,
     this.moduleId,
     this.moduleType,
     this.unitType,
@@ -153,17 +169,25 @@ class Item {
     this.manufactureDate,
     this.packageDate,
     this.expiryDate,
+    this.serviceType,
   });
 
   Item.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     name = json['name'];
     description = json['description'];
-    imageFullUrl = json['image_full_url'];
-    if(json['images_full_url'] != null){
+    image = json['image'];
+    imageFullUrl =
+        json['image_full_url'] ??
+        (json['image'] != null && json['image'].toString().isNotEmpty
+            ? (json['image'].toString().startsWith('http')
+                  ? json['image'].toString()
+                  : '${Get.find<SplashController>().configModel?.baseUrls?.itemImageUrl}/${json['image']}')
+            : null);
+    if (json['images_full_url'] != null) {
       imagesFullUrl = [];
       json['images_full_url'].forEach((v) {
-        if(v != null) {
+        if (v != null) {
           imagesFullUrl!.add(v.toString());
         }
       });
@@ -220,6 +244,9 @@ class Item {
     moduleId = json['module_id'];
     moduleType = json['module_type'];
     veg = json['veg'] != null ? int.parse(json['veg'].toString()) : 0;
+    nonVeg = json['non_veg'] != null
+        ? int.parse(json['non_veg'].toString())
+        : 0;
     stock = json['stock'];
     unitType = json['unit_type'];
     availableDateStarts = json['available_date_starts'];
@@ -232,10 +259,20 @@ class Item {
     nutritionsName = json['nutritions_name']?.cast<String>();
     allergiesName = json['allergies_name']?.cast<String>();
     genericName = json['generic_name']?.cast<String>();
-    isSubscription = (json['is_subscription'] == 1 || json['is_subscription'] == true);
+    isSubscription =
+        (json['is_subscription'] == 1 || json['is_subscription'] == true);
     manufactureDate = json['manufacture_date'];
     packageDate = json['package_date'];
     expiryDate = json['expiry_date'] ?? json['expery_date'];
+    if (json['service_type'] != null) {
+      if (json['service_type'] is List) {
+        serviceType = (json['service_type'] as List)
+            .map((e) => e.toString())
+            .toList();
+      } else {
+        serviceType = [json['service_type'].toString()];
+      }
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -274,6 +311,7 @@ class Item {
     data['avg_rating'] = avgRating;
     data['rating_count'] = ratingCount;
     data['veg'] = veg;
+    data['non_veg'] = nonVeg;
     data['module_id'] = moduleId;
     data['module_type'] = moduleType;
     data['stock'] = stock;
@@ -304,8 +342,8 @@ class CategoryIds {
   CategoryIds({this.id, this.position});
 
   CategoryIds.fromJson(Map<String, dynamic> json) {
-    id = int.tryParse(json['id'].toString())??0;
-    position = int.tryParse(json['position'].toString())??0;
+    id = int.tryParse(json['id'].toString()) ?? 0;
+    position = int.tryParse(json['position'].toString()) ?? 0;
     name = json['name'];
   }
 
@@ -344,11 +382,7 @@ class AddOns {
   String? name;
   double? price;
 
-  AddOns({
-    this.id,
-    this.name,
-    this.price,
-  });
+  AddOns({this.id, this.name, this.price});
 
   AddOns.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -395,7 +429,14 @@ class FoodVariation {
   bool? required;
   List<VariationValue>? variationValues;
 
-  FoodVariation({this.name, this.multiSelect, this.min, this.max, this.required, this.variationValues});
+  FoodVariation({
+    this.name,
+    this.multiSelect,
+    this.min,
+    this.max,
+    this.required,
+    this.variationValues,
+  });
 
   FoodVariation.fromJson(Map<String, dynamic> json) {
     if (json['max'] != null) {
@@ -447,7 +488,9 @@ class VariationValue {
     data['isSelected'] = isSelected;
     return data;
   }
-}class CountData {
+}
+
+class CountData {
   String? categoryName;
   int? productCount;
 

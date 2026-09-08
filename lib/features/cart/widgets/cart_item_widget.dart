@@ -60,9 +60,11 @@ class _CartItemWidgetState extends State<CartItemWidget>
     _hintShown = true;
 
     await Future.delayed(const Duration(milliseconds: 400));
+    if (!mounted) return;
     _slidableController.openEndActionPane();
 
     await Future.delayed(const Duration(milliseconds: 700));
+    if (!mounted) return;
     _slidableController.close();
   }
 
@@ -74,11 +76,6 @@ class _CartItemWidgetState extends State<CartItemWidget>
 
   @override
   Widget build(BuildContext context) {
-    double? startingPrice = _calculatePrice(item: widget.cart.item);
-    double? endingPrice = _calculatePrice(
-      item: widget.cart.item,
-      isStartingPrice: false,
-    );
     String? variationText = _setupVariationText(cart: widget.cart).$1;
     String addOnText = _setupAddonsText(cart: widget.cart) ?? '';
 
@@ -87,6 +84,65 @@ class _CartItemWidgetState extends State<CartItemWidget>
 
     double? discount = widget.cart.item!.discount;
     String? discountType = widget.cart.item!.discountType;
+
+    bool isFood = widget.cart.item!.moduleType == 'food';
+    double unitOriginalPrice;
+    double totalOriginalPrice;
+    double unitDiscountedPrice;
+    double totalDiscountedPrice;
+
+    if (isFood) {
+      double basePrice = widget.cart.item!.price!;
+      double unitVariationPrice = 0;
+      if (widget.cart.foodVariations != null && widget.cart.foodVariations!.isNotEmpty) {
+        for (int index = 0; index < widget.cart.item!.foodVariations!.length; index++) {
+          for (int i = 0; i < widget.cart.item!.foodVariations![index].variationValues!.length; i++) {
+            if (widget.cart.foodVariations![index][i]!) {
+              unitVariationPrice += widget.cart.item!.foodVariations![index].variationValues![i].optionPrice!;
+            }
+          }
+        }
+      }
+      double totalAddonPrice = 0;
+      if (widget.cart.addOnIds != null && widget.cart.addOnIds!.isNotEmpty) {
+        for (var addOnId in widget.cart.addOnIds!) {
+          for (AddOns addOns in widget.cart.item!.addOns!) {
+            if (addOns.id == addOnId.id) {
+              totalAddonPrice += addOns.price! * addOnId.quantity!;
+            }
+          }
+        }
+      }
+
+      unitOriginalPrice = basePrice + unitVariationPrice + (totalAddonPrice / (widget.cart.quantity ?? 1));
+      totalOriginalPrice = (basePrice + unitVariationPrice) * (widget.cart.quantity ?? 1) + totalAddonPrice;
+
+      double unitDiscountedVariationPrice = 0;
+      if (widget.cart.foodVariations != null && widget.cart.foodVariations!.isNotEmpty) {
+        for (int index = 0; index < widget.cart.item!.foodVariations!.length; index++) {
+          for (int i = 0; i < widget.cart.item!.foodVariations![index].variationValues!.length; i++) {
+            if (widget.cart.foodVariations![index][i]!) {
+              double optionPrice = widget.cart.item!.foodVariations![index].variationValues![i].optionPrice!;
+              unitDiscountedVariationPrice += PriceConverter.convertWithDiscount(
+                optionPrice,
+                discount,
+                discountType,
+                isFoodVariation: true,
+              )!;
+            }
+          }
+        }
+      }
+
+      unitDiscountedPrice = PriceConverter.convertWithDiscount(basePrice, discount, discountType)! + unitDiscountedVariationPrice + (totalAddonPrice / (widget.cart.quantity ?? 1));
+      totalDiscountedPrice = (PriceConverter.convertWithDiscount(basePrice, discount, discountType)! + unitDiscountedVariationPrice) * (widget.cart.quantity ?? 1) + totalAddonPrice;
+    } else {
+      unitOriginalPrice = widget.cart.price ?? 0;
+      totalOriginalPrice = unitOriginalPrice * (widget.cart.quantity ?? 1);
+
+      unitDiscountedPrice = PriceConverter.convertWithDiscount(unitOriginalPrice, discount, discountType) ?? 0;
+      totalDiscountedPrice = unitDiscountedPrice * (widget.cart.quantity ?? 1);
+    }
     String genericName = '';
 
     if (widget.cart.item!.genericName != null &&
@@ -127,10 +183,42 @@ class _CartItemWidgetState extends State<CartItemWidget>
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      PriceConverter.convertPrice(startingPrice, discount: discount, discountType: discountType),
-                      style: robotoRegular.copyWith(fontSize: 13, color: Colors.grey.shade600),
+                    const SizedBox(height: 2),
+                    if (variationText != null && variationText.isNotEmpty) ...[
+                      Text(
+                        variationText,
+                        style: robotoRegular.copyWith(fontSize: 12, color: Theme.of(context).disabledColor),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                    ],
+                    if (addOnText.isNotEmpty) ...[
+                      Text(
+                        '${'addons'.tr}: $addOnText',
+                        style: robotoRegular.copyWith(fontSize: 12, color: Theme.of(context).disabledColor),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                    ],
+                    Row(
+                      children: [
+                        if (discount != null && discount > 0) ...[
+                          CustomLineThroughText(
+                            text: PriceConverter.convertPrice(unitOriginalPrice),
+                            style: robotoRegular.copyWith(
+                              fontSize: 12,
+                              color: Theme.of(context).disabledColor,
+                            ),
+                          ),
+                          const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+                        ],
+                        Text(
+                          PriceConverter.convertPrice(unitDiscountedPrice),
+                          style: robotoRegular.copyWith(fontSize: 13, color: Colors.grey.shade600),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -150,7 +238,7 @@ class _CartItemWidgetState extends State<CartItemWidget>
                   children: [
                     QuantityButtonPharmacy(
                       onTap: () {
-                        if (widget.cart.quantity! > 1) {
+                        if ((widget.cart.quantity ?? 1) > 1) {
                           Get.find<CartController>().setQuantity(false, widget.cartIndex, widget.cart.stock, widget.cart.quantityLimit);
                         } else {
                           Get.find<CartController>().removeFromCart(widget.cartIndex, item: widget.cart.item);
@@ -190,8 +278,18 @@ class _CartItemWidgetState extends State<CartItemWidget>
                       child: Icon(Icons.close, size: 18, color: Colors.grey.shade400),
                     ),
                     const SizedBox(height: 8),
+                    if (discount != null && discount > 0) ...[
+                      CustomLineThroughText(
+                        text: PriceConverter.convertPrice(totalOriginalPrice),
+                        style: robotoRegular.copyWith(
+                          fontSize: 12,
+                          color: Theme.of(context).disabledColor,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                    ],
                     Text(
-                      PriceConverter.convertPrice((startingPrice ?? 0) * widget.cart.quantity!, discount: discount, discountType: discountType),
+                      PriceConverter.convertPrice(totalDiscountedPrice),
                       style: robotoBold.copyWith(fontSize: 15, color: Colors.black87),
                     ),
                   ],
@@ -214,7 +312,7 @@ class _CartItemWidgetState extends State<CartItemWidget>
     double? endingPrice;
     bool newVariation = Get.find<SplashController>().getModuleConfig(item!.moduleType).newVariation ?? false;
 
-    if (item.variations!.isNotEmpty && !newVariation) {
+    if (item.variations != null && item.variations!.isNotEmpty && !newVariation) {
       List<double?> priceList = [];
       for (var variation in item.variations!) {
         priceList.add(variation.price);
@@ -234,7 +332,7 @@ class _CartItemWidgetState extends State<CartItemWidget>
     String? variationText = '';
     int count = 0;
     if (Get.find<SplashController>().getModuleConfig(cart.item!.moduleType).newVariation!) {
-      if (cart.foodVariations!.isNotEmpty) {
+      if (cart.foodVariations != null && cart.foodVariations!.isNotEmpty) {
         for (int index = 0; index < cart.foodVariations!.length; index++) {
           if (cart.foodVariations![index].contains(true)) {
             variationText = '${variationText!}${variationText.isNotEmpty ? ', ' : ''}${cart.item!.foodVariations![index].name} (';
@@ -249,9 +347,9 @@ class _CartItemWidgetState extends State<CartItemWidget>
         }
       }
     } else {
-      if (cart.variation!.isNotEmpty) {
+      if (cart.variation != null && cart.variation!.isNotEmpty) {
         List<String> variationTypes = cart.variation![0].type!.split('-');
-        if (variationTypes.length == cart.item!.choiceOptions!.length) {
+        if (cart.item!.choiceOptions != null && variationTypes.length == cart.item!.choiceOptions!.length) {
           int index0 = 0;
           for (var choice in cart.item!.choiceOptions!) {
             variationText = '${variationText!}${(index0 == 0) ? '' : ',  '}${choice.title} - ${variationTypes[index0]}';
@@ -259,7 +357,9 @@ class _CartItemWidgetState extends State<CartItemWidget>
             count++;
           }
         } else {
-          variationText = cart.item!.variations![0].type;
+          if (cart.item!.variations != null && cart.item!.variations!.isNotEmpty) {
+            variationText = cart.item!.variations![0].type;
+          }
         }
       }
     }
@@ -271,14 +371,18 @@ class _CartItemWidgetState extends State<CartItemWidget>
     int index0 = 0;
     List<int?> ids = [];
     List<int?> qtys = [];
-    for (var addOn in cart.addOnIds!) {
-      ids.add(addOn.id);
-      qtys.add(addOn.quantity);
+    if (cart.addOnIds != null) {
+      for (var addOn in cart.addOnIds!) {
+        ids.add(addOn.id);
+        qtys.add(addOn.quantity);
+      }
     }
-    for (var addOn in cart.item!.addOns!) {
-      if (ids.contains(addOn.id)) {
-        addOnText = '$addOnText${(index0 == 0) ? '' : ',  '}${addOn.name} (${qtys[index0]})';
-        index0++;
+    if (cart.item!.addOns != null) {
+      for (var addOn in cart.item!.addOns!) {
+        if (ids.contains(addOn.id)) {
+          addOnText = '$addOnText${(index0 == 0) ? '' : ',  '}${addOn.name} (${qtys[index0]})';
+          index0++;
+        }
       }
     }
     return addOnText;

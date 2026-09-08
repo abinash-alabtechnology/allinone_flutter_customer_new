@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:icons_plus/icons_plus.dart';
+import 'package:iconsx_plus/iconsx_plus.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
 import 'package:handy_allinone/features/notification/domain/models/notification_body_model.dart';
@@ -63,7 +63,7 @@ class OrderInfoWidget extends StatelessWidget {
 
       case 'accepted':
         baseColor = const Color(0xFF0BA5EC);
-        quote = "We’ve green-lit your request — execution is underway.";
+        quote = "Weâ€™ve green-lit your request â€” execution is underway.";
         break;
 
       case 'processing':
@@ -83,12 +83,12 @@ class OrderInfoWidget extends StatelessWidget {
 
       case 'picked_up':
         baseColor = const Color(0xFF2E90FA);
-        quote = "Your package is now in transit — en route to your doorstep.";
+        quote = "Your package is now in transit â€” en route to your doorstep.";
         break;
 
       case 'delivered':
         baseColor = const Color(0xFF12BD5F);
-        quote = "Order successfully completed — thank you for choosing us.";
+        quote = "Order successfully completed â€” thank you for choosing us.";
         break;
 
       default:
@@ -298,9 +298,9 @@ class OrderInfoWidget extends StatelessWidget {
                           ? const SizedBox(height: Dimensions.paddingSizeSmall)
                           : const SizedBox(),
                       Text(
-                        DateConverter.dateTimeStringToDateTime(
+                        order.createdAt != null ? DateConverter.dateTimeStringToDateTime(
                           order.createdAt!,
-                        ),
+                        ) : '',
                         style: robotoBold,
                       ),
                       SizedBox(height: 10),
@@ -433,18 +433,16 @@ class OrderInfoWidget extends StatelessWidget {
                                                                               .trackModel!
                                                                               .offlinePayment !=
                                                                           null
-                                                                      ? orderController
+                                                                      ? (orderController
                                                                             .trackModel!
                                                                             .offlinePayment!
-                                                                            .data!
-                                                                            .status!
-                                                                            .tr
+                                                                            .data?.status ?? '').tr
                                                                       : '',
                                                                   style: robotoMedium.copyWith(
                                                                     color:
                                                                         (orderController.trackModel!.offlinePayment !=
                                                                                 null
-                                                                            ? orderController.trackModel!.offlinePayment!.data!.status.toString() ==
+                                                                            ? orderController.trackModel!.offlinePayment!.data?.status?.toString() ==
                                                                                   'denied'
                                                                             : false)
                                                                         ? Colors
@@ -631,10 +629,9 @@ class OrderInfoWidget extends StatelessWidget {
                                         ),
                                         Text(
                                           parcel
-                                              ? order.chargePayer!.tr
-                                              : orderController
-                                                    .orderDetails!
-                                                    .length
+                                              ? (order.chargePayer ?? '').tr
+                                              : (orderController
+                                                    .orderDetails?.length ?? 0)
                                                     .toString(),
                                           style: robotoBold.copyWith(
                                             color: Colors.green,
@@ -674,25 +671,25 @@ class OrderInfoWidget extends StatelessWidget {
                                 ),
                                 const Expanded(child: SizedBox()),
                                 Text(
-                                  DateConverter.dateTimeStringToDateTime(
+                                  order.scheduleAt != null ? DateConverter.dateTimeStringToDateTime(
                                     order.scheduleAt!,
-                                  ),
+                                  ) : '',
                                   style: robotoMedium,
                                 ),
                               ],
                             )
                           : const SizedBox(),
 
-                      Get.find<SplashController>()
-                              .configModel!
-                              .orderDeliveryVerification!
+                      (Get.find<SplashController>()
+                              .configModel
+                              ?.orderDeliveryVerification ?? false)
                           ?  Divider(height: Dimensions.paddingSizeLarge, color: Theme.of(
                         context,
                       ).disabledColor.withValues(alpha: 0.10))
                           : const SizedBox(),
-                      Get.find<SplashController>()
-                              .configModel!
-                              .orderDeliveryVerification!
+                      (Get.find<SplashController>()
+                              .configModel
+                              ?.orderDeliveryVerification ?? false)
                           ? Row(
                               children: [
                                 Text(
@@ -700,7 +697,7 @@ class OrderInfoWidget extends StatelessWidget {
                                   style: robotoRegular,
                                 ),
                                 const Expanded(child: SizedBox()),
-                                Text(order.otp!, style: robotoMedium),
+                                Text(order.otp ?? '', style: robotoMedium),
                               ],
                             )
                           : const SizedBox(),
@@ -753,9 +750,9 @@ class OrderInfoWidget extends StatelessWidget {
                       //   ).disabledColor.withValues(alpha: 0.30),
                       // ),
 
-                      Get.find<SplashController>()
+                      (Get.find<SplashController>()
                               .getModuleConfig(order.moduleType)
-                              .newVariation!
+                              .newVariation ?? false)
                           ? Column(
                               children: [
                                 Divider(
@@ -774,7 +771,7 @@ class OrderInfoWidget extends StatelessWidget {
                                     const Expanded(child: SizedBox()),
 
                                     Text(
-                                      order.cutlery! ? 'yes'.tr : 'no'.tr,
+                                      (order.cutlery ?? false) ? 'yes'.tr : 'no'.tr,
                                       style: robotoRegular,
                                     ),
                                   ],
@@ -1132,35 +1129,35 @@ class OrderInfoWidget extends StatelessWidget {
               : const SizedBox(),
 
           (isDesktop &&
-                  Get.find<SplashController>()
+                  (Get.find<SplashController>()
                       .getModuleConfig(order.moduleType)
-                      .orderAttachment! &&
+                      .orderAttachment ?? false) &&
                   order.orderAttachmentFullUrl != null &&
                   order.orderAttachmentFullUrl!.isNotEmpty)
               ? const SizedBox(height: Dimensions.paddingSizeSmall)
               : const SizedBox(),
 
           (isDesktop &&
-                  Get.find<SplashController>()
+                  (Get.find<SplashController>()
                       .getModuleConfig(order.moduleType)
-                      .orderAttachment! &&
+                      .orderAttachment ?? false) &&
                   order.orderAttachmentFullUrl != null &&
                   order.orderAttachmentFullUrl!.isNotEmpty)
               ? Text('prescription'.tr, style: robotoMedium)
               : const SizedBox(),
 
           (isDesktop &&
-                  Get.find<SplashController>()
+                  (Get.find<SplashController>()
                       .getModuleConfig(order.moduleType)
-                      .orderAttachment! &&
+                      .orderAttachment ?? false) &&
                   order.orderAttachmentFullUrl != null &&
                   order.orderAttachmentFullUrl!.isNotEmpty)
               ? const SizedBox(height: Dimensions.paddingSizeLarge)
               : const SizedBox(),
 
-          (Get.find<SplashController>()
+          ((Get.find<SplashController>()
                       .getModuleConfig(order.moduleType)
-                      .orderAttachment! &&
+                      .orderAttachment ?? false) &&
                   order.orderAttachmentFullUrl != null &&
                   order.orderAttachmentFullUrl!.isNotEmpty)
               ? Container(
@@ -1235,9 +1232,9 @@ class OrderInfoWidget extends StatelessWidget {
 
                       SizedBox(
                         width:
-                            (Get.find<SplashController>()
+                            ((Get.find<SplashController>()
                                     .getModuleConfig(order.moduleType)
-                                    .orderAttachment! &&
+                                    .orderAttachment ?? false) &&
                                 order.orderAttachmentFullUrl != null &&
                                 order.orderAttachmentFullUrl!.isNotEmpty)
                             ? Dimensions.paddingSizeSmall
@@ -1287,9 +1284,9 @@ class OrderInfoWidget extends StatelessWidget {
               : const SizedBox(),
           SizedBox(
             height:
-                Get.find<SplashController>()
+                (Get.find<SplashController>()
                         .getModuleConfig(order.moduleType)
-                        .orderAttachment! &&
+                        .orderAttachment ?? false) &&
                     order.orderAttachmentFullUrl != null &&
                     order.orderAttachmentFullUrl!.isNotEmpty
                 ? Dimensions.paddingSizeSmall
@@ -1761,9 +1758,9 @@ class OrderInfoWidget extends StatelessWidget {
               ? Text(
                   parcel
                       ? 'parcel_category'.tr
-                      : Get.find<SplashController>()
+                      : (Get.find<SplashController>()
                             .getModuleConfig(order.moduleType)
-                            .showRestaurantText!
+                            .showRestaurantText ?? false)
                       ? 'restaurant_details'.tr
                       : 'store_details'.tr.toUpperCase(),
                   style: robotoMedium,
@@ -1801,9 +1798,9 @@ class OrderInfoWidget extends StatelessWidget {
                         Text(
                             parcel
                                 ? 'parcel_category'.tr
-                                : Get.find<SplashController>()
+                                : (Get.find<SplashController>()
                                       .getModuleConfig(order.moduleType)
-                                      .showRestaurantText!
+                                      .showRestaurantText ?? false)
                                 ? 'restaurant_details'.tr
                                 : 'store_details'.tr,
                             style: robotoMedium.copyWith(color: Colors.grey.shade400, fontSize: 16)
@@ -1874,8 +1871,8 @@ class OrderInfoWidget extends StatelessWidget {
                                   children: [
                                     Text(
                                       parcel
-                                          ? order.parcelCategory!.name!
-                                          : order.store!.name!,
+                                          ? (order.parcelCategory!.name ?? '')
+                                          : (order.store!.name ?? ''),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: robotoRegular.copyWith(
@@ -1885,8 +1882,8 @@ class OrderInfoWidget extends StatelessWidget {
                                     ),
                                     Text(
                                       parcel
-                                          ? order.parcelCategory!.description!
-                                          : order.store?.address ?? '',
+                                          ? (order.parcelCategory!.description ?? '')
+                                          : (order.store?.address ?? ''),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: robotoRegular.copyWith(
@@ -1961,18 +1958,17 @@ class OrderInfoWidget extends StatelessWidget {
 
                               !isGuestLoggedIn &&
                                       (Get.find<SplashController>()
-                                              .configModel!
-                                              .refundActiveStatus! &&
+                                              .configModel
+                                              ?.refundActiveStatus ?? false) &&
                                           order.orderStatus == 'delivered' &&
                                           !parcel &&
                                           (parcel ||
-                                              (orderController
-                                                      .orderDetails!
-                                                      .isNotEmpty &&
+                                              (orderController.orderDetails != null &&
+                                               orderController.orderDetails!.isNotEmpty &&
                                                   orderController
                                                           .orderDetails![0]
                                                           .itemCampaignId ==
-                                                      null)))
+                                                      null))
                                   ? InkWell(
                                       onTap: () => Get.toNamed(
                                         RouteHelper.getRefundRequestRoute(
@@ -2024,12 +2020,10 @@ class OrderInfoWidget extends StatelessWidget {
                     order.paymentMethod == 'offline_payment'
                         ? Text(
                             orderController.trackModel!.offlinePayment != null
-                                ? orderController
+                                ? (orderController
                                       .trackModel!
                                       .offlinePayment!
-                                      .data!
-                                      .status!
-                                      .tr
+                                      .data?.status ?? '').tr
                                 : '',
                             style: robotoMedium.copyWith(
                               color: Theme.of(context).primaryColor,
@@ -2084,12 +2078,10 @@ class OrderInfoWidget extends StatelessWidget {
                                                     .trackModel!
                                                     .offlinePayment !=
                                                 null
-                                            ? orderController
+                                            ? (orderController
                                                   .trackModel!
                                                   .offlinePayment!
-                                                  .data!
-                                                  .status!
-                                                  .tr
+                                                  .data?.status ?? '').tr
                                             : '',
                                         style: robotoMedium.copyWith(
                                           color:
@@ -2100,9 +2092,8 @@ class OrderInfoWidget extends StatelessWidget {
                                                   ? orderController
                                                             .trackModel!
                                                             .offlinePayment!
-                                                            .data!
-                                                            .status
-                                                            .toString() ==
+                                                            .data?.status
+                                                            ?.toString() ==
                                                         'denied'
                                                   : false)
                                               ? Colors.red
@@ -2227,7 +2218,7 @@ Widget offlineView(
           ),
           const SizedBox(height: Dimensions.paddingSizeDefault),
 
-          orderController.trackModel!.offlinePayment != null
+          (orderController.trackModel!.offlinePayment != null && orderController.trackModel!.offlinePayment!.methodFields != null)
               ? ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -2274,8 +2265,7 @@ Widget offlineView(
                       orderController
                               .trackModel!
                               .offlinePayment!
-                              .data!
-                              .status !=
+                              .data?.status !=
                           'verified')
                   ? InkWell(
                       onTap: () {
@@ -2300,7 +2290,7 @@ Widget offlineView(
           ),
           const SizedBox(height: Dimensions.paddingSizeDefault),
 
-          orderController.trackModel!.offlinePayment != null
+          (orderController.trackModel!.offlinePayment != null && orderController.trackModel!.offlinePayment!.input != null)
               ? ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),

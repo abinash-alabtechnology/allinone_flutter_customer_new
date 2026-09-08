@@ -194,6 +194,7 @@ class OrderController extends GetxController implements GetxService {
     _showCancelled = false;
     if(orderModel == null) {
       _isLoading = true;
+      update();
       Response response = await orderServiceInterface.trackOrder(
         orderID, AuthHelper.isLoggedIn() ? null : AuthHelper.getGuestId(),
         contactNumber: contactNumber,

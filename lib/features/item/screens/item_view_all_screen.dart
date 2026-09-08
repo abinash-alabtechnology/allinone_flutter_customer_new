@@ -366,12 +366,12 @@ class ItemCardWidget extends StatelessWidget {
                 ) : const SizedBox(),
                 SizedBox(height: (Get.find<SplashController>().configModel!.moduleConfig!.module!.unit! && item.unitType != null) ? Dimensions.paddingSizeExtraSmall : 0),
 
-                discount != null && discount > 0 ? Text(
-                  PriceConverter.convertPrice(Get.find<ItemController>().getStartingPrice(item)),
+                discount != null && discount > 0 ? CustomLineThroughText(
+                  text: PriceConverter.convertPrice(Get.find<ItemController>().getStartingPrice(item)),
                   style: robotoMedium.copyWith(
                     fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor,
-                    decoration: TextDecoration.lineThrough,
-                  ), textDirection: TextDirection.ltr,
+                  ),
+                  textAlign: TextAlign.center, textDirection: TextDirection.ltr,
                 ) : const SizedBox(),
                 SizedBox(height: discount != null && discount > 0 ? Dimensions.paddingSizeExtraSmall : 0),
 

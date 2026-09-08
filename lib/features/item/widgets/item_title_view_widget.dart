@@ -1,3 +1,4 @@
+import 'package:handy_allinone/util/app_constants.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -40,6 +41,9 @@ class ItemTitleViewWidget extends StatelessWidget {
       print(inStock ? 'out_of_stock'.tr : 'in_stock'.tr);
     }
     final bool isLoggedIn = AuthHelper.isLoggedIn();
+    bool isFood = Get.find<SplashController>().module != null &&
+        Get.find<SplashController>().module!.moduleType.toString().toLowerCase() ==
+            AppConstants.food.toLowerCase();
     double? startingPrice;
     double? endingPrice;
     if (item!.variations != null && item!.variations!.isNotEmpty) {
@@ -115,7 +119,7 @@ class ItemTitleViewWidget extends StatelessWidget {
                                               .module!
                                               .unit! &&
                                           item!.unitType != null) ||
-                                      (Get.find<SplashController>()
+                                      (isFood && Get.find<SplashController>()
                                               .configModel!
                                               .moduleConfig!
                                               .module!
@@ -296,22 +300,6 @@ class ItemTitleViewWidget extends StatelessWidget {
 
                   Row(
                     children: [
-                      discount! > 0
-                          ? Flexible(
-                              child: Text(
-                                '${PriceConverter.convertPrice(startingPrice)}'
-                                '${endingPrice != null ? ' - ${PriceConverter.convertPrice(endingPrice)}' : ''}',
-                                textDirection: TextDirection.ltr,
-                                style: robotoRegular.copyWith(
-                                  color: Theme.of(context).disabledColor,
-                                  decoration: TextDecoration.lineThrough,
-                                  fontSize: Dimensions.fontSizeExtraSmall,
-                                ),
-                              ),
-                            )
-                          : const SizedBox(),
-                      SizedBox(width: discount > 0 ? 10 : 0),
-
                       Text(
                         '${PriceConverter.convertPrice(startingPrice, discount: discount, discountType: discountType)}'
                         '${endingPrice != null ? ' - ${PriceConverter.convertPrice(endingPrice, discount: discount, discountType: discountType)}' : ''}',
@@ -423,54 +411,16 @@ class ItemTitleViewWidget extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              if (discount! > 0)
-                                Row(
-                                  children: [
-                                    Text(
-                                      PriceConverter.convertPrice(startingPrice),
-                                      style: robotoRegular.copyWith(
-                                        color: Colors.grey,
-                                        decoration: TextDecoration.lineThrough,
-                                        fontSize: 14.sp,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'MRP (incl. of all taxes)',
-                                      style: robotoRegular.copyWith(
-                                        color: Colors.grey,
-                                        fontSize: 12.sp,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              const SizedBox(height: 4),
                               Row(
                                 children: [
                                   Text(
-                                    PriceConverter.convertPrice(startingPrice, discount: discount, discountType: discountType),
+                                    '${PriceConverter.convertPrice(startingPrice, discount: discount, discountType: discountType)}'
+                                    '${endingPrice != null ? ' - ${PriceConverter.convertPrice(endingPrice, discount: discount, discountType: discountType)}' : ''}',
                                     style: robotoBold.copyWith(
                                       color: Colors.black,
                                       fontSize: 26.sp,
                                     ),
                                   ),
-                                  if (discount > 0) ...[
-                                    const SizedBox(width: 12),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFDC2626),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Text(
-                                        '${discount.toStringAsFixed(0)}% OFF',
-                                        style: robotoBold.copyWith(
-                                          color: Colors.white,
-                                          fontSize: 12.sp,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
                                 ],
                               ),
                             ],
@@ -479,33 +429,7 @@ class ItemTitleViewWidget extends StatelessWidget {
                       ],
                     ),
 
-                    const SizedBox(height: 20),
 
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildTrustBadge(
-                            context,
-                            title: "Secure payments",
-                            subtitle: "100% protected checkout",
-                            icon: Images.card,
-                            color: const Color(0xFFF5F3FF),
-                            iconColor: const Color(0xFF7C3AED),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _buildTrustBadge(
-                            context,
-                            title: "Original products",
-                            subtitle: "Trusted and verified brands",
-                            icon: Images.approve,
-                            color: const Color(0xFFF0FDF4),
-                            iconColor: const Color(0xFF16A34A),
-                          ),
-                        ),
-                      ],
-                    ),
                   ],
                 );
               },
@@ -541,43 +465,5 @@ class ItemTitleViewWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildTrustBadge(BuildContext context, {required String title, required String subtitle, required String icon, required Color color, required Color iconColor}) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: CustomAssetImageWidget(icon, height: 20, width: 20, color: iconColor),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: robotoBold.copyWith(fontSize: 11.sp, color: Colors.black87),
-                ),
-                Text(
-                  subtitle,
-                  style: robotoRegular.copyWith(fontSize: 9.sp, color: Colors.black54),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 }

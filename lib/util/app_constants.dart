@@ -7,14 +7,14 @@ import 'package:handy_allinone/util/images.dart';
 
 class AppConstants {
 
-  static const String developedby = 'Alabtechnology Pvt. ltd';
+  static const String developedby = 'Alabtechnology Pvt. Ltd';
 
 
   static const String TaxiIconsolid = 'assets/image/taxiicon1.png';
   static const String TaxiIcon = 'assets/taxi/taxiicon.png';
 
   ///Taxi Integration
-  static const String firebaseDBURL ='https://gograb-87d87-default-rtdb.asia-southeast1.firebasedatabase.app';
+  static const String firebaseDBURL ='https://alabtechdemos-default-rtdb.firebaseio.com';
   // static const String firebaseDBURL ='https://zeastigo-default-rtdb.asia-southeast1.firebasedatabase.app';
   static const String captiondetails = '/api/v1/captain/details';
   static const String Vehiclelist = '/api/v1/vehicle-price-types';
@@ -33,8 +33,9 @@ class AppConstants {
 
   static const String addwalletamount = 'api/v1/customer/wallet/add-amount';
 
-  static const String appName = 'Gograb';
+  static const String appName = 'Handy';
   static const double appVersion = 3.3;
+  static const String devAppVersion = 'DEV -3.6.4';
   static const String searchimage = '/public/assets/admin/customer_search_img/';
   static const String fontFamily = 'Roboto';
   static const bool payInWevView = false;
@@ -42,8 +43,8 @@ class AppConstants {
   static const String webHostedUrl = 'https://web.allinonego.in';
   static const bool useReactWebsite = false;
   // static const String baseUrl = 'http://192.168.0.9:8000';
-  //static const String baseUrl = 'https://admin.allinonego.in';
-   static const String baseUrl = 'https://admin.gograbx.com';
+  static const String baseUrl = 'https://admin.allinonego.in';
+  // static const String baseUrl = 'https://admin.gograbx.com';
   // static const String baseUrl = 'https://zesteat.alabproject.in';
   static const String polylinemap = '/api/v1/get-google-map-key';
   static const String configUri = '/api/v1/config';
@@ -61,6 +62,7 @@ class AppConstants {
   static const String couponrestUri = '/api/v1/coupon/restlist';
   static const String categoryUri = '/api/v1/categories';
   static const String bannerUri = '/api/v1/banners';
+  static const String spotlightBannerUri = '/api/v1/banners/spotlight';
   static const String storeItemUri = '/api/v1/items/latest';
   static const String popularItemUri = '/api/v1/items/popular';
   static const String reviewedItemUri = '/api/v1/items/most-reviewed';
@@ -305,6 +307,14 @@ class AppConstants {
     'Deliver to reception',
     'WhatsApp for live location',
     'Beware of DOG',
+  ];
+
+  static List<String> cookingInstructionList = [
+    'Make it spicy',
+    'Please no salt',
+    'Make it sweet',
+    'Add extra cheese',
+    'Add extra mayonnaise',
   ];
 
   static List<ChooseUsModel> whyChooseUsList = [

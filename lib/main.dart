@@ -29,21 +29,18 @@ import 'package:handy_allinone/features/home/widgets/cookies_view.dart';
 import 'helper/get_di.dart' as di;
 import 'package:flutter_web_plugins/url_strategy.dart';
 
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-  ]);
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
-  if(ResponsiveHelper.isMobilePhone()) {
+  if (ResponsiveHelper.isMobilePhone()) {
     HttpOverrides.global = MyHttpOverrides();
   }
   usePathUrlStrategy();
-
-
 
   /// added by ak
   // LinkHandlerService().init(); // Activate deep link routing
@@ -60,23 +57,26 @@ Future<void> main() async {
     return true;
   };*/
 
-  if(GetPlatform.isWeb){
-    await Firebase.initializeApp(options: const FirebaseOptions(
-        apiKey: "AIzaSyCIkAsZdKa6jPVnBv2Dly3T02-XZgj3sEA",
-        authDomain: "gograb-87d87.firebaseapp.com",
-        databaseURL: "https://gograb-87d87-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "gograb-87d87",
-        storageBucket: "gograb-87d87.firebasestorage.app",
-        messagingSenderId: "167391621913",
-        appId: "1:167391621913:web:7a85472e8cf436284bcb88"
-    ));
-  } else if(GetPlatform.isAndroid) {
+  if (GetPlatform.isWeb) {
     await Firebase.initializeApp(
       options: const FirebaseOptions(
-        apiKey: "AIzaSyBwxLH6jYwh2yYISCW7YMo5gjF43vxI_jU",
-        appId: "1:167391621913:android:b999436b1e559fdf4bcb88",
-        messagingSenderId: "167391621913",
-        projectId: "gograb-87d87",
+        apiKey: "AIzaSyCLRIsZgBnF3M4H9jvjXi1tftYsd74hBwc",
+        authDomain: "alabtechdemos.firebaseapp.com",
+        databaseURL: "https://alabtechdemos-default-rtdb.firebaseio.com",
+        projectId: "alabtechdemos",
+        storageBucket: "alabtechdemos.firebasestorage.app",
+        messagingSenderId: "591429626414",
+        appId: "1:591429626414:web:1a1fb782f5b85074290dbf",
+        measurementId: "G-K3RQ31D4HD",
+      ),
+    );
+  } else if (GetPlatform.isAndroid) {
+    await Firebase.initializeApp(
+      options: const FirebaseOptions(
+        apiKey: "AIzaSyA9k3Box6xLUqwAXuiMDQqgbK2Rlw7kG9Y",
+        appId: "1:591429626414:android:a9276f43200a53bb290dbf",
+        messagingSenderId: "591429626414",
+        projectId: "alabtechdemos",
       ),
     );
   } else {
@@ -88,15 +88,15 @@ Future<void> main() async {
   NotificationBodyModel? body;
   try {
     if (GetPlatform.isMobile) {
-      final RemoteMessage? remoteMessage = await FirebaseMessaging.instance.getInitialMessage();
+      final RemoteMessage? remoteMessage = await FirebaseMessaging.instance
+          .getInitialMessage();
       if (remoteMessage != null) {
-
         body = NotificationHelper.convertNotification(remoteMessage.data);
       }
       await NotificationHelper.initialize(flutterLocalNotificationsPlugin);
       FirebaseMessaging.onBackgroundMessage(myBackgroundMessageHandler);
     }
-  }catch(_) {}
+  } catch (_) {}
 
   if (ResponsiveHelper.isWeb()) {
     await FacebookAuth.instance.webAndDesktopInitialize(
@@ -108,10 +108,7 @@ Future<void> main() async {
   }
   runApp(
     AppLifecycleHandler(
-      child: MyApp(
-        languages: languages,
-        body: body,
-      ),
+      child: MyApp(languages: languages, body: body),
     ),
   );
 }
@@ -126,7 +123,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-
   @override
   void initState() {
     super.initState();
@@ -135,105 +131,204 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _route() async {
-    if(GetPlatform.isWeb) {
-       Get.find<SplashController>().initSharedData();
-      if(AddressHelper.getUserAddressFromSharedPref() != null && AddressHelper.getUserAddressFromSharedPref()!.zoneIds == null) {
+    if (GetPlatform.isWeb) {
+      Get.find<SplashController>().initSharedData();
+      if (AddressHelper.getUserAddressFromSharedPref() != null &&
+          AddressHelper.getUserAddressFromSharedPref()!.zoneIds == null) {
         Get.find<AuthController>().clearSharedAddress();
       }
 
-      if(!AuthHelper.isLoggedIn() && !AuthHelper.isGuestLoggedIn() /*&& !ResponsiveHelper.isDesktop(Get.context!)*/) {
+      if (!AuthHelper.isLoggedIn() &&
+          !AuthHelper.isGuestLoggedIn() /*&& !ResponsiveHelper.isDesktop(Get.context!)*/ ) {
         await Get.find<AuthController>().guestLogin();
       }
 
-      if((AuthHelper.isLoggedIn() || AuthHelper.isGuestLoggedIn()) && Get.find<SplashController>().cacheModule != null) {
+      if ((AuthHelper.isLoggedIn() || AuthHelper.isGuestLoggedIn()) &&
+          Get.find<SplashController>().cacheModule != null) {
         Get.find<CartController>().getCartDataOnline();
       }
 
-      Get.find<SplashController>().getConfigData(loadLandingData: (GetPlatform.isWeb && AddressHelper.getUserAddressFromSharedPref() == null), fromMainFunction: true);
-
+      Get.find<SplashController>().getConfigData(
+        loadLandingData:
+            (GetPlatform.isWeb &&
+            AddressHelper.getUserAddressFromSharedPref() == null),
+        fromMainFunction: true,
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    return GetBuilder<ThemeController>(
+      builder: (themeController) {
+        return GetBuilder<LocalizationController>(
+          builder: (localizeController) {
+            return GetBuilder<SplashController>(
+              builder: (splashController) {
+                Color primaryColor = const Color(0xFFFF8110);
+                Color secondaryColor = const Color(0xFF22C55E);
+                if (splashController.module != null) {
+                  if (splashController.module!.moduleType.toString() ==
+                      AppConstants.pharmacy) {
+                    primaryColor = const Color(0xFF0EA5E9);
+                    secondaryColor = const Color(0xFF0284C7);
+                  } else if (splashController.module!.moduleType.toString() ==
+                      AppConstants.grocery) {
+                    primaryColor = const Color(0xFF1E7F35);
+                    secondaryColor = const Color(0xFF00E676);
+                  } else if (splashController.module!.moduleType.toString() ==
+                      AppConstants.taxi) {
+                    primaryColor = const Color(0xFF16A34A);
+                  } else if (splashController.module!.moduleType.toString() ==
+                      AppConstants.food) {
+                    primaryColor = const Color(0xFFF97316);
+                    secondaryColor = const Color(0xFFEA580C);
+                  } else if (splashController.module!.moduleType.toString() ==
+                      AppConstants.parcel) {
+                    primaryColor = const Color(0xFFEF4444);
+                    secondaryColor = const Color(0xFFDC2626);
+                  } else if (splashController.module!.moduleType.toString() ==
+                      AppConstants.ecommerce) {
+                    primaryColor = const Color(0xFF16A34A);
+                  }
+                }
 
+                return (GetPlatform.isWeb &&
+                        splashController.configModel == null)
+                    ? const SizedBox()
+                    : ScreenUtilInit(
+                        designSize: const Size(
+                          375,
+                          812,
+                        ), // match your Figma design device
+                        minTextAdapt: true,
+                        splitScreenMode: true,
+                        child: GetMaterialApp(
+                          title: AppConstants.appName,
+                          debugShowCheckedModeBanner: false,
+                          navigatorKey: Get.key,
+                          scrollBehavior: const MaterialScrollBehavior()
+                              .copyWith(
+                                dragDevices: {
+                                  PointerDeviceKind.mouse,
+                                  PointerDeviceKind.touch,
+                                },
+                              ),
+                          theme: themeController.darkTheme
+                              ? dark(
+                                  color: primaryColor,
+                                  secondaryColor: secondaryColor,
+                                )
+                              : light(
+                                  color: primaryColor,
+                                  secondaryColor: secondaryColor,
+                                ),
+                          locale: localizeController.locale,
+                          translations: Messages(languages: widget.languages),
+                          fallbackLocale: Locale(
+                            AppConstants.languages[0].languageCode!,
+                            AppConstants.languages[0].countryCode,
+                          ),
+                          initialRoute: GetPlatform.isWeb
+                              ? RouteHelper.getInitialRoute()
+                              : RouteHelper.getSplashRoute(widget.body),
+                          getPages: RouteHelper.routes,
+                          defaultTransition: Transition.zoom,
+                          transitionDuration: const Duration(milliseconds: 500),
+                          builder: (BuildContext context, widget) {
+                            return Theme(
+                              data: themeController.darkTheme
+                                  ? dark(
+                                      color: primaryColor,
+                                      secondaryColor: secondaryColor,
+                                    )
+                                  : light(
+                                      color: primaryColor,
+                                      secondaryColor: secondaryColor,
+                                    ),
+                              child: MediaQuery(
+                                data: MediaQuery.of(context).copyWith(
+                                  textScaler: const TextScaler.linear(1),
+                                ),
+                                child: AnnotatedRegion<SystemUiOverlayStyle>(
+                                  value: SystemUiOverlayStyle(
+                                    statusBarColor: Colors.transparent,
+                                    statusBarIconBrightness:
+                                        themeController.darkTheme
+                                        ? Brightness.light
+                                        : Brightness.dark,
+                                    statusBarBrightness:
+                                        themeController.darkTheme
+                                        ? Brightness.dark
+                                        : Brightness.light,
+                                    systemNavigationBarColor:
+                                        Colors.transparent,
+                                    systemNavigationBarIconBrightness:
+                                        themeController.darkTheme
+                                        ? Brightness.light
+                                        : Brightness.dark,
+                                  ),
+                                  child: Material(
+                                    color: Theme.of(
+                                      context,
+                                    ).scaffoldBackgroundColor,
+                                    child: SafeArea(
+                                      top: false,
+                                      bottom: GetPlatform.isAndroid,
+                                      child: Stack(
+                                        children: [
+                                          widget!,
 
-    return GetBuilder<ThemeController>(builder: (themeController) {
-      return GetBuilder<LocalizationController>(builder: (localizeController) {
-        return GetBuilder<SplashController>(builder: (splashController) {
-          Color primaryColor = const Color(0xFFFF8110);
-          Color secondaryColor = const Color(0xFF22C55E);
-          if (splashController.module != null) {
-            if (splashController.module!.moduleType.toString() == AppConstants.pharmacy) {
-              primaryColor = const Color(0xFF16A34A);
-            } else if (splashController.module!.moduleType.toString() == AppConstants.grocery) {
-              primaryColor = const Color(0xFF1E7F35);
-              secondaryColor = const Color(0xFF00E676);
-            }
-          }
-
-          return (GetPlatform.isWeb && splashController.configModel == null) ? const SizedBox() :
-          ScreenUtilInit(
-            designSize: const Size(375, 812),  // match your Figma design device
-            minTextAdapt: true,
-            splitScreenMode: true,
-            child: GetMaterialApp(
-              title: AppConstants.appName,
-              debugShowCheckedModeBanner: false,
-              navigatorKey: Get.key,
-              scrollBehavior: const MaterialScrollBehavior().copyWith(
-                dragDevices: {PointerDeviceKind.mouse, PointerDeviceKind.touch},
-              ),
-              theme: themeController.darkTheme ? dark(color: primaryColor, secondaryColor: secondaryColor) : light(color: primaryColor, secondaryColor: secondaryColor),
-              locale: localizeController.locale,
-              translations: Messages(languages: widget.languages),
-              fallbackLocale: Locale(AppConstants.languages[0].languageCode!, AppConstants.languages[0].countryCode),
-              initialRoute: GetPlatform.isWeb ? RouteHelper.getInitialRoute() : RouteHelper.getSplashRoute(widget.body),
-              getPages: RouteHelper.routes,
-              defaultTransition: Transition.zoom,
-              transitionDuration: const Duration(milliseconds: 500),
-              builder: (BuildContext context, widget) {
-                return MediaQuery(data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1)), child: AnnotatedRegion<SystemUiOverlayStyle>(
-                  value: SystemUiOverlayStyle(
-                    statusBarColor: Colors.transparent,
-                    statusBarIconBrightness: themeController.darkTheme ? Brightness.light : Brightness.dark,
-                    statusBarBrightness: themeController.darkTheme ? Brightness.dark : Brightness.light,
-                    systemNavigationBarColor: Colors.transparent,
-                    systemNavigationBarIconBrightness: themeController.darkTheme ? Brightness.light : Brightness.dark,
-                  ),
-                  child: Material(
-                    color: Theme.of(context).scaffoldBackgroundColor,
-                    child: SafeArea(
-                      top: false, bottom: GetPlatform.isAndroid,
-                      child: Stack(children: [
-                        widget!,
-  
-                        GetBuilder<SplashController>(builder: (splashController){
-                          if(!splashController.savedCookiesData && !splashController.getAcceptCookiesStatus(splashController.configModel != null ? splashController.configModel!.cookiesText! : '')){
-                            return ResponsiveHelper.isWeb() ? const Align(alignment: Alignment.bottomCenter, child: CookiesView()) : const SizedBox();
-                          }else{
-                            return const SizedBox();
-                          }
-                        })
-                      ]),
-                    ),
-                  ),
-                ));
+                                          GetBuilder<SplashController>(
+                                            builder: (splashController) {
+                                              if (!splashController
+                                                      .savedCookiesData &&
+                                                  !splashController
+                                                      .getAcceptCookiesStatus(
+                                                        splashController
+                                                                    .configModel !=
+                                                                null
+                                                            ? splashController
+                                                                  .configModel!
+                                                                  .cookiesText!
+                                                            : '',
+                                                      )) {
+                                                return ResponsiveHelper.isWeb()
+                                                    ? const Align(
+                                                        alignment: Alignment
+                                                            .bottomCenter,
+                                                        child: CookiesView(),
+                                                      )
+                                                    : const SizedBox();
+                                              } else {
+                                                return const SizedBox();
+                                              }
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      );
               },
-            ),
-          );
-        });
-      });
-    });
+            );
+          },
+        );
+      },
+    );
   }
 }
 
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
-    return super.createHttpClient(context)..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
   }
 }
-
-
-

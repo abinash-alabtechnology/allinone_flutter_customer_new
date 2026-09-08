@@ -46,9 +46,7 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Future<void> initCall() async {
-    if(Get.find<CartController>().cartList.isEmpty) {
-      await Get.find<CartController>().getCartDataOnline();
-    }
+    await Get.find<CartController>().getCartDataOnline();
     if(Get.find<CartController>().cartList.isNotEmpty){
       Get.find<CartController>().setAvailableIndex(-1, willUpdate: false);
       Get.find<StoreController>().getCartStoreSuggestedItemList(Get.find<CartController>().cartList[0].item!.storeId);
@@ -60,42 +58,40 @@ class _CartScreenState extends State<CartScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      appBar: CustomAppBar3(
-        backButton: true,
-        onBackPressed: () => Get.back(),
-        bgcolor: Colors.white,
-        textcolor: Colors.black,
-        iconcolor: Colors.black,
-        title: "Your Cart (${Get.find<CartController>().cartList.length} Items)",
-      ),
-      endDrawer: const MenuDrawer(),
-      endDrawerEnableOpenDragGesture: false,
-      body: GetBuilder<CartController>(builder: (cartController) {
-        if (cartController.cartList.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const NoDataScreen(isCart: true, text: '', showFooter: true),
-                const SizedBox(height: Dimensions.paddingSizeLarge),
-                CustomButton(
-                  buttonText: 'Shop Now'.tr,
-                  width: 200,
-                  onPressed: () => Get.offAllNamed(RouteHelper.getInitialRoute()),
+    bool isPharmacy = Get.find<SplashController>().module?.moduleType == 'pharmacy';
+    bool isFood = Get.find<SplashController>().module != null && Get.find<SplashController>().module!.moduleType.toString() == AppConstants.food;
+
+    return GetBuilder<CartController>(builder: (cartController) {
+      return Scaffold(
+        backgroundColor: const Color(0xFFF8FAFC),
+        appBar: CustomAppBar3(
+          backButton: true,
+          onBackPressed: () => Get.back(),
+          bgcolor: Colors.white,
+          textcolor: Colors.black,
+          iconcolor: Colors.black,
+          title: "Your Cart (${cartController.cartList.length} Items)",
+        ),
+        endDrawer: const MenuDrawer(),
+        endDrawerEnableOpenDragGesture: false,
+        body: cartController.cartList.isEmpty
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const NoDataScreen(isCart: true, text: '', showFooter: true),
+                    const SizedBox(height: Dimensions.paddingSizeLarge),
+                    CustomButton(
+                      buttonText: 'Shop Now'.tr,
+                      width: 200,
+                      onPressed: () => Get.offAllNamed(RouteHelper.getInitialRoute()),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          );
-        }
-
-
-        bool isPharmacy = Get.find<SplashController>().module?.moduleType == 'pharmacy';
-
-        return Column(
-          children: [
-            Expanded(
+              )
+            : Column(
+                children: [
+                  Expanded(
               child: SingleChildScrollView(
                 controller: scrollController,
                 child: Center(
@@ -125,7 +121,9 @@ class _CartScreenState extends State<CartScreen> {
                                     const SizedBox(width: 28),
                                     Expanded(
                                       child: Text(
-                                        AddressHelper.getUserAddressFromSharedPref()?.address ?? 'Select Address',
+                                        AddressHelper.isAddressComplete(AddressHelper.getUserAddressFromSharedPref())
+                                            ? AddressHelper.getUserAddressFromSharedPref()?.address ?? 'Select Address'
+                                            : 'Select Address',
                                         style: robotoBold.copyWith(fontSize: 14, color: Colors.black),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
@@ -185,9 +183,9 @@ class _CartScreenState extends State<CartScreen> {
                                   ),
                                 ),
                               ),
-                              const Divider(height: 1, indent: 16, endIndent: 16, color: Color(0xFFF1F5F9)),
+                              if (isFood) const Divider(height: 1, indent: 16, endIndent: 16, color: Color(0xFFF1F5F9)),
                               
-                              GetBuilder<CheckoutController>(builder: (checkoutController) {
+                              if (isFood) GetBuilder<CheckoutController>(builder: (checkoutController) {
                                 return InkWell(
                                   onTap: () {
                                     _showInstructionsBottomSheet(context, checkoutController);
@@ -306,9 +304,9 @@ class _CartScreenState extends State<CartScreen> {
               ),
             ),
           ],
-        );
-      }),
-    );
+        ),
+      );
+    });
   }
 
   void _showInstructionsBottomSheet(BuildContext context, CheckoutController checkoutController) {
@@ -374,13 +372,13 @@ class _CartScreenState extends State<CartScreen> {
         Row(
           children: [
             if (originalPrice != null)
-              Text(
-                originalPrice,
+              CustomLineThroughText(
+                text: originalPrice,
                 style: robotoRegular.copyWith(
                   fontSize: 13,
                   color: Colors.grey,
-                  decoration: TextDecoration.lineThrough,
                 ),
+                textAlign: TextAlign.center,
               ),
             if (originalPrice != null) const SizedBox(width: 8),
             Text(
@@ -397,7 +395,7 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   void _onCheckout(BuildContext context, CartController cartController) {
-    if (AddressHelper.getUserAddressFromSharedPref() == null) {
+    if (!AddressHelper.isAddressComplete(AddressHelper.getUserAddressFromSharedPref())) {
       showCustomSnackBar('select_address_first'.tr);
     } else if (cartController.cartList.isEmpty) {
       showCustomSnackBar('cart_is_empty'.tr);

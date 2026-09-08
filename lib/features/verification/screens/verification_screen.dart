@@ -22,6 +22,7 @@ import 'package:handy_allinone/common/widgets/custom_app_bar.dart';
 import 'package:handy_allinone/common/widgets/custom_button.dart';
 import 'package:handy_allinone/common/widgets/custom_snackbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
@@ -52,6 +53,7 @@ class VerificationScreen extends StatefulWidget {
 }
 
 class VerificationScreenState extends State<VerificationScreen> {
+  final TextEditingController _otpController = TextEditingController();
   String? _number;
   String? _email;
   Timer? _timer;
@@ -117,6 +119,7 @@ class VerificationScreenState extends State<VerificationScreen> {
     super.dispose();
 
     _timer?.cancel();
+    _otpController.dispose();
     errorController.close();
   }
 
@@ -231,10 +234,12 @@ class VerificationScreenState extends State<VerificationScreen> {
                         ? 0
                         : Dimensions.paddingSizeDefault),
                 child: PinCodeTextField(
+                  controller: _otpController,
                   focusNode: _focusNode,
                   length: 6,
                   appContext: context,
                   keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   animationType: AnimationType.slide,
                   pinTheme: PinTheme(
                     shape: PinCodeFieldShape.box,
@@ -312,7 +317,7 @@ class VerificationScreenState extends State<VerificationScreen> {
                                 if (value.isSuccess) {
                                   _handleVerifyResponse(value, _number, _email);
                                 } else {
-                                  showCustomSnackBar(value.message);
+                                  _onVerificationError(value.message);
                                 }
                               });
                             } else if (widget.userModel != null) {
@@ -339,7 +344,7 @@ class VerificationScreenState extends State<VerificationScreen> {
                                 if (value.isSuccess) {
                                   _handleVerifyResponse(value, _number, _email);
                                 } else {
-                                  showCustomSnackBar(value.message);
+                                  _onVerificationError(value.message);
                                 }
                               });
                             } else {
@@ -368,12 +373,7 @@ class VerificationScreenState extends State<VerificationScreen> {
                                             page: 'reset-password'));
                                   }
                                 } else {
-                                  errorController.add(ErrorAnimationType.shake);
-                                  errorMessage = value.message ?? '';
-                                  setState(() {
-                                    hasError = true;
-                                  });
-                                  showCustomSnackBar(value.message);
+                                  _onVerificationError(value.message);
                                 }
                               });
                             }
@@ -478,6 +478,19 @@ class VerificationScreenState extends State<VerificationScreen> {
             .navigateToLocationScreen('verification', offNamed: true);
       }
     }
+  }
+
+  void _onVerificationError(String? message) {
+    errorController.add(ErrorAnimationType.shake);
+    if (message != null && message.isNotEmpty) {
+      errorMessage = message;
+    }
+    setState(() {
+      hasError = true;
+    });
+    _otpController.clear();
+    Get.find<VerificationController>().updateVerificationCode('');
+    showCustomSnackBar(message);
   }
 
   void _resendOtp() {

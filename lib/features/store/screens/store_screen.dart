@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:icons_plus/icons_plus.dart';
+import 'package:iconsx_plus/iconsx_plus.dart';
 import 'package:handy_allinone/common/widgets/custom_asset_image_widget.dart';
 import 'package:handy_allinone/features/cart/controllers/cart_controller.dart';
 import 'package:handy_allinone/features/category/controllers/category_controller.dart';
@@ -76,10 +76,10 @@ class _StoreScreenState extends State<StoreScreen> {
   final ScrollController scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
   final GlobalKey _menuKey = GlobalKey();
-  /// Stores GlobalKeys for each category header — populated by ItemsViewStore
+  /// Stores GlobalKeys for each category header â€” populated by ItemsViewStore
   /// after each build so we can scroll to the exact pixel position.
   final Map<String, GlobalKey> _categoryHeaderKeys = {};
-  /// Filter chip state — null = no filter, true = active
+  /// Filter chip state â€” null = no filter, true = active
   bool _vegFilter = false;
   bool _nonVegFilter = false;
   bool _discountFilter = false;
@@ -118,7 +118,7 @@ class _StoreScreenState extends State<StoreScreen> {
   /// When index == 0 (All), scrolls to top of menu area.
   /// When index > 0, calculates the cumulative offset of that category.
   void scrollToCategoryByIndex(int categoryIndex) {
-    // Index 0 = "All" — scroll to top of menu area
+    // Index 0 = "All" â€” scroll to top of menu area
     if (categoryIndex == 0) {
       scrollToMenu();
       return;
@@ -135,7 +135,7 @@ class _StoreScreenState extends State<StoreScreen> {
 
     if (headerKey?.currentContext != null) {
       // Use Flutter's built-in ensureVisible to scroll the header
-      // to the very top of the viewport — pixel-perfect, no math needed.
+      // to the very top of the viewport â€” pixel-perfect, no math needed.
       Scrollable.ensureVisible(
         headerKey!.currentContext!,
         alignment: 0.0,
@@ -1141,7 +1141,7 @@ class _StoreScreenState extends State<StoreScreen> {
                             ),
                           ),
 
-                        // ── Sticky search bar + filter chips ──────────────
+                        // Sticky search bar + filter chips 
                         if (!ResponsiveHelper.isDesktop(context) && storeController.categoryList != null && storeController.categoryList!.isNotEmpty)
                           SliverPersistentHeader(
                             pinned: true,
@@ -1230,9 +1230,7 @@ class _StoreScreenState extends State<StoreScreen> {
                                            ? storeController.storeItemModel!.items
                                            : null;
 
-                                       final filteredItems = rawItems == null
-                                           ? null
-                                           : rawItems.where((item) {
+                                       final filteredItems = rawItems?.where((item) {
                                                if (_vegFilter && (item.veg ?? 0) != 1) return false;
                                                if (_nonVegFilter && (item.veg ?? 0) != 0) return false;
                                                if (_discountFilter && (item.discount == null || item.discount! <= 0)) return false;
@@ -1263,7 +1261,7 @@ class _StoreScreenState extends State<StoreScreen> {
                                   ),
                                 ),
                               ),
-                        // ── scroll-to-top animated button (inline, after all items) ──
+                        // scroll-to-top animated button (inline, after all items)
                         SliverToBoxAdapter(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 24),
@@ -1272,7 +1270,7 @@ class _StoreScreenState extends State<StoreScreen> {
                             ),
                           ),
                         ),
-                        // ── bottom scroll padding ──────────────────────────
+                        // bottom scroll padding 
                         const SliverToBoxAdapter(
                           child: SizedBox(height: 80),
                         ),
@@ -1344,153 +1342,162 @@ class _StoreScreenState extends State<StoreScreen> {
                 Get.find<SplashController>().configModel!.prescriptionStatus! &&
                 AuthHelper.isLoggedIn();
 
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              if (showPrescription)
-                Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Theme.of(
-                          context,
-                        ).primaryColor.withOpacity(0.5),
-                        blurRadius: 10,
-                        offset: const Offset(2, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 800),
-                        width: storeController.currentState == true
-                            ? 0
-                            : ResponsiveHelper.isDesktop(context)
-                            ? 180
-                            : 150,
-                        height: 30,
-                        curve: Curves.linear,
-                        child: Center(
-                          child: Text(
-                            'prescription_order'.tr,
-                            textAlign: TextAlign.center,
-                            style: robotoMedium.copyWith(
-                              color: Theme.of(context).primaryColor,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ),
+          return GetBuilder<CartController>(
+            builder: (cartController) {
+              bool isCartVisible = cartController.cartList.isNotEmpty && !ResponsiveHelper.isDesktop(context);
 
-                      InkWell(
-                        onTap: () {
-                          Get.find<CheckoutController>().updateFirstTime();
-                          Get.toNamed(
-                            RouteHelper.getCheckoutRoute(
-                              'prescription',
-                              storeId: storeController.store!.id,
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  if (showPrescription)
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).cardColor,
+                        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Theme.of(
+                              context,
+                            ).primaryColor.withOpacity(0.5),
+                            blurRadius: 10,
+                            offset: const Offset(2, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 800),
+                            width: storeController.currentState == true
+                                ? 0
+                                : ResponsiveHelper.isDesktop(context)
+                                ? 180
+                                : 150,
+                            height: 30,
+                            curve: Curves.linear,
+                            child: Center(
+                              child: Text(
+                                'prescription_order'.tr,
+                                textAlign: TextAlign.center,
+                                style: robotoMedium.copyWith(
+                                  color: Theme.of(context).primaryColor,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                            arguments: CheckoutScreen(
-                              fromCart: false,
-                              cartList: null,
-                              storeId: storeController.store!.id,
+                          ),
+
+                          InkWell(
+                            onTap: () {
+                              Get.find<CheckoutController>().updateFirstTime();
+                              Get.toNamed(
+                                RouteHelper.getCheckoutRoute(
+                                  'prescription',
+                                  storeId: storeController.store!.id,
+                                ),
+                                arguments: CheckoutScreen(
+                                  fromCart: false,
+                                  cartList: null,
+                                  storeId: storeController.store!.id,
+                                ),
+                              );
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).primaryColor,
+                                borderRadius: BorderRadius.circular(
+                                  Dimensions.radiusSmall,
+                                ),
+                              ),
+                              padding: const EdgeInsets.all(
+                                Dimensions.paddingSizeSmall,
+                              ),
+                              child: Image.asset(
+                                Images.prescriptionIcon,
+                                height: 25,
+                                width: 25,
+                              ),
                             ),
-                          );
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  if (showPrescription) const SizedBox(height: Dimensions.paddingSizeSmall),
+
+                  Visibility(
+                    visible: storeController.showFavButton,
+                    child: GestureDetector(
+                      key: _menuKey,
+                      onTap: () => showCategoryPopup(
+                        context,
+                        storeController,
+                        _menuKey,
+                        onCategorySelected: (int categoryIndex) {
+                          // Always scroll to the category in the grouped "All" view
+                          scrollToCategoryByIndex(categoryIndex);
                         },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor,
-                            borderRadius: BorderRadius.circular(
-                              Dimensions.radiusSmall,
+                      ),
+
+                      child: Container(
+                        height: 65,
+                        width: 65,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [const Color(0xFF2D2D2D), Colors.black],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.4),
+                              blurRadius: 15,
+                              spreadRadius: 2,
+                              offset: const Offset(0, 8),
                             ),
-                          ),
-                          padding: const EdgeInsets.all(
-                            Dimensions.paddingSizeSmall,
-                          ),
-                          child: Image.asset(
-                            Images.prescriptionIcon,
-                            height: 25,
-                            width: 25,
-                          ),
+                          ],
+                          border: Border.all(color: Colors.white.withOpacity(0.1), width: 1.5),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              ((Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('meat') ?? false) || (Get.find<SplashController>().module?.moduleType?.toLowerCase() == 'meat'))
+                                  ? Icons.kebab_dining
+                                  : (Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('fish') ?? false)
+                                      ? Icons.set_meal
+                                      : Icons.restaurant_menu_rounded,
+                              color: Colors.white,
+                              size: 26,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              ((Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('meat') ?? false) || (Get.find<SplashController>().module?.moduleType?.toLowerCase() == 'meat'))
+                                  ? "CUTS"
+                                  : (Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('fish') ?? false)
+                                      ? "FRESH"
+                                      : "MENU",
+                              style: robotoBold.copyWith(
+                                color: Colors.white,
+                                fontSize: 10,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
-
-              if (showPrescription) const SizedBox(height: Dimensions.paddingSizeSmall),
-
-              Visibility(
-                visible: storeController.showFavButton,
-                child: GestureDetector(
-                  key: _menuKey,
-                  onTap: () => showCategoryPopup(
-                    context,
-                    storeController,
-                    _menuKey,
-                    onCategorySelected: (int categoryIndex) {
-                      // Always scroll to the category in the grouped "All" view
-                      scrollToCategoryByIndex(categoryIndex);
-                    },
-                  ),
-
-                  child: Container(
-                    height: 65,
-                    width: 65,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [const Color(0xFF2D2D2D), Colors.black],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.4),
-                          blurRadius: 15,
-                          spreadRadius: 2,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                      border: Border.all(color: Colors.white.withOpacity(0.1), width: 1.5),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          ((Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('meat') ?? false) || (Get.find<SplashController>().module?.moduleType?.toLowerCase() == 'meat'))
-                              ? Icons.kebab_dining
-                              : (Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('fish') ?? false)
-                                  ? Icons.set_meal
-                                  : Icons.restaurant_menu_rounded,
-                          color: Colors.white,
-                          size: 26,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          ((Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('meat') ?? false) || (Get.find<SplashController>().module?.moduleType?.toLowerCase() == 'meat'))
-                              ? "CUTS"
-                              : (Get.find<SplashController>().module?.moduleName?.toLowerCase().contains('fish') ?? false)
-                                  ? "FRESH"
-                                  : "MENU",
-                          style: robotoBold.copyWith(
-                            color: Colors.white,
-                            fontSize: 10,
-                            letterSpacing: 1,
-                          ),
-                        ),
-                      ],
                     ),
                   ),
-                ),
-              ),
-            ],
+
+                  if (isCartVisible)
+                    SizedBox(height: 85.h),
+                ],
+              );
+            },
           );
         },
       ),
@@ -1965,7 +1972,7 @@ class QuoteScreen extends StatelessWidget {
 
                   const SizedBox(height: 26),
 
-                  /// SUBTITLE — also italic like mockup
+                  /// SUBTITLE â€” also italic like mockup
                   const Text(
                     '- Our Commitment',
                     textAlign: TextAlign.center,
@@ -1995,10 +2002,10 @@ class QuoteScreen extends StatelessWidget {
 }
 
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 /// Swiggy-style toggle switch filter chip.
 /// Layout: [icon]  [label]  [toggle nub]
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _FilterChip extends StatelessWidget {
   final String label;
   final Widget icon;
@@ -2057,7 +2064,7 @@ class _FilterChip extends StatelessWidget {
   }
 }
 
-/// A compact animated toggle track + thumb (22×13 px).
+/// A compact animated toggle track + thumb (22Ã—13 px).
 class _MiniToggleSwitch extends StatelessWidget {
   final bool isActive;
   final Color activeColor;
@@ -2112,7 +2119,7 @@ class _TrianglePainter extends CustomPainter {
   bool shouldRepaint(_TrianglePainter old) => old.color != color;
 }
 
-// ── Animated back-to-top pill button ─────────────────────────────────────────
+// â”€â”€ Animated back-to-top pill button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _StoreBackToTopButton extends StatefulWidget {
   final VoidCallback onTap;
   const _StoreBackToTopButton({required this.onTap});
@@ -2188,7 +2195,7 @@ class _StoreBackToTopButtonState extends State<_StoreBackToTopButton>
   }
 }
 
-// ── Sticky header delegate (primitives + callbacks — no AppBar context) ──────
+// â”€â”€ Sticky header delegate (primitives + callbacks â€” no AppBar context) â”€â”€â”€â”€â”€â”€
 class _StoreStickyHeaderDelegate extends SliverPersistentHeaderDelegate {
   final bool vegFilter;
   final bool nonVegFilter;
@@ -2221,6 +2228,7 @@ class _StoreStickyHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    bool isFood = Get.find<SplashController>().module != null && Get.find<SplashController>().module!.moduleType.toString() == AppConstants.food;
     return SizedBox(
       height: _height,
       child: Material(
@@ -2269,34 +2277,36 @@ class _StoreStickyHeaderDelegate extends SliverPersistentHeaderDelegate {
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
               child: Row(
                 children: [
-                  _FilterChip(
-                    label: 'Veg',
-                    icon: Container(
-                      width: 14, height: 14,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: const Color(0xFF00A550), width: 1.5),
-                        borderRadius: BorderRadius.circular(3),
-                      ),
-                      child: Center(
-                        child: Container(
-                          width: 6, height: 6,
-                          decoration: const BoxDecoration(color: Color(0xFF00A550), shape: BoxShape.circle),
+                  if (isFood) ...[
+                    _FilterChip(
+                      label: 'Veg',
+                      icon: Container(
+                        width: 14, height: 14,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: const Color(0xFF00A550), width: 1.5),
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                        child: Center(
+                          child: Container(
+                            width: 6, height: 6,
+                            decoration: const BoxDecoration(color: Color(0xFF00A550), shape: BoxShape.circle),
+                          ),
                         ),
                       ),
+                      isActive: vegFilter,
+                      activeColor: const Color(0xFF00A550),
+                      onTap: onVegTap,
                     ),
-                    isActive: vegFilter,
-                    activeColor: const Color(0xFF00A550),
-                    onTap: onVegTap,
-                  ),
-                  const SizedBox(width: 8),
-                  _FilterChip(
-                    label: 'Non-veg',
-                    icon: CustomPaint(size: const Size(14, 14), painter: _TrianglePainter(color: const Color(0xFFE43B3B))),
-                    isActive: nonVegFilter,
-                    activeColor: const Color(0xFFE43B3B),
-                    onTap: onNonVegTap,
-                  ),
-                  const SizedBox(width: 8),
+                    const SizedBox(width: 8),
+                    _FilterChip(
+                      label: 'Non-veg',
+                      icon: CustomPaint(size: const Size(14, 14), painter: _TrianglePainter(color: const Color(0xFFE43B3B))),
+                      isActive: nonVegFilter,
+                      activeColor: const Color(0xFFE43B3B),
+                      onTap: onNonVegTap,
+                    ),
+                    const SizedBox(width: 8),
+                  ],
                   _FilterChip(
                     label: 'Offers',
                     icon: Icon(Icons.local_offer_rounded, size: 14, color: discountFilter ? primaryColor : disabledColor),

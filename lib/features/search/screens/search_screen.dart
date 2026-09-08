@@ -93,7 +93,7 @@ class SearchScreenState extends State<SearchScreen> with TickerProviderStateMixi
                 child: Padding(
                   padding: ResponsiveHelper.isDesktop(context) ? EdgeInsets.zero :  EdgeInsets.zero,
                   child: GetBuilder<search.SearchController>(builder: (searchController) {
-                    if(!GetPlatform.isWeb) {
+                    if(!GetPlatform.isWeb && _searchController.text != (searchController.searchText ?? '')) {
                       _searchController.text = searchController.searchText ?? '';
                     }
                     return Column(children: [
@@ -227,7 +227,7 @@ class SearchScreenState extends State<SearchScreen> with TickerProviderStateMixi
                                     searchController.setStore(false);
                                   }
                                 },
-                                icon: Icon(Icons.arrow_back_ios_new, color: isPharmacy ? Colors.black : Theme.of(context).cardColor),
+                                icon: Icon(Icons.arrow_back_ios_new, color: isPharmacy ? Colors.black : Theme.of(context).primaryColor),
                               ),
 
                               Expanded(child: SearchFieldWidget(
@@ -491,6 +491,9 @@ class SearchScreenState extends State<SearchScreen> with TickerProviderStateMixi
   void _actionSearch(bool isSubmit, String? queryText, bool fromHome) {
     if(Get.find<search.SearchController>().isSearchMode || isSubmit) {
       if(queryText!.isNotEmpty) {
+        if(isSubmit) {
+          Get.find<search.SearchController>().clearResultTexts();
+        }
         Get.find<search.SearchController>().searchData(queryText, fromHome);
       } else {
         showCustomSnackBar((Get.find<SplashController>().configModel?.moduleConfig?.module?.showRestaurantText ?? false)

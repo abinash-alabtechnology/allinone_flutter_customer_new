@@ -13,6 +13,9 @@ class BannerController extends GetxController implements GetxService {
   List<String?>? _bannerImageList;
   List<String?>? get bannerImageList => _bannerImageList;
 
+  List<Banner>? _bannerList;
+  List<Banner>? get bannerList => _bannerList;
+
   List<String?>? _taxiBannerImageList;
   List<String?>? get taxiBannerImageList => _taxiBannerImageList;
 
@@ -37,9 +40,33 @@ class BannerController extends GetxController implements GetxService {
   PromotionalBanner? _promotionalBanner;
   PromotionalBanner? get promotionalBanner => _promotionalBanner;
 
-  Future<void> getFeaturedBanner() async {
-    BannerModel? bannerModel = await bannerServiceInterface
-        .getFeaturedBannerList();
+  Future<void> getFeaturedBanner(
+    bool reload, {
+    DataSourceEnum dataSource = DataSourceEnum.local,
+    bool fromRecall = false,
+  }) async {
+    if (_featuredBannerList == null || reload || fromRecall) {
+      if (reload) {
+        _featuredBannerList = null;
+      }
+      BannerModel? bannerModel;
+      if (dataSource == DataSourceEnum.local) {
+        bannerModel = await bannerServiceInterface.getFeaturedBannerList(source: DataSourceEnum.local);
+        await _prepareFeaturedBanner(bannerModel);
+
+        getFeaturedBanner(
+          false,
+          dataSource: DataSourceEnum.client,
+          fromRecall: true,
+        );
+      } else {
+        bannerModel = await bannerServiceInterface.getFeaturedBannerList(source: DataSourceEnum.client);
+        _prepareFeaturedBanner(bannerModel);
+      }
+    }
+  }
+
+  Future<void> _prepareFeaturedBanner(BannerModel? bannerModel) async {
     if (bannerModel != null) {
       _featuredBannerList = [];
       _featuredBannerDataList = [];
@@ -82,6 +109,11 @@ class BannerController extends GetxController implements GetxService {
 
   void clearBanner() {
     _bannerImageList = null;
+    _featuredBannerList = null;
+    _bannerDataList = null;
+    _featuredBannerDataList = null;
+    _promotionalBanner = null;
+    update();
   }
 
   Future<void> getBannerList(
@@ -116,35 +148,40 @@ class BannerController extends GetxController implements GetxService {
 
   Future<void> _prepareBanner(BannerModel? bannerModel) async {
     if (bannerModel != null) {
+      _bannerList = bannerModel.banners;
       _bannerImageList = [];
       _bannerDataList = [];
-      for (var campaign in bannerModel.campaigns!) {
-        if (_bannerImageList!.contains(campaign.imageFullUrl)) {
-          _bannerImageList!.add(
-            '${campaign.imageFullUrl}${bannerModel.campaigns!.indexOf(campaign)}',
-          );
-        } else {
-          _bannerImageList!.add(campaign.imageFullUrl);
+      if (bannerModel.campaigns != null) {
+        for (var campaign in bannerModel.campaigns!) {
+          if (_bannerImageList!.contains(campaign.imageFullUrl)) {
+            _bannerImageList!.add(
+              '${campaign.imageFullUrl}${bannerModel.campaigns!.indexOf(campaign)}',
+            );
+          } else {
+            _bannerImageList!.add(campaign.imageFullUrl);
+          }
+          _bannerDataList!.add(campaign);
         }
-        _bannerDataList!.add(campaign);
       }
-      for (var banner in bannerModel.banners!) {
-        if (_bannerImageList!.contains(banner.imageFullUrl)) {
-          _bannerImageList!.add(
-            '${banner.imageFullUrl}${bannerModel.banners!.indexOf(banner)}',
-          );
-        } else {
-          _bannerImageList!.add(banner.imageFullUrl);
-        }
+      if (bannerModel.banners != null) {
+        for (var banner in bannerModel.banners!) {
+          if (_bannerImageList!.contains(banner.imageFullUrl)) {
+            _bannerImageList!.add(
+              '${banner.imageFullUrl}${bannerModel.banners!.indexOf(banner)}',
+            );
+          } else {
+            _bannerImageList!.add(banner.imageFullUrl);
+          }
 
-        if (banner.item != null) {
-          _bannerDataList!.add(banner.item);
-        } else if (banner.store != null) {
-          _bannerDataList!.add(banner.store);
-        } else if (banner.type == 'default') {
-          _bannerDataList!.add(banner.link);
-        } else {
-          _bannerDataList!.add(null);
+          if (banner.item != null) {
+            _bannerDataList!.add(banner.item);
+          } else if (banner.store != null) {
+            _bannerDataList!.add(banner.store);
+          } else if (banner.type == 'default') {
+            _bannerDataList!.add(banner.link);
+          } else {
+            _bannerDataList!.add(null);
+          }
         }
       }
     }
@@ -155,43 +192,51 @@ class BannerController extends GetxController implements GetxService {
     if (_taxiBannerImageList == null || reload) {
       _taxiBannerImageList = null;
       update(); // Show shimmer
-      BannerModel? bannerModel = await bannerServiceInterface
-          .getTaxiBannerList();
-      print("Taxi Banner Response: ${bannerModel?.toJson()}");
-      _taxiBannerImageList = [];
-      _taxiBannerDataList = [];
-      if (bannerModel != null) {
-        if (bannerModel.campaigns != null) {
-          for (var campaign in bannerModel.campaigns!) {
-            _taxiBannerImageList!.add(campaign.imageFullUrl);
-            _taxiBannerDataList!.add(campaign);
-          }
-        }
-        if (bannerModel.banners != null) {
-          for (var banner in bannerModel.banners!) {
-            _taxiBannerImageList!.add(banner.imageFullUrl);
-            if (banner.item != null) {
-              _taxiBannerDataList!.add(banner.item);
-            } else if (banner.store != null) {
-              _taxiBannerDataList!.add(banner.store);
-            } else if (banner.type == 'default' || banner.link != null) {
-              _taxiBannerDataList!.add(banner.link);
-            } else {
-              _taxiBannerDataList!.add(null);
+      try {
+        BannerModel? bannerModel = await bannerServiceInterface
+            .getTaxiBannerList();
+        print("Taxi Banner Response: ${bannerModel?.toJson()}");
+        _taxiBannerImageList = [];
+        _taxiBannerDataList = [];
+        if (bannerModel != null) {
+          if (bannerModel.campaigns != null) {
+            for (var campaign in bannerModel.campaigns!) {
+              _taxiBannerImageList!.add(campaign.imageFullUrl);
+              _taxiBannerDataList!.add(campaign);
             }
           }
+          if (bannerModel.banners != null) {
+            for (var banner in bannerModel.banners!) {
+              _taxiBannerImageList!.add(banner.imageFullUrl);
+              if (banner.item != null) {
+                _taxiBannerDataList!.add(banner.item);
+              } else if (banner.store != null) {
+                _taxiBannerDataList!.add(banner.store);
+              } else if (banner.type == 'default' || banner.link != null) {
+                _taxiBannerDataList!.add(banner.link);
+              } else {
+                _taxiBannerDataList!.add(null);
+              }
+            }
+          }
+          if (ResponsiveHelper.isDesktop(Get.context) &&
+              _taxiBannerImageList!.isNotEmpty &&
+              _taxiBannerImageList!.length % 2 != 0) {
+            _taxiBannerImageList!.add(_taxiBannerImageList![0]);
+            _taxiBannerDataList!.add(_taxiBannerDataList![0]);
+          }
         }
-        if (ResponsiveHelper.isDesktop(Get.context) &&
-            _taxiBannerImageList!.isNotEmpty &&
-            _taxiBannerImageList!.length % 2 != 0) {
-          _taxiBannerImageList!.add(_taxiBannerImageList![0]);
-          _taxiBannerDataList!.add(_taxiBannerDataList![0]);
-        }
+      } catch (e) {
+        print("Error fetching taxi banners: $e");
+        _taxiBannerImageList = [];
+        _taxiBannerDataList = [];
       }
-      // if (_taxiBannerImageList!.isEmpty) {
-      //   _taxiBannerImageList!.add("https://admin.gograbx.com/storage/app/public/banner/2026-05-07-69fc3534da4f8.png");
-      //   _taxiBannerDataList!.add(null);
-      // }
+      
+      if (_taxiBannerImageList!.isEmpty) {
+        _taxiBannerImageList!.add("https://admin.allinonego.in/storage/app/public/banner/2026-05-07-69fc3534da4f8.png");
+        _taxiBannerDataList!.add(null);
+      }
+      
       print("Taxi Banner Image List: $_taxiBannerImageList");
       update();
     }
@@ -234,6 +279,39 @@ class BannerController extends GetxController implements GetxService {
           .getPromotionalBannerList();
       if (promotionalBanner != null) {
         _promotionalBanner = promotionalBanner;
+      }
+      update();
+    }
+  }
+
+  List<Banner>? _spotlightBannerList;
+  List<Banner>? get spotlightBannerList => _spotlightBannerList;
+
+  Future<void> getSpotlightBannerList(
+    bool reload, {
+    DataSourceEnum dataSource = DataSourceEnum.local,
+    bool fromRecall = false,
+  }) async {
+    if (_spotlightBannerList == null || reload || fromRecall) {
+      if (reload) {
+        _spotlightBannerList = null;
+      }
+      BannerModel? bannerModel;
+      if (dataSource == DataSourceEnum.local) {
+        bannerModel = await bannerServiceInterface.getSpotlightBannerList(source: DataSourceEnum.local);
+        if (bannerModel != null && bannerModel.banners != null) {
+          _spotlightBannerList = bannerModel.banners;
+        }
+        getSpotlightBannerList(
+          false,
+          dataSource: DataSourceEnum.client,
+          fromRecall: true,
+        );
+      } else {
+        bannerModel = await bannerServiceInterface.getSpotlightBannerList(source: DataSourceEnum.client);
+        if (bannerModel != null && bannerModel.banners != null) {
+          _spotlightBannerList = bannerModel.banners;
+        }
       }
       update();
     }

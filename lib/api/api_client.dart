@@ -120,7 +120,7 @@ class ApiClient extends GetxService {
 
   Future<Response> postMultipartData(String uri, Map<String, dynamic> body, List<MultipartBody> multipartBody, {List<MultipartDocument>? multipartDoc, Map<String, String>? headers, bool handleError = true}) async {
     try {
-      debugPrint('====> API Call: $uri\nHeader: $_mainHeaders');
+      debugPrint('====> API Call: $uri\nHeader: ${headers ?? _mainHeaders}');
       debugPrint('====> API Body: $body with ${multipartBody.length} and multipart ${multipartDoc?.length}');
       http.MultipartRequest request = http.MultipartRequest('POST', Uri.parse(appBaseUrl+uri));
       request.headers.addAll(headers ?? _mainHeaders);

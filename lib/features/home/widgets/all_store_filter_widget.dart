@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:icons_plus/icons_plus.dart';
+import 'package:iconsx_plus/iconsx_plus.dart';
 import 'package:handy_allinone/features/home/widgets/filter_view.dart';
 import 'package:handy_allinone/features/home/widgets/store_filter_button_widget.dart';
 import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';

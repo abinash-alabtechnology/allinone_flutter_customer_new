@@ -430,14 +430,34 @@ class OnlineCart {
       });
     }
     _quantity = json['quantity'];
-    _addOnIds = json['add_on_ids'].cast<int>();
+    if (json['add_on_ids'] != null) {
+      _addOnIds = [];
+      json['add_on_ids'].forEach((v) {
+        if (v != null) {
+          int? parsed = int.tryParse(v.toString());
+          if (parsed != null) _addOnIds!.add(parsed);
+        }
+      });
+    } else {
+      _addOnIds = [];
+    }
     if (json['add_ons'] != null) {
       _addOns = [];
       json['add_ons'].forEach((v) {
         _addOns!.add(AddOns.fromJson(v));
       });
     }
-    _addOnQtys = json['add_on_qtys'].cast<int>();
+    if (json['add_on_qtys'] != null) {
+      _addOnQtys = [];
+      json['add_on_qtys'].forEach((v) {
+        if (v != null) {
+          int? parsed = int.tryParse(v.toString());
+          if (parsed != null) _addOnQtys!.add(parsed);
+        }
+      });
+    } else {
+      _addOnQtys = [];
+    }
     _model = json['model'];
     if (json['item_type'] != null && json['item_type'] != 'null') {
       _itemType = json['item_type'];
@@ -499,7 +519,16 @@ class OrderVariationValue {
   OrderVariationValue({this.label});
 
   OrderVariationValue.fromJson(Map<String, dynamic> json) {
-    label = json['label'].cast<String>();
+    if (json['label'] != null) {
+      label = [];
+      json['label'].forEach((v) {
+        if (v != null) {
+          label!.add(v.toString());
+        }
+      });
+    } else {
+      label = [];
+    }
   }
 
   Map<String, dynamic> toJson() {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:handy_allinone/common/widgets/cart_snackbar.dart';
 import 'package:handy_allinone/features/cart/controllers/cart_controller.dart';
 import 'package:handy_allinone/features/item/controllers/item_controller.dart';
 import 'package:handy_allinone/features/item/domain/models/item_model.dart';
@@ -315,7 +316,7 @@ class DetailsWebViewWidget extends StatelessWidget {
                                           if(success) {
                                             await cartController.addToCartOnline(cart!);
                                             itemController.setExistInCart(itemController.item, null);
-                                            // showCartSnackBar();
+                                            showCartSnackBar();
                                           }
                                         });
                                       },
@@ -325,13 +326,13 @@ class DetailsWebViewWidget extends StatelessWidget {
                                       await cartController.addToCartOnline(cart!).then((success) {
                                         if(success){
                                           itemController.setExistInCart(itemController.item, null);
-                                          // showCartSnackBar();
+                                          showCartSnackBar();
                                         }
                                       });
                                     } else {
                                       await cartController.updateCartOnline(cart!).then((success) {
                                         if(success) {
-                                          // showCartSnackBar();
+                                          showCartSnackBar();
                                         }
                                       });
                                     }

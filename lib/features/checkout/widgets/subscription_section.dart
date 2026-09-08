@@ -125,12 +125,15 @@ child:Container(
                   Expanded(child: ListView.builder(
                     itemCount: timeSlots.length,
                     itemBuilder: (context, index) {
-                      return ListTile(
-                        title: Text(timeSlots[index]),
-                        onTap: () {
-                          widget.checkoutController.setSubscriptionTime(timeSlots[index]);
-                          Get.back();
-                        },
+                      return Material(
+                        color: Colors.transparent,
+                        child: ListTile(
+                          title: Text(timeSlots[index]),
+                          onTap: () {
+                            widget.checkoutController.setSubscriptionTime(timeSlots[index]);
+                            Get.back();
+                          },
+                        ),
                       );
                     },
                   )),

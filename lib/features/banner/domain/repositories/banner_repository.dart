@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 
 import 'package:get/get.dart';
 import 'package:handy_allinone/api/api_client.dart';
@@ -12,6 +11,8 @@ import 'package:handy_allinone/features/banner/domain/models/taxi_banner_model.d
 import 'package:handy_allinone/features/banner/domain/repositories/banner_repository_interface.dart';
 import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
 import 'package:handy_allinone/helper/header_helper.dart';
+import 'package:handy_allinone/helper/address_helper.dart';
+import 'package:handy_allinone/helper/module_helper.dart';
 import 'package:handy_allinone/util/app_constants.dart';
 
 class BannerRepository implements BannerRepositoryInterface {
@@ -19,53 +20,133 @@ class BannerRepository implements BannerRepositoryInterface {
   BannerRepository({required this.apiClient});
 
   @override
-  Future getList({int? offset, bool isBanner = false, bool isTaxiBanner = false, bool isFeaturedBanner = false, bool isParcelOtherBanner = false, bool isPromotionalBanner = false, DataSourceEnum? source}) async {
+  Future getList({int? offset, bool isBanner = false, bool isTaxiBanner = false, bool isFeaturedBanner = false, bool isParcelOtherBanner = false, bool isPromotionalBanner = false, bool isSpotlightBanner = false, DataSourceEnum? source}) async {
     if (isBanner) {
       return await _getBannerList(source: source!);
     } else if (isTaxiBanner) {
       return await _getTaxiBannerList();
     } else if (isFeaturedBanner) {
-      return await _getFeaturedBannerList();
+      return await _getFeaturedBannerList(source: source!);
     } else if (isParcelOtherBanner) {
       return await _getParcelOtherBannerList();
     } else if (isPromotionalBanner) {
       return await _getPromotionalBannerList();
+    } else if (isSpotlightBanner) {
+      return await _getSpotlightBannerList(source: source!);
     }
+  }
+
+  Future<BannerModel?> _getSpotlightBannerList({required DataSourceEnum source}) async {
+    BannerModel? bannerModel;
+    Map<String, String> reqHeaders = Map.from(apiClient.getHeader());
+    reqHeaders['Content-Type'] = 'application/json; charset=UTF-8';
+    reqHeaders.remove('service_type');
+    reqHeaders.remove('service-type');
+
+    int? activeModuleId = ModuleHelper.getModule()?.id ?? ModuleHelper.getCacheModule()?.id;
+    if (activeModuleId == null || activeModuleId == 0) {
+      if (Get.isRegistered<SplashController>()) {
+        final splash = Get.find<SplashController>();
+        activeModuleId = splash.module?.id ?? splash.cacheModule?.id;
+        if (activeModuleId == null || activeModuleId == 0) {
+          activeModuleId = splash.getHandymanModuleId();
+        }
+      }
+    }
+    if (activeModuleId != null && activeModuleId > 0) {
+      reqHeaders[AppConstants.moduleId] = activeModuleId.toString();
+    }
+
+    List<int>? zoneIds = AddressHelper.getUserAddressFromSharedPref()?.zoneIds;
+    if (zoneIds == null || zoneIds.isEmpty) {
+      zoneIds = [1];
+    }
+    reqHeaders[AppConstants.zoneId] = jsonEncode(zoneIds);
+
+    String cacheId = '${AppConstants.spotlightBannerUri}-$activeModuleId';
+
+    switch (source) {
+      case DataSourceEnum.client:
+        Response response = await apiClient.getData(
+          '${AppConstants.spotlightBannerUri}?limit=10&offset=1',
+          headers: reqHeaders,
+        );
+        if (response.statusCode == 200) {
+          dynamic body = response.body;
+          if (body is Map<String, dynamic>) {
+            bannerModel = BannerModel.fromJson(body);
+          } else if (body is List) {
+            List<Banner> banners = [];
+            for (var v in body) {
+              banners.add(Banner.fromJson(v));
+            }
+            bannerModel = BannerModel(banners: banners);
+          }
+          LocalClient.organize(source, cacheId, jsonEncode(response.body), reqHeaders);
+        }
+      case DataSourceEnum.local:
+        String? cacheResponseData = await LocalClient.organize(source, cacheId, null, null);
+        if (cacheResponseData != null) {
+          try {
+            dynamic decoded = jsonDecode(cacheResponseData);
+            if (decoded is Map<String, dynamic>) {
+              bannerModel = BannerModel.fromJson(decoded);
+            } else if (decoded is List) {
+              List<Banner> banners = [];
+              for (var v in decoded) {
+                banners.add(Banner.fromJson(v));
+              }
+              bannerModel = BannerModel(banners: banners);
+            }
+          } catch (_) {}
+        }
+    }
+
+    return bannerModel;
   }
 
   Future<BannerModel?> _getBannerList({required DataSourceEnum source}) async {
     BannerModel? bannerModel;
-    String cacheId = '${AppConstants.bannerUri}-${Get.find<SplashController>().module!.id!}';
+    Map<String, String> reqHeaders = Map.from(apiClient.getHeader());
+    reqHeaders['Content-Type'] = 'application/json; charset=UTF-8';
+
+    int activeModuleId = Get.find<SplashController>().module?.id ?? 10;
+    reqHeaders[AppConstants.moduleId] = activeModuleId.toString();
+
+    List<int>? zoneIds = AddressHelper.getUserAddressFromSharedPref()?.zoneIds;
+    if (zoneIds == null || zoneIds.isEmpty) {
+      zoneIds = [1];
+    }
+    reqHeaders[AppConstants.zoneId] = jsonEncode(zoneIds);
+
+    String cacheId = '${AppConstants.bannerUri}-$activeModuleId';
 
     switch(source) {
       case DataSourceEnum.client:
-        Response response = await apiClient.getData(AppConstants.bannerUri);
+        Response response = await apiClient.getData(
+          '${AppConstants.bannerUri}?limit=10&offset=1',
+          headers: reqHeaders,
+        );
         if (response.statusCode == 200) {
           bannerModel = BannerModel.fromJson(response.body);
-          LocalClient.organize(source, cacheId, jsonEncode(response.body), apiClient.getHeader());
-
+          LocalClient.organize(source, cacheId, jsonEncode(response.body), reqHeaders);
         }
       case DataSourceEnum.local:
-
         String? cacheResponseData = await LocalClient.organize(source, cacheId, null, null);
         if(cacheResponseData != null) {
           bannerModel = BannerModel.fromJson(jsonDecode(cacheResponseData));
         }
     }
 
-
     return bannerModel;
   }
 
   Future<BannerModel?> _getTaxiBannerList() async {
     BannerModel? bannerModel;
-    int? moduleId = Get.find<SplashController>().module?.id;
-    var response = await http.get(
-      Uri.parse('${AppConstants.baseUrl}${AppConstants.taxiBannerUri}'),
-    );
-    print("Taxi Banner API Response: ${response.body}");
+    Response response = await apiClient.getData(AppConstants.taxiBannerUri);
+    print("Taxi Banner API Response: ${response.statusCode} ${response.body}");
     if (response.statusCode == 200) {
-      dynamic body = jsonDecode(response.body);
+      dynamic body = response.body;
 
       if (body is List) {
         bannerModel = BannerModel(banners: [], campaigns: []);
@@ -90,14 +171,25 @@ class BannerRepository implements BannerRepositoryInterface {
     return bannerModel;
   }
 
-  Future<BannerModel?> _getFeaturedBannerList() async {
+  Future<BannerModel?> _getFeaturedBannerList({required DataSourceEnum source}) async {
     BannerModel? bannerModel;
-    final headers = HeaderHelper.featuredHeader();
-    print("🔹 Request Headers: $headers");
-    Response response = await apiClient.getData('${AppConstants.bannerUri}?featured=1', headers: HeaderHelper.featuredHeader());
-    print("fdggg ${response.statusCode}${response.body}");
-    if (response.statusCode == 200) {
-      bannerModel = BannerModel.fromJson(response.body);
+    String cacheId = '${AppConstants.bannerUri}-featured';
+
+    switch (source) {
+      case DataSourceEnum.client:
+        final headers = HeaderHelper.featuredHeader();
+        print("🔹 Request Headers: $headers");
+        Response response = await apiClient.getData('${AppConstants.bannerUri}?featured=1', headers: HeaderHelper.featuredHeader());
+        print("fdggg ${response.statusCode}${response.body}");
+        if (response.statusCode == 200) {
+          bannerModel = BannerModel.fromJson(response.body);
+          LocalClient.organize(source, cacheId, jsonEncode(response.body), apiClient.getHeader());
+        }
+      case DataSourceEnum.local:
+        String? cacheResponseData = await LocalClient.organize(source, cacheId, null, null);
+        if (cacheResponseData != null) {
+          bannerModel = BannerModel.fromJson(jsonDecode(cacheResponseData));
+        }
     }
     return bannerModel;
   }

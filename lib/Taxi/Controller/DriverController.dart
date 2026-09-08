@@ -26,29 +26,36 @@ class DriverController extends GetxController {
 
       final DataSnapshot snapshot = await dbRef.child('drivers').get();
 
-      if (snapshot.exists && snapshot.value != null && snapshot.value is Map) {
-        // print("Driver Data Response: ${snapshot.value}");
-        final Map<String, dynamic> data = Map<String, dynamic>.from(
-          snapshot.value as Map,
-        );
-
+      if (snapshot.exists && snapshot.value != null) {
         final List<Driver> loadedDrivers = [];
 
-        data.forEach((key, value) {
-          if (value is Map) {
-            final driverMap = Map<String, dynamic>.from(value);
-            final driver = Driver.fromMap(driverMap);
-            loadedDrivers.add(driver);
+        if (snapshot.value is Map) {
+          final Map<dynamic, dynamic> data = snapshot.value as Map;
+          data.forEach((key, value) {
+            if (value is Map) {
+              final driverMap = Map<dynamic, dynamic>.from(value);
+              final driver = Driver.fromMap(driverMap);
+              loadedDrivers.add(driver);
+            }
+          });
+          driverList.value = loadedDrivers;
+        } else if (snapshot.value is List) {
+          final List<dynamic> dataList = snapshot.value as List;
+          for (var value in dataList) {
+            if (value is Map) {
+              final driverMap = Map<dynamic, dynamic>.from(value);
+              final driver = Driver.fromMap(driverMap);
+              loadedDrivers.add(driver);
+            }
           }
-        });
-
-        driverList.value = loadedDrivers;
-      } else {
-        if (snapshot.value != null && snapshot.value is! Map) {
+          driverList.value = loadedDrivers;
+        } else {
           print(
             "⚠️ Unexpected data format for drivers: ${snapshot.value.runtimeType}",
           );
+          driverList.clear();
         }
+      } else {
         driverList.clear();
       }
     } catch (e) {
@@ -65,7 +72,7 @@ class DriverController extends GetxController {
 
       final snapshot = await dbRef.child('drivers/$driverId').get();
 
-      if (snapshot.exists && snapshot.value != null) {
+      if (snapshot.exists && snapshot.value != null && snapshot.value is Map) {
         final data = Map<dynamic, dynamic>.from(snapshot.value as Map);
         return Driver.fromMap(data);
       }

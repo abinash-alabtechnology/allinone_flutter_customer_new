@@ -135,12 +135,13 @@ class _WebItemThatYouLoveViewWidgetState extends State<WebItemThatYouLoveViewWid
 
 
                                                 Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                                                  recommendItems[index].discount! > 0  ? Flexible(child: Text(
-                                                      PriceConverter.convertPrice(
+                                                  recommendItems[index].discount! > 0  ? Flexible(child: CustomLineThroughText(
+                                                      text: PriceConverter.convertPrice(
                                                         Get.find<ItemController>().getStartingPrice(recommendItems[index]),
                                                       ),
+                                                      textAlign: TextAlign.center,
                                                       style: robotoRegular.copyWith(
-                                                        fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor, decoration: TextDecoration.lineThrough,
+                                                        fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor,
                                                       ))) : const SizedBox(),
                                                   SizedBox(width: recommendItems[index].discount! > 0 ? Dimensions.paddingSizeExtraSmall : 0),
 
@@ -332,12 +333,13 @@ class _WebItemThatYouLoveForShopState extends State<WebItemThatYouLoveForShop> {
 
 
                                               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                                                recommendItems[index].discount! > 0  ? Flexible(child: Text(
-                                                    PriceConverter.convertPrice(
+                                                recommendItems[index].discount! > 0  ? Flexible(child: CustomLineThroughText(
+                                                    text: PriceConverter.convertPrice(
                                                       Get.find<ItemController>().getStartingPrice(recommendItems[index]),
                                                     ),
+                                                    textAlign: TextAlign.center,
                                                     style: robotoRegular.copyWith(
-                                                      fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor, decoration: TextDecoration.lineThrough,
+                                                      fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor,
                                                     ))) : const SizedBox(),
                                                 SizedBox(width: recommendItems[index].discount! > 0 ? Dimensions.paddingSizeExtraSmall : 0),
 

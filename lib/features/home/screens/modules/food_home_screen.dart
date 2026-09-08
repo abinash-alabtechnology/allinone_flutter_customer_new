@@ -327,8 +327,7 @@ class _FoodHomeScreenState extends State<FoodHomeScreen> {
                                                           children: [
                                                             Flexible(
                                                               child: Text(
-                                                                AddressHelper.getUserAddressFromSharedPref()!
-                                                                    .address!,
+                                                                AddressHelper.getUserAddressFromSharedPref()?.address ?? '',
                                                                 maxLines: 2,
                                                                 overflow:
                                                                     TextOverflow
@@ -537,41 +536,43 @@ class _FoodHomeScreenState extends State<FoodHomeScreen> {
                                                   width: 5,
                                                   height: 100.0,
                                                 ),
-                                                GetBuilder<CategoryController>(
-                                                  builder: (categoryController) {
-                                                    if (categoryController
-                                                                .categoryList !=
-                                                            null &&
-                                                        categoryController
-                                                            .categoryList!
-                                                            .isNotEmpty) {
-                                                      return AnimatedTextKit(
-                                                        repeatForever: true,
-                                                        animatedTexts: categoryController
-                                                            .categoryList!
-                                                            .map(
-                                                              (
-                                                                category,
-                                                              ) => RotateAnimatedText(
-                                                                ("${(category.name?.capitalizeFirst)}"),
-                                                                textStyle: robotoRegular.copyWith(
-                                                                  fontSize:
-                                                                      Dimensions
-                                                                          .fontSizeLarge,
-                                                                  color: Theme.of(
-                                                                    context,
-                                                                  ).primaryColor,
+                                                Expanded(
+                                                  child: GetBuilder<CategoryController>(
+                                                    builder: (categoryController) {
+                                                      if (categoryController
+                                                                  .categoryList !=
+                                                              null &&
+                                                          categoryController
+                                                              .categoryList!
+                                                              .isNotEmpty) {
+                                                        return AnimatedTextKit(
+                                                          repeatForever: true,
+                                                          animatedTexts: categoryController
+                                                              .categoryList!
+                                                              .map(
+                                                                (
+                                                                  category,
+                                                                ) => RotateAnimatedText(
+                                                                  ("${(category.name?.capitalizeFirst)}"),
+                                                                  textStyle: robotoRegular.copyWith(
+                                                                    fontSize:
+                                                                        Dimensions
+                                                                            .fontSizeLarge,
+                                                                    color: Theme.of(
+                                                                      context,
+                                                                    ).primaryColor,
+                                                                  ),
                                                                 ),
-                                                              ),
-                                                            )
-                                                            .toList(),
-                                                      );
-                                                    } else {
-                                                      return const Text(
-                                                        'Loading categories...',
-                                                      );
-                                                    }
-                                                  },
+                                                              )
+                                                              .toList(),
+                                                        );
+                                                      } else {
+                                                        return const Text(
+                                                          'Loading categories...',
+                                                        );
+                                                      }
+                                                    },
+                                                  ),
                                                 ),
                                               ],
                                             ),

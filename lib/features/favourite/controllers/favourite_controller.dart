@@ -27,7 +27,6 @@ class FavouriteController extends GetxController implements GetxService {
   bool get isRemoving => _isRemoving;
 
   void addToFavouriteList(Item? product, int? storeID, bool isStore, {bool getXSnackBar = false}) async {
-
     _isRemoving = true;
     update();
     if(isStore) {
@@ -44,17 +43,11 @@ class FavouriteController extends GetxController implements GetxService {
       showCustomSnackBar(responseModel.message, isError: false, getXSnackBar: getXSnackBar);
     } else {
       if(isStore) {
-        for (var storeId in _wishStoreIdList) {
-          if (storeId == storeID) {
-            _wishStoreIdList.removeAt(_wishStoreIdList.indexOf(storeId));
-          }
-        }
+        _wishStoreIdList.remove(storeID);
+        _wishStoreList?.removeWhere((store) => store?.id == storeID);
       }else{
-        for (var productId in _wishItemIdList) {
-          if(productId == product!.id){
-            _wishItemIdList.removeAt(_wishItemIdList.indexOf(productId));
-          }
-        }
+        _wishItemIdList.remove(product!.id);
+        _wishItemList?.removeWhere((item) => item?.id == product.id);
       }
       showCustomSnackBar(responseModel.message, isError: true, getXSnackBar: getXSnackBar);
     }
@@ -119,39 +112,27 @@ class FavouriteController extends GetxController implements GetxService {
       _wishItemIdList = [];
 
       if(response.body['item'] != null) {
-        response.body['item'].forEach((item) async {
-          if(item['module_type'] == null || !Get.find<SplashController>().getModuleConfig(item['module_type']).newVariation!
-            || item['variations'] == null || item['variations'].isEmpty || (item['food_variations'] != null && item['food_variations'].isNotEmpty)){
-
-            Item i = Item.fromJson(item);
-            if(Get.find<SplashController>().module == null){
-              _wishItemList!.addAll(favouriteServiceInterface.wishItemList(i));
-              _wishItemIdList.addAll(favouriteServiceInterface.wishItemIdList(i));
-            }else{
-              _wishItemList!.add(i);
-              _wishItemIdList.add(i.id);
-            }
-          }
+        response.body['item'].forEach((item) {
+          Item i = Item.fromJson(item);
+          _wishItemList!.add(i);
+          _wishItemIdList.add(i.id);
         });
       }
 
-      response.body['store'].forEach((store) async {
-        if(Get.find<SplashController>().module == null){
-          _wishStoreList!.addAll(favouriteServiceInterface.wishStoreList(store));
-          _wishStoreIdList.addAll(favouriteServiceInterface.wishStoreIdList(store));
-        }else{
+      if(response.body['store'] != null) {
+        response.body['store'].forEach((store) {
           Store? s;
           try{
             s = Store.fromJson(store);
           }catch(e){
             debugPrint('exception create in store list create : $e');
           }
-          if(s != null && Get.find<SplashController>().module!.id == s.moduleId) {
+          if(s != null) {
             _wishStoreList!.add(s);
             _wishStoreIdList.add(s.id);
           }
-        }
-      });
+        });
+      }
     }
     update();
   }

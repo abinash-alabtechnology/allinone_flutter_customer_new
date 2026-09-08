@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:handy_allinone/common/enums/data_source_enum.dart';
 import 'package:handy_allinone/features/category/domain/models/category_model.dart';
 import 'package:handy_allinone/features/item/domain/models/item_model.dart';
+import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
 import 'package:handy_allinone/features/store/domain/models/store_model.dart';
 import 'package:get/get.dart';
 import 'package:handy_allinone/features/category/domain/services/category_service_interface.dart';
@@ -86,6 +87,7 @@ class CategoryController extends GetxController implements GetxService {
   bool isLoadingCategories = false;
 
   final Map<String, List<Item>> _itemsByCategory = {};
+  Map<String, List<Item>> get itemsByCategory => _itemsByCategory;
   List<Item>? getItemsForCategory(String categoryID) =>
       _itemsByCategory[categoryID];
 
@@ -96,6 +98,10 @@ class CategoryController extends GetxController implements GetxService {
 
   void clearCategoryList() {
     _categoryList = null;
+    _subCategoryList = null;
+    _categoryItemList = null;
+    _categoryStoreList = null;
+    update();
   }
 
   Future<void> getCategoryList(
@@ -105,8 +111,9 @@ class CategoryController extends GetxController implements GetxService {
         bool fromRecall = false,
       }) async {
     if (_categoryList == null || reload || fromRecall) {
+      int? currentModuleId = Get.isRegistered<SplashController>() ? Get.find<SplashController>().module?.id : null;
+
       try {
-        // Set loading true
         isLoadingCategories = true;
 
         // ✅ Safe update — schedule it after current frame
@@ -126,6 +133,8 @@ class CategoryController extends GetxController implements GetxService {
             source: DataSourceEnum.local,
           );
 
+          if (Get.isRegistered<SplashController>() && Get.find<SplashController>().module?.id != currentModuleId) return;
+
           _prepareCategoryList(categoryList);
 
           // Recall to fetch from client source
@@ -140,6 +149,8 @@ class CategoryController extends GetxController implements GetxService {
             allCategory,
             source: DataSourceEnum.client,
           );
+
+          if (Get.isRegistered<SplashController>() && Get.find<SplashController>().module?.id != currentModuleId) return;
 
           _prepareCategoryList(categoryList);
         }
@@ -179,7 +190,13 @@ class CategoryController extends GetxController implements GetxService {
     if (categoryList != null) {
       _categoryList = [];
       _interestSelectedList = [];
-      _categoryList!.addAll(categoryList);
+      final Map<int, CategoryModel> uniqueCatMap = {};
+      for (var cat in categoryList) {
+        if (cat.id != null) {
+          uniqueCatMap[cat.id!] = cat;
+        }
+      }
+      _categoryList!.addAll(uniqueCatMap.values);
       for(int i = 0; i < _categoryList!.length; i++) {
         _interestSelectedList!.add(false);
       }
@@ -191,20 +208,35 @@ class CategoryController extends GetxController implements GetxService {
     if (_loadingStatusByCategory[categoryID] == true) return;
 
     _loadingStatusByCategory[categoryID] = true;
-    if (offset == 1) {
+    if (offset == 1 || !_itemsByCategory.containsKey(categoryID)) {
       _itemsByCategory[categoryID] = [];
     }
 
     // Fetch items from the service
     ItemModel? fetchedItems = await categoryServiceInterface
         .getCategoryItemList(categoryID, offset, type);
-    if (fetchedItems != null) {
-      _itemsByCategory[categoryID]!.addAll(fetchedItems.items!);
+    if (fetchedItems != null && fetchedItems.items != null) {
+      for (var item in fetchedItems.items!) {
+        if (item.id != null) {
+          int existingIndex = _itemsByCategory[categoryID]!.indexWhere((i) => i.id == item.id);
+          if (existingIndex != -1) {
+            _itemsByCategory[categoryID]![existingIndex] = item;
+          } else {
+            _itemsByCategory[categoryID]!.add(item);
+          }
+        }
+      }
       _totalPageSize = fetchedItems.totalSize;
       _isOverallLoading = false;
     }
 
     _loadingStatusByCategory[categoryID] = false;
+    update();
+  }
+
+  void clearCategoryCache() {
+    _itemsByCategory.clear();
+    _loadingStatusByCategory.clear();
     update();
   }
   void getSubCategoryList(String? categoryID) async {

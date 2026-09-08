@@ -30,7 +30,13 @@ class CustomImage extends StatelessWidget {
       curve: Curves.easeInOut,
       child: CachedNetworkImage(
         color: color,
-        imageUrl: kIsWeb ? '${AppConstants.baseUrl}/image-proxy?url=$imageUrl' : imageUrl, height: height, width: width, fit: fit,
+        imageUrl: kIsWeb ? '${AppConstants.baseUrl}/image-proxy?url=$imageUrl' : imageUrl,
+        height: height,
+        width: width,
+        fit: fit,
+        fadeInDuration: const Duration(milliseconds: 500),
+        fadeOutDuration: const Duration(milliseconds: 500),
+        useOldImageOnUrlChange: true,
         placeholder: (context, url) => Image.asset(
           placeholder.isNotEmpty ? placeholder : (isNotification ? Images.notificationPlaceholder : Images.placeholder),
           height: height, width: width, fit: fit, color: color,
@@ -87,6 +93,9 @@ class CustomImage1 extends StatelessWidget {
         height: height,
         width: width,
         fit: fit,
+        fadeInDuration: const Duration(milliseconds: 500),
+        fadeOutDuration: const Duration(milliseconds: 500),
+        useOldImageOnUrlChange: true,
         placeholder: (context, url) => Image.asset(
           placeholder.isNotEmpty
               ? placeholder

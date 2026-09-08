@@ -107,9 +107,9 @@ class BannerView extends StatelessWidget {
 
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: bannerController.bannerImageList!.map((bnr) {
-                int index = bannerController.bannerImageList!.indexOf(bnr);
-                int totalBanner = bannerController.bannerImageList!.length;
+              children: bannerList.asMap().entries.map((entry) {
+                int index = entry.key;
+                int totalBanner = bannerList.length;
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 3),
                   child: index == bannerController.currentIndex ? Container(

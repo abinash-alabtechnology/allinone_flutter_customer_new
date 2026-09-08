@@ -1,3 +1,4 @@
+import 'package:handy_allinone/util/app_constants.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:handy_allinone/common/widgets/card_design/store_card_with_distance.dart';
 import 'package:handy_allinone/common/widgets/custom_asset_image_widget.dart';
@@ -19,6 +20,8 @@ import 'package:handy_allinone/features/store/controllers/store_controller.dart'
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:handy_allinone/util/styles.dart';
+import 'package:handy_allinone/features/item/controllers/item_controller.dart';
+import 'package:handy_allinone/common/widgets/custom_ink_well.dart';
 
 import '../../util/images.dart';
 
@@ -628,10 +631,10 @@ class _ItemsViewStoreState extends State<ItemsViewStore> {
                                         ? widget.stores != null &&
                                                   widget.isStore
                                               ? 200
-                                              : 240
+                                              : 255
                                         : ResponsiveHelper.isDesktop(context)
                                         ? 300
-                                        : 240,
+                                        : 255,
                                     crossAxisCount:
                                         ResponsiveHelper.isMobile(context)
                                         ? 3
@@ -770,10 +773,10 @@ class _ItemsViewStoreState extends State<ItemsViewStore> {
                       : ResponsiveHelper.isMobile(context)
                       ? widget.stores != null && widget.isStore
                             ? 200
-                            : 240
+                            : 255
                       : ResponsiveHelper.isDesktop(context)
                       ? 300
-                      : 240,
+                      : 255,
                   crossAxisCount: ResponsiveHelper.isMobile(context)
                       ? 3
                       : ResponsiveHelper.isDesktop(context) &&
@@ -798,6 +801,7 @@ class _ItemsViewStoreState extends State<ItemsViewStore> {
                           isEnabled: isNull,
                           isStore: widget.isStore,
                           hasDivider: index != widget.shimmerLength - 1,
+                          isGridView: true,
                         );
                 },
               ) : GridView.builder(
@@ -1016,14 +1020,19 @@ class _ItemsViewStoreState extends State<ItemsViewStore> {
 
   /// Swiggy-style item card: text LEFT, image RIGHT with ADD button overlay.
   Widget _buildSwiggyItem(BuildContext context, Item item, bool isLast) {
+    final bool isFood = Get.find<SplashController>().module != null && Get.find<SplashController>().module!.moduleType.toString().toLowerCase() == AppConstants.food.toLowerCase();
     final bool isVeg = (item.veg ?? 0) == 1;
     final double price = item.price ?? 0;
     final double? discount = item.discount != null && item.discount! > 0 ? item.discount : null;
     final String? discountType = item.discountType;
     final String finalPrice = PriceConverter.convertPrice(price, discount: discount, discountType: discountType);
 
-    return Column(
-      children: [
+    return CustomInkWell(
+      onTap: () {
+        Get.find<ItemController>().navigateToItemPage(item, context, inStore: true);
+      },
+      child: Column(
+        children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 14, 16, 22),
           child: Row(
@@ -1035,7 +1044,7 @@ class _ItemsViewStoreState extends State<ItemsViewStore> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Veg / non-veg indicator
-                    Container(
+                    isFood ? Container(
                       width: 16,
                       height: 16,
                       decoration: BoxDecoration(
@@ -1055,7 +1064,7 @@ class _ItemsViewStoreState extends State<ItemsViewStore> {
                           ),
                         ),
                       ),
-                    ),
+                    ) : const SizedBox(),
                     const SizedBox(height: 6),
 
                     // Item name
@@ -1082,13 +1091,13 @@ class _ItemsViewStoreState extends State<ItemsViewStore> {
                         ),
                         if (discount != null) ...[
                           const SizedBox(width: 6),
-                          Text(
-                            PriceConverter.convertPrice(price),
+                          CustomLineThroughText(
+                            text: PriceConverter.convertPrice(price),
                             style: robotoRegular.copyWith(
                               fontSize: 12,
                               color: Theme.of(context).disabledColor,
-                              decoration: TextDecoration.lineThrough,
                             ),
+                            textAlign: TextAlign.center,
                           ),
                         ],
                       ],
@@ -1179,6 +1188,7 @@ class _ItemsViewStoreState extends State<ItemsViewStore> {
             color: Theme.of(context).dividerColor.withOpacity(0.1),
           ),
       ],
+      ),
     );
   }
 }

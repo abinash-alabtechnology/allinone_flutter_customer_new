@@ -62,30 +62,40 @@ class MostPopularItemView extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     SizedBox(height: 15.h),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 8,
-                                      ),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            "Most Selling Items",
-                                            style: robotoBold.copyWith(
-                                              fontSize: 18.sp,
-                                            ),
-                                          ),
-                                          SizedBox(height: 5.h),
-                                          Container(
-                                            height: 2,
-                                            width: 180.w,
-                                            color: Colors.orange,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                                     Padding(
+                                       padding: const EdgeInsets.symmetric(
+                                         vertical: 8,
+                                       ),
+                                       child: Column(
+                                         mainAxisSize: MainAxisSize.min,
+                                         crossAxisAlignment:
+                                             CrossAxisAlignment.center,
+                                         children: [
+                                           Text(
+                                             "Trending near you 📈",
+                                             style: robotoBold.copyWith(
+                                               fontSize: 18.sp,
+                                               color: Colors.orange.shade800,
+                                             ),
+                                           ),
+                                           SizedBox(height: 4.h),
+                                           Text(
+                                             "Popular products in your area",
+                                             style: robotoMedium.copyWith(
+                                               fontSize: 12.sp,
+                                               color: Colors.orange.shade700,
+                                             ),
+                                             textAlign: TextAlign.center,
+                                           ),
+                                           SizedBox(height: 8.h),
+                                           Container(
+                                             height: 2,
+                                             width: 180.w,
+                                             color: Colors.orange,
+                                           ),
+                                         ],
+                                       ),
+                                     ),
                                   ],
                                 ),
 
@@ -113,7 +123,7 @@ class MostPopularItemView extends StatelessWidget {
                                         return Get.find<ItemController>()
                                                 .isAvailable(itemList[index])
                                             ? Container(
-                                                child: MostSellItemCard(
+                                                child: TrendingItemCard(
                                                   isPopularItem: isShop
                                                       ? false
                                                       : true,

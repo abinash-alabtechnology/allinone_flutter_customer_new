@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:icons_plus/icons_plus.dart';
+import 'package:iconsx_plus/iconsx_plus.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:handy_allinone/common/widgets/custom_ink_well.dart';
 import 'package:handy_allinone/features/splash/controllers/splash_controller.dart';
@@ -70,11 +70,16 @@ class StoreCardWidget extends StatelessWidget {
                 /// Image
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
-                  child: CustomImage(
-                    image: store!.coverPhotoFullUrl ?? "",
-                    height: 278,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
+                  child: ColorFiltered(
+                    colorFilter: isAvailable
+                        ? const ColorFilter.mode(Colors.transparent, BlendMode.dst)
+                        : const ColorFilter.mode(Colors.grey, BlendMode.saturation),
+                    child: CustomImage(
+                      image: store!.coverPhotoFullUrl ?? "",
+                      height: 278,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
 
@@ -98,6 +103,15 @@ class StoreCardWidget extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (!isAvailable)
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.35),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  ),
 
                 /// Favorite Button
                 Positioned(

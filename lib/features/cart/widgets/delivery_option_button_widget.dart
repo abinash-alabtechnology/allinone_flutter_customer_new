@@ -88,16 +88,17 @@ class _DeliveryOptionButtonWidgetState extends State<DeliveryOptionButtonWidget>
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(widget.title, style: robotoMedium.copyWith(color: select ? Theme.of(context).primaryColor : Theme.of(context).textTheme.bodyMedium!.color)),
 
-                Row(children: [
-                  Text(widget.value == 'delivery' ? '${'charge'.tr}: +${widget.deliveryChargeForView}' : 'free'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).textTheme.bodyMedium!.color)),
-                  const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+                if (widget.value != 'delivery' || (widget.charge != null && widget.charge! > 0))
+                  Row(children: [
+                    Text(widget.value == 'delivery' ? '${'charge'.tr}: +${widget.deliveryChargeForView}' : 'free'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).textTheme.bodyMedium!.color)),
+                    const SizedBox(width: Dimensions.paddingSizeExtraSmall),
 
-                  widget.deliveryChargeForView != PriceConverter.convertPrice(0) && widget.value == 'delivery' && checkoutController.extraCharge != null && (widget.deliveryChargeForView != '0') && widget.extraChargeForToolTip > 0 ? CustomToolTip(
-                    message: '${'this_charge_include_extra_vehicle_charge'.tr} ${PriceConverter.convertPrice(widget.extraChargeForToolTip)}',
-                    preferredDirection: AxisDirection.right,
-                    child: const Icon(Icons.info, color: Colors.blue, size: 14),
-                  ) : const SizedBox(),
-                ]),
+                    widget.deliveryChargeForView != PriceConverter.convertPrice(0) && widget.value == 'delivery' && checkoutController.extraCharge != null && (widget.deliveryChargeForView != '0') && widget.extraChargeForToolTip > 0 ? CustomToolTip(
+                      message: '${'this_charge_include_extra_vehicle_charge'.tr} ${PriceConverter.convertPrice(widget.extraChargeForToolTip)}',
+                      preferredDirection: AxisDirection.right,
+                      child: const Icon(Icons.info, color: Colors.blue, size: 14),
+                    ) : const SizedBox(),
+                  ]),
 
               ]),
               const SizedBox(width: Dimensions.paddingSizeSmall),
@@ -343,35 +344,36 @@ class _DeliveryOptionButton2WidgetState
                     height: 1,
                   ),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                        widget.value == 'delivery'
-                            ? '${'charge'.tr}: +${widget.deliveryChargeForView}'
-                            : 'free'.tr,
-                        style: robotoRegular.copyWith(
-                          fontSize: Dimensions.fontSizeSmall,
-                          color: Colors.white,
-                        )),
-                    const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-                    // conditions for free delivery charge and extra charge tooltip
-                    widget.deliveryChargeForView !=
-                                PriceConverter.convertPrice(0) &&
-                            widget.value == 'delivery' &&
-                            checkoutController.extraCharge != null &&
-                            (widget.deliveryChargeForView != '0') &&
-                            widget.extraChargeForToolTip > 0
-                        ? CustomToolTip(
-                            message:
-                                '${'this_charge_include_extra_vehicle_charge'.tr} ${PriceConverter.convertPrice(widget.extraChargeForToolTip)}',
-                            preferredDirection: AxisDirection.right,
-                            child: const Icon(Icons.info,
-                                color: Colors.blue, size: 14),
-                          )
-                        : const SizedBox(),
-                  ],
-                ),
+                    if (widget.value != 'delivery' || (widget.charge != null && widget.charge! > 0))
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                              widget.value == 'delivery'
+                                  ? '${'charge'.tr}: +${widget.deliveryChargeForView}'
+                                  : 'free'.tr,
+                              style: robotoRegular.copyWith(
+                                fontSize: Dimensions.fontSizeSmall,
+                                color: Colors.white,
+                              )),
+                          const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+                          // conditions for free delivery charge and extra charge tooltip
+                          widget.deliveryChargeForView !=
+                                      PriceConverter.convertPrice(0) &&
+                                  widget.value == 'delivery' &&
+                                  checkoutController.extraCharge != null &&
+                                  (widget.deliveryChargeForView != '0') &&
+                                  widget.extraChargeForToolTip > 0
+                              ? CustomToolTip(
+                                  message:
+                                      '${'this_charge_include_extra_vehicle_charge'.tr} ${PriceConverter.convertPrice(widget.extraChargeForToolTip)}',
+                                  preferredDirection: AxisDirection.right,
+                                  child: const Icon(Icons.info,
+                                      color: Colors.blue, size: 14),
+                                )
+                              : const SizedBox(),
+                        ],
+                      ),
               ],
             ),
           ),
@@ -471,15 +473,16 @@ class _DeliveryOptionButtonWidgetfinalState extends State<DeliveryOptionButtonWi
                       const SizedBox(width: Dimensions.paddingSizeDefault),
                       Column(crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: .center, children: [
                         Text(widget.title, style: robotoBold.copyWith(color: select ? Theme.of(context).textTheme.bodyMedium!.color : Theme.of(context).textTheme.bodyMedium!.color,fontSize: 12)),
-                        Row(children: [
-                          Text(widget.value == 'delivery' ? '${'charge'.tr}: +${widget.deliveryChargeForView}' : 'free'.tr, style: robotoRegular.copyWith(fontSize: 10, color: Theme.of(context).textTheme.bodyMedium!.color)),
-                          const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-                          widget.deliveryChargeForView != PriceConverter.convertPrice(0) && widget.value == 'delivery' && checkoutController.extraCharge != null && (widget.deliveryChargeForView != '0') && widget.extraChargeForToolTip > 0 ? CustomToolTip(
-                            message: '${'this_charge_include_extra_vehicle_charge'.tr} ${PriceConverter.convertPrice(widget.extraChargeForToolTip)}',
-                            preferredDirection: AxisDirection.right,
-                            child: const Icon(Icons.info, color: Colors.blue, size: 14),
-                          ) : const SizedBox(),
-                        ]),
+                        if (widget.value != 'delivery' || (widget.charge != null && widget.charge! > 0))
+                          Row(children: [
+                            Text(widget.value == 'delivery' ? '${'charge'.tr}: +${widget.deliveryChargeForView}' : 'free'.tr, style: robotoRegular.copyWith(fontSize: 10, color: Theme.of(context).textTheme.bodyMedium!.color)),
+                            const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+                            widget.deliveryChargeForView != PriceConverter.convertPrice(0) && widget.value == 'delivery' && checkoutController.extraCharge != null && (widget.deliveryChargeForView != '0') && widget.extraChargeForToolTip > 0 ? CustomToolTip(
+                              message: '${'this_charge_include_extra_vehicle_charge'.tr} ${PriceConverter.convertPrice(widget.extraChargeForToolTip)}',
+                              preferredDirection: AxisDirection.right,
+                              child: const Icon(Icons.info, color: Colors.blue, size: 14),
+                            ) : const SizedBox(),
+                          ]),
                       ]),
                     ],
                   ),
